@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.kjipotech:TimeSeriesRules:latest">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/kjipotech/TimeSeriesRules/latest/TimeSeriesRules-latest.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/kjipotech/TimeSeriesRules/latest/TimeSeriesRules-latest-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/kjipotech/TimeSeriesRules/latest/TimeSeriesRules-latest-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

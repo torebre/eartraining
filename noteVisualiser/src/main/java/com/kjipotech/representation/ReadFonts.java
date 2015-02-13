@@ -11,62 +11,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.*;
-import java.awt.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.DoubleStream;
+
 
 /**
- * Created by student on 12/19/14.
+ * This class is not thread-safe.
+ *
  */
 public class ReadFonts {
-
     private static final String GLYPH = "glyph";
-    private static final String UTF8 = "UTF-8";
+
+    private static DecimalFormat decimalFormat;
+
+    static {
+        decimalFormat = new DecimalFormat();
+        decimalFormat.setMaximumFractionDigits(3);
+        decimalFormat.setGroupingUsed(false);
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadFonts.class);
 
-//    private static final double scaleFactor = 0.1;
 
-    // TODO Only here temporarily for testing
-
-//    private static final double xTranslate = 0; // -350;
-//    private static final double yTranslate = 0; // -200;
-
-
-    private static String transformToSquare(String path) throws IOException {
+    private static String transformToSquare(String path, double boundingBox[]) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         List<Character> number = new ArrayList<>();
-        double translateX = Double.NaN;
-        double translateY = Double.NaN;
 
-        DecimalFormat decimalFormat = new DecimalFormat();
-        decimalFormat.setMaximumFractionDigits(3);
-        decimalFormat.setGroupingUsed(false);
-
-
-        double fontBoundingBox[] = new double[] {-510.142, -1487.78, 852.632, 1370.06};
         double upperLeftCorner[] = new double[] {0, 0};
-        double diagonalLength = Math.sqrt(2) * 200;
 
-        translateX = upperLeftCorner[0] - fontBoundingBox[0];
-        translateY = upperLeftCorner[1] - fontBoundingBox[3];
+        double translateX = upperLeftCorner[0] - boundingBox[0];
+        double translateY = upperLeftCorner[1] - boundingBox[3];
 
-        double xLength = fontBoundingBox[2] - fontBoundingBox[0];
-        double yLength = fontBoundingBox[3] - fontBoundingBox[1];
-
-        double max = Math.max(xLength, yLength);
+        double xLength = boundingBox[2] - boundingBox[0];
+        double yLength = boundingBox[3] - boundingBox[1];
 
         // TODO Put scale back
         double scale = 1.0; // diagonalLength / max;
-
-        char currentlyProcessing = ' ';
-        boolean translateNextNumber = false;
-        int processingArgument = 0;
-
-        double unitsPerEm = fontBoundingBox[3] - fontBoundingBox[1];
+        double unitsPerEm = boundingBox[3] - boundingBox[1];
 
         ByteArrayInputStream charStream = new ByteArrayInputStream(path.getBytes());
 
@@ -77,8 +63,6 @@ public class ReadFonts {
 
             switch(c) {
 
-//                case 'V':
-//                    absolute = true;
                 case 'v':
 
                     stringBuilder.append((char)c).append(" ");
@@ -193,7 +177,6 @@ public class ReadFonts {
                         if(number.isEmpty()) {
                             break;
                         }
-
                         temp = parseNumber(number);
                         if(absolute) {
                             temp = unitsPerEm - temp + translateY;
@@ -253,6 +236,27 @@ public class ReadFonts {
     }
 
 
+//    private boolean readValue(StringBuilder stringBuilder, List<Character> number, boolean absolute, double translateX,
+//                              double translateY, double scale, double unitsPerEm, ByteArrayInputStream charStream ) throws IOException {
+//        stringBuilder.append(decimalFormat.format((parseNumber(number) + (absolute ? translateX : 0)) * scale)).append(" ");
+//        number.clear();
+//        c = readNumber(charStream, number);
+//        if(number.isEmpty()) {
+//            return true;
+//        }
+//        double temp = parseNumber(number);
+//        if(absolute) {
+//            temp = unitsPerEm - temp + translateY;
+//        }
+//        else {
+//            temp *= -1;
+//        }
+//        stringBuilder.append(decimalFormat.format(temp * scale)).append(" ");
+//        number.clear();
+//        return false;
+//    }
+
+
     private static final int APPROXIMATE_CHARACTERS_ON_LINE = 200;
 
 
@@ -299,9 +303,15 @@ public class ReadFonts {
 
 
     private static void readVexFlowFont() throws IOException {
+
+//        "boundingBox":{"yMin":-2065.375,"xMin":-695.53125,"yMax":1901.578125,"xMax":1159.671875}
+
+
+        double boundingBox[] = new double[] {-2065.375, -695.53125, 1901.578125, 1159.671875};
+
+
         JsonFactory factory = new JsonFactory();
-//        JsonParser jsonParser = factory.createParser(new File("/home/student/projects/vexflow/src/fonts/gonville_original.js"));
-        InputStream inputStream = ReadFonts.class.getResourceAsStream("/VexFlowFont");
+        InputStream inputStream = ReadFonts.class.getResourceAsStream("/VexGonville");
         LOGGER.info("Input stream: {}", inputStream);
         JsonParser jsonParser = factory.createParser(inputStream);
         JsonToken jsonToken;
@@ -319,10 +329,9 @@ public class ReadFonts {
 
         while((jsonToken = jsonParser.nextToken()) != null) {
 
-            if("o".equals(jsonParser.getCurrentName())) {
+            LOGGER.info("Current name: {}", jsonParser.getCurrentName());
 
-                LOGGER.info("Writing glyph");
-                LOGGER.info(jsonToken.toString() +", " +jsonParser.getValueAsString());
+            if("o".equals(jsonParser.getCurrentName())) {
 
                 jsonParser.nextToken();
 
@@ -343,16 +352,10 @@ public class ReadFonts {
                 jsonGenerator.writeStartObject();
                 jsonGenerator.writeStringField("glyph_name", "glyph" +nameCounter++);
 
-                jsonGenerator.writeStringField("d", transformToSquare(pathStringOutput.toString()));
+                jsonGenerator.writeStringField("d", transformToSquare(pathStringOutput.toString(), boundingBox));
                 jsonGenerator.writeEndObject();
 
             }
-
-//            LOGGER.info("Current name: {}", jsonParser.getCurrentName());
-
-
-//            LOGGER.info(jsonToken.toString() +", " +jsonParser.getValueAsString());
-
         }
 
         jsonGenerator.writeEndArray();
@@ -371,43 +374,82 @@ public class ReadFonts {
 
 
     private static void transformFont() throws IOException, XMLStreamException {
-
         try (
                 InputStream inputStream = ReadFonts.class.getResourceAsStream("/gonville-r9313/lilyfonts/svg/gonvillepart1.svg");
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(new File("/home/student/test_output.txt")));
         ) {
             XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-            XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(inputStream, UTF8);
+            XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(inputStream, StandardCharsets.UTF_8.name());
             Map<String, String> namePathMapping = new HashMap<>();
+            double fontBoundingBox[] = null;
 
             while(xmlEventReader.hasNext()) {
                 xmlEventReader.next();
-                if(xmlEventReader.isStartElement() && GLYPH.equals(xmlEventReader.getName().getLocalPart())) {
-                    String glyphName = xmlEventReader.getAttributeValue("", "glyph-name");
-                    if(!keepGlyphs.contains(glyphName)) {
-                        continue;
-                    }
-                    namePathMapping.put(glyphName, xmlEventReader.getAttributeValue("", "d"));
+
+                if(!xmlEventReader.isStartElement()) {
+                    continue;
                 }
+
+                String localName = xmlEventReader.getName().getLocalPart();
+
+
+                switch(localName) {
+
+                    case "font-face":
+                            fontBoundingBox = Arrays.stream(xmlEventReader.getAttributeValue("", "bbox").split(" ")).mapToDouble(new ToDoubleFunction<String>() {
+                                @Override
+                                public double applyAsDouble(String value) {
+                                    return Double.valueOf(value);
+                                }
+                            }).toArray();
+                        break;
+
+                    case GLYPH:
+                        String glyphName = xmlEventReader.getAttributeValue("", "glyph-name");
+                        if(!keepGlyphs.contains(glyphName)) {
+                            continue;
+                        }
+                        namePathMapping.put(glyphName, xmlEventReader.getAttributeValue("", "d"));
+                        break;
+
+
+                    default:
+                        // Do nothing
+                }
+
 
             }
 
             JsonFactory factory = new JsonFactory();
             com.fasterxml.jackson.core.JsonGenerator jsonGenerator = factory.createGenerator(bufferedOutputStream, JsonEncoding.UTF8);
-//            jsonGenerator.writeStartObject();
-            jsonGenerator.writeStartArray();
 
+            jsonGenerator.writeStartObject();
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeFieldName("bbox");
+            jsonGenerator.writeStartArray();
+            for(double d : fontBoundingBox) {
+                jsonGenerator.writeNumber(d);
+            }
+            jsonGenerator.writeEndArray();
+            jsonGenerator.writeEndObject();
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeFieldName("glyphs");
+            jsonGenerator.writeStartArray();
             for(String glyphName : keepGlyphs) {
                 jsonGenerator.writeStartObject();
                 jsonGenerator.writeStringField("glyph_name", glyphName);
-                jsonGenerator.writeStringField("d", transformToSquare(namePathMapping.get(glyphName)));
+                jsonGenerator.writeStringField("d", transformToSquare(namePathMapping.get(glyphName), fontBoundingBox));
                 jsonGenerator.writeEndObject();
             }
             jsonGenerator.writeEndArray();
-//            jsonGenerator.writeEndObject();
+            jsonGenerator.writeEndObject();
+
+            jsonGenerator.writeEndObject();
+
             jsonGenerator.close();
         }
-
     }
 
     private static final Set<String> keepGlyphs = Sets.newHashSet("clefs.G",
@@ -417,8 +459,8 @@ public class ReadFonts {
     );
 
     public static void main(String args[]) throws Exception {
-//        transformFont();
-        readVexFlowFont();
+        transformFont();
+//        readVexFlowFont();
 
     }
 
