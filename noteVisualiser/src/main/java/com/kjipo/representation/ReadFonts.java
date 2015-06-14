@@ -330,16 +330,13 @@ public class ReadFonts {
 
                 StringBuilder pathStringOutput = new StringBuilder();
                 for (String s : jsonParser.getValueAsString().split(" ")) {
-                    switch (s) {
-                        case "b":
+                        if("b".equals(s)) {
                             pathStringOutput.append("c").append(" ");
                             break;
-
-                        default:
+                        }
+                        else {
                             pathStringOutput.append(s).append(" ");
-
-                    }
-
+                        }
                 }
 
                 jsonGenerator.writeStartObject();
@@ -369,7 +366,7 @@ public class ReadFonts {
 
         XMLInputFactory inputFactory = XMLInputFactory.newFactory();
         XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(inputStream, StandardCharsets.UTF_8.name());
-        Map<String, String> namePathMapping = new HashMap<>();
+        Map<String, String> namePathMapping = new HashMap<String, String>();
         double fontBoundingBox[] = null;
 
         while (xmlEventReader.hasNext()) {
@@ -429,7 +426,7 @@ public class ReadFonts {
         jsonGenerator.close();
     }
 
-}
+
 
 private static final Set<String> keepGlyphs = Sets.newHashSet("clefs.G",
         "noteheads.s0",
