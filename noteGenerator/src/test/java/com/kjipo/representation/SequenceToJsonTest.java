@@ -1,19 +1,13 @@
 package com.kjipo.representation;
 
 
-import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.kjipo.representation.EventSeriesFactory;
-import com.kjipo.representation.EventSeries;
-import com.kjipo.representation.OnOffSeries;
-import com.kjipo.utilities.TransformUtilities;
 import org.testng.annotations.Test;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
@@ -26,16 +20,28 @@ public class SequenceToJsonTest {
 
     @Test
     public void simpleSequenceToJson() throws IOException {
-        EventSeries eventSeries = EventSeriesFactory.getEventSeriesFactory().createEmptySeries();
-        Map<Event, SequenceElement> eventSeqMapping = new HashMap<Event, SequenceElement>();
+        EventSeries eventSeries = EventSeriesFactoryProvider.getEventSeriesFactory().createEmptySeries();
+        Map<Event, Note> eventSeqMapping = new HashMap<Event, Note>();
         ElementType[] validElements = new ElementType[] {ElementType.QUARTERNOTE, ElementType.HALFNOTE};
+        int cumulativeDuration = 0;
+        int id = 0;
 
         for (int i = 0; i < 10; ++i) {
             ElementType type = validElements[randomizer.nextInt(validElements.length)];
             int pitch = 60 + randomizer.nextInt(11);
+            int duration = -1;
+            switch (type) {
+                case QUARTERNOTE:
+                    duration = 1;
+                    break;
 
-            Event event = eventSeries.addEvent(i, type.duration);
-            Note note = new Note(type, pitch);
+                case HALFNOTE:
+                    duration = 2;
+                    break;
+            }
+            cumulativeDuration += duration;
+            Event event = eventSeries.addEvent(i, duration);
+            Note note = new Note(id++, pitch, cumulativeDuration, type, duration);
 
             eventSeqMapping.put(event, note);
         }
@@ -55,7 +61,7 @@ public class SequenceToJsonTest {
         while((jsonToken = parser.nextToken()) != null);
 
 
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(new File("/home/student/test_output.json")));
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(new File("/home/student/test_output2.json")));
         bufferedOutputStream.write(outputStream.toByteArray());
         bufferedOutputStream.close();
 

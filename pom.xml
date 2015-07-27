@@ -5,20 +5,21 @@
     <groupId>com.kjipo</groupId>
     <artifactId>earTraining</artifactId>
     <packaging>pom</packaging>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Dependency versions -->
+        <jackson.version>2.6.0-rc2</jackson.version>
     </properties>
 
 
+    <!-- TODO This is not needed if the release plugin is not used -->
     <scm>
         <developerConnection>scm:git:file://localhost/home/student/workspace/EarTraining</developerConnection>
       <tag>HEAD</tag>
   </scm>
 
     <modules>
-        <module>visualizer</module>
-        <module>generator</module>
         <module>noteVisualiser</module>
         <module>noteGenerator</module>
         <module>musicXml</module>
@@ -49,16 +50,34 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.4.3</version>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.kjipo</groupId>
                 <artifactId>TimeSeriesRules</artifactId>
-                <version>[0.1.0, )</version>
+                <version>0.1.80</version>
             </dependency>
-
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.3.2</version>
+            </dependency>
         </dependencies>
-
     </dependencyManagement>
 
 
@@ -74,21 +93,34 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
-                <configuration>
-                    <tagBase>
-                        file:///D:/subversion_data/repos/my_repo/my-app-example/tags
-                    </tagBase>
-                </configuration>
-
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>1.2.11</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-release-plugin</artifactId>-->
+                <!--<version>2.5.2</version>-->
+                <!--<configuration>-->
+                    <!--<tagBase>-->
+                        <!--file:///D:/subversion_data/repos/my_repo/my-app-example/tags-->
+                    <!--</tagBase>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
 
 
 
     </build>
+
+
 
 
 
