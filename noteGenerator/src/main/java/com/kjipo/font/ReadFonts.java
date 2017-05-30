@@ -35,6 +35,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
@@ -151,20 +152,71 @@ public class ReadFonts {
     }
 
 
-    private static void writePathsToSvgFile(Path path, InputStream fontData) throws XMLStreamException, IOException, TransformerException {
-        XMLInputFactory inputFactory = XMLInputFactory.newFactory();
-        XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(fontData, StandardCharsets.UTF_8.name());
-//        Map<String, String> namePathMapping = new HashMap<>();
-        double fontBoundingBox[] = null;
-
-
+    private static void writePathsToSvgFile(Path path, InputStream fontData, String inputName) throws XMLStreamException, IOException, TransformerException {
         DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
         String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
         Document doc = impl.createDocument(svgNS, "svg", null);
 
         SVGDocument svgDocument = (SVGDocument) doc;
-        SVGSVGElement rootElement = svgDocument.getRootElement();
+        int currentY = 50;
 
+        addElementsToDocument(svgDocument, currentY, inputName, fontData);
+        writeDocumentToFile(svgDocument, path);
+    }
+
+    private static void writeDocumentToFile(SVGDocument svgDocument, Path outputPath) throws IOException, TransformerException {
+        DOMSource source = new DOMSource(svgDocument);
+
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);) {
+            StreamResult result = new StreamResult(bufferedWriter);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.transform(source, result);
+        }
+    }
+
+    private static void createDocumentWithAllGlyphs(Path fontFilesDirectory, Path outputFilePath) throws IOException, TransformerException {
+        DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
+        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+        Document doc = impl.createDocument(svgNS, "svg", null);
+
+        SVGDocument svgDocument = (SVGDocument) doc;
+
+        AtomicInteger currentY = new AtomicInteger(50);
+
+        Files.list(fontFilesDirectory).forEach(path -> {
+            try (InputStream inputStream = new FileInputStream(path.toFile())) {
+                currentY.set(addElementsToDocument(svgDocument, currentY.get(), path.getFileName().toString(), inputStream));
+            } catch (XMLStreamException | IOException e) {
+                // TODO
+                e.printStackTrace();
+            }
+        });
+
+        SVGSVGElement rootElement = svgDocument.getRootElement();
+        rootElement.setAttributeNS(null, "width", "10000");
+        rootElement.setAttributeNS(null, "height", String.valueOf(currentY.get()));
+
+        writeDocumentToFile(svgDocument, outputFilePath);
+    }
+
+
+    private static int addElementsToDocument(SVGDocument svgDocument, int currentY,
+                                             String inputName, InputStream fontData) throws XMLStreamException, IOException {
+        XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+        XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(fontData, StandardCharsets.UTF_8.name());
+
+        Element path1 = svgDocument.createElementNS(SVG_NAMESPACE_URI, "text");
+        path1.setAttribute("x", "0");
+        path1.setAttribute("y", String.valueOf(currentY));
+        path1.setAttribute("font-size", "55");
+
+        SVGSVGElement rootElement = svgDocument.getRootElement();
+        rootElement.appendChild(path1);
+
+        path1.appendChild(svgDocument.createTextNode(inputName));
+
+        currentY += 100;
         int currentX = 0;
         while (xmlEventReader.hasNext()) {
             xmlEventReader.next();
@@ -176,23 +228,32 @@ public class ReadFonts {
             String localName = xmlEventReader.getName().getLocalPart();
 
             String pathString;
-            if (localName.equals("font-face")) {
-                fontBoundingBox = Arrays.stream(xmlEventReader.getAttributeValue("", "bbox").split(" ")).mapToDouble(new ToDoubleFunction<String>() {
-                    @Override
-                    public double applyAsDouble(String value) {
-                        return Double.valueOf(value);
-                    }
-                }).toArray();
-            } else if (localName.equals(GLYPH)) {
+//            if (localName.equals("font-face")) {
+//                fontBoundingBox = Arrays.stream(xmlEventReader.getAttributeValue("", "bbox").split(" ")).mapToDouble(new ToDoubleFunction<String>() {
+//                    @Override
+//                    public double applyAsDouble(String value) {
+//                        return Double.valueOf(value);
+//                    }
+//                }).toArray();
+//            } else
+            if (localName.equals(GLYPH)) {
                 String glyphName = xmlEventReader.getAttributeValue("", "glyph-name");
 //                if (!glyphElementMapping.containsKey(glyphName)) {
 //                    continue;
 //                }
                 LOGGER.info("Processing glyph: " + glyphName);
                 String elementName = glyphElementMapping.get(glyphName);
+
                 String pathAttribute = xmlEventReader.getAttributeValue("", "d");
+
+                if(pathAttribute == null) {
+                    LOGGER.info("No path defined for element: " +elementName);
+                    continue;
+                }
+
                 String horizontalMovement = xmlEventReader.getAttributeValue("", "horiz-adv-x");
-                pathString = transformToSquare2(pathAttribute, currentX, 1000);
+                pathString = transformToSquare2(pathAttribute, currentX, currentY);
+
                 if (horizontalMovement != null) {
                     currentX += Integer.valueOf(horizontalMovement);
                 } else {
@@ -203,21 +264,12 @@ public class ReadFonts {
             }
         }
 
-        rootElement.setAttributeNS(null, "width", "" + (currentX + 200));
-        rootElement.setAttributeNS(null, "height", "2000");
+//        rootElement.setAttributeNS(null, "width", "" + (currentX + 200));
+//        rootElement.setAttributeNS(null, "height", "2000");
 
-
-        DOMSource source = new DOMSource(svgDocument);
-
-        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);) {
-            StreamResult result = new StreamResult(bufferedWriter);
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.transform(source, result);
-        }
-
+        return currentY + 2000;
     }
+
 
     private static void addPath(Document document, Node node, String path) {
         Element path1 = document.createElementNS(SVG_NAMESPACE_URI, "path");
@@ -248,6 +300,8 @@ public class ReadFonts {
     }
 
     private static List<FontPathElement> parsePathData(String pathData) throws IOException {
+        LOGGER.info("Processing {}", pathData);
+
         ByteArrayInputStream charStream = new ByteArrayInputStream(pathData.getBytes());
         List<FontPathElement> fontPathElements = new ArrayList<>();
 
@@ -586,10 +640,14 @@ public class ReadFonts {
     public static void main(String args[]) throws Exception {
 //        transformFont();
 
-        Path outputFilePath = Paths.get("output.xml");
-        try (InputStream inputStream = ReadFonts.class.getResourceAsStream("/gonville-r9313/lilyfonts/svg/gonvillepart1.svg")) {
-            writePathsToSvgFile(outputFilePath, inputStream);
-        }
+//        Path outputFilePath = Paths.get("output.xml");
+//        try (InputStream inputStream = ReadFonts.class.getResourceAsStream("/gonville-r9313/lilyfonts/svg/gonvillepart1.svg")) {
+//            writePathsToSvgFile(outputFilePath, inputStream, "gonvillepart1");
+//        }
+
+        Path outputFilePath = Paths.get("output2.xml");
+        Path fontFilesDirectory = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg");
+        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath);
 
     }
 

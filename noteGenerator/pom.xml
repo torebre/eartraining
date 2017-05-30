@@ -44,9 +44,36 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.kjipo</groupId>
-            <artifactId>TimeSeriesRules</artifactId>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-dom</artifactId>
+            <version>1.7</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-svg-dom</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-anim</artifactId>
+            <version>1.7</version>
+        </dependency>
+
+
+        <!--// https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-dom-->
+        <!--testCompile 'org.apache.xmlgraphics:batik-dom:1.9'-->
+        <!--// https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-svg-dom-->
+        <!--testCompile 'org.apache.xmlgraphics:batik-svg-dom:1.9'-->
+        <!--// https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-anim-->
+        <!--testCompile 'org.apache.xmlgraphics:batik-anim:1.9'-->
+        <!--// https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-i18n-->
+        <!--testCompile 'org.apache.xmlgraphics:batik-i18n:1.9'-->
+        <!--// https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-util-->
+        <!--testCompile 'org.apache.xmlgraphics:batik-util:1.9'-->
+        <!--// https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-constants-->
+        <!--testCompile 'org.apache.xmlgraphics:batik-constants:1.9'-->
+
+
     </dependencies>
 
 
