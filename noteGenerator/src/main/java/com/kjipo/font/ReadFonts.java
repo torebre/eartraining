@@ -4,10 +4,8 @@ package com.kjipo.font;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.commons.lang3.CharUtils;
 import org.slf4j.Logger;
@@ -37,7 +35,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToDoubleFunction;
-import java.util.stream.Collectors;
+
+
 
 
 public class ReadFonts {
@@ -282,24 +281,29 @@ public class ReadFonts {
 
     private static String transformToSquare2(String pathData, int xOffset, int yOffset) throws IOException {
         List<FontPathElement> fontPathElements = parsePathData(pathData);
-        String result = fontPathElements.stream()
-                .map(fontPathElement -> {
-                    // TODO Only handling M for now
-                    if (fontPathElement.getCommand() == 'M') {
-                        return new FontPathElement('M',
-                                Lists.newArrayList(fontPathElement.getNumbers().get(0) + xOffset,
-                                        fontPathElement.getNumbers().get(1) + yOffset));
-                    }
-                    return fontPathElement;
-                })
-                .map(fontPathElement -> fontPathElement.getCommand() + " " + fontPathElement.getNumbers().stream()
-                        .map(decimalFormat::format)
-                        .collect(Collectors.joining(" ")))
-                .collect(Collectors.joining(" "));
-        return result;
+//        String result = fontPathElements.stream()
+//                .map(fontPathElement -> {
+//                    // TODO Only handling M for now
+//                    if (fontPathElement.getCommand() == 'M') {
+//                        return new FontPathElement('M',
+//                                Lists.newArrayList(fontPathElement.getNumbers().get(0) + xOffset,
+//                                        fontPathElement.getNumbers().get(1) + yOffset));
+//                    }
+//                    return fontPathElement;
+//                })
+//                .map(fontPathElement -> fontPathElement.getCommand() + " " + fontPathElement.getNumbers().stream()
+//                        .map(decimalFormat::format)
+//                        .collect(Collectors.joining(" ")))
+//                .collect(Collectors.joining(" "));
+//        return result;
+
+        // TODO
+        return null;
     }
 
-    private static List<FontPathElement> parsePathData(String pathData) throws IOException {
+
+
+    static List<FontPathElement> parsePathData(String pathData) throws IOException {
         LOGGER.info("Processing {}", pathData);
 
         ByteArrayInputStream charStream = new ByteArrayInputStream(pathData.getBytes());
@@ -326,13 +330,13 @@ public class ReadFonts {
                     break;
 
                 case 'M':
-                    parsedElement = Iterators.getOnlyElement(handleGeneric('M', charStream).entrySet().iterator());
+                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_ABSOLUTE, charStream).entrySet().iterator());
                     c = parsedElement.getKey();
                     fontPathElements.add(parsedElement.getValue());
                     break;
 
                 case 'm':
-                    parsedElement = Iterators.getOnlyElement(handleGeneric('m', charStream).entrySet().iterator());
+                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_RELATIVE, charStream).entrySet().iterator());
                     c = parsedElement.getKey();
                     fontPathElements.add(parsedElement.getValue());
                     break;
@@ -349,14 +353,14 @@ public class ReadFonts {
                     fontPathElements.add(parsedElement.getValue());
                     break;
 
+                case 'Z':
                 case 'z':
-                    fontPathElements.add(new FontPathElement('z', Collections.emptyList()));
-//                    stringBuilder.append((char) c).append(" ");
+                    fontPathElements.add(new FontPathElement(PathCommand.CLOSE_PATH, Collections.emptyList()));
                     c = charStream.read();
                     break;
 
                 case 's':
-                    parsedElement = Iterators.getOnlyElement(handleGeneric('s', charStream).entrySet().iterator());
+                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.SMOOTH_CURVE_TO_RELATIVE, charStream).entrySet().iterator());
                     c = parsedElement.getKey();
                     fontPathElements.add(parsedElement.getValue());
                     break;
@@ -376,10 +380,10 @@ public class ReadFonts {
 
 
     private static Map<Integer, FontPathElement> handleLowerCaseL(InputStream charStream) throws IOException {
-        return handleGeneric('l', charStream);
+        return handleGeneric(PathCommand.LINE_TO_RELATIVE, charStream);
     }
 
-    private static Map<Integer, FontPathElement> handleGeneric(char character, InputStream charStream) throws IOException {
+    private static Map<Integer, FontPathElement> handleGeneric(PathCommand pathCommand, InputStream charStream) throws IOException {
         int c;
         List<Character> number = new ArrayList<>();
         List<Double> numbers = new ArrayList<>();
@@ -402,7 +406,7 @@ public class ReadFonts {
         }
         while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement(character, numbers));
+        return Collections.singletonMap(c, new FontPathElement(pathCommand, numbers));
     }
 
 
@@ -421,7 +425,7 @@ public class ReadFonts {
 
         } while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement('v', numbers));
+        return Collections.singletonMap(c, new FontPathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, numbers));
 
     }
 
@@ -436,14 +440,10 @@ public class ReadFonts {
                 break;
             }
             numbers.add(parseNumber(number));
-//            stringBuilder.append(decimalFormat.format((parseNumber(number) + (absolute ? translateX : 0)) * scale)).append(" ");
             number.clear();
-
         } while (!CharUtils.isAsciiAlpha((char) c));
 
-
-        return Collections.singletonMap(c, new FontPathElement('h', numbers));
-
+        return Collections.singletonMap(c, new FontPathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, numbers));
     }
 
 
@@ -498,7 +498,7 @@ public class ReadFonts {
         }
         while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement('c', numbers));
+        return Collections.singletonMap(c, new FontPathElement(PathCommand.CURVE_TO_RELATIVE, numbers));
     }
 
 
@@ -616,8 +616,8 @@ public class ReadFonts {
         jsonGenerator.close();
 
         JsonParser parser = factory.createParser(tempOutputStream.toByteArray());
-        JsonToken jsonToken;
-        while ((jsonToken = parser.nextToken()) != null) ;
+
+        while (parser.nextToken() != null);
 
 
         outputStream.write(tempOutputStream.toByteArray());
@@ -635,6 +635,30 @@ public class ReadFonts {
             writeGlyphElementsToStream(inputStream, bufferedOutputStream);
         }
     }
+
+
+    public static List<CoordinatePair> extractGlyphFromFile(String glyphName, InputStream inputStream) throws XMLStreamException, IOException {
+        XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+        XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(inputStream, StandardCharsets.UTF_8.name());
+        Map<String, String> namePathMapping = new HashMap<>();
+        double fontBoundingBox[] = null;
+
+        while (xmlEventReader.hasNext()) {
+            xmlEventReader.next();
+
+            if (!xmlEventReader.isStartElement()) {
+                continue;
+            }
+
+            String localName = xmlEventReader.getName().getLocalPart();
+
+            if (localName.equals(GLYPH) && glyphName.equals(xmlEventReader.getAttributeValue("", "glyph-name"))) {
+                return PathProcessorKt.processPath(parsePathData(xmlEventReader.getAttributeValue("", "d")));
+            }
+        }
+        return Collections.emptyList();
+    }
+
 
 
     public static void main(String args[]) throws Exception {

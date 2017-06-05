@@ -11,6 +11,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.kjipo</groupId>
+            <artifactId>noteGenerator</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -54,6 +58,11 @@
         <dependency>
             <groupId>com.kjipo</groupId>
             <artifactId>TimeSeriesRules</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.tornado</groupId>
+            <artifactId>tornadofx</artifactId>
+            <version>1.7.5</version>
         </dependency>
     </dependencies>
 
