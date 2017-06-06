@@ -133,7 +133,7 @@ private fun processSmoothCurveToRelative(numbers: List<Double>, startCoordinate:
 
     val n = coordinatePairs.size
     val newCoordinates = mutableListOf<CoordinatePair>()
-    for (curveNumber in 0..n step 2) {
+    for (curveNumber in 0..n - 1 step 2) {
         val bezierCurve = processSingleCubicBezierCurve(listOf(filteredStartCoordinate, firstControlPoint,
                 coordinatePairs.get(curveNumber), coordinatePairs.get(curveNumber + 1)))
         filteredStartCoordinate = bezierCurve.last()
@@ -187,3 +187,58 @@ private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double
 fun invertYcoordinates(coordinatePairs: List<CoordinatePair>): List<CoordinatePair> {
     return coordinatePairs.map { coordinatePair -> CoordinatePair(coordinatePair.x, -coordinatePair.y) }
 }
+
+
+data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val yMax: Double)
+
+
+private fun findBoundingBoxInternal(coordinates: Iterable<CoordinatePair>): BoundingBox {
+    return BoundingBox(coordinates.map { coordinatePair -> coordinatePair.x }.min() ?: 0.0,
+            coordinates.map { coordinatePair -> coordinatePair.y }.min() ?: 0.0,
+            coordinates.map { coordinatePair -> coordinatePair.x }.max() ?: 0.0,
+            coordinates.map { coordinatePair -> coordinatePair.y }.max() ?: 0.0)
+}
+
+fun findBoundingBox(fontPathElements: List<FontPathElement>): BoundingBox {
+    return findBoundingBoxInternal(processPath(fontPathElements))
+}
+
+fun offSetBoundingBox(boundingBox: BoundingBox, xOffset: Int, yOffset: Int): BoundingBox {
+    return BoundingBox(boundingBox.xMin + xOffset, boundingBox.yMin + yOffset, boundingBox.xMax + xOffset, boundingBox.yMax + yOffset)
+}
+
+
+fun invertYCoordinates(glyphData: GlyphData): GlyphData {
+    val newFontPathElements = mutableListOf<FontPathElement>()
+    for (fontPathElement in glyphData.fontPathElements) {
+        when (fontPathElement.command) {
+            PathCommand.VERTICAL_LINE_TO_RELATIVE -> fontPathElement.numbers.map { -it }
+            PathCommand.HORIZONAL_LINE_TO_RELATIVE -> fontPathElement.numbers
+            PathCommand.MOVE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
+            PathCommand.MOVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
+            PathCommand.LINE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
+            PathCommand.CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
+            PathCommand.CLOSE_PATH -> emptyList()
+            PathCommand.SMOOTH_CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
+        }.let { newFontPathElements.add(FontPathElement(fontPathElement.command, it)) }
+
+    }
+    return GlyphData(glyphData.name, newFontPathElements)
+}
+
+
+fun invertEverySecondNumber(numbers: Iterable<Double>): List<Double> {
+    var invert = true
+
+    return numbers.map {
+        invert != invert;
+        if (invert) {
+            -it
+        } else {
+            it
+        }
+    }.toList()
+
+
+}
+
