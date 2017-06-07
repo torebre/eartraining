@@ -86,7 +86,7 @@ public class ReadFonts {
         }
     }
 
-    private static void createDocumentWithAllGlyphs(Path fontFilesDirectory, Path outputFilePath) throws IOException, TransformerException {
+    private static void createDocumentWithAllGlyphs(Path fontFilesDirectory, Path outputFilePath, double scale) throws IOException, TransformerException {
         DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
         String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
         Document doc = impl.createDocument(svgNS, "svg", null);
@@ -97,8 +97,10 @@ public class ReadFonts {
 
         Files.list(fontFilesDirectory).forEach(path -> {
             try (InputStream inputStream = new FileInputStream(path.toFile())) {
-                addElementsToDocument(svgDocument, currentY.get(), path.getFileName().toString(), extractGlyphPaths(inputStream));
-
+                Collection<GlyphData> glyphDataCollection = extractGlyphPaths(inputStream).stream()
+                        .map(glyphData -> PathProcessorKt.scaleGlyph(glyphData, scale))
+                        .collect(Collectors.toList());
+                addElementsToDocument(svgDocument, currentY.get(), path.getFileName().toString(), glyphDataCollection);
 
 //                currentY.set(updatedYcoordinate);
 
@@ -117,6 +119,10 @@ public class ReadFonts {
     }
 
     private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath) throws IOException, TransformerException, XMLStreamException {
+        writeGlyphWithBoundingBoxToFile(glyphName, fontFile, outputFilePath, 1.0);
+    }
+
+    private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath, double scale) throws IOException, TransformerException, XMLStreamException {
         DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
         String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
         Document doc = impl.createDocument(svgNS, "svg", null);
@@ -129,6 +135,7 @@ public class ReadFonts {
         try (InputStream inputStream = new FileInputStream(fontFile.toFile())) {
             glyphDataCollection = extractGlyphPaths(inputStream).stream()
                     .map(PathProcessorKt::invertYCoordinates)
+                    .map(glyphData -> PathProcessorKt.scaleGlyph(glyphData, scale))
                     .collect(Collectors.toList());
         }
 
@@ -166,6 +173,9 @@ public class ReadFonts {
 
         int currentX = 500;
         for (GlyphData glyphData : glyphDataCollection) {
+
+            LOGGER.info("Glyph name: {}", glyphData.getName());
+
             String pathString = transformToSquare2(glyphData.getFontPathElements(), currentX, currentY);
             BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getFontPathElements());
 
@@ -505,14 +515,14 @@ public class ReadFonts {
 //            writePathsToSvgFile(outputFilePath, inputStream, "gonvillepart1");
 //        }
 
-//        Path outputFilePath = Paths.get("output2.xml");
-//        Path fontFilesDirectory = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg");
-//        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath);
+        Path outputFilePath = Paths.get("output2.xml");
+        Path fontFilesDirectory = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg");
+        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1);
 
 
-        Path outputFilePath = Paths.get("glyph_with_bounding_box.xml");
-        Path svgFontFile = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
-        writeGlyphWithBoundingBoxToFile("clefs.G", svgFontFile, outputFilePath);
+//        Path outputFilePath = Paths.get("glyph_with_bounding_box.xml");
+//        Path svgFontFile = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
+//        writeGlyphWithBoundingBoxToFile("clefs.G", svgFontFile, outputFilePath, 0.1);
 
     }
 

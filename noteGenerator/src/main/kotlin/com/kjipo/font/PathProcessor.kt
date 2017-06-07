@@ -231,14 +231,19 @@ fun invertEverySecondNumber(numbers: Iterable<Double>): List<Double> {
     var invert = true
 
     return numbers.map {
-        invert != invert;
+        invert = !invert
         if (invert) {
             -it
         } else {
             it
         }
     }.toList()
-
-
 }
+
+
+fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
+    return GlyphData(glyphData.name, glyphData.fontPathElements.map { it -> FontPathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) })
+}
+
+
 
