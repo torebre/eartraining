@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 
 public class ReadFonts {
-    private static final int APPROXIMATE_CHARACTERS_ON_LINE = 200;
     private static final String GLYPH = "glyph";
 
     private static DecimalFormat decimalFormat;
@@ -93,21 +92,20 @@ public class ReadFonts {
 
         SVGDocument svgDocument = (SVGDocument) doc;
 
+        int yIncrement = 200;
+
         AtomicInteger currentY = new AtomicInteger(50);
 
         Files.list(fontFilesDirectory).forEach(path -> {
             try (InputStream inputStream = new FileInputStream(path.toFile())) {
                 Collection<GlyphData> glyphDataCollection = extractGlyphPaths(inputStream).stream()
                         .map(glyphData -> PathProcessorKt.scaleGlyph(glyphData, scale))
+                        .map(PathProcessorKt::invertYCoordinates)
                         .collect(Collectors.toList());
-                addElementsToDocument(svgDocument, currentY.get(), path.getFileName().toString(), glyphDataCollection);
-
-//                currentY.set(updatedYcoordinate);
-
+                addElementsToDocument(svgDocument, currentY.getAndAdd(yIncrement), path.getFileName().toString(), glyphDataCollection);
 
             } catch (XMLStreamException | IOException e) {
-                // TODO
-                e.printStackTrace();
+                LOGGER.error("Exception when processing path {}", path, e);
             }
         });
 
@@ -176,11 +174,17 @@ public class ReadFonts {
 
             LOGGER.info("Glyph name: {}", glyphData.getName());
 
-            String pathString = transformToSquare2(glyphData.getFontPathElements(), currentX, currentY);
-            BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getFontPathElements());
+            try {
 
-            addPath(svgDocument, rootElement, pathString);
-            addRectangle(svgDocument, rootElement, (PathProcessorKt.offSetBoundingBox(boundingBox, currentX, currentY)));
+                String pathString = transformToSquare2(glyphData.getFontPathElements(), currentX, currentY);
+                BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getFontPathElements());
+
+                addPath(svgDocument, rootElement, pathString);
+                addRectangle(svgDocument, rootElement, (PathProcessorKt.offSetBoundingBox(boundingBox, currentX, currentY)));
+            }
+            catch(RuntimeException e) {
+                LOGGER.error("Exception when processing glyph {}", glyphData.getName(), e);
+            }
 
             currentX += 200;
         }
