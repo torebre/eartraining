@@ -1,0 +1,246 @@
+package com.kjipo.font;
+
+import com.google.common.collect.Iterators;
+import org.apache.commons.lang3.CharUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+public final class FontProcessingUtilities {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FontProcessingUtilities.class);
+
+    private FontProcessingUtilities() {
+
+    }
+
+
+    static List<FontPathElement> parsePathData(String pathData) throws IOException {
+        LOGGER.info("Processing {}", pathData);
+
+        ByteArrayInputStream charStream = new ByteArrayInputStream(pathData.getBytes());
+        List<FontPathElement> fontPathElements = new ArrayList<>();
+
+        int c = charStream.read();
+        Map.Entry<Integer, FontPathElement> parsedElement;
+
+        while (c != -1) {
+            switch (c) {
+
+                case 'v':
+                    parsedElement = Iterators.getOnlyElement(handleLowercaseV(charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+//                case 'H':
+//                    absolute = true;
+                case 'h':
+                    parsedElement = Iterators.getOnlyElement(handleLowerCaseH(charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+                case 'M':
+                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_ABSOLUTE, charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+                case 'm':
+                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_RELATIVE, charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+                case 'l':
+                    parsedElement = Iterators.getOnlyElement(handleLowerCaseL(charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+                case 'c':
+                    parsedElement = Iterators.getOnlyElement(handleLowerCaseC(charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+                case 'Z':
+                case 'z':
+                    fontPathElements.add(new FontPathElement(PathCommand.CLOSE_PATH, Collections.emptyList()));
+                    c = charStream.read();
+                    break;
+
+                case 's':
+                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.SMOOTH_CURVE_TO_RELATIVE, charStream).entrySet().iterator());
+                    c = parsedElement.getKey();
+                    fontPathElements.add(parsedElement.getValue());
+                    break;
+
+                default:
+
+                    LOGGER.error("Hit default: {}", (char) c);
+
+//                    stringBuilder.append((char) c).append(" ");
+                    c = charStream.read();
+            }
+
+        }
+
+        return fontPathElements;
+    }
+
+
+    private static Map<Integer, FontPathElement> handleLowerCaseL(InputStream charStream) throws IOException {
+        return handleGeneric(PathCommand.LINE_TO_RELATIVE, charStream);
+    }
+
+    private static Map<Integer, FontPathElement> handleGeneric(PathCommand pathCommand, InputStream charStream) throws IOException {
+        int c;
+        List<Character> number = new ArrayList<>();
+        List<Double> numbers = new ArrayList<>();
+
+        do {
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+
+            numbers.add(parseNumber(number));
+
+            number.clear();
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+        }
+        while (!CharUtils.isAsciiAlpha((char) c));
+
+        return Collections.singletonMap(c, new FontPathElement(pathCommand, numbers));
+    }
+
+
+    private static Map<Integer, FontPathElement> handleLowercaseV(InputStream charStream) throws IOException {
+        int c;
+        List<Character> number = new ArrayList<>();
+
+        List<Double> numbers = new ArrayList<>();
+        do {
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+
+        } while (!CharUtils.isAsciiAlpha((char) c));
+
+        return Collections.singletonMap(c, new FontPathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, numbers));
+
+    }
+
+    private static Map<Integer, FontPathElement> handleLowerCaseH(InputStream charStream) throws IOException {
+        int c;
+        List<Character> number = new ArrayList<>();
+        List<Double> numbers = new ArrayList<>();
+
+        do {
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+        } while (!CharUtils.isAsciiAlpha((char) c));
+
+        return Collections.singletonMap(c, new FontPathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, numbers));
+    }
+
+
+    private static Map<Integer, FontPathElement> handleLowerCaseC(InputStream charStream) throws IOException {
+        int c;
+        List<Character> number = new ArrayList<>();
+        List<Double> numbers = new ArrayList<>();
+
+        do {
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+
+            c = readNumber(charStream, number);
+            if (number.isEmpty()) {
+                break;
+            }
+            numbers.add(parseNumber(number));
+            number.clear();
+        }
+        while (!CharUtils.isAsciiAlpha((char) c));
+
+        return Collections.singletonMap(c, new FontPathElement(PathCommand.CURVE_TO_RELATIVE, numbers));
+    }
+
+
+    private static double parseNumber(List<Character> number) {
+        char temp[] = new char[number.size()];
+        int i = 0;
+        for (Character character : number) {
+            temp[i++] = character.charValue();
+        }
+        return Double.valueOf(String.valueOf(temp));
+    }
+
+    private static int readNumber(InputStream input, List<Character> number) throws IOException {
+        char c = (char) input.read();
+        while (c == ' ') {
+            c = (char) input.read();
+        }
+        while (CharUtils.isAsciiNumeric(c) ||
+                c == 'e' ||
+                c == '-' ||
+                c == '.') {
+            number.add(new Character(c));
+            c = (char) input.read();
+        }
+        return c;
+    }
+
+}

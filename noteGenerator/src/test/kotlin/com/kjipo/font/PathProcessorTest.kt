@@ -10,7 +10,7 @@ class PathProcessorTest {
 
     @Test
     fun `test cubic Bezier curve generation`() {
-        val lineSegments = processPath(ReadFonts.parsePathData("M359.403 1080.91c-7.621 -2.80005 -37.638 -31.6801 -54.954 -52.88c-56.862 -69.564 -87.028 -156.64 -87.028 -247.587"))
+        val lineSegments = processPath(FontProcessingUtilities.parsePathData("M359.403 1080.91c-7.621 -2.80005 -37.638 -31.6801 -54.954 -52.88c-56.862 -69.564 -87.028 -156.64 -87.028 -247.587"))
 
         lineSegments.forEach(System.out::println)
     }
