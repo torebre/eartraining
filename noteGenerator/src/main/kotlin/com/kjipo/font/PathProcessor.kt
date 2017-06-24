@@ -246,4 +246,34 @@ fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
 }
 
 
+fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): GlyphData {
+    return GlyphData(glyphData.name, glyphData.fontPathElements.map { translateFontPathElement(it, xTranslate, yTranslate) })
+}
 
+fun translateFontPathElement(fontPathElement: FontPathElement, xTranslate: Int, yTranslate: Int): FontPathElement {
+    return when (fontPathElement.command) {
+        PathCommand.MOVE_TO_ABSOLUTE -> FontPathElement(fontPathElement.command, translateAbsoluteMovement(fontPathElement.numbers, xTranslate, yTranslate))
+        else -> fontPathElement
+    }
+}
+
+fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate: Int): List<Double> {
+    var isYCoordinate = true
+
+    return numbers.map {
+        isYCoordinate = !isYCoordinate
+        if (isYCoordinate) {
+            it + yTranslate
+        } else {
+            it + xTranslate
+        }
+    }
+
+}
+
+fun transformToPathString(glyphData: GlyphData): String {
+    return glyphData.fontPathElements.map { it.command.command
+            .plus(" ")
+            .plus(it.numbers.map { ReadFonts.decimalFormatThreadLocal.get().format(it) }.joinToString(" ")) }
+            .joinToString(" ")
+}

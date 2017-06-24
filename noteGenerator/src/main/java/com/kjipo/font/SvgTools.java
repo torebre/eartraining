@@ -36,16 +36,16 @@ public final class SvgTools {
     }
 
 
-    public static void addPath(Document document, Node node, String path) {
-        Element path1 = document.createElementNS(SVG_NAMESPACE_URI, "path");
+    public static void addPath(Node node, String path) {
+        Element path1 = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "path");
         path1.setAttribute("d", path);
         path1.setAttribute("stroke", "blue");
         path1.setAttribute("fill", "yellow");
         node.appendChild(path1);
     }
 
-    public static void addLine(int xStart, int yStart, int xEnd, int yEnd, Node node, Document document) {
-        Element path1 = document.createElementNS(SVG_NAMESPACE_URI, "line");
+    public static void addLine(int xStart, int yStart, int xEnd, int yEnd, Node node) {
+        Element path1 = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "line");
         path1.setAttribute("x1", String.valueOf(xStart));
         path1.setAttribute("y1", String.valueOf(yStart));
         path1.setAttribute("x2", String.valueOf(xEnd));
@@ -58,4 +58,16 @@ public final class SvgTools {
 
         node.appendChild(path1);
     }
+
+
+//    public static void drawPath(int xStart, int yStart, String path, Node node) {
+//        Element pathElement = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "path");
+//        pathElement.setAttribute("d", path);
+//        pathElement.setAttribute("stroke", "blue");
+//        pathElement.setAttribute("fill", "yellow");
+//        node.appendChild(pathElement);
+//    }
 }
+
+
+

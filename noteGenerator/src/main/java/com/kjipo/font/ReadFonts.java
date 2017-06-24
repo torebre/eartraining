@@ -32,13 +32,13 @@ import java.util.stream.Collectors;
 public class ReadFonts {
     private static final String GLYPH = "glyph";
 
-    private static DecimalFormat decimalFormat;
 
-    static {
-        decimalFormat = new DecimalFormat();
+    public static final ThreadLocal<DecimalFormat> decimalFormatThreadLocal = ThreadLocal.withInitial(() -> {
+        DecimalFormat decimalFormat = new DecimalFormat();
         decimalFormat.setMaximumFractionDigits(3);
         decimalFormat.setGroupingUsed(false);
-    }
+        return decimalFormat;
+    });
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadFonts.class);
@@ -151,7 +151,7 @@ public class ReadFonts {
                 String pathString = transformToSquare2(glyphData.getFontPathElements(), currentX, currentY);
                 BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getFontPathElements());
 
-                SvgTools.addPath(svgDocument, rootElement, pathString);
+                SvgTools.addPath(rootElement, pathString);
                 addRectangle(svgDocument, rootElement, (PathProcessorKt.offSetBoundingBox(boundingBox, currentX, currentY)));
             } catch (RuntimeException e) {
                 LOGGER.error("Exception when processing glyph {}", glyphData.getName(), e);
@@ -163,7 +163,7 @@ public class ReadFonts {
     }
 
 
-    private static Collection<GlyphData> extractGlyphPaths(InputStream fontData) throws XMLStreamException, IOException {
+    public static Collection<GlyphData> extractGlyphPaths(InputStream fontData) throws XMLStreamException, IOException {
         XMLInputFactory inputFactory = XMLInputFactory.newFactory();
         XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(fontData, StandardCharsets.UTF_8.name());
         Collection<GlyphData> glyphDataCollection = new ArrayList<>();
@@ -210,7 +210,7 @@ public class ReadFonts {
 
 
     private static String transformToSquare2(List<FontPathElement> fontPathElements, int xOffset, int yOffset) throws IOException {
-        String result = fontPathElements.stream()
+        return fontPathElements.stream()
                 .map(fontPathElement -> {
                     // TODO Only handling M for now
                     if (fontPathElement.getCommand() == PathCommand.MOVE_TO_ABSOLUTE) {
@@ -221,10 +221,9 @@ public class ReadFonts {
                     return fontPathElement;
                 })
                 .map(fontPathElement -> fontPathElement.getCommand().getCommand() + " " + fontPathElement.getNumbers().stream()
-                        .map(decimalFormat::format)
+                        .map(decimalFormatThreadLocal.get()::format)
                         .collect(Collectors.joining(" ")))
                 .collect(Collectors.joining(" "));
-        return result;
     }
 
 
