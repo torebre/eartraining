@@ -5,10 +5,10 @@ private val STEP_SIZE = 0.1
 
 data class CoordinatePair(val x: Double, val y: Double, val skipLine: Boolean = false)
 
-fun processPath(pathElements: List<FontPathElement>): List<CoordinatePair> {
+fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
     val pathAsLineSegments = mutableListOf<CoordinatePair>()
 
-    var previousPathElement: FontPathElement? = null
+    var previousPathElement: PathElement? = null
 
     for (pathElement in pathElements) {
         when (pathElement.command) {
@@ -100,7 +100,7 @@ private fun processLineToRelative(numbers: List<Double>, startCoordinate: Coordi
 }
 
 private fun processSmoothCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePair?,
-                                         previousFontPathElement: FontPathElement?): List<CoordinatePair> {
+                                         previousPathElement: PathElement?): List<CoordinatePair> {
     var filteredStartCoordinate: CoordinatePair
 
     if (startCoordinate != null) {
@@ -110,10 +110,10 @@ private fun processSmoothCurveToRelative(numbers: List<Double>, startCoordinate:
     }
 
     var firstControlPoint: CoordinatePair
-    if (previousFontPathElement != null) {
-        if (setOf<PathCommand>(PathCommand.CURVE_TO_RELATIVE, PathCommand.SMOOTH_CURVE_TO_RELATIVE).contains(previousFontPathElement.command)) {
-            firstControlPoint = CoordinatePair(2 * filteredStartCoordinate.x - previousFontPathElement.numbers.get(previousFontPathElement.numbers.size - 4),
-                    2 * filteredStartCoordinate.y - previousFontPathElement.numbers.get(previousFontPathElement.numbers.size - 3))
+    if (previousPathElement != null) {
+        if (setOf<PathCommand>(PathCommand.CURVE_TO_RELATIVE, PathCommand.SMOOTH_CURVE_TO_RELATIVE).contains(previousPathElement.command)) {
+            firstControlPoint = CoordinatePair(2 * filteredStartCoordinate.x - previousPathElement.numbers.get(previousPathElement.numbers.size - 4),
+                    2 * filteredStartCoordinate.y - previousPathElement.numbers.get(previousPathElement.numbers.size - 3))
         } else {
             firstControlPoint = filteredStartCoordinate
         }
@@ -199,8 +199,8 @@ private fun findBoundingBoxInternal(coordinates: Iterable<CoordinatePair>): Boun
             coordinates.map { coordinatePair -> coordinatePair.y }.max() ?: 0.0)
 }
 
-fun findBoundingBox(fontPathElements: List<FontPathElement>): BoundingBox {
-    return findBoundingBoxInternal(processPath(fontPathElements))
+fun findBoundingBox(pathElements: List<PathElement>): BoundingBox {
+    return findBoundingBoxInternal(processPath(pathElements))
 }
 
 fun offSetBoundingBox(boundingBox: BoundingBox, xOffset: Int, yOffset: Int): BoundingBox {
@@ -209,8 +209,8 @@ fun offSetBoundingBox(boundingBox: BoundingBox, xOffset: Int, yOffset: Int): Bou
 
 
 fun invertYCoordinates(glyphData: GlyphData): GlyphData {
-    val newFontPathElements = mutableListOf<FontPathElement>()
-    for (fontPathElement in glyphData.fontPathElements) {
+    val newFontPathElements = mutableListOf<PathElement>()
+    for (fontPathElement in glyphData.pathElements) {
         when (fontPathElement.command) {
             PathCommand.VERTICAL_LINE_TO_RELATIVE -> fontPathElement.numbers.map { -it }
             PathCommand.HORIZONAL_LINE_TO_RELATIVE -> fontPathElement.numbers
@@ -220,7 +220,7 @@ fun invertYCoordinates(glyphData: GlyphData): GlyphData {
             PathCommand.CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.CLOSE_PATH -> emptyList()
             PathCommand.SMOOTH_CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
-        }.let { newFontPathElements.add(FontPathElement(fontPathElement.command, it)) }
+        }.let { newFontPathElements.add(PathElement(fontPathElement.command, it)) }
 
     }
     return GlyphData(glyphData.name, newFontPathElements)
@@ -242,18 +242,18 @@ fun invertEverySecondNumber(numbers: Iterable<Double>): List<Double> {
 
 
 fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
-    return GlyphData(glyphData.name, glyphData.fontPathElements.map { it -> FontPathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) })
+    return GlyphData(glyphData.name, glyphData.pathElements.map { it -> PathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) })
 }
 
 
-fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): GlyphData {
-    return GlyphData(glyphData.name, glyphData.fontPathElements.map { translateFontPathElement(it, xTranslate, yTranslate) })
+fun translateGlyph(pathInterface: PathInterface, xTranslate: Int, yTranslate: Int): PathInterface {
+    return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) })
 }
 
-fun translateFontPathElement(fontPathElement: FontPathElement, xTranslate: Int, yTranslate: Int): FontPathElement {
-    return when (fontPathElement.command) {
-        PathCommand.MOVE_TO_ABSOLUTE -> FontPathElement(fontPathElement.command, translateAbsoluteMovement(fontPathElement.numbers, xTranslate, yTranslate))
-        else -> fontPathElement
+fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {
+    return when (pathElement.command) {
+        PathCommand.MOVE_TO_ABSOLUTE -> PathElement(pathElement.command, translateAbsoluteMovement(pathElement.numbers, xTranslate, yTranslate))
+        else -> pathElement
     }
 }
 
@@ -271,9 +271,11 @@ fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate
 
 }
 
-fun transformToPathString(glyphData: GlyphData): String {
-    return glyphData.fontPathElements.map { it.command.command
-            .plus(" ")
-            .plus(it.numbers.map { ReadFonts.decimalFormatThreadLocal.get().format(it) }.joinToString(" ")) }
+fun transformToPathString(pathInterface: PathInterface): String {
+    return pathInterface.pathElements.map {
+        it.command.command
+                .plus(" ")
+                .plus(it.numbers.map { ReadFonts.decimalFormatThreadLocal.get().format(it) }.joinToString(" "))
+    }
             .joinToString(" ")
 }

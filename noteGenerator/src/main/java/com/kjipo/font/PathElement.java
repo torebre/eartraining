@@ -4,14 +4,14 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FontPathElement {
+public class PathElement {
     private final PathCommand command;
     private final List<Double> numbers;
 
 
 
 
-    FontPathElement(@Nonnull PathCommand command, @Nonnull List<Double> numbers) {
+    PathElement(@Nonnull PathCommand command, @Nonnull List<Double> numbers) {
         this.command = command;
         this.numbers = numbers;
     }

@@ -8,7 +8,11 @@ object GlyphFactory {
 
     val scale = 0.1
     val glyphResource = "/gonville-r9313/lilyfonts/svg/emmentaler-11.svg"
+    val blankGlyph = GlyphData("blank", emptyList())
 
+    fun getGlyph(name:String):GlyphData {
+        return nameGlyphMap.getOrDefault(name, blankGlyph)
+    }
 
     private fun loadGlyphs(): Array<Pair<String, GlyphData>> {
         return javaClass.getResourceAsStream(glyphResource).use {

@@ -2,19 +2,14 @@ package com.kjipo.font;
 
 import java.util.List;
 
-public class GlyphData implements PathInterface {
-    private final String name;
+public class PathInterfaceImpl implements PathInterface {
     private final List<PathElement> pathElements;
 
 
-    public GlyphData(String name, List<PathElement> pathElements) {
-        this.name = name;
+    public PathInterfaceImpl(List<PathElement> pathElements) {
         this.pathElements = pathElements;
     }
 
-    public String getName() {
-        return name;
-    }
 
     @Override
     public List<PathElement> getPathElements() {

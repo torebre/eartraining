@@ -148,8 +148,8 @@ public class ReadFonts {
 
             try {
 
-                String pathString = transformToSquare2(glyphData.getFontPathElements(), currentX, currentY);
-                BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getFontPathElements());
+                String pathString = transformToSquare2(glyphData.getPathElements(), currentX, currentY);
+                BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getPathElements());
 
                 SvgTools.addPath(rootElement, pathString);
                 addRectangle(svgDocument, rootElement, (PathProcessorKt.offSetBoundingBox(boundingBox, currentX, currentY)));
@@ -209,18 +209,18 @@ public class ReadFonts {
     }
 
 
-    private static String transformToSquare2(List<FontPathElement> fontPathElements, int xOffset, int yOffset) throws IOException {
-        return fontPathElements.stream()
-                .map(fontPathElement -> {
+    private static String transformToSquare2(List<PathElement> pathElements, int xOffset, int yOffset) throws IOException {
+        return pathElements.stream()
+                .map(pathElement -> {
                     // TODO Only handling M for now
-                    if (fontPathElement.getCommand() == PathCommand.MOVE_TO_ABSOLUTE) {
-                        return new FontPathElement(PathCommand.MOVE_TO_ABSOLUTE,
-                                Lists.newArrayList(fontPathElement.getNumbers().get(0) + xOffset,
-                                        fontPathElement.getNumbers().get(1) + yOffset));
+                    if (pathElement.getCommand() == PathCommand.MOVE_TO_ABSOLUTE) {
+                        return new PathElement(PathCommand.MOVE_TO_ABSOLUTE,
+                                Lists.newArrayList(pathElement.getNumbers().get(0) + xOffset,
+                                        pathElement.getNumbers().get(1) + yOffset));
                     }
-                    return fontPathElement;
+                    return pathElement;
                 })
-                .map(fontPathElement -> fontPathElement.getCommand().getCommand() + " " + fontPathElement.getNumbers().stream()
+                .map(pathElement -> pathElement.getCommand().getCommand() + " " + pathElement.getNumbers().stream()
                         .map(decimalFormatThreadLocal.get()::format)
                         .collect(Collectors.joining(" ")))
                 .collect(Collectors.joining(" "));

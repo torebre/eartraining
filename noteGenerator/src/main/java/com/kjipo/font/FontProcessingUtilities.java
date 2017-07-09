@@ -21,14 +21,14 @@ public final class FontProcessingUtilities {
     }
 
 
-    static List<FontPathElement> parsePathData(String pathData) throws IOException {
+    static List<PathElement> parsePathData(String pathData) throws IOException {
         LOGGER.info("Processing {}", pathData);
 
         ByteArrayInputStream charStream = new ByteArrayInputStream(pathData.getBytes());
-        List<FontPathElement> fontPathElements = new ArrayList<>();
+        List<PathElement> pathElements = new ArrayList<>();
 
         int c = charStream.read();
-        Map.Entry<Integer, FontPathElement> parsedElement;
+        Map.Entry<Integer, PathElement> parsedElement;
 
         while (c != -1) {
             switch (c) {
@@ -36,7 +36,7 @@ public final class FontProcessingUtilities {
                 case 'v':
                     parsedElement = Iterators.getOnlyElement(handleLowercaseV(charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
 //                case 'H':
@@ -44,43 +44,43 @@ public final class FontProcessingUtilities {
                 case 'h':
                     parsedElement = Iterators.getOnlyElement(handleLowerCaseH(charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'M':
                     parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_ABSOLUTE, charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'm':
                     parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_RELATIVE, charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'l':
                     parsedElement = Iterators.getOnlyElement(handleLowerCaseL(charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'c':
                     parsedElement = Iterators.getOnlyElement(handleLowerCaseC(charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'Z':
                 case 'z':
-                    fontPathElements.add(new FontPathElement(PathCommand.CLOSE_PATH, Collections.emptyList()));
+                    pathElements.add(new PathElement(PathCommand.CLOSE_PATH, Collections.emptyList()));
                     c = charStream.read();
                     break;
 
                 case 's':
                     parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.SMOOTH_CURVE_TO_RELATIVE, charStream).entrySet().iterator());
                     c = parsedElement.getKey();
-                    fontPathElements.add(parsedElement.getValue());
+                    pathElements.add(parsedElement.getValue());
                     break;
 
                 default:
@@ -93,15 +93,15 @@ public final class FontProcessingUtilities {
 
         }
 
-        return fontPathElements;
+        return pathElements;
     }
 
 
-    private static Map<Integer, FontPathElement> handleLowerCaseL(InputStream charStream) throws IOException {
+    private static Map<Integer, PathElement> handleLowerCaseL(InputStream charStream) throws IOException {
         return handleGeneric(PathCommand.LINE_TO_RELATIVE, charStream);
     }
 
-    private static Map<Integer, FontPathElement> handleGeneric(PathCommand pathCommand, InputStream charStream) throws IOException {
+    private static Map<Integer, PathElement> handleGeneric(PathCommand pathCommand, InputStream charStream) throws IOException {
         int c;
         List<Character> number = new ArrayList<>();
         List<Double> numbers = new ArrayList<>();
@@ -124,11 +124,11 @@ public final class FontProcessingUtilities {
         }
         while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement(pathCommand, numbers));
+        return Collections.singletonMap(c, new PathElement(pathCommand, numbers));
     }
 
 
-    private static Map<Integer, FontPathElement> handleLowercaseV(InputStream charStream) throws IOException {
+    private static Map<Integer, PathElement> handleLowercaseV(InputStream charStream) throws IOException {
         int c;
         List<Character> number = new ArrayList<>();
 
@@ -143,11 +143,11 @@ public final class FontProcessingUtilities {
 
         } while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, numbers));
+        return Collections.singletonMap(c, new PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, numbers));
 
     }
 
-    private static Map<Integer, FontPathElement> handleLowerCaseH(InputStream charStream) throws IOException {
+    private static Map<Integer, PathElement> handleLowerCaseH(InputStream charStream) throws IOException {
         int c;
         List<Character> number = new ArrayList<>();
         List<Double> numbers = new ArrayList<>();
@@ -161,11 +161,11 @@ public final class FontProcessingUtilities {
             number.clear();
         } while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, numbers));
+        return Collections.singletonMap(c, new PathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, numbers));
     }
 
 
-    private static Map<Integer, FontPathElement> handleLowerCaseC(InputStream charStream) throws IOException {
+    private static Map<Integer, PathElement> handleLowerCaseC(InputStream charStream) throws IOException {
         int c;
         List<Character> number = new ArrayList<>();
         List<Double> numbers = new ArrayList<>();
@@ -215,7 +215,7 @@ public final class FontProcessingUtilities {
         }
         while (!CharUtils.isAsciiAlpha((char) c));
 
-        return Collections.singletonMap(c, new FontPathElement(PathCommand.CURVE_TO_RELATIVE, numbers));
+        return Collections.singletonMap(c, new PathElement(PathCommand.CURVE_TO_RELATIVE, numbers));
     }
 
 

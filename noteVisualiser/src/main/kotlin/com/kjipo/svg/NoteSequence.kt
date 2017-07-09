@@ -1,6 +1,11 @@
 package com.kjipo.svg
 
-class NoteSequence {
+import com.kjipo.font.GlyphData
+
+class NoteSequence(val glyphDatas:List<GlyphData>) {
+
+
+
 
 
 

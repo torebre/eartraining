@@ -9,7 +9,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 
-fun writeToFile(noteSequence: NoteSequence, outputFilePath: Path) {
+fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath: Path) {
     val impl = SVGDOMImplementation.getDOMImplementation()
     val svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI
     val doc = impl.createDocument(svgNS, "svg", null)
@@ -17,23 +17,30 @@ fun writeToFile(noteSequence: NoteSequence, outputFilePath: Path) {
     val svgDocument = doc as SVGDocument
     val rootElement = svgDocument.rootElement
 
-//    val gElement = rootElement
+    var xStart = 100
+    val yStart = 400
 
     // TODO Draw sequence
-    drawBarLines(rootElement)
+    drawBarLines(rootElement, xStart, yStart)
 
-    drawGlyph(10, 10, GlyphFactory.nameGlyphMap.getOrDefault("clefs.G", GlyphData("blank", emptyList())), rootElement)
+    for (renderingElement in temporalElementSequence.renderingElements) {
+        for (pathInterface in renderingElement.renderingPath) {
+            drawGlyph(xStart + renderingElement.x, yStart + renderingElement.y, pathInterface, rootElement)
+        }
+
+    }
+
 
     SvgTools.writeDocumentToFile(svgDocument, outputFilePath)
 }
 
 
-fun drawBarLines(element: SVGSVGElement) {
-    var x = 0
-    var y = 0
-
+fun drawBarLines(element: SVGSVGElement, xStart: Int, gLine: Int) {
     val width = 500
-    val spaceBetweenLines = 10
+    val spaceBetweenLines = 20
+
+    var x = xStart
+    var y = gLine - spaceBetweenLines * 3
 
     drawLine(x, y, x, y + 4 * spaceBetweenLines, element)
     drawLine(x + width, y, x + width, y + 4 * spaceBetweenLines, element)
@@ -46,10 +53,10 @@ fun drawBarLines(element: SVGSVGElement) {
 }
 
 
-
-fun drawGlyph(x:Int, y:Int, glyphData: GlyphData, node:Node) {
-    SvgTools.addPath(node, transformToPathString(translateGlyph(glyphData, x, y)))
+fun drawGlyph(x: Int, y: Int, pathInterface: PathInterface, node: Node) {
+    SvgTools.addPath(node, transformToPathString(translateGlyph(pathInterface, x, y)))
 }
+
 
 fun drawLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node) {
     SvgTools.addLine(xStart, yStart, xEnd, yEnd, node)
@@ -57,10 +64,28 @@ fun drawLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node) {
 
 
 fun main(args: Array<String>) {
-    val noteSequence = NoteSequence()
+    val noteSequence = NoteSequence(listOf(
+            GlyphFactory.getGlyph("clefs.G"),
+            GlyphFactory.getGlyph("noteheads.s2"),
+            GlyphFactory.getGlyph("noteheads.s1"),
+            GlyphFactory.getGlyph("noteheads.s0")
+//            GlyphFactory.getGlyph("noteheads.s2slash"),
+//            GlyphFactory.getGlyph("noteheads.s1slash"),
+//            GlyphFactory.getGlyph("noteheads.s0slash"))
+    ))
+
+    val x = 0
+    val y = 0
+
+    val temporalElementSequence = TemporalElementSequence(listOf(
+            RenderingElement(x, y, listOf(GlyphFactory.getGlyph("clefs.G"))),
+            RenderingElement(x, y + 50, listOf(GlyphFactory.getGlyph("noteheads.s2"))),
+            RenderingElement(x, y + 100, listOf(GlyphFactory.getGlyph("noteheads.s1"))),
+            RenderingElement(x, y + 150, listOf(GlyphFactory.getGlyph("noteheads.s0")))))
+
 
     val path = Paths.get("/home/student/test_output.xml")
 
-    writeToFile(noteSequence, path)
+    writeToFile(temporalElementSequence, path)
 
 }
