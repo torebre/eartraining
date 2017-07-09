@@ -189,7 +189,8 @@ public class ReadFonts {
                     continue;
                 }
 
-                glyphDataCollection.add(new GlyphData(glyphName, FontProcessingUtilities.parsePathData(pathAttribute)));
+                List<PathElement> pathElements = FontProcessingUtilities.parsePathData(pathAttribute);
+                glyphDataCollection.add(new GlyphData(glyphName, pathElements, PathProcessorKt.findBoundingBox(pathElements)));
             }
         }
 

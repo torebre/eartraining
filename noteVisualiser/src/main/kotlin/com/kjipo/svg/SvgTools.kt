@@ -60,9 +60,10 @@ fun drawLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node, strokeW
     SvgTools.addLine(xStart, yStart, xEnd, yEnd, node, strokeWidth)
 }
 
-fun addStem(): PathInterface {
-    return PathInterfaceImpl(listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
-            PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(0.0, 100.0))), 5)
+fun addStem(boundingBox: BoundingBox, stemUp: Boolean = true): PathInterface {
+    val yEnd = if(stemUp) -100.0 else 100.0
+    return translateGlyph(PathInterfaceImpl(listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
+            PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(0.0, yEnd))), 3), boundingBox.xMax.toInt(), 0)
 }
 
 
@@ -80,12 +81,15 @@ fun main(args: Array<String>) {
     val x = 0
     val y = 0
 
+    val noteHeadS2 = GlyphFactory.getGlyph("noteheads.s2")
+    val noteHeadS1 = GlyphFactory.getGlyph("noteheads.s1")
+    val noteHeadS0 = GlyphFactory.getGlyph("noteheads.s0")
+
     val temporalElementSequence = TemporalElementSequence(listOf(
             RenderingElement(x, y, listOf(GlyphFactory.getGlyph("clefs.G"))),
-            RenderingElement(x + 50, y, listOf(GlyphFactory.getGlyph("noteheads.s2"), addStem())),
-            RenderingElement(x + 100, y, listOf(GlyphFactory.getGlyph("noteheads.s1"), addStem())),
-            RenderingElement(x + 150, y, listOf(GlyphFactory.getGlyph("noteheads.s0"), addStem()))))
-
+            RenderingElement(x + 50, y, listOf(noteHeadS2, addStem(noteHeadS2.boundingBox))),
+            RenderingElement(x + 100, y, listOf(noteHeadS1, addStem(noteHeadS1.boundingBox))),
+            RenderingElement(x + 150, y, listOf(noteHeadS0, addStem(noteHeadS0.boundingBox)))))
 
     val path = Paths.get("/home/student/test_output.xml")
 

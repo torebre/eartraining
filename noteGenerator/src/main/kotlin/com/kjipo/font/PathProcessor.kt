@@ -185,11 +185,6 @@ private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double
     return Math.pow(1 - t, 3.0) * p0 + 3 * Math.pow(1 - t, 2.0) * p1 * t + 3 * (1 - t) * p2 * Math.pow(t, 2.0) + Math.pow(t, 3.0) * p3
 }
 
-fun invertYcoordinates(coordinatePairs: List<CoordinatePair>): List<CoordinatePair> {
-    return coordinatePairs.map { coordinatePair -> CoordinatePair(coordinatePair.x, -coordinatePair.y) }
-}
-
-
 data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val yMax: Double)
 
 
@@ -225,7 +220,7 @@ fun invertYCoordinates(glyphData: GlyphData): GlyphData {
         }.let { newFontPathElements.add(PathElement(fontPathElement.command, it)) }
 
     }
-    return GlyphData(glyphData.name, newFontPathElements)
+    return GlyphData(glyphData.name, newFontPathElements, findBoundingBox(newFontPathElements))
 }
 
 
@@ -244,7 +239,8 @@ fun invertEverySecondNumber(numbers: Iterable<Double>): List<Double> {
 
 
 fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
-    return GlyphData(glyphData.name, glyphData.pathElements.map { it -> PathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) })
+    val newPathElements = glyphData.pathElements.map { it -> PathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) }
+    return GlyphData(glyphData.name, newPathElements, findBoundingBox(newPathElements))
 }
 
 

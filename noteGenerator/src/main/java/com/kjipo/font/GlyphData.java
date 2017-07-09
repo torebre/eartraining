@@ -6,16 +6,18 @@ public class GlyphData implements PathInterface {
     private final String name;
     private final List<PathElement> pathElements;
     private final int strokeWidth;
+    private final BoundingBox boundingBox;
 
 
-    public GlyphData(String name, List<PathElement> pathElements) {
-        this(name, pathElements, 1);
+    public GlyphData(String name, List<PathElement> pathElements, BoundingBox boundingBox) {
+        this(name, pathElements, 1, boundingBox);
     }
 
-    public GlyphData(String name, List<PathElement> pathElements, int strokeWidth) {
+    public GlyphData(String name, List<PathElement> pathElements, int strokeWidth, BoundingBox boundingBox) {
         this.name = name;
         this.pathElements = pathElements;
         this.strokeWidth = strokeWidth;
+        this.boundingBox = boundingBox;
     }
 
     public String getName() {
@@ -30,5 +32,9 @@ public class GlyphData implements PathInterface {
     @Override
     public int getStrokeWidth() {
         return strokeWidth;
+    }
+
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
     }
 }

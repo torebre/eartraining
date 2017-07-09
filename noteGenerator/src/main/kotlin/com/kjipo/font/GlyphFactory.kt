@@ -8,7 +8,7 @@ object GlyphFactory {
 
     val scale = 0.1
     val glyphResource = "/gonville-r9313/lilyfonts/svg/emmentaler-11.svg"
-    val blankGlyph = GlyphData("blank", emptyList())
+    val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0.0))
 
     fun getGlyph(name:String):GlyphData {
         return nameGlyphMap.getOrDefault(name, blankGlyph)
