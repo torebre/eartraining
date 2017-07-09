@@ -6,6 +6,8 @@ public interface PathInterface {
 
     List<PathElement> getPathElements();
 
+    int getStrokeWidth();
+
 
 
 }

@@ -1,6 +1,5 @@
 package com.kjipo.font;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.svg.SVGDocument;
@@ -36,15 +35,18 @@ public final class SvgTools {
     }
 
 
-    public static void addPath(Node node, String path) {
+    public static void addPath(Node node, String path, int strokeWidth) {
         Element path1 = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "path");
         path1.setAttribute("d", path);
         path1.setAttribute("stroke", "blue");
         path1.setAttribute("fill", "yellow");
+
+        path1.setAttribute("stroke-width", String.valueOf(strokeWidth));
+
         node.appendChild(path1);
     }
 
-    public static void addLine(int xStart, int yStart, int xEnd, int yEnd, Node node) {
+    public static void addLine(int xStart, int yStart, int xEnd, int yEnd, Node node, int strokeWidth) {
         Element path1 = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "line");
         path1.setAttribute("x1", String.valueOf(xStart));
         path1.setAttribute("y1", String.valueOf(yStart));
@@ -52,7 +54,7 @@ public final class SvgTools {
         path1.setAttribute("y2", String.valueOf(yEnd));
 
 
-        path1.setAttribute("stroke-width", "1");
+        path1.setAttribute("stroke-width", String.valueOf(strokeWidth));
         path1.setAttribute("stroke","black");
 
 

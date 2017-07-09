@@ -151,7 +151,7 @@ public class ReadFonts {
                 String pathString = transformToSquare2(glyphData.getPathElements(), currentX, currentY);
                 BoundingBox boundingBox = PathProcessorKt.findBoundingBox(glyphData.getPathElements());
 
-                SvgTools.addPath(rootElement, pathString);
+                SvgTools.addPath(rootElement, pathString, 1);
                 addRectangle(svgDocument, rootElement, (PathProcessorKt.offSetBoundingBox(boundingBox, currentX, currentY)));
             } catch (RuntimeException e) {
                 LOGGER.error("Exception when processing glyph {}", glyphData.getName(), e);

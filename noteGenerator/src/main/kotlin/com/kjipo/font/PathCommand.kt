@@ -2,6 +2,7 @@ package com.kjipo.font
 
 enum class PathCommand constructor(val command: Char, val isAbsolute: Boolean) {
     VERTICAL_LINE_TO_RELATIVE('v', false),
+    VERTICAL_LINE_TO_ABSOLUTE('V', true),
     HORIZONAL_LINE_TO_RELATIVE('h', false),
     MOVE_TO_ABSOLUTE('M', true),
     MOVE_TO_RELATIVE('m', false),

@@ -14,6 +14,7 @@ fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
         when (pathElement.command) {
             PathCommand.CURVE_TO_RELATIVE -> processCurveToRelative(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.VERTICAL_LINE_TO_RELATIVE -> processVerticalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
+            PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> processMoveToAbsolute(pathElement.numbers)
             PathCommand.HORIZONAL_LINE_TO_RELATIVE -> processHorizontalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.MOVE_TO_ABSOLUTE -> processMoveToAbsolute(pathElement.numbers)
             PathCommand.MOVE_TO_RELATIVE -> processMoveToRelative(pathElement.numbers, pathAsLineSegments.lastOrNull())
@@ -213,6 +214,7 @@ fun invertYCoordinates(glyphData: GlyphData): GlyphData {
     for (fontPathElement in glyphData.pathElements) {
         when (fontPathElement.command) {
             PathCommand.VERTICAL_LINE_TO_RELATIVE -> fontPathElement.numbers.map { -it }
+            PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.HORIZONAL_LINE_TO_RELATIVE -> fontPathElement.numbers
             PathCommand.MOVE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.MOVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
@@ -247,7 +249,7 @@ fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
 
 
 fun translateGlyph(pathInterface: PathInterface, xTranslate: Int, yTranslate: Int): PathInterface {
-    return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) })
+    return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, pathInterface.strokeWidth)
 }
 
 fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {

@@ -9,9 +9,7 @@ public class PathElement {
     private final List<Double> numbers;
 
 
-
-
-    PathElement(@Nonnull PathCommand command, @Nonnull List<Double> numbers) {
+    public PathElement(@Nonnull PathCommand command, @Nonnull List<Double> numbers) {
         this.command = command;
         this.numbers = numbers;
     }
