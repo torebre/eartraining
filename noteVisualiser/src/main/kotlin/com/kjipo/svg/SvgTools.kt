@@ -9,6 +9,10 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 
+
+val verticalNoteSpacing = 12
+
+
 fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath: Path) {
     val impl = SVGDOMImplementation.getDOMImplementation()
     val svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI
@@ -23,9 +27,12 @@ fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath
     // TODO Draw sequence
     drawBarLines(rootElement, xStart, yStart)
 
-    for (renderingElement in temporalElementSequence.renderingElements) {
+    for (i in 0..temporalElementSequence.renderingElements.size - 1) {
+        val renderingElement = temporalElementSequence.renderingElements.get(i)
+        val point = temporalElementSequence.points.get(i)
+
         for (pathInterface in renderingElement.renderingPath) {
-            drawGlyph(xStart + renderingElement.x, yStart + renderingElement.y, pathInterface, rootElement)
+            drawGlyph(xStart + point.x, yStart + point.y, pathInterface, rootElement)
         }
     }
 
@@ -35,7 +42,7 @@ fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath
 
 fun drawBarLines(element: SVGSVGElement, xStart: Int, gLine: Int) {
     val width = 500
-    val spaceBetweenLines = 20
+    val spaceBetweenLines = 2 * verticalNoteSpacing
 
     var x = xStart
     var y = gLine - spaceBetweenLines * 3
@@ -61,23 +68,13 @@ fun drawLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node, strokeW
 }
 
 fun addStem(boundingBox: BoundingBox, stemUp: Boolean = true): PathInterface {
-    val yEnd = if(stemUp) -100.0 else 100.0
+    val yEnd = if (stemUp) -100.0 else 100.0
     return translateGlyph(PathInterfaceImpl(listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(0.0, yEnd))), 3), boundingBox.xMax.toInt(), 0)
 }
 
 
 fun main(args: Array<String>) {
-    val noteSequence = NoteSequence(listOf(
-            GlyphFactory.getGlyph("clefs.G"),
-            GlyphFactory.getGlyph("noteheads.s2"),
-            GlyphFactory.getGlyph("noteheads.s1"),
-            GlyphFactory.getGlyph("noteheads.s0")
-//            GlyphFactory.getGlyph("noteheads.s2slash"),
-//            GlyphFactory.getGlyph("noteheads.s1slash"),
-//            GlyphFactory.getGlyph("noteheads.s0slash"))
-    ))
-
     val x = 0
     val y = 0
 
@@ -85,14 +82,30 @@ fun main(args: Array<String>) {
     val noteHeadS1 = GlyphFactory.getGlyph("noteheads.s1")
     val noteHeadS0 = GlyphFactory.getGlyph("noteheads.s0")
 
+    val point1 = Point(x, y)
+    val point2 = Point(x + 50, y)
+    val point3 = Point(x + 150, y)
+    val point4 = Point(x + 200, y)
+
     val temporalElementSequence = TemporalElementSequence(listOf(
-            RenderingElement(x, y, listOf(GlyphFactory.getGlyph("clefs.G"))),
-            RenderingElement(x + 50, y, listOf(noteHeadS2, addStem(noteHeadS2.boundingBox))),
-            RenderingElement(x + 100, y, listOf(noteHeadS1, addStem(noteHeadS1.boundingBox))),
-            RenderingElement(x + 150, y, listOf(noteHeadS0, addStem(noteHeadS0.boundingBox)))))
+            RenderingElement(listOf(GlyphFactory.getGlyph("clefs.G"))),
+            RenderingElement(listOf(noteHeadS2, addStem(noteHeadS2.boundingBox))),
+            RenderingElement(listOf(noteHeadS1, addStem(noteHeadS1.boundingBox))),
+            RenderingElement(listOf(noteHeadS0, addStem(noteHeadS0.boundingBox)))),
+            listOf(point1, point2, point3, point4))
+
+
+    val chord = createChord(listOf(Note(60, NoteType.QUARTER_NOTE), Note(62, NoteType.HALF_NOTE)))
+    val chord2 = createChord(listOf(Note(62, NoteType.QUARTER_NOTE), Note(64, NoteType.QUARTER_NOTE)))
+    val temporalElementSequence2 = TemporalElementSequence(listOf(chord, chord2,
+            RenderingElement(RenderingElement(listOf(noteHeadS2, addStem(noteHeadS2.boundingBox))),
+                    addAdditionalBarLines(Note(56, NoteType.HALF_NOTE)))),
+            listOf(point1, point2, point3))
 
     val path = Paths.get("/home/student/test_output.xml")
 
-    writeToFile(temporalElementSequence, path)
+//    writeToFile(temporalElementSequence, path)
+
+    writeToFile(temporalElementSequence2, path)
 
 }

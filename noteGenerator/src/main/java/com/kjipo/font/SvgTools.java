@@ -55,20 +55,12 @@ public final class SvgTools {
 
 
         path1.setAttribute("stroke-width", String.valueOf(strokeWidth));
-        path1.setAttribute("stroke","black");
+        path1.setAttribute("stroke", "black");
 
 
         node.appendChild(path1);
     }
 
-
-//    public static void drawPath(int xStart, int yStart, String path, Node node) {
-//        Element pathElement = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "path");
-//        pathElement.setAttribute("d", path);
-//        pathElement.setAttribute("stroke", "blue");
-//        pathElement.setAttribute("fill", "yellow");
-//        node.appendChild(pathElement);
-//    }
 }
 
 

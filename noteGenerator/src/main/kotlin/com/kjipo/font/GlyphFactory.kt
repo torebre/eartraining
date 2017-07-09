@@ -10,7 +10,16 @@ object GlyphFactory {
     val glyphResource = "/gonville-r9313/lilyfonts/svg/emmentaler-11.svg"
     val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0.0))
 
-    fun getGlyph(name:String):GlyphData {
+
+    fun getGlyph(noteType: NoteType): GlyphData {
+        return when (noteType) {
+            NoteType.QUARTER_NOTE -> getGlyph("noteheads.s2")
+            NoteType.HALF_NOTE -> getGlyph("noteheads.s1")
+            NoteType.WHOLE_NOTE -> getGlyph("noteheads.s0")
+        }
+    }
+
+    fun getGlyph(name: String): GlyphData {
         return nameGlyphMap.getOrDefault(name, blankGlyph)
     }
 
