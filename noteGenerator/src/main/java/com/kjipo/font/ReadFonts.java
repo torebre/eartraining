@@ -1,24 +1,18 @@
 package com.kjipo.font;
 
 
-import com.google.common.collect.Lists;
-import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.svg.SVGDocument;
-import org.w3c.dom.svg.SVGSVGElement;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.TransformerException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -248,6 +242,19 @@ public class ReadFonts {
             }
         }
         return Collections.emptyList();
+    }
+
+
+    private static void extractGlyphsAsGlyphDataAndSave(List<String> glyphNames, InputStream inputXmlData, OutputStreamWriter outputStreamWriter) throws IOException, XMLStreamException {
+
+        Collection<GlyphData> glyphDataCollection = extractGlyphPaths(inputXmlData);
+
+
+        // TODO
+
+//        glyphDataCollection.stream().filter(glyphData -> glyphNames.contains(glyphData.getName()))
+
+
     }
 
 
