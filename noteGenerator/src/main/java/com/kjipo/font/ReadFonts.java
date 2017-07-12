@@ -1,6 +1,8 @@
 package com.kjipo.font;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -14,10 +16,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.TransformerException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +39,7 @@ public class ReadFonts {
         return decimalFormat;
     });
 
-    public static final ThreadLocal<DocumentBuilderFactory> documentFactoryThreadLocal = ThreadLocal.withInitial(DocumentBuilderFactory::newInstance);
+    private static final ThreadLocal<DocumentBuilderFactory> documentFactoryThreadLocal = ThreadLocal.withInitial(DocumentBuilderFactory::newInstance);
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadFonts.class);
@@ -57,14 +57,9 @@ public class ReadFonts {
 
 
     private static void createDocumentWithAllGlyphs(Path fontFilesDirectory, Path outputFilePath, double scale) throws IOException, TransformerException, ParserConfigurationException {
-        DocumentBuilder documentBuilder = documentFactoryThreadLocal.get().newDocumentBuilder();
-
-//        DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-//        Document doc = impl.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null);
-        Document doc = documentBuilder.newDocument();
-
         int yIncrement = 200;
         AtomicInteger currentY = new AtomicInteger(50);
+        Document doc = createNewSvgDocument();
 
         Files.list(fontFilesDirectory).forEach(path -> {
             try (InputStream inputStream = new FileInputStream(path.toFile())) {
@@ -79,15 +74,9 @@ public class ReadFonts {
             }
         });
 
-
-//        SVGSVGElement rootElement = svgDocument.getRootElement();
-
         Element rootElement = doc.getDocumentElement();
-
         rootElement.setAttributeNS(null, "width", "10000");
         rootElement.setAttributeNS(null, "height", String.valueOf(currentY.get()));
-
-
 
         SvgTools.writeDocumentToFile(doc, outputFilePath);
     }
@@ -97,10 +86,7 @@ public class ReadFonts {
     }
 
     private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath, double scale) throws IOException, TransformerException, XMLStreamException, ParserConfigurationException {
-        DocumentBuilder documentBuilder = documentFactoryThreadLocal.get().newDocumentBuilder();
-        Document doc = documentBuilder.newDocument();
-//        Document doc = impl.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null);
-
+        Document doc = createNewSvgDocument();
         AtomicInteger currentY = new AtomicInteger(50);
 
         Collection<GlyphData> glyphDataCollection;
@@ -132,8 +118,11 @@ public class ReadFonts {
     }
 
 
-    private static void addElementsToDocument(Document svgDocument, int currentY,
-                                              String inputName, Collection<GlyphData> glyphDataCollection) throws XMLStreamException, IOException {
+    private static void addElementsToDocument(
+            Document svgDocument,
+            int currentY,
+            String inputName,
+            Collection<GlyphData> glyphDataCollection) throws XMLStreamException, IOException {
         Element path1 = svgDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "text");
         path1.setAttribute("x", "0");
         path1.setAttribute("y", String.valueOf(currentY));
@@ -254,15 +243,21 @@ public class ReadFonts {
 
 
     private static void extractGlyphsAsGlyphDataAndSave(List<String> glyphNames, InputStream inputXmlData, OutputStreamWriter outputStreamWriter) throws IOException, XMLStreamException {
-
         Collection<GlyphData> glyphDataCollection = extractGlyphPaths(inputXmlData);
 
+        List<GlyphData> glyphsToSave = glyphDataCollection.stream()
+                .filter(glyphData -> glyphNames.contains(glyphData.getName()))
+                .collect(Collectors.toList());
 
-        // TODO
+        Gson gson = new Gson();
+        Type typeToken = new TypeToken<Collection<GlyphData>>() {
+        }.getType();
+        gson.toJson(glyphsToSave, typeToken, outputStreamWriter);
+    }
 
-//        glyphDataCollection.stream().filter(glyphData -> glyphNames.contains(glyphData.getName()))
-
-
+    private static Document createNewSvgDocument() throws ParserConfigurationException {
+        DocumentBuilder documentBuilder = documentFactoryThreadLocal.get().newDocumentBuilder();
+        return documentBuilder.getDOMImplementation().createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null);
     }
 
 
@@ -274,14 +269,28 @@ public class ReadFonts {
 //            writePathsToSvgFile(outputFilePath, inputStream, "gonvillepart1");
 //        }
 
-        Path outputFilePath = Paths.get("output2.xml");
-        Path fontFilesDirectory = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg");
-        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1);
+//        Path outputFilePath = Paths.get("output2.xml");
+//        Path fontFilesDirectory = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg");
+//        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1);
 
 
 //        Path outputFilePath = Paths.get("glyph_with_bounding_box.xml");
 //        Path svgFontFile = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
 //        writeGlyphWithBoundingBoxToFile("clefs.G", svgFontFile, outputFilePath, 0.1);
+
+
+        Path outputFilePath = Paths.get("output3.json");
+        Path svgFontFile = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
+
+
+        List<String> glyphNames = Arrays.asList("noteheads.s2", "noteheads.s1", "noteheads.s0");
+
+        try (InputStream inputStream = Files.newInputStream(svgFontFile);
+             OutputStream outputStream = Files.newOutputStream(outputFilePath);
+             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream)) {
+            extractGlyphsAsGlyphDataAndSave(glyphNames, inputStream, outputStreamWriter);
+        }
+
 
     }
 
