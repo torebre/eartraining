@@ -1,8 +1,8 @@
 package com.kjipo.font;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.svg.SVGDocument;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -23,7 +23,7 @@ public final class SvgTools {
     }
 
 
-    public static void writeDocumentToFile(SVGDocument svgDocument, Path outputPath) throws IOException, TransformerException {
+    public static void writeDocumentToFile(Document svgDocument, Path outputPath) throws IOException, TransformerException {
         DOMSource source = new DOMSource(svgDocument);
 
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);) {

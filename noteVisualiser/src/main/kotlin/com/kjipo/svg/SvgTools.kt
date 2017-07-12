@@ -1,25 +1,20 @@
 package com.kjipo.svg
 
 import com.kjipo.font.*
-import org.apache.batik.dom.svg.SVGDOMImplementation
+import org.w3c.dom.Element
 import org.w3c.dom.Node
-import org.w3c.dom.svg.SVGDocument
-import org.w3c.dom.svg.SVGSVGElement
 import java.nio.file.Path
 import java.nio.file.Paths
-
+import javax.xml.parsers.DocumentBuilderFactory
 
 
 val verticalNoteSpacing = 12
 
 
 fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath: Path) {
-    val impl = SVGDOMImplementation.getDOMImplementation()
-    val svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI
-    val doc = impl.createDocument(svgNS, "svg", null)
-
-    val svgDocument = doc as SVGDocument
-    val rootElement = svgDocument.rootElement
+    val documentFactory = DocumentBuilderFactory.newInstance()
+    val document = documentFactory.newDocumentBuilder().domImplementation.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null)
+    val rootElement = document.documentElement
 
     var xStart = 100
     val yStart = 400
@@ -36,11 +31,11 @@ fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath
         }
     }
 
-    SvgTools.writeDocumentToFile(svgDocument, outputFilePath)
+    SvgTools.writeDocumentToFile(document, outputFilePath)
 }
 
 
-fun drawBarLines(element: SVGSVGElement, xStart: Int, gLine: Int) {
+fun drawBarLines(element: Element, xStart: Int, gLine: Int) {
     val width = 500
     val spaceBetweenLines = 2 * verticalNoteSpacing
 

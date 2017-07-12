@@ -3,16 +3,21 @@ package com.kjipo.font;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.TransformerException;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,32 +39,31 @@ public class ReadFonts {
         return decimalFormat;
     });
 
+    public static final ThreadLocal<DocumentBuilderFactory> documentFactoryThreadLocal = ThreadLocal.withInitial(DocumentBuilderFactory::newInstance);
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadFonts.class);
 
 
-    private static void writePathsToSvgFile(Path path, InputStream fontData, String inputName) throws XMLStreamException, IOException, TransformerException {
-        DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        Document doc = impl.createDocument(svgNS, "svg", null);
+    private static void writePathsToSvgFile(Path path, InputStream fontData, String inputName) throws XMLStreamException, IOException, TransformerException, ParserConfigurationException {
+        Document doc = documentFactoryThreadLocal.get().newDocumentBuilder().newDocument();
 
-        SVGDocument svgDocument = (SVGDocument) doc;
+//        Document doc = impl.createDocument(svgNS, "svg", null);
         int currentY = 50;
 
-        addElementsToDocument(svgDocument, currentY, inputName, extractGlyphPaths(fontData));
-        SvgTools.writeDocumentToFile(svgDocument, path);
+        addElementsToDocument(doc, currentY, inputName, extractGlyphPaths(fontData));
+        SvgTools.writeDocumentToFile(doc, path);
     }
 
 
-    private static void createDocumentWithAllGlyphs(Path fontFilesDirectory, Path outputFilePath, double scale) throws IOException, TransformerException {
-        DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        Document doc = impl.createDocument(svgNS, "svg", null);
+    private static void createDocumentWithAllGlyphs(Path fontFilesDirectory, Path outputFilePath, double scale) throws IOException, TransformerException, ParserConfigurationException {
+        DocumentBuilder documentBuilder = documentFactoryThreadLocal.get().newDocumentBuilder();
 
-        SVGDocument svgDocument = (SVGDocument) doc;
+//        DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
+//        Document doc = impl.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null);
+        Document doc = documentBuilder.newDocument();
 
         int yIncrement = 200;
-
         AtomicInteger currentY = new AtomicInteger(50);
 
         Files.list(fontFilesDirectory).forEach(path -> {
@@ -68,30 +72,34 @@ public class ReadFonts {
                         .map(glyphData -> PathProcessorKt.scaleGlyph(glyphData, scale))
                         .map(PathProcessorKt::invertYCoordinates)
                         .collect(Collectors.toList());
-                addElementsToDocument(svgDocument, currentY.getAndAdd(yIncrement), path.getFileName().toString(), glyphDataCollection);
+                addElementsToDocument(doc, currentY.getAndAdd(yIncrement), path.getFileName().toString(), glyphDataCollection);
 
             } catch (XMLStreamException | IOException e) {
                 LOGGER.error("Exception when processing path {}", path, e);
             }
         });
 
-        SVGSVGElement rootElement = svgDocument.getRootElement();
+
+//        SVGSVGElement rootElement = svgDocument.getRootElement();
+
+        Element rootElement = doc.getDocumentElement();
+
         rootElement.setAttributeNS(null, "width", "10000");
         rootElement.setAttributeNS(null, "height", String.valueOf(currentY.get()));
 
-        SvgTools.writeDocumentToFile(svgDocument, outputFilePath);
+
+
+        SvgTools.writeDocumentToFile(doc, outputFilePath);
     }
 
-    private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath) throws IOException, TransformerException, XMLStreamException {
+    private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath) throws IOException, TransformerException, XMLStreamException, ParserConfigurationException {
         writeGlyphWithBoundingBoxToFile(glyphName, fontFile, outputFilePath, 1.0);
     }
 
-    private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath, double scale) throws IOException, TransformerException, XMLStreamException {
-        DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        Document doc = impl.createDocument(svgNS, "svg", null);
-
-        SVGDocument svgDocument = (SVGDocument) doc;
+    private static void writeGlyphWithBoundingBoxToFile(String glyphName, Path fontFile, Path outputFilePath, double scale) throws IOException, TransformerException, XMLStreamException, ParserConfigurationException {
+        DocumentBuilder documentBuilder = documentFactoryThreadLocal.get().newDocumentBuilder();
+        Document doc = documentBuilder.newDocument();
+//        Document doc = impl.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null);
 
         AtomicInteger currentY = new AtomicInteger(50);
 
@@ -108,7 +116,7 @@ public class ReadFonts {
                 .findFirst()
                 .ifPresent(glyphData -> {
                     try {
-                        addElementsToDocument(svgDocument, currentY.get(), glyphData.getName(), Collections.singleton(glyphData));
+                        addElementsToDocument(doc, currentY.get(), glyphData.getName(), Collections.singleton(glyphData));
                     } catch (IOException | XMLStreamException e) {
                         // TODO
                         e.printStackTrace();
@@ -116,22 +124,22 @@ public class ReadFonts {
                 });
 
 
-        SVGSVGElement rootElement = svgDocument.getRootElement();
+        Element rootElement = doc.getDocumentElement();
         rootElement.setAttributeNS(null, "width", "10000");
         rootElement.setAttributeNS(null, "height", "5000");
 
-        SvgTools.writeDocumentToFile(svgDocument, outputFilePath);
+        SvgTools.writeDocumentToFile(doc, outputFilePath);
     }
 
 
-    private static void addElementsToDocument(SVGDocument svgDocument, int currentY,
+    private static void addElementsToDocument(Document svgDocument, int currentY,
                                               String inputName, Collection<GlyphData> glyphDataCollection) throws XMLStreamException, IOException {
         Element path1 = svgDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "text");
         path1.setAttribute("x", "0");
         path1.setAttribute("y", String.valueOf(currentY));
         path1.setAttribute("font-size", "55");
 
-        SVGSVGElement rootElement = svgDocument.getRootElement();
+        Element rootElement = svgDocument.getDocumentElement();
         rootElement.appendChild(path1);
         path1.appendChild(svgDocument.createTextNode(inputName));
 
@@ -210,7 +218,7 @@ public class ReadFonts {
                     // TODO Only handling M for now
                     if (pathElement.getCommand() == PathCommand.MOVE_TO_ABSOLUTE) {
                         return new PathElement(PathCommand.MOVE_TO_ABSOLUTE,
-                                Lists.newArrayList(pathElement.getNumbers().get(0) + xOffset,
+                                Arrays.asList(pathElement.getNumbers().get(0) + xOffset,
                                         pathElement.getNumbers().get(1) + yOffset));
                     }
                     return pathElement;

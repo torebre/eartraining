@@ -69,17 +69,17 @@ class Handler extends URLStreamHandler {
     @Override
     protected URLConnection openConnection(URL u) throws IOException {
 
-        System.out.println("Test10: " +u +"\nPath: " +u.getPath());
+        System.out.println("Test10: " + u + "\nPath: " + u.getPath());
 
 
 //        String path = getURL().getPath().startsWith("/") ? getURL().getPath().substring(1) : getURL().getPath();
 //        URL resourceUrl = classLoader.getResource(path);
 
         URL resourceUrl = classLoader.getResource(u.getPath().startsWith("/") ? u.getPath().substring(1) : u.getPath());
-        if(resourceUrl == null)
+        if (resourceUrl == null)
             throw new IOException("Resource not found: " + u);
 
-        System.out.println("Found resource: " +u.getPath());
+        System.out.println("Found resource: " + u.getPath());
 
         return resourceUrl.openConnection();
     }
@@ -105,7 +105,8 @@ class Browser extends Region {
 //                            stage.setTitle(webEngine.getLocation());
 
                             JSObject jsobj = (JSObject) webEngine.executeScript("window");
-                            jsobj.setMember("java", new Bridge());
+                            // TODO
+//                            jsobj.setMember("java", new Bridge());
                             webEngine.executeScript("loadData()");
 
                         }
@@ -136,35 +137,28 @@ class Browser extends Region {
     }
 
 
-
-
-
     private Node createSpacer() {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         return spacer;
     }
 
-    @Override protected void layoutChildren() {
+    @Override
+    protected void layoutChildren() {
         double w = getWidth();
         double h = getHeight();
-        layoutInArea(browser,0,0,w,h,0, HPos.CENTER, VPos.CENTER);
+        layoutInArea(browser, 0, 0, w, h, 0, HPos.CENTER, VPos.CENTER);
     }
 
-    @Override protected double computePrefWidth(double height) {
+    @Override
+    protected double computePrefWidth(double height) {
         return 750;
     }
 
-    @Override protected double computePrefHeight(double width) {
+    @Override
+    protected double computePrefHeight(double width) {
         return 500;
     }
-
-
-
-
-
-
-
 
 
 }

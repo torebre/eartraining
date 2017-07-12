@@ -1,6 +1,5 @@
 package com.kjipo.font;
 
-import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.CharUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ public final class FontProcessingUtilities {
             switch (c) {
 
                 case 'v':
-                    parsedElement = Iterators.getOnlyElement(handleLowercaseV(charStream).entrySet().iterator());
+                    parsedElement = handleLowercaseV(charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
@@ -42,31 +41,31 @@ public final class FontProcessingUtilities {
 //                case 'H':
 //                    absolute = true;
                 case 'h':
-                    parsedElement = Iterators.getOnlyElement(handleLowerCaseH(charStream).entrySet().iterator());
+                    parsedElement = handleLowerCaseH(charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'M':
-                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_ABSOLUTE, charStream).entrySet().iterator());
+                    parsedElement = handleGeneric(PathCommand.MOVE_TO_ABSOLUTE, charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'm':
-                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.MOVE_TO_RELATIVE, charStream).entrySet().iterator());
+                    parsedElement = handleGeneric(PathCommand.MOVE_TO_RELATIVE, charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'l':
-                    parsedElement = Iterators.getOnlyElement(handleLowerCaseL(charStream).entrySet().iterator());
+                    parsedElement = handleLowerCaseL(charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
 
                 case 'c':
-                    parsedElement = Iterators.getOnlyElement(handleLowerCaseC(charStream).entrySet().iterator());
+                    parsedElement = handleLowerCaseC(charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
@@ -78,7 +77,7 @@ public final class FontProcessingUtilities {
                     break;
 
                 case 's':
-                    parsedElement = Iterators.getOnlyElement(handleGeneric(PathCommand.SMOOTH_CURVE_TO_RELATIVE, charStream).entrySet().iterator());
+                    parsedElement = handleGeneric(PathCommand.SMOOTH_CURVE_TO_RELATIVE, charStream).entrySet().iterator().next();
                     c = parsedElement.getKey();
                     pathElements.add(parsedElement.getValue());
                     break;
