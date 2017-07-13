@@ -1,5 +1,8 @@
 package com.kjipo.svg
 
+import com.kjipo.font.GlyphFactory
+import com.kjipo.font.NoteType
+
 
 interface ElementConsumer<out T> {
     fun onNoteAdded(note : NOTE)
@@ -23,9 +26,15 @@ open class ScoreElement(val consumer: ElementConsumer<*>) {
 
 }
 
+fun <T : ScoreElement, R> T.finalize(consumer: ElementConsumer<R>): R {
+    return consumer.build()
+}
 
 class SCORE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
-    fun bar(init: BAR.() -> Unit) = doInit(BAR(consumer), init)
+    fun bar(init: BAR.() -> Unit) {
+        doInit(BAR(consumer), init)
+
+    }
 }
 
 
@@ -42,21 +51,51 @@ class NOTE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 }
 
 
+
+
+
 class ScoreBuilder : ElementConsumer<RenderingSequence> {
+    private val renderingElements = mutableListOf<RenderingElement>()
+    private val points = mutableListOf<Point>()
+
+    var ticksPerQuarterNote = 24
+
+    private var counter = 0
+
+
     override fun onNoteAdded(note: NOTE) {
 
         println("Test20")
 
+        renderingElements.add(translateToRenderingElement(note))
+
+        // TODO
+        points.add(Point(counter, note.pitch))
+
+        counter += note.duration
+
     }
 
-    private val renderingElements = mutableListOf<RenderingElement>()
-    private val points = mutableListOf<Point>()
 
-    fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init)
+    fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init).finalize(this)
 
     override fun build() : RenderingSequence {
         return RenderingSequence(renderingElements, points)
     }
+
+    fun translateToRenderingElement(note: NOTE): RenderingElement {
+
+        // TODO
+
+        val glyph = when {
+            note.duration == 24 -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
+            note.duration == 48 -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
+            else -> GlyphFactory.blankGlyph
+        }
+
+        return RenderingElement(listOf(glyph))
+    }
+
 
 }
 

@@ -37,4 +37,14 @@ public class GlyphData implements PathInterface {
     public BoundingBox getBoundingBox() {
         return boundingBox;
     }
+
+    @Override
+    public String toString() {
+        return "GlyphData{" +
+                "name='" + name + '\'' +
+                ", pathElements=" + pathElements +
+                ", strokeWidth=" + strokeWidth +
+                ", boundingBox=" + boundingBox +
+                '}';
+    }
 }
