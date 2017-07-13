@@ -11,7 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 val verticalNoteSpacing = 12
 
 
-fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath: Path) {
+fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
     val documentFactory = DocumentBuilderFactory.newInstance()
     val document = documentFactory.newDocumentBuilder().domImplementation.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null)
     val rootElement = document.documentElement
@@ -22,9 +22,9 @@ fun writeToFile(temporalElementSequence: TemporalElementSequence, outputFilePath
     // TODO Draw sequence
     drawBarLines(rootElement, xStart, yStart)
 
-    for (i in 0..temporalElementSequence.renderingElements.size - 1) {
-        val renderingElement = temporalElementSequence.renderingElements.get(i)
-        val point = temporalElementSequence.points.get(i)
+    for (i in 0..renderingSequence.renderingElements.size - 1) {
+        val renderingElement = renderingSequence.renderingElements.get(i)
+        val point = renderingSequence.points.get(i)
 
         for (pathInterface in renderingElement.renderingPath) {
             drawGlyph(xStart + point.x, yStart + point.y, pathInterface, rootElement)
@@ -48,15 +48,11 @@ fun drawBarLines(element: Element, xStart: Int, gLine: Int) {
         drawLine(x, y, x + width, y, element, 1)
         y += spaceBetweenLines
     }
-
-
 }
-
 
 fun drawGlyph(x: Int, y: Int, pathInterface: PathInterface, node: Node) {
     SvgTools.addPath(node, transformToPathString(translateGlyph(pathInterface, x, y)), pathInterface.strokeWidth)
 }
-
 
 fun drawLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node, strokeWidth: Int) {
     SvgTools.addLine(xStart, yStart, xEnd, yEnd, node, strokeWidth)
@@ -82,7 +78,7 @@ fun main(args: Array<String>) {
     val point3 = Point(x + 150, y)
     val point4 = Point(x + 200, y)
 
-    val temporalElementSequence = TemporalElementSequence(listOf(
+    val temporalElementSequence = RenderingSequence(listOf(
             RenderingElement(listOf(GlyphFactory.getGlyph("clefs.G"))),
             RenderingElement(listOf(noteHeadS2, addStem(noteHeadS2.boundingBox))),
             RenderingElement(listOf(noteHeadS1, addStem(noteHeadS1.boundingBox))),
@@ -92,7 +88,7 @@ fun main(args: Array<String>) {
 
     val chord = createChord(listOf(Note(60, NoteType.QUARTER_NOTE), Note(62, NoteType.HALF_NOTE)))
     val chord2 = createChord(listOf(Note(62, NoteType.QUARTER_NOTE), Note(64, NoteType.QUARTER_NOTE)))
-    val temporalElementSequence2 = TemporalElementSequence(listOf(chord, chord2,
+    val temporalElementSequence2 = RenderingSequence(listOf(chord, chord2,
             RenderingElement(RenderingElement(listOf(noteHeadS2, addStem(noteHeadS2.boundingBox))),
                     addAdditionalBarLines(Note(56, NoteType.HALF_NOTE)))),
             listOf(point1, point2, point3))
