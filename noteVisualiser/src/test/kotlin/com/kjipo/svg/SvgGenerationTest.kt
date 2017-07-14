@@ -20,6 +20,16 @@ class SvgGenerationTest {
                     duration = 48
                 }
 
+                note {
+                    pitch = 80
+                    duration = 24
+                }
+
+                note {
+                    pitch = 52
+                    duration = 24
+                }
+
             }
 
         }

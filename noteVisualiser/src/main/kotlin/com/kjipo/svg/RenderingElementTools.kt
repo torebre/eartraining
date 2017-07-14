@@ -3,21 +3,21 @@ package com.kjipo.svg
 import com.kjipo.font.*
 
 
-fun createChord(notes: Collection<Note>): RenderingElement {
-    return RenderingElement(notes.map { translateGlyph(GlyphFactory.getGlyph(it.type), 0, (7 - (it.pitch - 60)) * verticalNoteSpacing) })
+fun createChord(notes: Collection<Note>): RenderingElementImpl {
+    return RenderingElementImpl(notes.map { translateGlyph(GlyphFactory.getGlyph(it.type), 0, (7 - (it.pitch - 60)) * DEFAULT_VERTICAL_NOTE_SPACING) })
 }
 
 
 fun calculateVerticalOffset(pitch: Int): Int {
-    return (7 - (pitch - 60)) * verticalNoteSpacing
+    return (7 - (pitch - 60)) * DEFAULT_VERTICAL_NOTE_SPACING
 }
 
-fun addAdditionalBarLines(note: Note): RenderingElement {
+fun addAdditionalBarLines(note: Note): RenderingElementImpl {
     // Assuming G-clef
     val glyph = GlyphFactory.getGlyph(note.type)
 
     // TODO Does not handle C sharp correctly
-    return RenderingElement(generateSequence(60, { it - 2})
+    return RenderingElementImpl(generateSequence(60, { it - 2})
             .takeWhile { it >= note.pitch }
             .map { drawLineSegment(calculateVerticalOffset(it), glyph.boundingBox) }.toList())
 }

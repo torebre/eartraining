@@ -1,6 +1,6 @@
 package com.kjipo.svg
 
-enum class Key {
-    C,
+enum class Clef {
+    G,
     NONE
 }

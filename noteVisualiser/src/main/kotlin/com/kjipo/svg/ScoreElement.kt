@@ -5,7 +5,7 @@ import com.kjipo.font.NoteType
 
 
 interface ElementConsumer<out T> {
-    fun onNoteAdded(note : NOTE)
+    fun onNoteAdded(note: NOTE)
     fun build(): T
 }
 
@@ -33,13 +33,13 @@ fun <T : ScoreElement, R> T.finalize(consumer: ElementConsumer<R>): R {
 class SCORE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
     fun bar(init: BAR.() -> Unit) {
         doInit(BAR(consumer), init)
-
     }
 }
 
 
 class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
-    var key: Key? = null
+    var clef: Clef = Clef.G
+    var key: Key = Key.C
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
 }
@@ -51,14 +51,16 @@ class NOTE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 }
 
 
-
-
-
 class ScoreBuilder : ElementConsumer<RenderingSequence> {
-    private val renderingElements = mutableListOf<RenderingElement>()
-    private val points = mutableListOf<Point>()
+    private val renderingElements = mutableListOf<RenderingElementImpl>()
+    private val internalLocation = mutableListOf<Point>()
 
+
+    var nominator = 4
+    var denominator = 4
     var ticksPerQuarterNote = 24
+
+    var measureWidth = 1000
 
     private var counter = 0
 
@@ -70,20 +72,43 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
         renderingElements.add(translateToRenderingElement(note))
 
         // TODO
-        points.add(Point(counter, note.pitch))
+        internalLocation.add(Point(counter, note.pitch))
 
         counter += note.duration
 
     }
 
 
+    private fun layout(): List<Point> {
+        // TODO Figure out better solution
+        val pixelsPerTick = measureWidth / ticksInMeasure()
+
+        return internalLocation.map { Point(it.x * pixelsPerTick, it.y) }
+
+    }
+
+
+    private fun ticksInMeasure(): Int {
+        return nominator * denominatorInTicks()
+
+
+    }
+
+    private fun denominatorInTicks(): Int {
+        // TODO Is this correct?
+        return nominator.div(4).times(ticksPerQuarterNote)
+    }
+
+
     fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init).finalize(this)
 
-    override fun build() : RenderingSequence {
+    override fun build(): RenderingSequence {
+        val points = layout()
+
         return RenderingSequence(renderingElements, points)
     }
 
-    fun translateToRenderingElement(note: NOTE): RenderingElement {
+    fun translateToRenderingElement(note: NOTE): RenderingElementImpl {
 
         // TODO
 
@@ -93,7 +118,7 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
             else -> GlyphFactory.blankGlyph
         }
 
-        return RenderingElement(listOf(glyph))
+        return RenderingElementImpl(listOf(glyph))
     }
 
 
