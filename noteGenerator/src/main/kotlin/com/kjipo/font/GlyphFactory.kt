@@ -12,7 +12,7 @@ object GlyphFactory {
 
     val scale = 0.1
     //    val glyphResource = "/gonville-r9313/lilyfonts/svg/emmentaler-11.svg"
-    val glyphResource = "/output3.json"
+    val glyphResource = "/glyphs.json"
     val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0.0))
 
 
