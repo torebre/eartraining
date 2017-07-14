@@ -52,8 +52,10 @@ class NOTE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
 
 class ScoreBuilder : ElementConsumer<RenderingSequence> {
-    private val renderingElements = mutableListOf<RenderingElementImpl>()
-    private val internalLocation = mutableListOf<Point>()
+    private val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
+
+//    private val renderingElements = mutableListOf<RenderingElementImpl>()
+//    private val internalLocation = mutableListOf<Point>()
 
 
     var nominator = 4
@@ -66,16 +68,14 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 
 
     override fun onNoteAdded(note: NOTE) {
+        val scoreRenderingElement = ScoreRenderingElement()
+        scoreRenderingElement.notes.add(note)
+        // TODO Set proper location
+        scoreRenderingElement.xPosition = counter
+        scoreRenderingElement.yPosition = note.pitch
 
-        println("Test20")
-
-        renderingElements.add(translateToRenderingElement(note))
-
-        // TODO
-        internalLocation.add(Point(counter, note.pitch))
-
+        scoreRenderingElements.add(scoreRenderingElement)
         counter += note.duration
-
     }
 
 
@@ -83,8 +83,7 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
         // TODO Figure out better solution
         val pixelsPerTick = measureWidth / ticksInMeasure()
 
-        return internalLocation.map { Point(it.x * pixelsPerTick, it.y) }
-
+        return scoreRenderingElements.map { Point(it.xPosition * pixelsPerTick, it.yPosition) }
     }
 
 
@@ -105,20 +104,7 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
     override fun build(): RenderingSequence {
         val points = layout()
 
-        return RenderingSequence(renderingElements, points)
-    }
-
-    fun translateToRenderingElement(note: NOTE): RenderingElementImpl {
-
-        // TODO
-
-        val glyph = when {
-            note.duration == 24 -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
-            note.duration == 48 -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
-            else -> GlyphFactory.blankGlyph
-        }
-
-        return RenderingElementImpl(listOf(glyph))
+        return RenderingSequence(scoreRenderingElements.map { it.toRenderingElement() }, points)
     }
 
 
