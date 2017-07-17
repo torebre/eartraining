@@ -279,11 +279,11 @@ public class ReadFonts {
 //        writeGlyphWithBoundingBoxToFile("clefs.G", svgFontFile, outputFilePath, 0.1);
 
 
-        Path outputFilePath = Paths.get("output3.json");
-        Path svgFontFile = Paths.get("/home/student/workspace/EarTraining/noteGenerator/src/main/resources/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
+        Path outputFilePath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/glyphs.json");
+        Path svgFontFile = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
 
 
-        List<String> glyphNames = Arrays.asList("noteheads.s2", "noteheads.s1", "noteheads.s0");
+        List<String> glyphNames = Arrays.asList("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0");
 
         try (InputStream inputStream = Files.newInputStream(svgFontFile);
              OutputStream outputStream = Files.newOutputStream(outputFilePath);

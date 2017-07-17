@@ -10,6 +10,8 @@ class SvgGenerationTest {
     fun generateSequence() {
         val testScore = createScore().score {
             bar {
+                clef = Clef.G
+
                 note {
                     pitch = 60
                     duration = 24

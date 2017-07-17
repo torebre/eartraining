@@ -1,10 +1,8 @@
 package com.kjipo.svg
 
-import com.kjipo.font.GlyphFactory
-import com.kjipo.font.NoteType
-
 
 interface ElementConsumer<out T> {
+    fun onBarAdded(bar: BAR)
     fun onNoteAdded(note: NOTE)
     fun build(): T
 }
@@ -13,16 +11,15 @@ open class ScoreElement(val consumer: ElementConsumer<*>) {
 
     private val children = mutableListOf<ScoreElement>()
 
-
     protected fun <T : ScoreElement> doInit(child: T, init: T.() -> Unit) {
         child.init()
         children.add(child)
 
         when {
             child is NOTE -> consumer.onNoteAdded(child)
+            child is BAR -> consumer.onBarAdded(child)
         }
     }
-
 
 }
 
@@ -38,7 +35,7 @@ class SCORE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
 
 class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
-    var clef: Clef = Clef.G
+    var clef: Clef? = null
     var key: Key = Key.C
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
@@ -67,12 +64,19 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
     private var counter = 0
 
 
+    override fun onBarAdded(bar: BAR) {
+        // TODO Figure out best way to set the value
+        val clef = bar.clef
+        if (clef != null) {
+            // TODO Set correct position
+            scoreRenderingElements.add(ClefElement(clef, counter, 0))
+        }
+    }
+
     override fun onNoteAdded(note: NOTE) {
-        val scoreRenderingElement = ScoreRenderingElement()
-        scoreRenderingElement.notes.add(note)
         // TODO Set proper location
-        scoreRenderingElement.xPosition = counter
-        scoreRenderingElement.yPosition = note.pitch
+        val scoreRenderingElement = NoteElement(counter, note.pitch)
+        scoreRenderingElement.notes.add(note)
 
         scoreRenderingElements.add(scoreRenderingElement)
         counter += note.duration
@@ -111,6 +115,3 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 }
 
 fun createScore() = ScoreBuilder()
-
-
-
