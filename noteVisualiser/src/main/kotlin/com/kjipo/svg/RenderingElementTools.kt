@@ -4,7 +4,9 @@ import com.kjipo.font.*
 
 
 fun createChord(notes: Collection<Note>): RenderingElementImpl {
-    return RenderingElementImpl(notes.map { translateGlyph(GlyphFactory.getGlyph(it.type), 0, (7 - (it.pitch - 60)) * DEFAULT_VERTICAL_NOTE_SPACING) })
+
+    // TODO Set correct bounding box
+    return RenderingElementImpl(notes.map { translateGlyph(GlyphFactory.getGlyph(it.type), 0, (7 - (it.pitch - 60)) * DEFAULT_VERTICAL_NOTE_SPACING) }, BoundingBox(0.0, 0.0, 0.0, 0.0))
 }
 
 
@@ -17,9 +19,10 @@ fun addAdditionalBarLines(note: Note): RenderingElementImpl {
     val glyph = GlyphFactory.getGlyph(note.type)
 
     // TODO Does not handle C sharp correctly
+    // TODO Set correct bounding box
     return RenderingElementImpl(generateSequence(60, { it - 2})
             .takeWhile { it >= note.pitch }
-            .map { drawLineSegment(calculateVerticalOffset(it), glyph.boundingBox) }.toList())
+            .map { drawLineSegment(calculateVerticalOffset(it), glyph.boundingBox) }.toList(), BoundingBox(0.0, 0.0, 0.0, 0.0))
 }
 
 

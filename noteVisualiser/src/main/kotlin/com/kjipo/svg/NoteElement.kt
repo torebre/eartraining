@@ -8,22 +8,21 @@ class NoteElement(override var xPosition: Int, override var yPosition: Int) : Sc
 
 
     override fun toRenderingElement(): RenderingElement {
-
-        // TODO
-
-        return notes.map {
+        val map = notes.map {
             when {
-                it.duration == 24 -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
-                it.duration == 48 -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
-                else -> GlyphFactory.blankGlyph
+            // TODO Fix duration values. Should not be hardcoded here
+                it.duration == 24 -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE).let { return RenderingElementImpl(listOf(it), it.boundingBox) }
+                it.duration == 48 -> GlyphFactory.getGlyph(NoteType.HALF_NOTE).let { return RenderingElementImpl(listOf(it), it.boundingBox) }
+                else -> GlyphFactory.blankGlyph.let { RenderingElementImpl(listOf(it), it.boundingBox) }
             }
-        }.let { RenderingElementImpl(it) }
+        }
 
+        // TODO Make better solution. Join rendering elements in a better way
+        var finalRenderingElement: RenderingElementImpl = RenderingElementImpl(listOf(GlyphFactory.blankGlyph), GlyphFactory.blankGlyph.boundingBox)
+        for (renderingElementImpl in map) {
+            finalRenderingElement = RenderingElementImpl(finalRenderingElement, renderingElementImpl)
+        }
+        return finalRenderingElement
     }
-
-
-
-
-
 
 }
