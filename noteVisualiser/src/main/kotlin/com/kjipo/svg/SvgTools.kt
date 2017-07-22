@@ -1,13 +1,12 @@
 package com.kjipo.svg
 
-import com.kjipo.font.*
+import com.kjipo.font.PathInterface
+import com.kjipo.font.SvgTools
+import com.kjipo.font.transformToPathString
+import com.kjipo.font.translateGlyph
 import org.w3c.dom.Node
 import java.nio.file.Path
-import java.nio.file.Paths
 import javax.xml.parsers.DocumentBuilderFactory
-
-
-
 
 
 fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
@@ -23,10 +22,9 @@ fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
 
     for (i in 0..renderingSequence.renderingElements.size - 1) {
         val renderingElement = renderingSequence.renderingElements.get(i)
-        val point = renderingSequence.points.get(i)
 
         for (pathInterface in renderingElement.renderingPath) {
-            drawGlyph(xStart + point.x, yStart + point.y, pathInterface, rootElement)
+            drawGlyph(xStart + renderingElement.xPosition, yStart + renderingElement.yPosition, pathInterface, rootElement)
         }
     }
 

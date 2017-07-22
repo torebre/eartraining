@@ -24,9 +24,8 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
         return nominator.div(4).times(TICKS_PER_QUARTER_NOTE)
     }
 
-    fun build(): Pair<List<RenderingElement>, List<Point>> {
-        val points = mutableListOf<Point>()
-        val clefElement = clef?.let { ClefElement(it, 0, 0)}
+    fun build(): List<PositionedRenderingElement> {
+        val clefElement = clef?.let { ClefElement(it, 0, 0) }
 
         clefElement?.let { println(it.toRenderingElement().boundingBox) }
 
@@ -37,13 +36,14 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
         val pixelsPerTick = widthAvailableForTemporalElements / ticksInMeasure()
         val xOffset = totalMeasureWidth - widthAvailableForTemporalElements
 
-        points.addAll(scoreRenderingElements.map { Point(xOffset + it.xPosition * pixelsPerTick, it.yPosition) })
-        clefElement?.let { points.add(0, Point(clefElement.xPosition, clefElement.yPosition)) }
+        val returnList = mutableListOf<PositionedRenderingElement>()
 
-        val returnList: List<RenderingElement> = clefElement?.let { scoreRenderingElements.map { it.toRenderingElement() }.toMutableList()
-                .let { it.add(0, clefElement.toRenderingElement()); it} } ?: scoreRenderingElements.map { it.toRenderingElement() }
+        clefElement?.let { returnList.add(0, clefElement.toRenderingElement()) }
+        scoreRenderingElements.forEach { it.xPosition = xOffset + it.xPosition * pixelsPerTick }
 
-        return Pair(returnList, points.toList())
+        returnList.addAll(scoreRenderingElements.map { it.toRenderingElement() })
+
+        return returnList
     }
 
 }

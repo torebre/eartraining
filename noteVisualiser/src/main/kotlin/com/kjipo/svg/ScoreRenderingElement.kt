@@ -6,5 +6,5 @@ interface ScoreRenderingElement {
     var yPosition: Int
 
 
-    fun toRenderingElement(): RenderingElement
+    fun toRenderingElement(): PositionedRenderingElement
 }

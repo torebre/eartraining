@@ -4,13 +4,16 @@ import com.kjipo.font.BoundingBox
 import com.kjipo.font.GlyphData
 import com.kjipo.font.PathInterface
 
-data class RenderingElementImpl(override val renderingPath: List<PathInterface>, override val boundingBox: BoundingBox) : RenderingElement {
+data class RenderingElementImpl(override val renderingPath: List<PathInterface>, override val boundingBox: BoundingBox) : PositionedRenderingElement {
+    override var xPosition = 0
+    override var yPosition = 0
 
     constructor(glyphData: GlyphData) : this(listOf(glyphData), glyphData.boundingBox)
 
     constructor(renderingElement1: RenderingElementImpl, renderingElement2: RenderingElementImpl) :
             this(renderingElement1.renderingPath.plus(renderingElement2.renderingPath),
                     mergeBoundingBoxes(renderingElement1.boundingBox, renderingElement2.boundingBox))
+
 }
 
 

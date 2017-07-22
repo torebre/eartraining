@@ -31,16 +31,12 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
     override fun build(): RenderingSequence {
         // TODO Possible to use immutable lists here?
         // TODO The position will be wrong when there are multiple bars
-        val renderingElements = mutableListOf<RenderingElement>()
-        val points = mutableListOf<Point>()
+        val renderingElements = mutableListOf<PositionedRenderingElement>()
         bars.forEach {
-            val (renderingElement, point) = it.build()
-            renderingElements.addAll(renderingElement)
-            points.addAll(point)
+            renderingElements.addAll(it.build())
         }
 
-        return RenderingSequence(renderingElements, points)
+        return RenderingSequence(renderingElements)
     }
-
 
 }
