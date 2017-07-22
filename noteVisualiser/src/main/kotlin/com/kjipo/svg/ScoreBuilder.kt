@@ -1,7 +1,5 @@
 package com.kjipo.svg
 
-import tornadofx.*
-
 class ScoreBuilder : ElementConsumer<RenderingSequence> {
     private val currentElements = mutableListOf<ScoreRenderingElement>()
     private val bars = mutableListOf<BAR>()
@@ -15,13 +13,6 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
         bar.scoreRenderingElements.addAll(currentElements)
         currentElements.clear()
         bars.add(bar)
-
-        val clef = bar.clef
-        if (clef != null) {
-            val clefElement = ClefElement(clef, 0, 0)
-            bar.scoreRenderingElements.add(clefElement)
-            bar.widthAvailableForTemporalElements = Math.abs(clefElement.toRenderingElement().boundingBox.xMax.minus(clefElement.toRenderingElement().boundingBox.xMin).toInt())
-        }
     }
 
     override fun onNoteAdded(note: NOTE) {
