@@ -7,9 +7,6 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val pathElements = yPositions.map {
-
-            println("Test23: " +-lineLength.div(2.0) +", " +yPosition.plus(it).toDouble());
-
             listOf(
                     PathElement(
                             PathCommand.MOVE_TO_ABSOLUTE, listOf(-lineLength.div(2.0), yPosition.plus(it).toDouble())),
@@ -18,8 +15,6 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
         }
                 .flatten()
                 .toList()
-
-        println("xPosition: ${xPosition}. yPosition: ${yPosition}")
 
         val yMin = yPositions.min() ?: 0
         val yMax = yPositions.max() ?: yMin

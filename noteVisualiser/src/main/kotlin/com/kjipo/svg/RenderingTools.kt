@@ -5,29 +5,22 @@ import org.w3c.dom.Element
 
 
 fun addExtraBarLines(noteElement: NoteElement): ScoreRenderingElement? {
-    return when(noteElement.getClef()) {
-        // TODO Only handling G-clef for now
+    return when (noteElement.getClef()) {
+    // TODO Only handling G-clef for now
         Clef.G -> addExtraBarLinesForGClef(noteElement)
         else -> null
     }
 }
 
 private fun addExtraBarLinesForGClef(noteElement: NoteElement): ScoreRenderingElement? {
-    // TODO Also need to check above bar
-    if(noteElement.pitch < 61) {
-        // TODO Does not handle sharps and flats correctly
+    getExtraBarlines(noteElement.pitch).let {
+        if (it.isEmpty()) {
+            return null
+        }
         val noteRenderingElement = noteElement.toRenderingElement()
-
-        val yPositions = generateSequence(60, {it - 2})
-                .takeWhile { it >= noteElement.pitch }
-                .map { calculateVerticalOffset(it) }
-                .toList()
-
-        return ExtraBarLinesElement(noteElement.xPosition, 0, yPositions,
+        return ExtraBarLinesElement(noteElement.xPosition, 0, it,
                 noteRenderingElement.boundingBox.xMax.minus(noteRenderingElement.boundingBox.xMin).toInt())
     }
-
-    return null
 }
 
 
@@ -36,8 +29,6 @@ fun addStem(boundingBox: BoundingBox, stemUp: Boolean = true): PathInterface {
     return translateGlyph(PathInterfaceImpl(listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(0.0, yEnd))), 3), boundingBox.xMax.toInt(), 0)
 }
-
-
 
 
 fun drawBarLines(element: Element, xStart: Int, gLine: Int) {
