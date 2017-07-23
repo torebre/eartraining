@@ -1,11 +1,10 @@
 package com.kjipo.svg
 
-import com.kjipo.font.GlyphFactory
-
 class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
     var clef: Clef? = null
     var key: Key = Key.C
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
+    var previousBar: BAR? = null
 
     var totalMeasureWidth = 1000
     var widthAvailableForTemporalElements = totalMeasureWidth
@@ -27,7 +26,7 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
     fun build(): List<PositionedRenderingElement> {
         val clefElement = clef?.let { ClefElement(it, 0, 0) }
 
-        clefElement?.let { println(it.toRenderingElement().boundingBox) }
+//        clefElement?.let { println(it.toRenderingElement().boundingBox) }
 
         widthAvailableForTemporalElements = totalMeasureWidth.minus(clefElement?.
                 let { clefElement.toRenderingElement().boundingBox.xMax.minus(clefElement.toRenderingElement().boundingBox.xMin).toInt() } ?: 0)
@@ -39,9 +38,16 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
         val returnList = mutableListOf<PositionedRenderingElement>()
 
         clefElement?.let { returnList.add(0, clefElement.toRenderingElement()) }
+
+
         scoreRenderingElements.forEach { it.xPosition = xOffset + it.xPosition * pixelsPerTick }
 
         returnList.addAll(scoreRenderingElements.map { it.toRenderingElement() })
+
+        scoreRenderingElements.filter { it is NoteElement }
+                .map { addExtraBarLines(it as NoteElement) }
+                .filterNotNull()
+                .let { returnList.addAll(it.map { it.toRenderingElement() }) }
 
         return returnList
     }

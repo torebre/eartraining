@@ -3,8 +3,9 @@ package com.kjipo.svg
 import com.kjipo.font.GlyphFactory
 import com.kjipo.font.NoteType
 
-class NoteElement(override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
+class NoteElement(val pitch: Int, override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
     val notes = mutableListOf<NOTE>()
+    var bar: BAR? = null
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val map = notes.map {
@@ -28,6 +29,12 @@ class NoteElement(override var xPosition: Int, override var yPosition: Int) : Sc
         finalRenderingElement.yPosition = yPosition
 
         return finalRenderingElement
+    }
+
+    fun getClef(): Clef {
+        // TODO The clef can change withing a bar. This is not handled at present
+        // Defaulting to G
+        return bar?.clef ?: Clef.G
     }
 
 }

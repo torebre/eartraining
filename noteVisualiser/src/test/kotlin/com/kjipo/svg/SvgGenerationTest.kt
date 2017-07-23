@@ -18,7 +18,7 @@ class SvgGenerationTest {
                 }
 
                 note {
-                    pitch = 62
+                    pitch = 67
                     duration = 48
                 }
 
