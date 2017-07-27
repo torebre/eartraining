@@ -1,5 +1,7 @@
 package com.kjipo.svg
 
+import com.kjipo.font.findBoundingBox
+
 class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
     var clef: Clef? = null
     var key: Key = Key.C
@@ -49,7 +51,17 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
                 .filterNotNull()
                 .let { returnList.addAll(it.map { it.toRenderingElement() }) }
 
+        scoreRenderingElements.filter { it is NoteElement }
+                .map { createStemElement(it as NoteElement) }
+                .let { returnList.addAll(it) }
+
         return returnList
     }
 
+}
+
+private fun createStemElement(noteElement: NoteElement): StemElement {
+    // TODO Need to determine stem direction, and whether the note should have a stem
+    val stem = addStem(noteElement.toRenderingElement().boundingBox)
+    return StemElement(noteElement.xPosition, noteElement.yPosition, listOf(stem), findBoundingBox(stem.pathElements))
 }
