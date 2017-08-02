@@ -165,56 +165,49 @@ public final class FontProcessingUtilities {
 
 
     private static Map<Integer, PathElement> handleLowerCaseC(InputStream charStream) throws IOException {
-        int c;
+        int c = -1;
         List<Character> number = new ArrayList<>();
         List<Double> numbers = new ArrayList<>();
 
         do {
-            c = readNumber(charStream, number);
-            if (number.isEmpty()) {
+            Pair pair = new Pair(-1, false);
+            for(int i = 0; i < 6; ++i) {
+                pair = processNumber(charStream, number, numbers);
+                c = pair.c;
+                if(pair.shouldBreak) {
+                    break;
+                }
+            }
+            if(pair.shouldBreak) {
                 break;
             }
-            numbers.add(parseNumber(number));
-            number.clear();
-
-            c = readNumber(charStream, number);
-            if (number.isEmpty()) {
-                break;
-            }
-            numbers.add(parseNumber(number));
-            number.clear();
-
-            c = readNumber(charStream, number);
-            if (number.isEmpty()) {
-                break;
-            }
-            numbers.add(parseNumber(number));
-            number.clear();
-
-            c = readNumber(charStream, number);
-            if (number.isEmpty()) {
-                break;
-            }
-            numbers.add(parseNumber(number));
-            number.clear();
-
-            c = readNumber(charStream, number);
-            if (number.isEmpty()) {
-                break;
-            }
-            numbers.add(parseNumber(number));
-            number.clear();
-
-            c = readNumber(charStream, number);
-            if (number.isEmpty()) {
-                break;
-            }
-            numbers.add(parseNumber(number));
-            number.clear();
         }
         while (!CharUtils.isAsciiAlpha((char) c));
 
+        LOGGER.info("Numbers: {}", numbers);
+
         return Collections.singletonMap(c, new PathElement(PathCommand.CURVE_TO_RELATIVE, numbers));
+    }
+
+
+    private static class Pair {
+        private final int c;
+        private final boolean shouldBreak;
+
+        private Pair(int c, boolean shouldBreak) {
+            this.c = c;
+            this.shouldBreak = shouldBreak;
+        }
+    }
+
+    private static Pair processNumber(InputStream charStream, List<Character> number, List<Double> numbers) throws IOException {
+        int c = readNumber(charStream, number);
+        if (number.isEmpty()) {
+            return new Pair(c, true);
+        }
+        numbers.add(parseNumber(number));
+        number.clear();
+        return new Pair(c, false);
     }
 
 
@@ -222,7 +215,7 @@ public final class FontProcessingUtilities {
         char temp[] = new char[number.size()];
         int i = 0;
         for (Character character : number) {
-            temp[i++] = character.charValue();
+            temp[i++] = character;
         }
         return Double.valueOf(String.valueOf(temp));
     }
@@ -236,7 +229,7 @@ public final class FontProcessingUtilities {
                 c == 'e' ||
                 c == '-' ||
                 c == '.') {
-            number.add(new Character(c));
+            number.add(c);
             c = (char) input.read();
         }
         return c;

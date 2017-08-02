@@ -149,6 +149,9 @@ fun processCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePai
 
     // TODO This will cause duplicate points
 //    inputPoints.add(startCoordinate)
+
+    println("Numbers: ${numbers}")
+
     for (i in 0..numbers.size - 1 step 2) {
         inputPoints.add(CoordinatePair(numbers.get(i) + startCoordinate.x, numbers.get(i + 1) + startCoordinate.y))
     }
