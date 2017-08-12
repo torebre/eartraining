@@ -62,9 +62,13 @@ public class ReadFonts {
         Document doc = createNewSvgDocument();
 
         Files.list(fontFilesDirectory).forEach(path -> {
+            LOGGER.info("Processing: {}", path);
             try (InputStream inputStream = new FileInputStream(path.toFile())) {
                 Collection<GlyphData> glyphDataCollection = extractGlyphPaths(inputStream).stream()
-                        .map(glyphData -> PathProcessorKt.scaleGlyph(glyphData, scale))
+                        .map(glyphData -> {
+                            LOGGER.info("Path: {}. Processing glyph: {}", path, glyphData.getName());
+                            return PathProcessorKt.scaleGlyph(glyphData, scale);
+                        })
                         .map(PathProcessorKt::invertYCoordinates)
                         .collect(Collectors.toList());
                 addElementsToDocument(doc, currentY.getAndAdd(yIncrement), path.getFileName().toString(), glyphDataCollection);
@@ -154,7 +158,7 @@ public class ReadFonts {
     }
 
 
-    public static Collection<GlyphData> extractGlyphPaths(InputStream fontData) throws XMLStreamException, IOException {
+    private static Collection<GlyphData> extractGlyphPaths(InputStream fontData) throws XMLStreamException {
         XMLInputFactory inputFactory = XMLInputFactory.newFactory();
         XMLStreamReader xmlEventReader = inputFactory.createXMLStreamReader(fontData, StandardCharsets.UTF_8.name());
         Collection<GlyphData> glyphDataCollection = new ArrayList<>();
@@ -171,7 +175,9 @@ public class ReadFonts {
             if (localName.equals(GLYPH)) {
                 String glyphName = xmlEventReader.getAttributeValue("", "glyph-name");
 
-                LOGGER.info("Processing glyph: " + glyphName);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Processing glyph: " + glyphName);
+                }
 
                 String pathAttribute = xmlEventReader.getAttributeValue("", "d");
 
@@ -180,8 +186,13 @@ public class ReadFonts {
                     continue;
                 }
 
-                List<PathElement> pathElements = FontProcessingUtilities.parsePathData(pathAttribute);
-                glyphDataCollection.add(new GlyphData(glyphName, pathElements, PathProcessorKt.findBoundingBox(pathElements)));
+                try {
+                    List<PathElement> pathElements = FontProcessingUtilities.parsePathData(pathAttribute);
+                    glyphDataCollection.add(new GlyphData(glyphName, pathElements, PathProcessorKt.findBoundingBox(pathElements)));
+                } catch (RuntimeException | IOException e) {
+                    LOGGER.error("Exception when processing glyph: {}", glyphName, e);
+                }
+
             }
         }
 

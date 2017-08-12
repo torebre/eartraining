@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,15 +22,20 @@ public final class FontProcessingUtilities {
 
 
     static List<PathElement> parsePathData(String pathData) throws IOException {
-        LOGGER.info("Processing {}", pathData);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Processing {}", pathData);
+        }
 
         ByteArrayInputStream charStream = new ByteArrayInputStream(pathData.getBytes());
         List<PathElement> pathElements = new ArrayList<>();
 
         int c = charStream.read();
         Map.Entry<Integer, PathElement> parsedElement;
+        StringBuilder stringBuilder = new StringBuilder();
 
         while (c != -1) {
+            stringBuilder.append((char)c);
+
             switch (c) {
 
                 case 'v':
@@ -82,9 +88,14 @@ public final class FontProcessingUtilities {
                     pathElements.add(parsedElement.getValue());
                     break;
 
+                case ' ':
+                    // Blank space between commands
+                    c = charStream.read();
+                    break;
+
                 default:
 
-                    LOGGER.error("Hit default: {}", (char) c);
+                    LOGGER.error("Hit default: {}. Characters read: {}", (char) c, stringBuilder);
 
 //                    stringBuilder.append((char) c).append(" ");
                     c = charStream.read();
@@ -171,20 +182,22 @@ public final class FontProcessingUtilities {
 
         do {
             Pair pair = new Pair(-1, false);
-            for(int i = 0; i < 6; ++i) {
+            for (int i = 0; i < 6; ++i) {
                 pair = processNumber(charStream, number, numbers);
                 c = pair.c;
-                if(pair.shouldBreak) {
+                if (pair.shouldBreak) {
                     break;
                 }
             }
-            if(pair.shouldBreak) {
+            if (pair.shouldBreak) {
                 break;
             }
         }
         while (!CharUtils.isAsciiAlpha((char) c));
 
-        LOGGER.info("Numbers: {}", numbers);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Numbers: {}", numbers);
+        }
 
         return Collections.singletonMap(c, new PathElement(PathCommand.CURVE_TO_RELATIVE, numbers));
     }
