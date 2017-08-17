@@ -34,12 +34,18 @@ public final class SvgTools {
         }
     }
 
-
     public static void addPath(Node node, String path, int strokeWidth) {
+        addPath(node, path, strokeWidth, null);
+    }
+
+    public static void addPath(Node node, String path, int strokeWidth, Integer id) {
         Element path1 = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "path");
         path1.setAttribute("d", path);
         path1.setAttribute("stroke", "blue");
         path1.setAttribute("fill", "yellow");
+        if (id != null) {
+            path1.setAttribute("id", String.valueOf(id));
+        }
 
         path1.setAttribute("stroke-width", String.valueOf(strokeWidth));
 

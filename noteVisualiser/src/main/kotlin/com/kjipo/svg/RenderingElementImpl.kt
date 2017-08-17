@@ -4,7 +4,9 @@ import com.kjipo.font.BoundingBox
 import com.kjipo.font.GlyphData
 import com.kjipo.font.PathInterface
 
-data class RenderingElementImpl(override val renderingPath: List<PathInterface>, override val boundingBox: BoundingBox) : PositionedRenderingElement {
+data class RenderingElementImpl(override val renderingPath: List<PathInterface>,
+                                override val boundingBox: BoundingBox) : PositionedRenderingElement {
+    override var id = -1
     override var xPosition = 0
     override var yPosition = 0
 

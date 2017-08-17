@@ -39,16 +39,16 @@ public class TestWebView extends Application {
     }
 
     public static void main(String[] args) {
-//        URL.setURLStreamHandlerFactory(protocol -> {
-//
-//            System.out.println("Test20: " +protocol);
-//
-//            if (protocol.equals("classpath")) {
-//                return new Handler();
-//            } else {
-//                return null;
-//            }
-//        });
+        URL.setURLStreamHandlerFactory(protocol -> {
+
+            System.out.println("Test20: " +protocol);
+
+            if (protocol.equals("classpath")) {
+                return new Handler();
+            } else {
+                return null;
+            }
+        });
 
         launch(args);
 

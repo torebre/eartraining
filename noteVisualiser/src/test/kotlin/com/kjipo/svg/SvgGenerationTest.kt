@@ -39,13 +39,14 @@ class SvgGenerationTest {
 
         println(testScore.renderingElements)
 
+        var idCounter = 0
+        testScore.renderingElements.forEach { it.id = idCounter++}
 
-        val path = Paths.get("/home/student/test_output3.xml")
+//        val path = Paths.get("/home/student/test_output3.xml")
+//        writeToFile(testScore, path)
 
-//    writeToFile(temporalElementSequence, path)
-
-        writeToFile(testScore, path)
-
+        val htmlPath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/test_output3.html")
+        writeToHtmlFile(testScore, htmlPath)
 
     }
 
