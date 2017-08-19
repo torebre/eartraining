@@ -3,7 +3,6 @@ package com.kjipo.svg
 import com.kjipo.font.SvgTools
 import com.kjipo.font.transformToPathString
 import com.kjipo.font.translateGlyph
-import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.nio.file.Path
@@ -13,16 +12,19 @@ val HTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
 
 fun writeToHtmlFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
     val documentFactory = DocumentBuilderFactory.newInstance()
+
     val document = documentFactory.newDocumentBuilder().domImplementation.createDocument(HTML_NAMESPACE, "html", null)
     val rootElement = document.documentElement
 
     val headElement = document.createElementNS(HTML_NAMESPACE, "head")
     rootElement.appendChild(headElement)
 
-//    val scriptElement = document.createElementNS(HTML_NAMESPACE, "script")
-//    scriptElement.setAttribute("src", "jquery.js")
-//    scriptElement.setAttribute("type", "text/javascript")
-//    headElement.appendChild(scriptElement)
+
+    val scriptElement = document.createElementNS(HTML_NAMESPACE, "script")
+
+    // TODO Figure out why this has to be loaded when the page is loaded in order work
+    scriptElement.setAttribute("src", "snap.svg-min.js")
+    headElement.appendChild(scriptElement)
 
     val bodyElement = document.createElementNS(HTML_NAMESPACE, "body")
     rootElement.appendChild(bodyElement)
@@ -30,6 +32,7 @@ fun writeToHtmlFile(renderingSequence: RenderingSequence, outputFilePath: Path) 
     val svgElement = document.createElementNS(SvgTools.SVG_NAMESPACE_URI, "svg")
     svgElement.setAttribute("width", "30cm")
     svgElement.setAttribute("height", "30cm")
+    svgElement.setAttribute("id", "score")
     bodyElement.appendChild(svgElement)
 
     generateSvgData(renderingSequence, svgElement)

@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -30,6 +31,10 @@ public final class SvgTools {
             StreamResult result = new StreamResult(bufferedWriter);
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+            // Set output to be HTML. If this is not set it causes
+            // empty tags to appear, which causes problems when used
+            // with the webview-component
+            transformer.setOutputProperty(OutputKeys.METHOD, "html");
             transformer.transform(source, result);
         }
     }
@@ -44,7 +49,7 @@ public final class SvgTools {
         path1.setAttribute("stroke", "blue");
         path1.setAttribute("fill", "yellow");
         if (id != null) {
-            path1.setAttribute("id", String.valueOf(id));
+            path1.setAttribute("id", "note" +String.valueOf(id));
         }
 
         path1.setAttribute("stroke-width", String.valueOf(strokeWidth));

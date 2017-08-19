@@ -1,7 +1,6 @@
 package com.kjipo.svg
 
 import javafx.application.Application
-import javafx.stage.Stage
 import tornadofx.*
 import java.net.URL
 import java.net.URLStreamHandler

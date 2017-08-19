@@ -15,14 +15,20 @@ class NoteElement(val pitch: Int, override var xPosition: Int, override var yPos
                         .let { RenderingElementImpl(listOf(it), it.boundingBox) }
                 it.duration == 48 -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
                         .let { RenderingElementImpl(listOf(it), it.boundingBox) }
-                else -> GlyphFactory.blankGlyph.let { RenderingElementImpl(listOf(it), it.boundingBox) }
+                else -> throw IllegalArgumentException("Unhandled duration: ${it.duration}")
             }
         }
 
         // TODO Make better solution. Join rendering elements in a better way
-        var finalRenderingElement: RenderingElementImpl = RenderingElementImpl(listOf(GlyphFactory.blankGlyph), GlyphFactory.blankGlyph.boundingBox)
-        for (renderingElementImpl in map) {
-            finalRenderingElement = RenderingElementImpl(finalRenderingElement, renderingElementImpl)
+        var finalRenderingElement: RenderingElementImpl
+        if(map.size != 1) {
+            finalRenderingElement = RenderingElementImpl(listOf(GlyphFactory.blankGlyph), GlyphFactory.blankGlyph.boundingBox)
+            for (renderingElementImpl in map) {
+                finalRenderingElement = RenderingElementImpl(finalRenderingElement, renderingElementImpl)
+            }
+        }
+        else {
+            finalRenderingElement = map[0]
         }
 
         finalRenderingElement.xPosition = xPosition

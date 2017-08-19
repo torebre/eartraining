@@ -1,12 +1,8 @@
 package com.kjipo.svg
 
-import com.kjipo.font.SvgTools
 import javafx.application.Platform
-import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.concurrent.Worker
-import javafx.scene.layout.Border
-import javafx.scene.layout.BorderStroke
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.web.WebView
@@ -18,8 +14,6 @@ import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLConnection
 import java.net.URLStreamHandler
-import java.nio.file.Paths
-import javax.xml.parsers.DocumentBuilderFactory
 
 
 class NoteView : View("Note view") {
@@ -46,31 +40,25 @@ class NoteView : View("Note view") {
 
     fun setFill(id: Int) {
         Platform.runLater {
-
-
-            //            val script = """$("#${id}").attr("fill", "red");"""
-
-//            val script = """$("path").find("*").attr("fill", "red");"""
-
-//            val script = """$("body").css("border", "9px solid red");"""
-
-//   val script = """$($.parseHTML("<h1>This is a test</h1>")).appendTo("BODY");
-            val script =
-                    """
-            console.log("Test20");
-$("html").find("*").each(function(index) {
-console.log("Index: " +index +". This: " +this);
+            val script2 = """
+                var s2 = Snap(1000, 1000);
+// Lets create big circle in the middle:
+var bigCircle = s2.circle(10, 10, 1000);
+bigCircle.attr({
+    fill: "#bada55",
+    stroke: "#000",
+    strokeWidth: 5
 });
-"""
 
-            println("Setting fill: " + script)
+                var s = Snap.select("#note1");
+//                console.log("path: " +s);
+              s.attr({
+                fill: "red"
+                });
 
-            webView.webEngine.executeScript(script)
+                """
 
-            val path = Paths.get("webview_contents.html")
-            SvgTools.writeDocumentToFile(webView.webEngine.document, path)
-
-
+            webView.webEngine.executeScript(script2)
         }
     }
 
@@ -104,20 +92,21 @@ class WebViewTest : Region() {
 
         LOGGER.info("Loading class")
 
-        webEngine.load("classpath:///test_output3.html")
+//        loadAndExecuteResource("/snap.svg-min.js")
 
-        val jqueryCode = StringBuilder()
-        javaClass.getResourceAsStream("/jquery.js").use {
-            InputStreamReader(it).useLines {
-                it.forEach { jqueryCode.append(it).append("\n") }
-            }
-        }
 
-        webEngine.executeScript(jqueryCode.toString())
+//        loadAndExecuteResource("/jquery.js")
+//        loadAndExecuteResource("/jquery.svg.min.js")
+//        loadAndExecuteResource("/jquery.svgdom.min.js")
+
+
 
         webEngine.loadWorker.stateProperty().addListener({
             observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
             run {
+
+                LOGGER.info("Test23. Setting logger")
+
                 val window = webEngine.executeScript("window") as JSObject
                 val bridge = JavaBridge()
 
@@ -128,6 +117,28 @@ java.log(message);
 """)
             }
         })
+
+        webEngine.load("classpath:///test_output3.html")
+
+
+//        val window = webEngine.executeScript("window") as JSObject
+//        val bridge = JavaBridge()
+//        window.setMember("java", bridge)
+//        webEngine.executeScript("""console.log = function(message) {
+//java.log(message);
+//}
+//""")
+    }
+
+
+    private fun loadAndExecuteResource(resourcePath: String) {
+        val jqueryCode = StringBuilder()
+        javaClass.getResourceAsStream(resourcePath).use {
+            InputStreamReader(it).useLines {
+                it.forEach { jqueryCode.append(it).append("\n") }
+            }
+        }
+        webEngine.executeScript(jqueryCode.toString())
     }
 
 }
