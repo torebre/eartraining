@@ -1,10 +1,8 @@
 package com.kjipo.svg
 
-import javafx.application.Platform
 import javafx.beans.value.ObservableValue
 import javafx.concurrent.Worker
 import javafx.scene.layout.Region
-import javafx.scene.paint.Color
 import javafx.scene.web.WebView
 import netscape.javascript.JSObject
 import org.slf4j.LoggerFactory
@@ -16,52 +14,34 @@ import java.net.URLConnection
 import java.net.URLStreamHandler
 
 
-class NoteView : View("Note view") {
-    val webView = WebViewTest()
-
-    companion object {
-        lateinit var instance: NoteView
-    }
+class NoteView : View("Note view"), ScoreControllerListener {
+    val scoreController: ScoreController by inject()
+    val webView: WebViewTest = WebViewTest()
 
     init {
-        instance = this
+        scoreController.addListener(this)
+    }
+
+    override fun load(renderingSequence: RenderingSequence) {
+        webView.webEngine.loadContent(createHtmlDocumentString(renderingSequence))
     }
 
     override val root = stackpane {
         webView.style(true, {
             minWidth = Dimension(100.0, Dimension.LinearUnits.px)
             minHeight = Dimension(100.0, Dimension.LinearUnits.px)
-            borderColor += box(top = Color.RED, bottom = Color.GREEN, left = Color.YELLOW, right = Color.BLUE)
         })
-
 
         add(webView)
     }
 
-    fun setFill(id: Int) {
-        Platform.runLater {
-            val script2 = """
-                var s2 = Snap(1000, 1000);
-// Lets create big circle in the middle:
-var bigCircle = s2.circle(10, 10, 1000);
-bigCircle.attr({
-    fill: "#bada55",
-    stroke: "#000",
-    strokeWidth: 5
-});
-
-                var s = Snap.select("#note1");
-//                console.log("path: " +s);
-              s.attr({
-                fill: "red"
-                });
-
-                """
-
-            webView.webEngine.executeScript(script2)
-        }
+    override fun noteOn(noteId: Int) {
+        webView.webEngine.executeScript("noteOn(\"note$noteId\");")
     }
 
+    override fun noteOff(noteId: Int) {
+        webView.webEngine.executeScript("noteOff(\"note$noteId\");")
+    }
 
 }
 
@@ -89,45 +69,28 @@ class WebViewTest : Region() {
 
         webEngine.isJavaScriptEnabled = true
 
-
         LOGGER.info("Loading class")
 
-//        loadAndExecuteResource("/snap.svg-min.js")
-
-
-//        loadAndExecuteResource("/jquery.js")
-//        loadAndExecuteResource("/jquery.svg.min.js")
-//        loadAndExecuteResource("/jquery.svgdom.min.js")
-
-
-
-        webEngine.loadWorker.stateProperty().addListener({
-            observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
+        webEngine.loadWorker.stateProperty().addListener({ observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
             run {
 
-                LOGGER.info("Test23. Setting logger")
+                if (state1 == Worker.State.SUCCEEDED) {
+                    LOGGER.info("Test23. Setting logger")
 
-                val window = webEngine.executeScript("window") as JSObject
-                val bridge = JavaBridge()
+                    val window = webEngine.executeScript("window") as JSObject
+                    val bridge = JavaBridge()
 
-                window.setMember("java", bridge)
-                webEngine.executeScript("""console.log = function(message) {
+                    window.setMember("java", bridge)
+                    webEngine.executeScript("""console.log = function(message) {
 java.log(message);
 }
 """)
+                    loadAndExecuteResource("/snap.svg-min.js")
+                    loadAndExecuteResource("/js/score_functions.js")
+                }
             }
         })
 
-        webEngine.load("classpath:///test_output3.html")
-
-
-//        val window = webEngine.executeScript("window") as JSObject
-//        val bridge = JavaBridge()
-//        window.setMember("java", bridge)
-//        webEngine.executeScript("""console.log = function(message) {
-//java.log(message);
-//}
-//""")
     }
 
 
@@ -153,10 +116,11 @@ class Handler : URLStreamHandler() {
         val resource = if (url.getPath().startsWith("/")) url.getPath().substring(1) else url.getPath() ?: throw IOException("Resource not found: " + url)
         val resourceUrl = classLoader.getResource(resource)
 
-        LOGGER.info("Found resource: {}. Resource URL: {}", url.getPath(), resourceUrl)
+        if (LOGGER.isDebugEnabled) {
+            LOGGER.debug("Found resource: {}. Resource URL: {}", url.getPath(), resourceUrl)
+        }
 
         return resourceUrl.openConnection()
     }
-
 
 }

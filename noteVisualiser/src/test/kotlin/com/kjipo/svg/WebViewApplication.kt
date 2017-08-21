@@ -3,8 +3,6 @@ package com.kjipo.svg
 import javafx.application.Application
 import tornadofx.*
 import java.net.URL
-import java.net.URLStreamHandler
-import java.net.URLStreamHandlerFactory
 
 
 class WebViewApplication : App() {
@@ -13,28 +11,22 @@ class WebViewApplication : App() {
 }
 
 
-fun main(args: Array<String>) {
-    URL.setURLStreamHandlerFactory(object : URLStreamHandlerFactory {
-        override fun createURLStreamHandler(protocol: String?): URLStreamHandler? {
-            if (protocol.equals("classpath")) {
-                return Handler()
-            } else {
-                return null
-            }
+fun startApplication() {
+    URL.setURLStreamHandlerFactory { protocol ->
+        if (protocol.equals("classpath")) {
+            Handler()
+        } else {
+            null
         }
-    })
-
-    val testThread = Thread {
-        Thread.sleep(5000)
-        println("Setting fill")
-        NoteView.instance.setFill(1)
     }
+    val startThread = Thread {
+        Application.launch(WebViewApplication::class.java, *emptyArray())
+    }
+    startThread.start()
+}
 
-    testThread.start()
 
-    Application.launch(WebViewApplication::class.java, *args)
-
-
-
+fun main(args: Array<String>) {
+    startApplication()
 }
 

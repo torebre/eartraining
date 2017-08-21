@@ -3,14 +3,41 @@ package com.kjipo.svg
 import com.kjipo.font.SvgTools
 import com.kjipo.font.transformToPathString
 import com.kjipo.font.translateGlyph
+import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import java.io.StringWriter
 import java.nio.file.Path
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 val HTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
 
 fun writeToHtmlFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
+    val document = createHtmlDocument(renderingSequence)
+    SvgTools.writeDocumentToFile(document, outputFilePath)
+}
+
+fun createHtmlDocumentString(renderingSequence: RenderingSequence): String {
+    val source = DOMSource(createHtmlDocument(renderingSequence))
+
+    val stringWriter = StringWriter()
+    val result = StreamResult(stringWriter)
+    val transformerFactory = TransformerFactory.newInstance()
+    val transformer = transformerFactory.newTransformer()
+    // Set output to be HTML. If this is not set it causes
+    // empty tags to appear, which causes problems when used
+    // with the webview-component
+    transformer.setOutputProperty(OutputKeys.METHOD, "html")
+    transformer.transform(source, result)
+
+    return stringWriter.toString()
+}
+
+fun createHtmlDocument(renderingSequence: RenderingSequence): Document {
     val documentFactory = DocumentBuilderFactory.newInstance()
 
     val document = documentFactory.newDocumentBuilder().domImplementation.createDocument(HTML_NAMESPACE, "html", null)
@@ -18,13 +45,6 @@ fun writeToHtmlFile(renderingSequence: RenderingSequence, outputFilePath: Path) 
 
     val headElement = document.createElementNS(HTML_NAMESPACE, "head")
     rootElement.appendChild(headElement)
-
-
-    val scriptElement = document.createElementNS(HTML_NAMESPACE, "script")
-
-    // TODO Figure out why this has to be loaded when the page is loaded in order work
-    scriptElement.setAttribute("src", "snap.svg-min.js")
-    headElement.appendChild(scriptElement)
 
     val bodyElement = document.createElementNS(HTML_NAMESPACE, "body")
     rootElement.appendChild(bodyElement)
@@ -36,8 +56,10 @@ fun writeToHtmlFile(renderingSequence: RenderingSequence, outputFilePath: Path) 
     bodyElement.appendChild(svgElement)
 
     generateSvgData(renderingSequence, svgElement)
-    SvgTools.writeDocumentToFile(document, outputFilePath)
+
+    return document
 }
+
 
 fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
     val documentFactory = DocumentBuilderFactory.newInstance()
