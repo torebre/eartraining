@@ -1,5 +1,6 @@
-package com.kjipo.svg
+package com.kjipo.viewer
 
+import com.kjipo.svg.RenderingSequence
 import tornadofx.*
 
 
@@ -8,9 +9,9 @@ class ScoreController : Controller() {
 
     fun fireLoadScore(renderingSequence: RenderingSequence) = listeners.forEach({ it.load(renderingSequence) })
 
-    fun fireNoteOn(noteId: Int) = listeners.forEach({it.noteOn(noteId)})
+    fun fireNoteOn(noteId: Int) = listeners.forEach({ it.noteOn(noteId) })
 
-    fun fireNoteOff(noteId: Int) = listeners.forEach({it.noteOff(noteId)})
+    fun fireNoteOff(noteId: Int) = listeners.forEach({ it.noteOff(noteId) })
 
     fun addListener(listener: ScoreControllerListener) = listeners.add(listener)
 
@@ -24,6 +25,5 @@ interface ScoreControllerListener {
     fun noteOn(noteId: Int)
 
     fun noteOff(noteId: Int)
-
 
 }

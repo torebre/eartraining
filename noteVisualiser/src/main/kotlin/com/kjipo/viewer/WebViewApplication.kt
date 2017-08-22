@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.viewer
 
 import javafx.application.Application
 import tornadofx.*

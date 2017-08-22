@@ -1,5 +1,7 @@
 package com.kjipo.svg
 
+import com.kjipo.viewer.ScoreController
+import com.kjipo.viewer.startApplication
 import tornadofx.*
 
 
@@ -26,6 +28,20 @@ fun generateSequence() {
             note {
                 pitch = 52
                 duration = 24
+            }
+
+        }
+
+        // TODO Support multiple bars
+        bar {
+            note {
+                pitch = 60
+                duration = 24
+            }
+
+            note {
+                pitch = 67
+                duration = 48
             }
 
         }
