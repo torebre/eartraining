@@ -21,8 +21,7 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 
     override fun onNoteAdded(note: NOTE) {
         // TODO Set proper location
-        val scoreRenderingElement = NoteElement(note.pitch, counter, calculateVerticalOffset(note.pitch))
-        scoreRenderingElement.notes.add(note)
+        val scoreRenderingElement = NoteElement(note.pitch, note.duration, counter, calculateVerticalOffset(note.pitch), note.beamGroup)
 
         currentElements.add(scoreRenderingElement)
         // TODO Set correct counter value that takes into account multiple measures

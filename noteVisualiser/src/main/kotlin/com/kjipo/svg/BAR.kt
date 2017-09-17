@@ -13,6 +13,7 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
     var nominator = 4
     var denominator = 4
+    var tieGroup: Int = 0
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
 
@@ -63,5 +64,7 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 private fun createStemElement(noteElement: NoteElement): StemElement {
     // TODO Need to determine stem direction, and whether the note should have a stem
     val stem = addStem(noteElement.toRenderingElement().boundingBox)
-    return StemElement(noteElement.xPosition, noteElement.yPosition, listOf(stem), findBoundingBox(stem.pathElements))
+    val stemElement = StemElement(noteElement.xPosition, noteElement.yPosition, listOf(stem), findBoundingBox(stem.pathElements))
+    noteElement.stemElement = stemElement
+    return stemElement
 }

@@ -5,16 +5,36 @@ import com.kjipo.font.GlyphData
 import com.kjipo.font.PathInterface
 
 data class RenderingElementImpl(override val renderingPath: List<PathInterface>,
-                                override val boundingBox: BoundingBox) : PositionedRenderingElement {
+                                override val boundingBox: BoundingBox,
+                                val beamGroup: Int = 0) : PositionedRenderingElement {
     override var id = -1
     override var xPosition = 0
     override var yPosition = 0
 
     constructor(glyphData: GlyphData) : this(listOf(glyphData), glyphData.boundingBox)
 
-    constructor(renderingElement1: RenderingElementImpl, renderingElement2: RenderingElementImpl) :
-            this(renderingElement1.renderingPath.plus(renderingElement2.renderingPath),
-                    mergeBoundingBoxes(renderingElement1.boundingBox, renderingElement2.boundingBox))
+}
+
+interface Stemable {
+    val beamGroup: Int
+
+}
+
+class MultiNoteRenderingElement() : PositionedRenderingElement, Stemable {
+    override var id = -1
+    override var xPosition = 0
+    override var yPosition = 0
+
+    override val renderingPath: List<PathInterface>
+
+    init {
+        renderingPath = emptyList()
+
+
+
+
+    }
+
 
 }
 

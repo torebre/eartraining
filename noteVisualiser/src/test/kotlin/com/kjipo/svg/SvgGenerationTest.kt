@@ -13,16 +13,18 @@ fun generateSequence() {
             note {
                 pitch = 60
                 duration = 24
+                beamGroup = 1
             }
 
             note {
                 pitch = 67
-                duration = 48
+                duration = 24
+                beamGroup = 1
             }
 
             note {
                 pitch = 80
-                duration = 24
+                duration = 48
             }
 
             note {

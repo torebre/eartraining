@@ -4,6 +4,7 @@ import com.kjipo.font.*
 
 class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: Int,
                            val yPositions: List<Int>, val lineLength: Int) : ScoreRenderingElement {
+    override var tieGroup: Int = 0
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val pathElements = yPositions.map {
@@ -23,7 +24,8 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
                 BoundingBox(-lineLength.div(2.0),
                         yMin.toDouble(),
                         lineLength.div(2.0),
-                        yMax.toDouble()))
+                        yMax.toDouble()),
+                0)
 
         renderingElement.xPosition = xPosition
         renderingElement.yPosition = yPosition

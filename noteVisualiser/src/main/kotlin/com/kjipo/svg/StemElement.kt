@@ -8,6 +8,7 @@ class StemElement(override var xPosition: Int,
                   override val renderingPath: List<PathInterface>,
                   override val boundingBox: BoundingBox) : PositionedRenderingElement {
     override var id = -1
-
+    override val tieGroup = 0
+    override val stem = null
 }
 

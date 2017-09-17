@@ -13,6 +13,7 @@ import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+import kotlin.streams.toList
 
 val HTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
 
@@ -73,11 +74,23 @@ fun generateSvgData(renderingSequence: RenderingSequence, rootElement: Element) 
     var xStart = 100
     val yStart = 400
 
-    // TODO Draw sequence
     drawBarLines(rootElement, xStart, yStart)
+
+    val tieGroups = mutableMapOf<Int, MutableCollection<RenderingElement>>()
 
     for (i in 0..renderingSequence.renderingElements.size - 1) {
         val renderingElement = renderingSequence.renderingElements.get(i)
+
+        if (renderingElement.tieGroup != 0) {
+            tieGroups.compute(renderingElement.tieGroup, { tieGroup, elements ->
+                if (elements == null) {
+                    mutableListOf(renderingElement)
+                } else {
+                    elements.add(renderingElement)
+                    elements
+                }
+            })
+        }
 
         for (pathInterface in renderingElement.renderingPath) {
             SvgTools.addPath(rootElement,
@@ -87,6 +100,48 @@ fun generateSvgData(renderingSequence: RenderingSequence, rootElement: Element) 
                     renderingElement.id)
         }
     }
+
+    // TODO Remove use of system out
+    println("Tie groups: $tieGroups")
+
+    tieGroups.forEach({ tieGroup, renderingElements ->
+        val stemElements = renderingElements.stream()
+                .map { it -> it.stem }
+                .toList()
+
+        val stemMinimum = stemElements.reduceRight({ s, t ->
+            if (t == null) {
+                s
+            } else {
+                s?.let {
+                    if (it.xPosition < t.xPosition) {
+                        it
+                    } else {
+                        t
+                    }
+                }
+            }
+        })
+
+        val stemMaximum = stemElements.reduceRight({ s, t ->
+            if (t == null) {
+                s
+            } else {
+                s?.let {
+                    if (it.xPosition > t.xPosition) {
+                        it
+                    } else {
+                        t
+                    }
+                }
+            }
+        })
+
+        println("Group: $tieGroup. Minimum: $stemMinimum. Maximum: $stemMaximum")
+
+    })
+
+
 }
 
 

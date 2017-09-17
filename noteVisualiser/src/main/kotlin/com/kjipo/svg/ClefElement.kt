@@ -3,10 +3,11 @@ package com.kjipo.svg
 import com.kjipo.font.GlyphFactory
 
 class ClefElement(val clef: Clef, override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
+    override var tieGroup: Int = 0
 
 
     override fun toRenderingElement(): PositionedRenderingElement {
-         val glyphData = when {
+        val glyphData = when {
             clef == Clef.G -> GlyphFactory.getGlyph("clefs.G")
             clef == Clef.NONE -> GlyphFactory.blankGlyph
             else -> {
@@ -14,8 +15,7 @@ class ClefElement(val clef: Clef, override var xPosition: Int, override var yPos
             }
         }
 
-        // TODO Make better method signature
-        return RenderingElementImpl(listOf(glyphData), glyphData.boundingBox)
+        return RenderingElementImpl(glyphData)
     }
 
 
