@@ -3,7 +3,6 @@ package com.kjipo.svg
 import com.kjipo.font.GlyphFactory
 
 class ClefElement(val clef: Clef, override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
-    override var tieGroup: Int = 0
 
 
     override fun toRenderingElement(): PositionedRenderingElement {

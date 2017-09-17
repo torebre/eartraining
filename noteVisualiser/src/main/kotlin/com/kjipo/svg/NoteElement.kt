@@ -12,7 +12,7 @@ class NoteElement(val pitch: Int,
 
 
     override fun toRenderingElement(): PositionedRenderingElement {
-        return when(duration) {
+        val noteRenderedElement = when(duration) {
         // TODO Fix duration values. Should not be hardcoded here
             24 -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
                     .let { RenderingElementImpl(listOf(it), it.boundingBox) }
@@ -20,6 +20,21 @@ class NoteElement(val pitch: Int,
                     .let { RenderingElementImpl(listOf(it), it.boundingBox) }
             else -> throw IllegalArgumentException("Unhandled duration: ${duration}")
         }
+
+        noteRenderedElement.xPosition = xPosition
+        noteRenderedElement.yPosition = yPosition
+
+        return noteRenderedElement
+    }
+
+    fun requiresStem(): Boolean {
+        // TODO Make proper computation
+        return duration == 24 || duration == 48
+    }
+
+    fun stemUp(): Boolean {
+        // TODO Make proper computation
+        return pitch > 60
     }
 
     fun getClef(): Clef {

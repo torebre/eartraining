@@ -6,9 +6,14 @@ import com.kjipo.font.PathInterface
 class StemElement(override var xPosition: Int,
                   override var yPosition: Int,
                   override val renderingPath: List<PathInterface>,
-                  override val boundingBox: BoundingBox) : PositionedRenderingElement {
+                  override val boundingBox: BoundingBox,
+                  val noteElement: NoteElement) : PositionedRenderingElement {
     override var id = -1
-    override val tieGroup = 0
-    override val stem = null
 }
 
+class BeamElement(override var xPosition: Int,
+                  override var yPosition: Int,
+                  override val renderingPath: List<PathInterface>,
+                  override val boundingBox: BoundingBox) : PositionedRenderingElement {
+    override var id = -1
+}

@@ -188,6 +188,13 @@ private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double
 
 data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val yMax: Double)
 
+fun BoundingBox.height(): Double {
+    return Math.abs(yMax.minus(yMin))
+}
+
+fun BoundingBox.width(): Double {
+    return Math.abs(xMax.minus(xMin))
+}
 
 private fun findBoundingBoxInternal(coordinates: Iterable<CoordinatePair>): BoundingBox {
     return BoundingBox(coordinates.map { coordinatePair -> coordinatePair.x }.min() ?: 0.0,

@@ -13,7 +13,6 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
     var nominator = 4
     var denominator = 4
-    var tieGroup: Int = 0
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
 
@@ -28,8 +27,6 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
     fun build(): List<PositionedRenderingElement> {
         val clefElement = clef?.let { ClefElement(it, 0, 0) }
-
-//        clefElement?.let { println(it.toRenderingElement().boundingBox) }
 
         widthAvailableForTemporalElements = totalMeasureWidth.minus(clefElement?.
                 let { clefElement.toRenderingElement().boundingBox.xMax.minus(clefElement.toRenderingElement().boundingBox.xMin).toInt() } ?: 0)
@@ -52,19 +49,7 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
                 .filterNotNull()
                 .let { returnList.addAll(it.map { it.toRenderingElement() }) }
 
-        scoreRenderingElements.filter { it is NoteElement }
-                .map { createStemElement(it as NoteElement) }
-                .let { returnList.addAll(it) }
-
         return returnList
     }
 
-}
-
-private fun createStemElement(noteElement: NoteElement): StemElement {
-    // TODO Need to determine stem direction, and whether the note should have a stem
-    val stem = addStem(noteElement.toRenderingElement().boundingBox)
-    val stemElement = StemElement(noteElement.xPosition, noteElement.yPosition, listOf(stem), findBoundingBox(stem.pathElements))
-    noteElement.stemElement = stemElement
-    return stemElement
 }
