@@ -3,7 +3,8 @@ package com.kjipo.svg
 import com.kjipo.font.GlyphFactory
 import com.kjipo.font.NoteType
 
-class NoteElement(val pitch: Int,
+class NoteElement(val note: com.kjipo.svg.NoteType,
+                  val octave: Int,
                   val duration: Int,
                   override var xPosition: Int,
                   override var yPosition: Int,
@@ -30,11 +31,6 @@ class NoteElement(val pitch: Int,
     fun requiresStem(): Boolean {
         // TODO Make proper computation
         return duration == 24 || duration == 48
-    }
-
-    fun stemUp(): Boolean {
-        // TODO Make proper computation
-        return pitch > 60
     }
 
     fun getClef(): Clef {

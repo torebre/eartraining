@@ -13,7 +13,7 @@ fun addExtraBarLines(noteElement: NoteElement): ScoreRenderingElement? {
 }
 
 private fun addExtraBarLinesForGClef(noteElement: NoteElement): ScoreRenderingElement? {
-    getExtraBarlines(noteElement.pitch).let {
+    getExtraBarlines(noteElement.note, noteElement.octave).let {
         if (it.isEmpty()) {
             return null
         }

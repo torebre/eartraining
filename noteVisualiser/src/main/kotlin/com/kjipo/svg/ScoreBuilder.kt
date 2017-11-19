@@ -1,6 +1,5 @@
 package com.kjipo.svg
 
-import com.kjipo.font.BoundingBox
 import com.kjipo.font.findBoundingBox
 import com.kjipo.font.height
 import com.kjipo.font.width
@@ -27,12 +26,17 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 
     override fun onNoteAdded(note: NOTE) {
         // TODO Set proper location
-        val noteElement = NoteElement(note.pitch, note.duration, counter, calculateVerticalOffset(note.pitch), note.beamGroup)
+        val noteElement = NoteElement(note.note, note.octave, note.duration, counter, calculateVerticalOffset(note.note, note.octave), note.beamGroup)
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
         // TODO Set correct counter value that takes into account multiple measures
         counter += note.duration
+    }
+
+    fun determineBarLine(note: NoteType, octave: Int) {
+
+
     }
 
 
