@@ -34,12 +34,6 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
         counter += note.duration
     }
 
-    fun determineBarLine(note: NoteType, octave: Int) {
-
-
-    }
-
-
     fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init).finalize(this)
 
     override fun build(): RenderingSequence {

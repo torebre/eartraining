@@ -9,26 +9,29 @@ fun generateSequence() {
     val testScore = createScore().score {
         bar {
             clef = Clef.G
+            timeSignature = TimeSignature(4, 4)
 
             note {
-                pitch = 60
+                note = NoteType.C
                 duration = 24
                 beamGroup = 1
             }
 
             note {
-                pitch = 67
+                note = NoteType.H
                 duration = 24
                 beamGroup = 1
             }
 
             note {
-                pitch = 80
+                note = NoteType.C
+                octave = 8
                 duration = 48
             }
 
             note {
-                pitch = 52
+                note = NoteType.C
+                octave = 4
                 duration = 24
             }
 
@@ -37,12 +40,12 @@ fun generateSequence() {
         // TODO Support multiple bars
         bar {
             note {
-                pitch = 60
+                note = NoteType.C
                 duration = 24
             }
 
             note {
-                pitch = 67
+                note = NoteType.F
                 duration = 48
             }
 

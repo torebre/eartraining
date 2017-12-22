@@ -1,7 +1,5 @@
 package com.kjipo.svg
 
-import com.kjipo.font.findBoundingBox
-
 class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
     var clef: Clef? = null
     var key: Key = Key.C
@@ -11,22 +9,26 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
     var totalMeasureWidth = 1000
     var widthAvailableForTemporalElements = totalMeasureWidth
 
-    var nominator = 4
-    var denominator = 4
+    var timeSignature = TimeSignature(4, 4)
+
+//    var nominator = 4
+//    var denominator = 4
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
 
     private fun ticksInMeasure(): Int {
-        return nominator * denominatorInTicks()
+        return timeSignature.nominator * denominatorInTicks()
     }
 
     private fun denominatorInTicks(): Int {
         // TODO Is this correct?
-        return nominator.div(4).times(TICKS_PER_QUARTER_NOTE)
+        return timeSignature.nominator.div(4).times(TICKS_PER_QUARTER_NOTE)
     }
 
     fun build(): List<PositionedRenderingElement> {
         val clefElement = clef?.let { ClefElement(it, 0, 0) }
+        val timeSignatureElement =
+
 
         widthAvailableForTemporalElements = totalMeasureWidth.minus(clefElement?.
                 let { clefElement.toRenderingElement().boundingBox.xMax.minus(clefElement.toRenderingElement().boundingBox.xMin).toInt() } ?: 0)

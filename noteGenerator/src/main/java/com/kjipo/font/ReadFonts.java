@@ -260,6 +260,10 @@ public class ReadFonts {
                 .filter(glyphData -> glyphNames.contains(glyphData.getName()))
                 .collect(Collectors.toList());
 
+        writeGlyphsToOutputStream(glyphsToSave, outputStreamWriter);
+    }
+
+    private static void writeGlyphsToOutputStream(Collection<GlyphData> glyphsToSave, OutputStreamWriter outputStreamWriter) {
         Gson gson = new Gson();
         Type typeToken = new TypeToken<Collection<GlyphData>>() {
         }.getType();
@@ -280,9 +284,19 @@ public class ReadFonts {
 //            writePathsToSvgFile(outputFilePath, inputStream, "gonvillepart1");
 //        }
 
-        Path outputFilePath = Paths.get("output2.xml");
-        Path fontFilesDirectory = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/");
-        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1);
+//        // Creates a document with all glyphs
+//        Path outputFilePath = Paths.get("output2.xml");
+//        Path fontFilesDirectory = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/");
+//        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1);
+
+
+        Path outputAlphabetFilePath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/alpha.json");
+        Path svgFontFile = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/gonvillealpha11.svg");
+        try (InputStream inputStream = Files.newInputStream(svgFontFile);
+             OutputStream outputStream = Files.newOutputStream(outputAlphabetFilePath);
+             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream)) {
+            writeGlyphsToOutputStream(extractGlyphPaths(inputStream), outputStreamWriter);
+        }
 
 
 //        Path outputFilePath = Paths.get("glyph_with_bounding_box.xml");
