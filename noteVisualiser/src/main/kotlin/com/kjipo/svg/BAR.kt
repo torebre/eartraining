@@ -27,7 +27,7 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
     fun build(): List<PositionedRenderingElement> {
         val clefElement = clef?.let { ClefElement(it, 0, 0) }
-        val timeSignatureElement =
+//        val timeSignatureElement =
 
 
         widthAvailableForTemporalElements = totalMeasureWidth.minus(clefElement?.

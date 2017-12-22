@@ -75,10 +75,7 @@ class WebViewTest : Region() {
 
         webEngine.loadWorker.stateProperty().addListener({ observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
             run {
-
                 if (state1 == Worker.State.SUCCEEDED) {
-                    LOGGER.info("Test23. Setting logger")
-
                     val window = webEngine.executeScript("window") as JSObject
                     val bridge = JavaBridge()
 
