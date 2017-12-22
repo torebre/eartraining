@@ -25,16 +25,16 @@ class ClefElement(val clef: Clef, override var xPosition: Int, override var yPos
 }
 
 
-class TimeSignatureElement(val nominator: Int, val denominator: Int, override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
-
-    override fun toRenderingElement(): PositionedRenderingElement {
-        val nominatorGlyph = GlyphFactory.getNumberGlyph(nominator)
-        val denominatorGlyph = GlyphFactory.getNumberGlyph(denominator)
-
-        val pathElements = Stream.concat(nominatorGlyph.pathElements.stream(), denominatorGlyph.pathElements.stream())
-                .collect(Collectors.toList())
-
-        return RenderingElementImpl(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)))
-    }
-
-}
+//class TimeSignatureElement(val nominator: Int, val denominator: Int, override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
+//
+//    override fun toRenderingElement(): PositionedRenderingElement {
+//        val nominatorGlyph = GlyphFactory.getNumberGlyph(nominator)
+//        val denominatorGlyph = GlyphFactory.getNumberGlyph(denominator)
+//
+//        val pathElements = Stream.concat(nominatorGlyph.pathElements.stream(), denominatorGlyph.pathElements.stream())
+//                .collect(Collectors.toList())
+//
+//        return RenderingElementImpl(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)))
+//    }
+//
+//}
