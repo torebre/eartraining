@@ -2,10 +2,8 @@ package com.kjipo.font
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.sun.javafx.font.Glyph
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
-import kotlin.streams.toList
 
 object GlyphFactory {
 
@@ -63,9 +61,7 @@ object GlyphFactory {
 
         return javaClass.getResourceAsStream(resourceLocation).use {
             val reader = InputStreamReader(it, StandardCharsets.UTF_8)
-            val glyphData = gson.fromJson<Collection<GlyphData>>(reader, typeToken).toList()
-
-            glyphData.stream()
+            gson.fromJson<Collection<GlyphData>>(reader, typeToken).toList()
                     .map { glyph -> scaleGlyph(glyph, glyphScale) }
                     .map { invertYCoordinates(it) }
                     .map { Pair(it.name, it) }
