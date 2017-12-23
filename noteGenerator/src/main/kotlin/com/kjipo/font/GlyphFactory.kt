@@ -26,7 +26,7 @@ object GlyphFactory {
     }
 
     fun getGlyph(name: String): GlyphData {
-        return nameGlyphMap.getOrDefault(name, blankGlyph)
+        return nameGlyphMap.getOrElse(name, { blankGlyph })
     }
 
     fun getNumberGlyph(number: Int): GlyphData {
@@ -46,7 +46,7 @@ object GlyphFactory {
     }
 
     fun getCharacter(name: String): GlyphData {
-        return alphabetGlyphMap.getOrDefault(name, blankGlyph)
+        return alphabetGlyphMap.getOrElse(name, { blankGlyph })
     }
 
     private fun loadGlyphs(): Array<Pair<String, GlyphData>> = loadGlyphResource(glyphResource, scale)
