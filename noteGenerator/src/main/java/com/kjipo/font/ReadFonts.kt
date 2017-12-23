@@ -29,11 +29,9 @@ import kotlin.streams.toList
 object ReadFonts {
     private val GLYPH = "glyph"
 
-
     val decimalFormatThreadLocal = ThreadLocal<DecimalFormat>()
 
-    private val documentFactoryThreadLocal = ThreadLocal.withInitial { DocumentBuilderFactory.newInstance() }
-
+    private val documentFactoryThreadLocal = ThreadLocal<DocumentBuilderFactory>()
 
     private val LOGGER = LoggerFactory.getLogger(ReadFonts::class.java)
 
@@ -42,6 +40,8 @@ object ReadFonts {
         decimalFormat.maximumFractionDigits = 3
         decimalFormat.isGroupingUsed = false
         decimalFormatThreadLocal.set(decimalFormat)
+
+        documentFactoryThreadLocal.set(DocumentBuilderFactory.newInstance())
     }
 
 
