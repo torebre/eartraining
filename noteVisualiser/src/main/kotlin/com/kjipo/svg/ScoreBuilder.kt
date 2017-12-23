@@ -46,23 +46,24 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 
         val beamGroups = mutableMapOf<Int, MutableCollection<StemElement>>()
 
-        noteElements.forEach {
-            if (it.requiresStem()) {
-                val stem = addStem(it.toRenderingElement().boundingBox)
-                val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it)
-
-                beamGroups.compute(it.beamGroup, { beamGroup, stemElements ->
-                    if (stemElements == null) {
-                        mutableListOf(stemElement)
-                    } else {
-                        stemElements.add(stemElement)
-                        stemElements
-                    }
-                })
-
-            }
-
-        }
+        // TODO Comment back in
+//        noteElements.forEach {
+//            if (it.requiresStem()) {
+//                val stem = addStem(it.toRenderingElement().boundingBox)
+//                val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it)
+//
+//                beamGroups.compute(it.beamGroup, { beamGroup, stemElements ->
+//                    if (stemElements == null) {
+//                        mutableListOf(stemElement)
+//                    } else {
+//                        stemElements.add(stemElement)
+//                        stemElements
+//                    }
+//                })
+//
+//            }
+//
+//        }
 
         // TODO Comment back in
 //        beamGroups.forEach({ beamGroup, stemElements ->
