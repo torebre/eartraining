@@ -63,8 +63,10 @@ object GlyphFactory {
 
         return javaClass.getResourceAsStream(resourceLocation).use {
             val reader = InputStreamReader(it, StandardCharsets.UTF_8)
-            gson.fromJson<Collection<GlyphData>>(reader, typeToken).stream()
-                    .map { glyphData -> scaleGlyph(glyphData, glyphScale) }
+            val glyphData = gson.fromJson<Collection<GlyphData>>(reader, typeToken).toList()
+
+            glyphData.stream()
+                    .map { glyph -> scaleGlyph(glyph, glyphScale) }
                     .map { invertYCoordinates(it) }
                     .map { Pair(it.name, it) }
                     .toList()
