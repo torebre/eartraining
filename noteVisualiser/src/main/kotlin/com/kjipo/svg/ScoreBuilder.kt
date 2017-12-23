@@ -64,14 +64,15 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 
         }
 
-        beamGroups.forEach({ beamGroup, stemElements ->
-            if (beamGroup == 0) {
-                renderingElements.addAll(stemElements)
-            } else {
-                renderingElements.addAll(stemElements)
-                renderingElements.add(handleBeams(stemElements))
-            }
-        })
+        // TODO Comment back in
+//        beamGroups.forEach({ beamGroup, stemElements ->
+//            if (beamGroup == 0) {
+//                renderingElements.addAll(stemElements)
+//            } else {
+//                renderingElements.addAll(stemElements)
+//                renderingElements.add(handleBeams(stemElements))
+//            }
+//        })
 
         return RenderingSequence(renderingElements)
     }
