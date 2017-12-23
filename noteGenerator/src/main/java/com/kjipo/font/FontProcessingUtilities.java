@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,7 +77,7 @@ public final class FontProcessingUtilities {
 
                 case 'Z':
                 case 'z':
-                    pathElements.add(new PathElement(PathCommand.CLOSE_PATH, Collections.emptyList()));
+                    pathElements.add(new PathElement(PathCommand.CLOSE_PATH, Collections.<Double>emptyList()));
                     c = charStream.read();
                     break;
 

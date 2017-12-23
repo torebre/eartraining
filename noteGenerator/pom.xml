@@ -8,6 +8,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <source.version>1.7</source.version>
+        <target.version>1.7</target.version>
+    </properties>
+
     <artifactId>noteGenerator</artifactId>
 
     <dependencies>
