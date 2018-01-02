@@ -1,5 +1,6 @@
 package com.kjipo.svg
 
+
 import com.kjipo.viewer.ScoreController
 import com.kjipo.viewer.startApplication
 import tornadofx.*
