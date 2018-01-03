@@ -53,7 +53,7 @@ fun drawBarLines(element: Element, xStart: Int, gLine: Int) {
     val width = DEFAULT_BAR_WIDTH
     val spaceBetweenLines = 2 * DEFAULT_VERTICAL_NOTE_SPACING
 
-    var x = xStart
+    val x = xStart
     var y = gLine - spaceBetweenLines * 3
 
     drawLine(x, y, x, y + 4 * spaceBetweenLines, element, 1)
