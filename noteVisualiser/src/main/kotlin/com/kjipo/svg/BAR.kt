@@ -11,8 +11,8 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
     var timeSignature = TimeSignature(4, 4)
 
-//    var nominator = 4
-//    var denominator = 4
+    private val timeSignatureXOffset = 80
+    private val timeSignatureYOffset = -25
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
 
@@ -27,7 +27,15 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
 
     fun build(): List<PositionedRenderingElement> {
         val clefElement = clef?.let { ClefElement(it, 0, 0) }
-//        val timeSignatureElement =
+
+
+
+        val timeSignatureElement = if(timeSignature.nominator == 0) {
+            null
+        }
+        else {
+            timeSignature.let { TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset) }
+        }
 
 
         widthAvailableForTemporalElements = totalMeasureWidth.minus(clefElement?.
@@ -40,6 +48,8 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
         val returnList = mutableListOf<PositionedRenderingElement>()
 
         clefElement?.let { returnList.add(0, clefElement.toRenderingElement()) }
+
+        timeSignatureElement?.let { returnList.add(0, timeSignatureElement.toRenderingElement()) }
 
 
         scoreRenderingElements.forEach { it.xPosition = xOffset + it.xPosition * pixelsPerTick }

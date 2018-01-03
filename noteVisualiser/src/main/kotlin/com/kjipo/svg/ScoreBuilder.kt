@@ -46,36 +46,35 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
 
         val beamGroups = mutableMapOf<Int, MutableCollection<StemElement>>()
 
-        // TODO Comment back in
-//        noteElements.forEach {
-//            if (it.requiresStem()) {
-//                val stem = addStem(it.toRenderingElement().boundingBox)
-//                val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it)
-//
-//                beamGroups.compute(it.beamGroup, { beamGroup, stemElements ->
-//                    if (stemElements == null) {
-//                        mutableListOf(stemElement)
-//                    } else {
-//                        stemElements.add(stemElement)
-//                        stemElements
-//                    }
-//                })
-//
-//            }
-//
-//        }
+        noteElements.forEach {
+            if (it.requiresStem()) {
+                val stem = addStem(it.toRenderingElement().boundingBox)
+                val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it)
 
-        // TODO Comment back in
-//        beamGroups.forEach({ beamGroup, stemElements ->
-//            if (beamGroup == 0) {
-//                renderingElements.addAll(stemElements)
-//            } else {
-//                renderingElements.addAll(stemElements)
-//                renderingElements.add(handleBeams(stemElements))
-//            }
-//        })
+                beamGroups.compute(it.beamGroup, { beamGroup, stemElements ->
+                    if (stemElements == null) {
+                        mutableListOf(stemElement)
+                    } else {
+                        stemElements.add(stemElement)
+                        stemElements
+                    }
+                })
 
-        return RenderingSequence(renderingElements)
+            }
+
+        }
+
+        beamGroups.forEach({ beamGroup, stemElements ->
+            if (beamGroup == 0) {
+                renderingElements.addAll(stemElements)
+            } else {
+                renderingElements.addAll(stemElements)
+                renderingElements.add(handleBeams(stemElements))
+            }
+        })
+
+        // TODO Set proper view box
+        return RenderingSequence(renderingElements, ViewBox(0, 0, 2000, 1000))
     }
 
 

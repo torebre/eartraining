@@ -50,8 +50,7 @@ fun createHtmlDocument(renderingSequence: RenderingSequence): Document {
     rootElement.appendChild(bodyElement)
 
     val svgElement = document.createElementNS(SvgTools.SVG_NAMESPACE_URI, "svg")
-    svgElement.setAttribute("width", "30cm")
-    svgElement.setAttribute("height", "30cm")
+    svgElement.setAttribute("viewBox", renderingSequence.viewBox.let { "${it.xMin} ${it.yMin} ${it.xMax} ${it.yMax}" })
     svgElement.setAttribute("id", "score")
     bodyElement.appendChild(svgElement)
 
