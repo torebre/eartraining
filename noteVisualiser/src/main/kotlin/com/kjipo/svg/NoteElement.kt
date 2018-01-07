@@ -5,19 +5,18 @@ import com.kjipo.font.NoteType
 
 class NoteElement(val note: com.kjipo.svg.NoteType,
                   val octave: Int,
-                  val duration: Int,
+                  val duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,
                   override val beamGroup: Int) : ScoreRenderingElement, Stemable {
     var bar: BAR? = null
 
-
     override fun toRenderingElement(): PositionedRenderingElement {
-        val noteRenderedElement = when(duration) {
+        val noteRenderedElement = when (duration) {
         // TODO Fix duration values. Should not be hardcoded here
-            24 -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
+            Duration.QUARTER -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
                     .let { RenderingElementImpl(listOf(it), it.boundingBox) }
-            48 -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
+            Duration.HALF -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
                     .let { RenderingElementImpl(listOf(it), it.boundingBox) }
             else -> throw IllegalArgumentException("Unhandled duration: ${duration}")
         }
@@ -30,7 +29,7 @@ class NoteElement(val note: com.kjipo.svg.NoteType,
 
     fun requiresStem(): Boolean {
         // TODO Make proper computation
-        return duration == 24 || duration == 48
+        return duration == Duration.HALF || duration == Duration.QUARTER
     }
 
     fun getClef(): Clef {

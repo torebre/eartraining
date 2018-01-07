@@ -1,10 +1,10 @@
 package com.kjipo.svg
 
 class NOTE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
-    var note: NoteType = NoteType.C
-    var modifier: NoteModifier = NoteModifier.NONE
+    var note = NoteType.C
+    var modifier = NoteModifier.NONE
     var octave = 5
-    var duration = 1
+    var duration = Duration.QUARTER
     var beamGroup: Int = 0
 
 }

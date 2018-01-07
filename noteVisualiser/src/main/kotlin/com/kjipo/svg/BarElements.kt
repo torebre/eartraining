@@ -9,12 +9,10 @@ enum class Clef {
 data class TimeSignature(val nominator: Int, val denominator: Int)
 
 
-
 enum class Key {
     C,
     NONE
 }
-
 
 
 enum class NoteType {
@@ -28,9 +26,15 @@ enum class NoteType {
 }
 
 
-
 enum class NoteModifier {
     NONE,
     SHARP,
     FLAT
+}
+
+
+enum class Duration(val ticks: Int) {
+    QUARTER(TICKS_PER_QUARTER_NOTE),
+    HALF(2 * TICKS_PER_QUARTER_NOTE),
+    WHOLE(4 * TICKS_PER_QUARTER_NOTE)
 }

@@ -9,8 +9,6 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
     private val noteElements = mutableListOf<NoteElement>()
     private val bars = mutableListOf<BAR>()
 
-    private var counter = 0
-
 
     override fun onBarAdded(bar: BAR) {
         // TODO Figure out best way to set the value
@@ -25,13 +23,10 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
     }
 
     override fun onNoteAdded(note: NOTE) {
-        // TODO Set proper location
-        val noteElement = NoteElement(note.note, note.octave, note.duration, counter, calculateVerticalOffset(note.note, note.octave), note.beamGroup)
+        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, calculateVerticalOffset(note.note, note.octave), note.beamGroup)
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
-        // TODO Set correct counter value that takes into account multiple measures
-        counter += note.duration
     }
 
     fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init).finalize(this)
@@ -40,8 +35,17 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
         // TODO Possible to use immutable lists here?
         // TODO The position will be wrong when there are multiple bars
         val renderingElements = mutableListOf<PositionedRenderingElement>()
+
+        var barXoffset = 0
+        var barYoffset = 0
+
+        val barXspace = 0
+        val barYspace = 200
+
         bars.forEach {
-            renderingElements.addAll(it.build())
+            renderingElements.addAll(it.build(barXoffset, barYoffset))
+            barXoffset += barXspace
+            barYoffset += barYspace
         }
 
         val beamGroups = mutableMapOf<Int, MutableCollection<StemElement>>()
@@ -74,7 +78,7 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
         })
 
         // TODO Set proper view box
-        return RenderingSequence(renderingElements, ViewBox(0, 0, 2000, 1000))
+        return RenderingSequence(renderingElements, ViewBox(0, 0, 2000, 2000))
     }
 
 

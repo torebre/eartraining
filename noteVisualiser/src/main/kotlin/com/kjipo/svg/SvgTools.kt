@@ -69,10 +69,10 @@ fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
 }
 
 fun generateSvgData(renderingSequence: RenderingSequence, rootElement: Element) {
-    var xStart = 100
+    val xStart = 100
     val yStart = 400
 
-    drawBarLines(rootElement, xStart, yStart)
+//    drawBarLines(rootElement, xStart, yStart)
 
     for (i in 0..renderingSequence.renderingElements.size - 1) {
         val renderingElement = renderingSequence.renderingElements.get(i)

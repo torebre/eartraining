@@ -14,18 +14,27 @@ fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
         when (pathElement.command) {
             PathCommand.CURVE_TO_RELATIVE -> processCurveToRelative(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.VERTICAL_LINE_TO_RELATIVE -> processVerticalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
-            PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> processMoveToAbsolute(pathElement.numbers)
+            PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> processVerticalLineToAbsolute(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.HORIZONAL_LINE_TO_RELATIVE -> processHorizontalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.MOVE_TO_ABSOLUTE -> processMoveToAbsolute(pathElement.numbers)
             PathCommand.MOVE_TO_RELATIVE -> processMoveToRelative(pathElement.numbers, pathAsLineSegments.lastOrNull())
             PathCommand.LINE_TO_RELATIVE -> processLineToRelative(pathElement.numbers, pathAsLineSegments.last())
-            PathCommand.CLOSE_PATH -> emptyList<CoordinatePair>()
+            PathCommand.CLOSE_PATH -> emptyList()
             PathCommand.SMOOTH_CURVE_TO_RELATIVE -> processSmoothCurveToRelative(pathElement.numbers, pathAsLineSegments.lastOrNull(), previousPathElement)
         }.let { pathAsLineSegments.addAll(it) }
         previousPathElement = pathElement
     }
 
     return pathAsLineSegments;
+}
+
+fun processVerticalLineToAbsolute(numbers: List<Double>, startCoordinate: CoordinatePair): List<CoordinatePair> {
+    val coordinatePairs = mutableListOf<CoordinatePair>()
+    val currentY = numbers.get(0)
+
+    coordinatePairs.add(CoordinatePair(startCoordinate.x, currentY, true))
+
+    return coordinatePairs
 }
 
 
