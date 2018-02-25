@@ -9,8 +9,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <source.version>1.8</source.version>
-        <target.version>1.8</target.version>
+        <source.version>1.7</source.version>
+        <target.version>1.7</target.version>
         <kotlin.version>1.2.21</kotlin.version>
     </properties>
 
