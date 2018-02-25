@@ -74,6 +74,8 @@ fun generateSvgData(renderingSequence: RenderingSequence, rootElement: Element) 
 
 //    drawBarLines(rootElement, xStart, yStart)
 
+
+
     for (i in 0..renderingSequence.renderingElements.size - 1) {
         val renderingElement = renderingSequence.renderingElements.get(i)
 
