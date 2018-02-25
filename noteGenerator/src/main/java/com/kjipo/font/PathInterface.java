@@ -8,6 +8,4 @@ public interface PathInterface {
 
     int getStrokeWidth();
 
-
-
 }

@@ -72,6 +72,17 @@ public final class SvgTools {
         node.appendChild(path1);
     }
 
+    public static void addPathUsingReference(Node node, String reference, int x, int y, Integer id) {
+        Element useTag = node.getOwnerDocument().createElementNS(SVG_NAMESPACE_URI, "use");
+        useTag.setAttribute("xlink:href", "#" +reference);
+        useTag.setAttribute("x", String.valueOf(x));
+        useTag.setAttribute("y", String.valueOf(y));
+        node.appendChild(useTag);
+        if (id != null) {
+            useTag.setAttribute("id", "note" +String.valueOf(id));
+        }
+    }
+
 }
 
 

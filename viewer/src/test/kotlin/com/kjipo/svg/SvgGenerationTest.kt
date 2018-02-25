@@ -4,6 +4,7 @@ package com.kjipo.svg
 import com.kjipo.viewer.ScoreController
 import com.kjipo.viewer.startApplication
 import tornadofx.*
+import java.nio.file.Paths
 
 
 fun generateSequence() {
@@ -58,8 +59,8 @@ fun generateSequence() {
     var idCounter = 0
     testScore.renderingElements.forEach { it.id = idCounter++ }
 
-//    val htmlPath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/test_output3.html")
-//    writeToHtmlFile(testScore, htmlPath)
+    val htmlPath = Paths.get("test_output.html")
+    writeToHtmlFile(testScore, htmlPath)
 
     startApplication()
 
@@ -69,6 +70,7 @@ fun generateSequence() {
     val scoreController = FX.find(ScoreController::class.java)
 
     FX.runAndWait { scoreController.fireLoadScore(testScore) }
+
     Thread.sleep(500)
     FX.runAndWait { scoreController.fireNoteOn(2) }
     Thread.sleep(500)
@@ -77,8 +79,6 @@ fun generateSequence() {
     FX.runAndWait { scoreController.fireNoteOff(2) }
 
     println("ScoreController: $scoreController")
-
-//    scoreController.fireLoadScore(testScore)
 
 
 }

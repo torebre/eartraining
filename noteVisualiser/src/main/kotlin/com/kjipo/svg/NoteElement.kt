@@ -15,9 +15,9 @@ class NoteElement(val note: com.kjipo.svg.NoteType,
         val noteRenderedElement = when (duration) {
         // TODO Fix duration values. Should not be hardcoded here
             Duration.QUARTER -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
-                    .let { RenderingElementImpl(listOf(it), it.boundingBox) }
+                    .let { RenderingElementImpl(it) }
             Duration.HALF -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
-                    .let { RenderingElementImpl(listOf(it), it.boundingBox) }
+                    .let { RenderingElementImpl(it) }
             else -> throw IllegalArgumentException("Unhandled duration: ${duration}")
         }
 

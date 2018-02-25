@@ -1,5 +1,6 @@
 package com.kjipo.svg
 
+import com.kjipo.font.GlyphData
 import com.kjipo.font.SvgTools
 import com.kjipo.font.transformToPathString
 import com.kjipo.font.translateGlyph
@@ -54,6 +55,8 @@ fun createHtmlDocument(renderingSequence: RenderingSequence): Document {
     svgElement.setAttribute("id", "score")
     bodyElement.appendChild(svgElement)
 
+    svgElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
+
     generateSvgData(renderingSequence, svgElement)
 
     return document
@@ -68,26 +71,45 @@ fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
     SvgTools.writeDocumentToFile(document, outputFilePath)
 }
 
-fun generateSvgData(renderingSequence: RenderingSequence, rootElement: Element) {
+fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
     val xStart = 100
     val yStart = 400
-
-//    drawBarLines(rootElement, xStart, yStart)
-
-
+    val usedGlyphs = mutableMapOf<String, GlyphData>()
 
     for (i in 0..renderingSequence.renderingElements.size - 1) {
         val renderingElement = renderingSequence.renderingElements.get(i)
 
-        for (pathInterface in renderingElement.renderingPath) {
-            SvgTools.addPath(rootElement,
-                    transformToPathString(translateGlyph(pathInterface, xStart + renderingElement.xPosition, yStart + renderingElement.yPosition)),
-                    pathInterface.strokeWidth,
-                    // TODO Now multiple paths will have the same ID
-                    renderingElement.id)
+        if(renderingElement.glyphData != null) {
+            renderingElement.glyphData?.let {
+                usedGlyphs.putIfAbsent(it.name, it)
+                SvgTools.addPathUsingReference(svgElement, it.name, xStart + renderingElement.xPosition, yStart + renderingElement.yPosition, renderingElement.id)
+            }
         }
+        else {
+            for (pathInterface in renderingElement.renderingPath) {
+                SvgTools.addPath(svgElement,
+                        transformToPathString(translateGlyph(pathInterface, xStart + renderingElement.xPosition, yStart + renderingElement.yPosition)),
+                        pathInterface.strokeWidth,
+                        // TODO Now multiple paths will have the same ID
+                        renderingElement.id)
+            }
+        }
+
+
     }
 
+    if(!usedGlyphs.isEmpty()) {
+        val defsElement = svgElement.ownerDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "defs")
+        svgElement.appendChild(defsElement)
+
+        usedGlyphs.entries.forEach {
+            val pathElement = defsElement.ownerDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "path")
+            pathElement.setAttribute("id", it.key)
+            pathElement.setAttribute("d", transformToPathString(it.value.pathElements))
+
+            defsElement.appendChild(pathElement)
+        }
+    }
 
 }
 

@@ -286,11 +286,17 @@ fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate
 
 }
 
-fun transformToPathString(pathInterface: PathInterface): String {
-    return pathInterface.pathElements.map {
+fun transformToPathString(pathInterface: PathInterface) = transformToPathString(pathInterface.pathElements)
+
+
+fun transformToPathString(pathElements: Collection<PathElement>): String {
+    return pathElements.map {
         it.command.command
                 .plus(" ")
-                .plus(it.numbers.map { ReadFonts.decimalFormatThreadLocal.get().format(it) }.joinToString(" "))
+                .plus(it.numbers.joinToString(" ") {
+                    ReadFonts.decimalFormatThreadLocal.get().format(it)
+                })
     }
             .joinToString(" ")
+
 }
