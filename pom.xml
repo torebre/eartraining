@@ -15,9 +15,9 @@
         <guava.version>22.0-android</guava.version>
         <slf4j.version>1.7.25</slf4j.version>
         <tornado.version>1.7.5</tornado.version>
-        <kotlin.compiler.jvmTarget>1.6</kotlin.compiler.jvmTarget>
-        <source.version>1.7</source.version>
-        <target.version>1.7</target.version>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <source.version>1.8</source.version>
+        <target.version>1.8</target.version>
     </properties>
 
 
