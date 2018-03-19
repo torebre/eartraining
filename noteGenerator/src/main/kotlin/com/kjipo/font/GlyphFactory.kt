@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets
 object GlyphFactory {
 
     val nameGlyphMap = mapOf(*loadGlyphs())
-    val alphabetGlyphMap = mapOf(*loadAlphabet())
+    val alphabetGlyphMap = mapOf(*loadAlphabet()).withDefault { blankGlyph }
 
     val scale = 0.1
     val glyphResource = "/glyphs.json"
@@ -31,17 +31,17 @@ object GlyphFactory {
 
     fun getNumberGlyph(number: Int): GlyphData {
         return when (number) {
-            0 -> alphabetGlyphMap.getOrDefault("zero", blankGlyph)
-            1 -> alphabetGlyphMap.getOrDefault("one", blankGlyph)
-            2 -> alphabetGlyphMap.getOrDefault("two", blankGlyph)
-            3 -> alphabetGlyphMap.getOrDefault("three", blankGlyph)
-            4 -> alphabetGlyphMap.getOrDefault("four", blankGlyph)
-            5 -> alphabetGlyphMap.getOrDefault("five", blankGlyph)
-            6 -> alphabetGlyphMap.getOrDefault("six", blankGlyph)
-            7 -> alphabetGlyphMap.getOrDefault("seven", blankGlyph)
-            8 -> alphabetGlyphMap.getOrDefault("eight", blankGlyph)
-            9 -> alphabetGlyphMap.getOrDefault("nine", blankGlyph)
-            else -> nameGlyphMap.getOrDefault(number.toString(), blankGlyph)
+            0 -> alphabetGlyphMap.getValue("zero")
+            1 -> alphabetGlyphMap.getValue("one")
+            2 -> alphabetGlyphMap.getValue("two")
+            3 -> alphabetGlyphMap.getValue("three")
+            4 -> alphabetGlyphMap.getValue("four")
+            5 -> alphabetGlyphMap.getValue("five")
+            6 -> alphabetGlyphMap.getValue("six")
+            7 -> alphabetGlyphMap.getValue("seven")
+            8 -> alphabetGlyphMap.getValue("eight")
+            9 -> alphabetGlyphMap.getValue("nine")
+            else -> nameGlyphMap.getValue(number.toString())
         }
     }
 
