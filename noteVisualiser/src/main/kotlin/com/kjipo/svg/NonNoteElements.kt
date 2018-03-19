@@ -28,9 +28,11 @@ class TimeSignatureElement(val nominator: Int, val denominator: Int, override va
         val nominatorGlyph = GlyphFactory.getNumberGlyph(nominator)
         val denominatorGlyph = GlyphFactory.getNumberGlyph(denominator)
 
-        val pathElements = Stream.concat(translateGlyph(nominatorGlyph, xPosition, yPosition).pathElements.stream(),
-                translateGlyph(translateGlyph(denominatorGlyph, xPosition, yPosition), 0, 50).pathElements.stream())
-                .collect(Collectors.toList())
+
+        val pathElements = mutableListOf<PathElement>()
+
+        pathElements.addAll(translateGlyph(nominatorGlyph, xPosition, yPosition).pathElements)
+        pathElements.addAll(translateGlyph(translateGlyph(denominatorGlyph, xPosition, yPosition), 0, 50).pathElements)
 
         return RenderingElementImpl(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)))
     }
