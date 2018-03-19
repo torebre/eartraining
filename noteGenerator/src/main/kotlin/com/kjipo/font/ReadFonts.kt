@@ -239,7 +239,7 @@ object ReadFonts {
 
                 }
                 .map {
-                    it.getCommand().toString() + " " + it.getNumbers().stream()
+                    it.command.toString() + " " + it.numbers.stream()
                             .map { decimalFormatThreadLocal.get().format(it) }
                             .collect(Collectors.joining(" "))
                 }
