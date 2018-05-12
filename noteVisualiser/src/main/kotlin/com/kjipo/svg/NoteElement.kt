@@ -38,4 +38,9 @@ class NoteElement(val note: com.kjipo.svg.NoteType,
         return bar?.clef ?: Clef.G
     }
 
+    override fun toString(): String {
+        return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, beamGroup=$beamGroup, bar=$bar)"
+    }
+
+
 }

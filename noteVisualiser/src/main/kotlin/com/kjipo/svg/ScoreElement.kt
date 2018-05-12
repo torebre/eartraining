@@ -1,13 +1,16 @@
 package com.kjipo.svg
 
 
-interface ElementConsumer<out T> {
+interface ScoreBuilderInterface<out T> {
+
+    val debug: Boolean
+
     fun onBarAdded(bar: BAR)
     fun onNoteAdded(note: NOTE)
     fun build(): T
 }
 
-open class ScoreElement(val consumer: ElementConsumer<*>) {
+open class ScoreElement(val consumer: ScoreBuilderInterface<*>) {
 
     private val children = mutableListOf<ScoreElement>()
 
@@ -23,9 +26,9 @@ open class ScoreElement(val consumer: ElementConsumer<*>) {
 
 }
 
-fun <T : ScoreElement, R> T.finalize(consumer: ElementConsumer<R>): R {
+fun <T : ScoreElement, R> T.finalize(consumer: ScoreBuilderInterface<R>): R {
     return consumer.build()
 }
 
 
-fun createScore() = ScoreBuilder()
+fun createScore() = ScoreBuilderImpl()

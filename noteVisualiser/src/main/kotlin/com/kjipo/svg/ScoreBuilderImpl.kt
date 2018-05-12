@@ -4,7 +4,7 @@ import com.kjipo.font.findBoundingBox
 import com.kjipo.font.height
 import com.kjipo.font.width
 
-class ScoreBuilder : ElementConsumer<RenderingSequence> {
+class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterface<RenderingSequence> {
     private val currentElements = mutableListOf<ScoreRenderingElement>()
     private val noteElements = mutableListOf<NoteElement>()
     private val bars = mutableListOf<BAR>()
@@ -103,13 +103,9 @@ class ScoreBuilder : ElementConsumer<RenderingSequence> {
             }
         })
 
-
         val height = stemMinimum.boundingBox.height()
-
-
         val yStart = minOf(stemMinimum.yPosition.toDouble() + height, stemMaximum.yPosition.toDouble() + height)
         val yEnd = maxOf(stemMinimum.yPosition.toDouble() + height, stemMaximum.yPosition.toDouble() + height)
-
         val boundingBoxHeight = yEnd - yStart
 
         val beamElement = addBeam(0, 0,

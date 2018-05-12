@@ -19,7 +19,7 @@ private fun addExtraBarLinesForGClef(noteElement: NoteElement): ScoreRenderingEl
         }
         val noteRenderingElement = noteElement.toRenderingElement()
         return ExtraBarLinesElement(noteElement.xPosition, 0, it,
-                noteRenderingElement.boundingBox.xMax.minus(noteRenderingElement.boundingBox.xMin).toInt())
+                noteRenderingElement.boundingBox.xMin.toInt().plus(EXTRA_BAR_LINE_LEFT_PADDING), noteRenderingElement.boundingBox.xMax.toInt().plus(EXTRA_BAR_LINE_RIGHT_PADDING))
     }
 }
 
@@ -48,18 +48,3 @@ fun addBeam(xMin: Int, yMin: Int, xMax: Int, yMax: Int, startX: Int, startY: Int
             startX, startY)
 }
 
-
-fun drawBarLines(element: Element, xStart: Int, gLine: Int) {
-    val width = DEFAULT_BAR_WIDTH
-    val spaceBetweenLines = 2 * DEFAULT_VERTICAL_NOTE_SPACING
-
-    val x = xStart
-    var y = gLine - spaceBetweenLines * 3
-
-    drawLine(x, y, x, y + 4 * spaceBetweenLines, element, 1)
-    drawLine(x + width, y, x + width, y + 4 * spaceBetweenLines, element, 1)
-    for (i in 0..4) {
-        drawLine(x, y, x + width, y, element, 1)
-        y += spaceBetweenLines
-    }
-}

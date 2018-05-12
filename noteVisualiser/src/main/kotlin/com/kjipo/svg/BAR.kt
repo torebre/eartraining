@@ -2,7 +2,7 @@ package com.kjipo.svg
 
 import org.slf4j.LoggerFactory
 
-class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
+class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
     var clef: Clef? = null
     var key: Key = Key.C
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
@@ -54,15 +54,26 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
                             val renderingElement = it.toRenderingElement()
                             renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
                         } ?: 0)
+                .minus(START_NOTE_ELEMENT_MARGIN)
 
-        // TODO Figure out better solution
-        val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / ticksInMeasure()
+
+        val valTotalTicksInBar = scoreRenderingElements.filter { it is NoteElement }.map { (it as NoteElement).duration.ticks }.sum()
+        val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
+
+
+        logger.info("Total ticks in bar: $valTotalTicksInBar. Pixels per tick: $pixelsPerTick")
+
+
         val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
 
         val returnList = mutableListOf<PositionedRenderingElement>()
 
         clefElement?.let { returnList.add(0, clefElement.toRenderingElement()) }
         timeSignatureElement?.let { returnList.add(0, timeSignatureElement.toRenderingElement()) }
+
+
+        logger.info("Elements in bar: $scoreRenderingElements")
+
 
         var tickCounter = 0
         scoreRenderingElements.forEach {
@@ -71,6 +82,13 @@ class BAR(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
                     it.xPosition = barXoffset + Math.ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     it.yPosition += barYoffset
                     tickCounter += it.duration.ticks
+
+                    if(consumer.debug) {
+                        val width = barXoffset.plus(Math.ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))).minus(it.xPosition).toInt()
+                        val debugBox = Box(it.xPosition, it.yPosition, width, it.yPosition)
+                        returnList.add(debugBox.toRenderingElement())
+                    }
+
                 }
                 else -> logger.error("Unhandled class: ${it::class}")
             }

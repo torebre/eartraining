@@ -112,8 +112,3 @@ fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
     }
 
 }
-
-
-fun drawLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node, strokeWidth: Int) {
-    SvgTools.addLine(xStart, yStart, xEnd, yEnd, node, strokeWidth)
-}

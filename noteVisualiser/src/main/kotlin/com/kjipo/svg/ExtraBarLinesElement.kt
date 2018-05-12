@@ -3,15 +3,15 @@ package com.kjipo.svg
 import com.kjipo.font.*
 
 class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: Int,
-                           val yPositions: List<Int>, val lineLength: Int) : ScoreRenderingElement {
+                           val yPositions: List<Int>, val leftStart: Int, val rightEnd: Int) : ScoreRenderingElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val pathElements = yPositions.map {
             listOf(
                     PathElement(
-                            PathCommand.MOVE_TO_ABSOLUTE, listOf(-lineLength.div(2.0), yPosition.plus(it).toDouble())),
+                            PathCommand.MOVE_TO_ABSOLUTE, listOf(leftStart.times(-1).toDouble(), yPosition.plus(it).toDouble())),
                     PathElement(
-                            PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(lineLength.toDouble())))
+                            PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(leftStart.plus(rightEnd).toDouble())))
         }
                 .flatten()
                 .toList()
@@ -20,9 +20,9 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
         val yMax = yPositions.max() ?: yMin
 
         val renderingElement = RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
-                BoundingBox(-lineLength.div(2.0),
+                BoundingBox(leftStart.times(-1).toDouble(),
                         yMin.toDouble(),
-                        lineLength.div(2.0),
+                        leftStart.plus(rightEnd).toDouble(),
                         yMax.toDouble()),
                 0)
 
@@ -32,25 +32,10 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
         return renderingElement
     }
 
-
 }
 
 
 class BarLines(override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
-
-//    val width = DEFAULT_BAR_WIDTH
-//    val spaceBetweenLines = 2 * DEFAULT_VERTICAL_NOTE_SPACING
-//
-//    val x = xStart
-//    var y = gLine - spaceBetweenLines * 3
-//
-//    drawLine(x, y, x, y + 4 * spaceBetweenLines, element, 1)
-//    drawLine(x + width, y, x + width, y + 4 * spaceBetweenLines, element, 1)
-//    for (i in 0..4) {
-//        drawLine(x, y, x + width, y, element, 1)
-//        y += spaceBetweenLines
-//    }
-
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val spaceBetweenLines = 2 * DEFAULT_VERTICAL_NOTE_SPACING
@@ -77,5 +62,20 @@ class BarLines(override var xPosition: Int, override var yPosition: Int) : Score
         return renderingElement
     }
 
+}
+
+
+class Box(override var xPosition: Int, override var yPosition: Int, val width: Int, val height: Int) : ScoreRenderingElement {
+
+    override fun toRenderingElement(): PositionedRenderingElement {
+        val pathElements = listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
+                PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(height.toDouble())),
+                PathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(width.toDouble())),
+                PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(height.times(-1).toDouble())))
+
+        return RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
+                findBoundingBox(pathElements),
+                0)
+    }
 
 }

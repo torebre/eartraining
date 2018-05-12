@@ -1,6 +1,6 @@
 package com.kjipo.svg
 
-class NOTE(consumer: ElementConsumer<*>) : ScoreElement(consumer) {
+class NOTE(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
     var note = NoteType.C
     var modifier = NoteModifier.NONE
     var octave = 5

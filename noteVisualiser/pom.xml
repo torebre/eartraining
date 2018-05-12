@@ -14,7 +14,7 @@
         <source.version>1.6</source.version>
         <target.version>1.6</target.version>
         <kotlin.compiler.jvmTarget>1.6</kotlin.compiler.jvmTarget>
-        <kotlin.version>1.2.21</kotlin.version>
+        <kotlin.version>1.2.30</kotlin.version>
     </properties>
 
 
