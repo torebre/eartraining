@@ -114,5 +114,56 @@ class GeneratedSequenceTest {
         Thread.sleep(Long.MAX_VALUE)
     }
 
+    @Test
+    fun `Shows rests`() {
+        val testScore = createScore().score {
+            bar {
+                clef = Clef.G
+                timeSignature = TimeSignature(4, 4)
+
+                note {
+                    note = NoteType.A
+                    duration = Duration.QUARTER
+                    octave = 4
+                }
+
+                note {
+                    note = NoteType.H
+                    duration = Duration.QUARTER
+                    octave = 4
+                }
+
+                note {
+                    note = NoteType.C
+                    duration = Duration.QUARTER
+                }
+
+                rest {
+                    duration = Duration.QUARTER
+                }
+
+            }
+
+        }
+
+        println(testScore.renderingElements)
+
+        var idCounter = 0
+        testScore.renderingElements.forEach { it.id = idCounter++ }
+
+        startApplication()
+
+        Thread.sleep(5000)
+        println("Initialized: ${FX.initialized.value}")
+
+        val scoreController = FX.find(ScoreController::class.java)
+
+        FX.runAndWait { scoreController.fireLoadScore(testScore) }
+
+        Thread.sleep(Long.MAX_VALUE)
+    }
+
+
+
 
 }

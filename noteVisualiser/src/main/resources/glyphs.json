@@ -1426,6 +1426,883 @@
     }
   },
   {
+    "name": "rests.2",
+    "pathElements": [
+      {
+        "command": "MOVE_TO_ABSOLUTE",
+        "numbers": [
+          36.2769,
+          364.519
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -5.2695,
+          -1.59402,
+          -7.9724,
+          -5.29401,
+          -7.9724,
+          -9.707
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -3.72,
+          1.9198,
+          -7.94601,
+          5.8409,
+          -11.846
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          31.7194,
+          -31.587,
+          47.3486,
+          -77.147,
+          47.3486,
+          -127.041
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -57.473,
+          -20.7388,
+          -120.695,
+          -61.5118,
+          -174.932
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -6.462,
+          -8.5712,
+          -6.6321,
+          -8.7247,
+          -6.6321,
+          -12.5837
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -0.2143,
+          5.00679E-4,
+          -0.440199,
+          5.00679E-4,
+          -0.679499
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -0.7798,
+          -0.0665007,
+          -1.3987,
+          -0.0665007,
+          -1.9875
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -4.2037,
+          3.3894,
+          -6.8696,
+          58.5665,
+          -55.5651
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          44.5264,
+          -39.5527
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          32.116,
+          -28.6105
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          5.513,
+          -4.9006,
+          9.94701,
+          -8.9566,
+          9.94701,
+          -9.09261
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -0.0019989
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -0.0059967,
+          -0.00299835,
+          -0.0189972,
+          -0.00499725,
+          -0.0370026,
+          -0.00499725
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -0.276001,
+          0.0,
+          -1.89301,
+          0.319,
+          -3.8,
+          0.763
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -15.551,
+          3.711,
+          -30.634,
+          5.493,
+          -44.901,
+          5.493
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -54.7436,
+          0.0,
+          -97.4681,
+          -26.237,
+          -108.478,
+          -70.388
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -0.806685,
+          -3.202,
+          -1.22431,
+          -9.918,
+          -1.22431,
+          -16.78
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -6.03101,
+          0.322692,
+          -12.174,
+          0.987472,
+          -16.141
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          8.14737,
+          -49.689,
+          47.9368,
+          -104.684,
+          111.316,
+          -153.9
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          6.064,
+          -4.73199,
+          10.38,
+          -7.01199,
+          13.978,
+          -7.01199
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          2.669,
+          0.0,
+          4.943,
+          1.255,
+          7.243,
+          3.69598
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          2.271,
+          2.43701,
+          3.455,
+          4.686,
+          3.455,
+          7.12402
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          3.819,
+          -2.905,
+          8.09998,
+          -9.092,
+          14.287
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -28.7879,
+          28.718,
+          -43.1229,
+          63.243,
+          -43.1229,
+          95.663
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          33.512,
+          15.3179,
+          64.775,
+          45.8229,
+          85.047
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          14.667,
+          9.72499,
+          34.376,
+          15.114,
+          52.022,
+          15.114
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          8.57001,
+          0.0,
+          16.654,
+          -1.27101,
+          23.436,
+          -3.935
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          1.463,
+          -0.578003,
+          2.922,
+          -0.84201,
+          4.33101,
+          -0.84201
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          6.31999,
+          0.0,
+          11.62,
+          5.31401,
+          11.62,
+          11.458
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          1.57899,
+          -0.350998,
+          3.213,
+          -1.12401,
+          4.82599
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -0.806,
+          1.70601,
+          -3.269,
+          4.453,
+          -8.57399,
+          9.66301
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -38.407,
+          37.8049,
+          -57.682,
+          91.579,
+          -57.682,
+          149.509
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          55.9565,
+          17.984,
+          115.79,
+          54.082,
+          168.855
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          6.916,
+          10.184
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          4.02599
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          0.409012
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          5.45999,
+          -0.315994,
+          5.64999,
+          -26.905,
+          28.817
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -54.095,
+          47.274
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -35.0528,
+          30.553
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -9.0,
+          7.86301
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -8.3843,
+          7.34198
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -11.1315,
+          9.711
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -10.6106,
+          9.23602
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -1.9894,
+          1.65799,
+          -5.7789,
+          5.021,
+          -8.4315,
+          7.43698
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -5.1769,
+          4.74002,
+          -8.7824,
+          6.785,
+          -12.4147,
+          6.785
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -1.0872,
+          0.0,
+          -2.1768,
+          -0.182983,
+          -3.3117,
+          -0.531982
+        ]
+      },
+      {
+        "command": "CLOSE_PATH",
+        "numbers": []
+      }
+    ],
+    "strokeWidth": 1,
+    "boundingBox": {
+      "xMin": -3.0262100001454684E-4,
+      "yMin": -365.05059515,
+      "xMax": 221.99617937899998,
+      "yMax": 365.0513868499999
+    }
+  },
+  {
+    "name": "rests.1",
+    "pathElements": [
+      {
+        "command": "MOVE_TO_ABSOLUTE",
+        "numbers": [
+          0.0,
+          62.5263
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -62.5263
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          164.842
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          164.842
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          62.5263
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          62.5267
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -164.842
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -164.842
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -62.5267
+        ]
+      },
+      {
+        "command": "CLOSE_PATH",
+        "numbers": []
+      }
+    ],
+    "strokeWidth": 1,
+    "boundingBox": {
+      "xMin": 0.0,
+      "yMin": 0.0,
+      "xMax": 329.684,
+      "yMax": 125.053
+    }
+  },
+  {
+    "name": "rests.3",
+    "pathElements": [
+      {
+        "command": "MOVE_TO_ABSOLUTE",
+        "numbers": [
+          65.3708,
+          218.319
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -40.8346,
+          -6.379,
+          -65.3708,
+          -41.922,
+          -65.3708,
+          -77.539
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -20.985,
+          8.51808,
+          -41.9963,
+          27.2393,
+          -57.0822
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          21.3482,
+          -17.1777,
+          48.5219,
+          -25.6977,
+          76.7527,
+          -25.6977
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          31.089,
+          0.0,
+          63.459,
+          10.3326,
+          90.742,
+          30.8135
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          3.25601,
+          2.4424,
+          5.908,
+          4.3233,
+          6.14101,
+          4.3233
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0110016,
+          0.0,
+          0.0169983,
+          -0.0042038,
+          0.0169983,
+          -0.0127029
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -0.142097,
+          -18.332,
+          -61.3421,
+          -40.737,
+          -136.042
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -34.685,
+          -115.569,
+          -40.791,
+          -135.439,
+          -40.791,
+          -141.176
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          -1.67401,
+          0.520004,
+          -2.145,
+          1.002,
+          -3.44
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          2.29401,
+          -6.10201,
+          8.414,
+          -9.278,
+          14.479,
+          -9.278
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          5.32899,
+          0.0,
+          10.617,
+          2.452,
+          13.231,
+          7.526
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          2.13199,
+          4.121,
+          109.658,
+          364.689,
+          109.658,
+          367.721
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          9.32401,
+          -7.42101,
+          15.15,
+          -15.195,
+          15.15
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -4.429,
+          0.0,
+          -8.974,
+          -1.89101,
+          -12.326,
+          -6.10301
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -0.662994,
+          -0.852997,
+          -2.274,
+          -4.121,
+          -3.45799,
+          -7.24699
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -16.816,
+          -42.963,
+          -52.247,
+          -76.358,
+          -92.605,
+          -87.3951
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          -4.5,
+          -1.2315
+        ]
+      },
+      {
+        "command": "LINE_TO_RELATIVE",
+        "numbers": [
+          2.179,
+          2.2737
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          12.625,
+          12.9509,
+          19.697,
+          31.7859,
+          19.697,
+          50.7879
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          0.0,
+          5.88,
+          -0.677002,
+          11.775,
+          -2.076,
+          17.517
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -8.11299,
+          33.519,
+          -39.127,
+          56.992,
+          -72.9191,
+          56.992
+        ]
+      },
+      {
+        "command": "CURVE_TO_RELATIVE",
+        "numbers": [
+          -3.6956,
+          0.0,
+          -7.4244,
+          -0.281006,
+          -11.1601,
+          -0.860001
+        ]
+      },
+      {
+        "command": "CLOSE_PATH",
+        "numbers": []
+      }
+    ],
+    "strokeWidth": 1,
+    "boundingBox": {
+      "xMin": 0.0,
+      "yMin": -196.8118029,
+      "xMax": 257.7340083,
+      "yMax": 219.17919709999998
+    }
+  },
+  {
+    "name": "rests.0",
+    "pathElements": [
+      {
+        "command": "MOVE_TO_ABSOLUTE",
+        "numbers": [
+          0.0,
+          -62.5263
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -62.5267
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          164.842
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          164.842
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          62.5267
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          62.5263
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -164.842
+        ]
+      },
+      {
+        "command": "HORIZONAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -164.842
+        ]
+      },
+      {
+        "command": "VERTICAL_LINE_TO_RELATIVE",
+        "numbers": [
+          -62.5263
+        ]
+      },
+      {
+        "command": "CLOSE_PATH",
+        "numbers": []
+      }
+    ],
+    "strokeWidth": 1,
+    "boundingBox": {
+      "xMin": 0.0,
+      "yMin": -125.053,
+      "xMax": 329.684,
+      "yMax": 0.0
+    }
+  },
+  {
     "name": "noteheads.s0",
     "pathElements": [
       {

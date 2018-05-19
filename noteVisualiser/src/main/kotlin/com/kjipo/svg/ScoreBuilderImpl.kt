@@ -6,7 +6,7 @@ import com.kjipo.font.width
 
 class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterface<RenderingSequence> {
     private val currentElements = mutableListOf<ScoreRenderingElement>()
-    private val noteElements = mutableListOf<NoteElement>()
+    private val noteElements = mutableListOf<TemporalElement>()
     private val bars = mutableListOf<BAR>()
 
 
@@ -27,6 +27,13 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
+    }
+
+    override fun onRestAdded(rest: REST) {
+        val restElement = RestElement(rest.duration, 0, 0)
+
+        currentElements.add(restElement)
+        noteElements.add(restElement)
     }
 
     fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init).finalize(this)
@@ -50,7 +57,9 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
 
         val beamGroups = mutableMapOf<Int, MutableCollection<StemElement>>()
 
-        noteElements.forEach {
+        noteElements.filter { it is NoteElement }
+                .map { it as NoteElement }
+                .forEach {
             if (it.requiresStem()) {
                 val stem = addStem(it.toRenderingElement().boundingBox)
                 val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it)
@@ -63,9 +72,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
                         stemElements
                     }
                 })
-
             }
-
         }
 
         beamGroups.forEach({ beamGroup, stemElements ->

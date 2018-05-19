@@ -20,6 +20,8 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
 
     fun note(init: NOTE.() -> Unit) = doInit(NOTE(consumer), init)
 
+    fun rest(init: REST.() -> Unit) = doInit(REST(consumer), init)
+
     private fun ticksInMeasure(): Int {
         // TODO Need to look at time signature defined in earlier bars
         return if (timeSignature.denominator == 0) {
@@ -57,7 +59,8 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
                 .minus(START_NOTE_ELEMENT_MARGIN)
 
 
-        val valTotalTicksInBar = scoreRenderingElements.filter { it is NoteElement }.map { (it as NoteElement).duration.ticks }.sum()
+        val valTotalTicksInBar = scoreRenderingElements.filter { it is TemporalElement }
+                .map { (it as TemporalElement).duration.ticks }.sum()
         val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
 
 
@@ -78,7 +81,7 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
         var tickCounter = 0
         scoreRenderingElements.forEach {
             when (it) {
-                is NoteElement -> {
+                is TemporalElement -> {
                     it.xPosition = barXoffset + Math.ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     it.yPosition += barYoffset
                     tickCounter += it.duration.ticks

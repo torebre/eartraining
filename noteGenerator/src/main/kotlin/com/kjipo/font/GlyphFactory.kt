@@ -25,6 +25,14 @@ object GlyphFactory {
         }
     }
 
+    fun getRest(restDuration: NoteType): GlyphData {
+        return when (restDuration) {
+            NoteType.QUARTER_NOTE -> getGlyph("rests.2")
+            NoteType.HALF_NOTE -> getGlyph("rests.1")
+            NoteType.WHOLE_NOTE -> getGlyph("rests.0")
+        }
+    }
+
     fun getGlyph(name: String): GlyphData {
         return nameGlyphMap.getOrElse(name, { blankGlyph })
     }

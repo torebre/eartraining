@@ -7,6 +7,7 @@ interface ScoreBuilderInterface<out T> {
 
     fun onBarAdded(bar: BAR)
     fun onNoteAdded(note: NOTE)
+    fun onRestAdded(rest: REST)
     fun build(): T
 }
 
@@ -20,6 +21,7 @@ open class ScoreElement(val consumer: ScoreBuilderInterface<*>) {
 
         when {
             child is NOTE -> consumer.onNoteAdded(child)
+            child is REST -> consumer.onRestAdded(child)
             child is BAR -> consumer.onBarAdded(child)
         }
     }
