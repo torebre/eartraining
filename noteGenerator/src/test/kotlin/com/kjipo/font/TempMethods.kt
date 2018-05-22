@@ -1,5 +1,8 @@
 package com.kjipo.font
 
+import com.kjipo.svg.GlyphData
+import com.kjipo.svg.findBoundingBox
+import com.kjipo.svg.translateFontPathElement
 import java.io.OutputStreamWriter
 import java.util.*
 

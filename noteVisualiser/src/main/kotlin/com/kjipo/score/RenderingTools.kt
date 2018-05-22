@@ -1,7 +1,6 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.*
-import org.w3c.dom.Element
+import com.kjipo.svg.*
 
 
 fun addExtraBarLines(noteElement: NoteElement): ScoreRenderingElement? {

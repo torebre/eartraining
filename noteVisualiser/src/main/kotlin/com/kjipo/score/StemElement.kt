@@ -1,8 +1,8 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.BoundingBox
-import com.kjipo.font.GlyphData
-import com.kjipo.font.PathInterface
+import com.kjipo.svg.BoundingBox
+import com.kjipo.svg.GlyphData
+import com.kjipo.svg.PathInterface
 
 class StemElement(override var xPosition: Int,
                   override var yPosition: Int,

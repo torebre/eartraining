@@ -1,6 +1,7 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.*
+import com.kjipo.svg.*
+
 
 class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: Int,
                            val yPositions: List<Int>, val leftStart: Int, val rightEnd: Int) : ScoreRenderingElement {

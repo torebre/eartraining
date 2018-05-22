@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 interface PositionedRenderingElement : RenderingElement {
     var id: Int

@@ -1,8 +1,7 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.findBoundingBox
-import com.kjipo.font.height
-import com.kjipo.font.width
+import com.kjipo.svg.findBoundingBox
+
 
 class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterface<RenderingSequence> {
     private val currentElements = mutableListOf<ScoreRenderingElement>()

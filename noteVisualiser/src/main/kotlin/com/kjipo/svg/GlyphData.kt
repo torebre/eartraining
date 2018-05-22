@@ -1,4 +1,4 @@
-package com.kjipo.font
+package com.kjipo.svg
 
 class GlyphData(val name: String, override val pathElements: List<PathElement>, override val strokeWidth: Int, val boundingBox: BoundingBox) : PathInterface {
 

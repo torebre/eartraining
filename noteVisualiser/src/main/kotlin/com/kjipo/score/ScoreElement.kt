@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 
 interface ScoreBuilderInterface<out T> {

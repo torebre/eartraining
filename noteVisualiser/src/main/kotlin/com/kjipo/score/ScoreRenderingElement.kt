@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 interface ScoreRenderingElement {
     var xPosition: Int

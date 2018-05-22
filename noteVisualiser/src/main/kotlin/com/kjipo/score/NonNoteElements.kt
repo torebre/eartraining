@@ -1,8 +1,7 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.*
-import java.util.stream.Collectors
-import java.util.stream.Stream
+import com.kjipo.svg.*
+
 
 class ClefElement(val clef: Clef, override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
 
@@ -27,8 +26,6 @@ class TimeSignatureElement(val nominator: Int, val denominator: Int, override va
     override fun toRenderingElement(): PositionedRenderingElement {
         val nominatorGlyph = GlyphFactory.getNumberGlyph(nominator)
         val denominatorGlyph = GlyphFactory.getNumberGlyph(denominator)
-
-
         val pathElements = mutableListOf<PathElement>()
 
         pathElements.addAll(translateGlyph(nominatorGlyph, xPosition, yPosition).pathElements)

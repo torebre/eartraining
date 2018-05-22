@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 import org.slf4j.LoggerFactory
 

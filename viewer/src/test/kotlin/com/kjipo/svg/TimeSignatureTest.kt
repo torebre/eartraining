@@ -1,6 +1,5 @@
 package com.kjipo.svg
 
-import com.kjipo.font.GlyphFactory
 import org.junit.Test
 
 class TimeSignatureTest {

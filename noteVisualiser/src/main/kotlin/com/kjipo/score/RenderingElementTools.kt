@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 
 fun getExtraBarlines(note: NoteType, octave: Int): List<Int> {

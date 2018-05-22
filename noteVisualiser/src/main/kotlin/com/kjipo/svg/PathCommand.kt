@@ -1,4 +1,4 @@
-package com.kjipo.font
+package com.kjipo.svg
 
 enum class PathCommand constructor(val command: Char, val isAbsolute: Boolean) {
     VERTICAL_LINE_TO_RELATIVE('v', false),

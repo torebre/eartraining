@@ -1,9 +1,9 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.GlyphFactory
-import com.kjipo.font.NoteType
 
-class NoteElement(val note: com.kjipo.svg.NoteType,
+import com.kjipo.svg.GlyphFactory
+
+class NoteElement(val note: NoteType,
                   val octave: Int,
                   override val duration: Duration,
                   override var xPosition: Int,
@@ -12,13 +12,7 @@ class NoteElement(val note: com.kjipo.svg.NoteType,
     var bar: BAR? = null
 
     override fun toRenderingElement(): PositionedRenderingElement {
-        val noteRenderedElement = when (duration) {
-            Duration.QUARTER -> GlyphFactory.getGlyph(NoteType.QUARTER_NOTE)
-                    .let { RenderingElementImpl(it) }
-            Duration.HALF -> GlyphFactory.getGlyph(NoteType.HALF_NOTE)
-                    .let { RenderingElementImpl(it) }
-            else -> throw IllegalArgumentException("Unhandled duration: ${duration}")
-        }
+        val noteRenderedElement = RenderingElementImpl(GlyphFactory.getGlyph(duration))
 
         noteRenderedElement.xPosition = xPosition
         noteRenderedElement.yPosition = yPosition

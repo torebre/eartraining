@@ -3,6 +3,7 @@ package com.kjipo.font
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.kjipo.svg.*
 import org.slf4j.LoggerFactory
 import org.w3c.dom.Document
 import org.w3c.dom.Node
@@ -66,7 +67,7 @@ object ReadFonts {
 //        doc.appendChild(rootElement)
         val currentY = 50
         addElementsToDocument(doc, currentY, inputName, extractGlyphPaths(fontData))
-        SvgTools.writeDocumentToFile(doc, path)
+        writeDocumentToFile(doc, path)
     }
 
     @Throws(IOException::class, TransformerException::class, ParserConfigurationException::class)
@@ -100,7 +101,7 @@ object ReadFonts {
         rootElement.setAttributeNS(null, "width", "10000")
         rootElement.setAttributeNS(null, "height", currentY.get().toString())
 
-        SvgTools.writeDocumentToFile(doc, outputFilePath)
+        writeDocumentToFile(doc, outputFilePath)
     }
 
     @Throws(IOException::class, TransformerException::class, XMLStreamException::class, ParserConfigurationException::class)
@@ -134,9 +135,8 @@ object ReadFonts {
         rootElement.setAttributeNS(null, "width", "10000")
         rootElement.setAttributeNS(null, "height", "5000")
 
-        SvgTools.writeDocumentToFile(doc, outputFilePath)
+        writeDocumentToFile(doc, outputFilePath)
     }
-
 
 
     private fun writeGlyphWithBoundingBoxToFile(glyphNames: Collection<String>, fontFile: Path, outputFilePath: Path, scale: Double = 1.0) {
@@ -163,7 +163,7 @@ object ReadFonts {
                     currentY.getAndAdd(100)
                 }
 
-        SvgTools.writeDocumentToFile(doc, outputFilePath)
+        writeDocumentToFile(doc, outputFilePath)
     }
 
 
@@ -173,7 +173,7 @@ object ReadFonts {
             currentY: Int,
             inputName: String,
             glyphDataCollection: Collection<GlyphData>) {
-        val path1 = svgDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "text")
+        val path1 = svgDocument.createElementNS(SVG_NAMESPACE_URI, "text")
         path1.setAttribute("x", "0")
         path1.setAttribute("y", currentY.toString())
         path1.setAttribute("font-size", "55")
@@ -192,7 +192,7 @@ object ReadFonts {
                 val pathString = transformToSquare2(glyphData.pathElements, currentX, currentY)
                 val boundingBox = findBoundingBox(glyphData.pathElements)
 
-                SvgTools.addPath(rootElement, pathString, 1)
+                addPath(rootElement, pathString, 1)
                 addRectangle(svgDocument, rootElement, offSetBoundingBox(boundingBox, currentX, currentY))
             } catch (e: RuntimeException) {
                 LOGGER.error("Exception when processing glyph {}", glyphData.name, e)
@@ -250,7 +250,7 @@ object ReadFonts {
 
 
     private fun addRectangle(document: Document, node: Node, boundingBox: BoundingBox) {
-        val path1 = document.createElementNS(SvgTools.SVG_NAMESPACE_URI, "rect")
+        val path1 = document.createElementNS(SVG_NAMESPACE_URI, "rect")
         path1.setAttribute("x", boundingBox.xMin.toString())
         path1.setAttribute("y", boundingBox.yMin.toString())
         path1.setAttribute("width", (boundingBox.xMax - boundingBox.xMin).toString())
@@ -330,7 +330,7 @@ object ReadFonts {
     @Throws(ParserConfigurationException::class)
     private fun createNewSvgDocument(): Document {
         val documentBuilder = documentFactoryThreadLocal.get().newDocumentBuilder()
-        return documentBuilder.domImplementation.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null)
+        return documentBuilder.domImplementation.createDocument(SVG_NAMESPACE_URI, "svg", null)
     }
 
 

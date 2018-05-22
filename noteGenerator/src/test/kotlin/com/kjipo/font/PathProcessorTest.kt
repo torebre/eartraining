@@ -1,6 +1,7 @@
 package com.kjipo.font
 
 
+import com.kjipo.svg.processPath
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths

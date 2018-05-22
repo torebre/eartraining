@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 
 class RenderingSequence(val renderingElements: List<PositionedRenderingElement>, val viewBox: ViewBox)

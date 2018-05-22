@@ -1,10 +1,10 @@
 package com.kjipo.svg
 
+import com.kjipo.score.*
 import com.kjipo.viewer.ScoreController
 import com.kjipo.viewer.startApplication
 import org.junit.Test
 import tornadofx.*
-import java.nio.file.Paths
 
 
 class GeneratedSequenceTest {

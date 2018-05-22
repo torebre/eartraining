@@ -1,8 +1,8 @@
-package com.kjipo.svg
+package com.kjipo.score
 
-import com.kjipo.font.BoundingBox
-import com.kjipo.font.GlyphData
-import com.kjipo.font.PathInterface
+import com.kjipo.svg.BoundingBox
+import com.kjipo.svg.GlyphData
+import com.kjipo.svg.PathInterface
 
 
 interface RenderingElement {

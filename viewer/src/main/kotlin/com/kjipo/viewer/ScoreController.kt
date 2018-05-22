@@ -1,6 +1,6 @@
 package com.kjipo.viewer
 
-import com.kjipo.svg.RenderingSequence
+import com.kjipo.score.RenderingSequence
 import tornadofx.*
 
 

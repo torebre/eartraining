@@ -1,5 +1,6 @@
 package com.kjipo.svg
 
+import com.kjipo.score.*
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -21,12 +22,10 @@ class SequenceGenerator {
 
 
     fun createNewSequence(debug: Boolean = false): RenderingSequence {
-
         var id = 0
         var timeCounter = 0
         var currentBarEnd = 4 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
         var beatCounter = 0
-        val random = Random()
 
         // TODO This only works because there are only two types of notes used so far
 

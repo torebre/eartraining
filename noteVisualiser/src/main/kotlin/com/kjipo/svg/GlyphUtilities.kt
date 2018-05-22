@@ -1,9 +1,45 @@
-package com.kjipo.font
+package com.kjipo.svg
+
+import java.text.DecimalFormat
+
+
+val decimalFormat = DecimalFormat().let {
+    it.maximumFractionDigits = 3
+    it.isGroupingUsed = false
+    it
+}
+
+
+fun translateGlyph(pathInterface: PathInterface, xTranslate: Int, yTranslate: Int): PathInterface {
+    return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, pathInterface.strokeWidth)
+}
+
+
+fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {
+    return when (pathElement.command) {
+        PathCommand.MOVE_TO_ABSOLUTE -> PathElement(pathElement.command, translateAbsoluteMovement(pathElement.numbers, xTranslate, yTranslate))
+        else -> pathElement
+    }
+}
+
+
+fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate: Int): List<Double> {
+    var isYCoordinate = true
+
+    return numbers.map {
+        isYCoordinate = !isYCoordinate
+        if (isYCoordinate) {
+            it + yTranslate
+        } else {
+            it + xTranslate
+        }
+    }
+
+}
 
 
 private val STEP_SIZE = 0.1
 
-data class CoordinatePair(val x: Double, val y: Double, val skipLine: Boolean = false)
 
 fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
     val pathAsLineSegments = mutableListOf<CoordinatePair>()
@@ -195,27 +231,6 @@ private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double
     return Math.pow(1 - t, 3.0) * p0 + 3 * Math.pow(1 - t, 2.0) * p1 * t + 3 * (1 - t) * p2 * Math.pow(t, 2.0) + Math.pow(t, 3.0) * p3
 }
 
-data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val yMax: Double)
-
-fun BoundingBox.height(): Double {
-    return Math.abs(yMax.minus(yMin))
-}
-
-fun BoundingBox.width(): Double {
-    return Math.abs(xMax.minus(xMin))
-}
-
-private fun findBoundingBoxInternal(coordinates: Iterable<CoordinatePair>): BoundingBox {
-    return BoundingBox(coordinates.map { coordinatePair -> coordinatePair.x }.min() ?: 0.0,
-            coordinates.map { coordinatePair -> coordinatePair.y }.min() ?: 0.0,
-            coordinates.map { coordinatePair -> coordinatePair.x }.max() ?: 0.0,
-            coordinates.map { coordinatePair -> coordinatePair.y }.max() ?: 0.0)
-}
-
-fun findBoundingBox(pathElements: List<PathElement>): BoundingBox {
-    return findBoundingBoxInternal(processPath(pathElements))
-}
-
 fun offSetBoundingBox(boundingBox: BoundingBox, xOffset: Int, yOffset: Int): BoundingBox {
     return BoundingBox(boundingBox.xMin + xOffset, boundingBox.yMin + yOffset, boundingBox.xMax + xOffset, boundingBox.yMax + yOffset)
 }
@@ -261,31 +276,6 @@ fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
 }
 
 
-fun translateGlyph(pathInterface: PathInterface, xTranslate: Int, yTranslate: Int): PathInterface {
-    return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, pathInterface.strokeWidth)
-}
-
-fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {
-    return when (pathElement.command) {
-        PathCommand.MOVE_TO_ABSOLUTE -> PathElement(pathElement.command, translateAbsoluteMovement(pathElement.numbers, xTranslate, yTranslate))
-        else -> pathElement
-    }
-}
-
-fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate: Int): List<Double> {
-    var isYCoordinate = true
-
-    return numbers.map {
-        isYCoordinate = !isYCoordinate
-        if (isYCoordinate) {
-            it + yTranslate
-        } else {
-            it + xTranslate
-        }
-    }
-
-}
-
 fun transformToPathString(pathInterface: PathInterface) = transformToPathString(pathInterface.pathElements)
 
 
@@ -294,7 +284,7 @@ fun transformToPathString(pathElements: Collection<PathElement>): String {
         it.command.command
                 .plus(" ")
                 .plus(it.numbers.joinToString(" ") {
-                    ReadFonts.decimalFormatThreadLocal.get().format(it)
+                    decimalFormat.format(it)
                 })
     }
             .joinToString(" ")

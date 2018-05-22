@@ -1,5 +1,7 @@
 package com.kjipo.font
 
+import com.kjipo.svg.PathCommand
+import com.kjipo.svg.PathElement
 import org.apache.commons.lang3.CharUtils
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream

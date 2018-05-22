@@ -1,4 +1,4 @@
-package com.kjipo.font
+package com.kjipo.svg
 
 interface PathInterface {
 

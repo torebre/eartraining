@@ -1,6 +1,6 @@
 package com.kjipo.viewer
 
-import com.kjipo.svg.RenderingSequence
+import com.kjipo.score.RenderingSequence
 import com.kjipo.svg.createHtmlDocumentString
 import javafx.beans.value.ObservableValue
 import javafx.concurrent.Worker

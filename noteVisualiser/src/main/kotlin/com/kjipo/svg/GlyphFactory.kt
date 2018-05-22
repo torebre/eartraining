@@ -1,7 +1,8 @@
-package com.kjipo.font
+package com.kjipo.svg
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.kjipo.score.Duration
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
@@ -17,19 +18,19 @@ object GlyphFactory {
     val alphabetResource = "/alpha.json"
 
 
-    fun getGlyph(noteType: NoteType): GlyphData {
+    fun getGlyph(noteType: Duration): GlyphData {
         return when (noteType) {
-            NoteType.QUARTER_NOTE -> getGlyph("noteheads.s2")
-            NoteType.HALF_NOTE -> getGlyph("noteheads.s1")
-            NoteType.WHOLE_NOTE -> getGlyph("noteheads.s0")
+            Duration.QUARTER -> getGlyph("noteheads.s2")
+            Duration.HALF -> getGlyph("noteheads.s1")
+            Duration.WHOLE -> getGlyph("noteheads.s0")
         }
     }
 
-    fun getRest(restDuration: NoteType): GlyphData {
+    fun getRest(restDuration: Duration): GlyphData {
         return when (restDuration) {
-            NoteType.QUARTER_NOTE -> getGlyph("rests.2")
-            NoteType.HALF_NOTE -> getGlyph("rests.1")
-            NoteType.WHOLE_NOTE -> getGlyph("rests.0")
+            Duration.QUARTER -> getGlyph("rests.2")
+            Duration.HALF -> getGlyph("rests.1")
+            Duration.WHOLE -> getGlyph("rests.0")
         }
     }
 

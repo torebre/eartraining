@@ -1,25 +1,28 @@
 package com.kjipo.svg
 
-import com.kjipo.font.GlyphData
-import com.kjipo.font.SvgTools
-import com.kjipo.font.transformToPathString
-import com.kjipo.font.translateGlyph
+
+import com.kjipo.score.RenderingSequence
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import java.io.IOException
 import java.io.StringWriter
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerException
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 val HTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
+val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
 fun writeToHtmlFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
     val document = createHtmlDocument(renderingSequence)
-    SvgTools.writeDocumentToFile(document, outputFilePath)
+    writeDocumentToFile(document, outputFilePath)
 }
 
 fun createHtmlDocumentString(renderingSequence: RenderingSequence): String {
@@ -50,7 +53,7 @@ fun createHtmlDocument(renderingSequence: RenderingSequence): Document {
     val bodyElement = document.createElementNS(HTML_NAMESPACE, "body")
     rootElement.appendChild(bodyElement)
 
-    val svgElement = document.createElementNS(SvgTools.SVG_NAMESPACE_URI, "svg")
+    val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
     svgElement.setAttribute("viewBox", renderingSequence.viewBox.let { "${it.xMin} ${it.yMin} ${it.xMax} ${it.yMax}" })
     svgElement.setAttribute("id", "score")
     bodyElement.appendChild(svgElement)
@@ -65,10 +68,10 @@ fun createHtmlDocument(renderingSequence: RenderingSequence): Document {
 
 fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
     val documentFactory = DocumentBuilderFactory.newInstance()
-    val document = documentFactory.newDocumentBuilder().domImplementation.createDocument(SvgTools.SVG_NAMESPACE_URI, "svg", null)
+    val document = documentFactory.newDocumentBuilder().domImplementation.createDocument(SVG_NAMESPACE_URI, "svg", null)
     val rootElement = document.documentElement
     generateSvgData(renderingSequence, rootElement)
-    SvgTools.writeDocumentToFile(document, outputFilePath)
+    writeDocumentToFile(document, outputFilePath)
 }
 
 fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
@@ -82,12 +85,12 @@ fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
         if(renderingElement.glyphData != null) {
             renderingElement.glyphData?.let {
                 usedGlyphs.putIfAbsent(it.name, it)
-                SvgTools.addPathUsingReference(svgElement, it.name, xStart + renderingElement.xPosition, yStart + renderingElement.yPosition, renderingElement.id)
+                addPathUsingReference(svgElement, it.name, xStart + renderingElement.xPosition, yStart + renderingElement.yPosition, renderingElement.id)
             }
         }
         else {
             for (pathInterface in renderingElement.renderingPath) {
-                SvgTools.addPath(svgElement,
+                addPath(svgElement,
                         transformToPathString(translateGlyph(pathInterface, xStart + renderingElement.xPosition, yStart + renderingElement.yPosition)),
                         pathInterface.strokeWidth,
                         // TODO Now multiple paths will have the same ID
@@ -99,11 +102,11 @@ fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
     }
 
     if(!usedGlyphs.isEmpty()) {
-        val defsElement = svgElement.ownerDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "defs")
+        val defsElement = svgElement.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "defs")
         svgElement.appendChild(defsElement)
 
         usedGlyphs.entries.forEach {
-            val pathElement = defsElement.ownerDocument.createElementNS(SvgTools.SVG_NAMESPACE_URI, "path")
+            val pathElement = defsElement.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             pathElement.setAttribute("id", it.key)
             pathElement.setAttribute("d", transformToPathString(it.value.pathElements))
 
@@ -112,3 +115,64 @@ fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
     }
 
 }
+
+
+
+
+@Throws(IOException::class, TransformerException::class)
+fun writeDocumentToFile(svgDocument: Document, outputPath: Path) {
+    val source = DOMSource(svgDocument)
+
+    Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING).use { bufferedWriter ->
+        val result = StreamResult(bufferedWriter)
+        val transformerFactory = TransformerFactory.newInstance()
+        val transformer = transformerFactory.newTransformer()
+        // Set output to be HTML. If this is not set it causes
+        // empty tags to appear, which causes problems when used
+        // with the webview-component
+        transformer.setOutputProperty(OutputKeys.METHOD, "html")
+        transformer.transform(source, result)
+    }
+}
+
+@JvmOverloads
+fun addPath(node: Node, path: String, strokeWidth: Int, id: Int? = null) {
+    val path1 = node.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
+    path1.setAttribute("d", path)
+    path1.setAttribute("stroke", "blue")
+    path1.setAttribute("fill", "yellow")
+    if (id != null) {
+        path1.setAttribute("id", "note" + id.toString())
+    }
+
+    path1.setAttribute("stroke-width", strokeWidth.toString())
+
+    node.appendChild(path1)
+}
+
+fun addLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node, strokeWidth: Int) {
+    val path1 = node.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "line")
+    path1.setAttribute("x1", xStart.toString())
+    path1.setAttribute("y1", yStart.toString())
+    path1.setAttribute("x2", xEnd.toString())
+    path1.setAttribute("y2", yEnd.toString())
+
+
+    path1.setAttribute("stroke-width", strokeWidth.toString())
+    path1.setAttribute("stroke", "black")
+
+
+    node.appendChild(path1)
+}
+
+fun addPathUsingReference(node: Node, reference: String, x: Int, y: Int, id: Int?) {
+    val useTag = node.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
+    useTag.setAttribute("xlink:href", "#$reference")
+    useTag.setAttribute("x", x.toString())
+    useTag.setAttribute("y", y.toString())
+    node.appendChild(useTag)
+    if (id != null) {
+        useTag.setAttribute("id", "note" + id.toString())
+    }
+}
+

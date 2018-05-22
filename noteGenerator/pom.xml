@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+        <groupId>com.kjipo</groupId>
+        <artifactId>scorebuilder</artifactId>
+        <version>0.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

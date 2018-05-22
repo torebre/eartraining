@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 class NOTE(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
     var note = NoteType.C

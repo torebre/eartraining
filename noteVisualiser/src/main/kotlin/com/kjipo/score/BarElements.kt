@@ -1,4 +1,4 @@
-package com.kjipo.svg
+package com.kjipo.score
 
 enum class Clef {
     G,
