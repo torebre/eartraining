@@ -1,0 +1,7 @@
+apply plugin: 'kotlin-platform-jvm'
+
+dependencies {
+    expectedBy project(":score-common")
+    compile libraries.kotlin_stdlib
+    testCompile libraries.kotlin_test_junit
+}

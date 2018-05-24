@@ -1,0 +1,2 @@
+export XJC_OPTS=-Djavax.xml.accessExternalSchema=all
+./bin/xjc.sh -cp lib/jaxb-impl.jar -d ~/workspace/EarTraining/musicXml/src/main/resources/musicxml30/out/ -disableXmlSecurity -b ~/workspace/EarTraining/musicXml/src/main/resources/bindings.xjb ~/workspace/EarTraining/musicXml/src/main/resources/musicxml30/musicxml.xsd

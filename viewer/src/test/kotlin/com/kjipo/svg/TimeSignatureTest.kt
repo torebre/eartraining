@@ -6,7 +6,7 @@ class TimeSignatureTest {
 
     @Test
     fun `Test reading alphabet glyph`() {
-        val character = GlyphFactory.getNumberGlyph(2)
+        val character = getNumberGlyph(2)
 
         println(character)
 

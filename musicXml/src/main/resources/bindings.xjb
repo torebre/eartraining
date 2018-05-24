@@ -1,0 +1,40 @@
+<jxb:bindings version="1.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+
+
+
+<!--
+<xs:sequence>
+    <xs:element name="credit-type" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="link" type="link" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="bookmark" type="bookmark" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:choice>
+        <xs:element name="credit-image" type="image"/>
+        <xs:sequence>
+            <xs:element name="credit-words" type="formatted-text"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="link" type="link" minOccurs="0" maxOccurs="unbounded"/>
+-->
+
+
+
+
+<jxb:bindings schemaLocation = "musicxml30/musicxml.xsd">
+    <jxb:bindings node = "/xs:schema/xs:complexType/xs:sequence/xs:element[@name ='link']">
+        <jxb:property name="link2"/>
+    </jxb:bindings>
+
+    <jxb:bindings node = "/xs:schema/xs:complexType/xs:sequence/xs:element[@name ='segno']">
+        <jxb:property name="segno2"/>
+    </jxb:bindings>
+
+    <jxb:bindings node = "/xs:schema/xs:complexType/xs:sequence/xs:element[@name ='coda']">
+        <jxb:property name="coda2"/>
+    </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>

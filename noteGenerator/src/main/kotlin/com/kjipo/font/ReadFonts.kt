@@ -24,7 +24,10 @@ import javax.xml.parsers.ParserConfigurationException
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamException
 import javax.xml.transform.TransformerException
-import kotlin.streams.toList
+import com.kjipo.svg.invertYCoordinates
+import com.kjipo.svg.offSetBoundingBox
+import com.kjipo.svg.processPath
+import java.lang.RuntimeException
 
 
 object ReadFonts {
@@ -86,7 +89,7 @@ object ReadFonts {
                                 scaleGlyph(glyphData, scale)
                             }
                             .map { invertYCoordinates(it) }
-                            .toList()
+                            .collect(Collectors.toList())
                     addElementsToDocument(doc, currentY.getAndAdd(yIncrement), path.fileName.toString(), glyphDataCollection)
 
                 }
@@ -113,7 +116,7 @@ object ReadFonts {
             extractGlyphPaths(inputStream).stream()
                     .map { invertYCoordinates(it) }
                     .map { glyphData -> scaleGlyph(glyphData, scale) }
-                    .toList()
+                    .collect(Collectors.toList())
         }
 
         glyphDataCollection.stream()
@@ -147,7 +150,7 @@ object ReadFonts {
             extractGlyphPaths(inputStream).stream()
                     .map { invertYCoordinates(it) }
                     .map { glyphData -> scaleGlyph(glyphData, scale) }
-                    .toList()
+                    .collect(Collectors.toList())
         }
 
 
@@ -314,7 +317,7 @@ object ReadFonts {
 
         val glyphsToSave = glyphDataCollection.stream()
                 .filter { glyphData -> glyphNames.contains(glyphData.name) }
-                .toList()
+                .collect(Collectors.toList())
 
         writeGlyphsToOutputStream(glyphsToSave, outputStreamWriter)
     }
@@ -348,6 +351,18 @@ object ReadFonts {
             }
         }
     }
+
+
+    private fun writeKotlinData(glyphNames: List<String>, inputXmlData: InputStream, outputStreamWriter: OutputStreamWriter) {
+        val glyphDataCollection = extractGlyphPaths(inputXmlData)
+
+        val glyphsToSave = glyphDataCollection.stream()
+                .filter { glyphData -> glyphNames.contains(glyphData.name) }
+                .collect(Collectors.toList())
+
+        writeGlyphsToOutputStream(glyphsToSave, outputStreamWriter)
+    }
+
 
 
     @Throws(Exception::class)
