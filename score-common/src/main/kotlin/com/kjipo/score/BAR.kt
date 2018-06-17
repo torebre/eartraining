@@ -70,9 +70,6 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
         clefElement?.let { returnList.add(0, clefElement.toRenderingElement()) }
         timeSignatureElement?.let { returnList.add(0, timeSignatureElement.toRenderingElement()) }
 
-
-
-
         var tickCounter = 0
         scoreRenderingElements.forEach {
             when (it) {

@@ -4,8 +4,8 @@ package com.kjipo.svg
 import com.kjipo.score.Duration
 
 
-val nameGlyphMap = mapOf<String, GlyphData>()
-val alphabetGlyphMap = mapOf<String, GlyphData>()
+//val nameGlyphMap = mapOf<String, GlyphData>()
+//val alphabetGlyphMap = mapOf<String, GlyphData>()
 
 val scale = 0.1
 val glyphResource = "/glyphs.json"
@@ -31,25 +31,25 @@ fun getRest(restDuration: Duration): GlyphData {
 }
 
 fun getGlyph(name: String): GlyphData {
-    return nameGlyphMap.getOrElse(name, { blankGlyph })
+    return GlyphList.instance.nameGlyphMap.getOrElse(name, { blankGlyph })
 }
 
 fun getNumberGlyph(number: Int): GlyphData {
     return when (number) {
-        0 -> alphabetGlyphMap.getValue("zero")
-        1 -> alphabetGlyphMap.getValue("one")
-        2 -> alphabetGlyphMap.getValue("two")
-        3 -> alphabetGlyphMap.getValue("three")
-        4 -> alphabetGlyphMap.getValue("four")
-        5 -> alphabetGlyphMap.getValue("five")
-        6 -> alphabetGlyphMap.getValue("six")
-        7 -> alphabetGlyphMap.getValue("seven")
-        8 -> alphabetGlyphMap.getValue("eight")
-        9 -> alphabetGlyphMap.getValue("nine")
-        else -> nameGlyphMap.getValue(number.toString())
+        0 -> GlyphList.instance.alphabetGlyphMap.getValue("zero")
+        1 -> GlyphList.instance.alphabetGlyphMap.getValue("one")
+        2 -> GlyphList.instance.alphabetGlyphMap.getValue("two")
+        3 -> GlyphList.instance.alphabetGlyphMap.getValue("three")
+        4 -> GlyphList.instance.alphabetGlyphMap.getValue("four")
+        5 -> GlyphList.instance.alphabetGlyphMap.getValue("five")
+        6 -> GlyphList.instance.alphabetGlyphMap.getValue("six")
+        7 -> GlyphList.instance.alphabetGlyphMap.getValue("seven")
+        8 -> GlyphList.instance.alphabetGlyphMap.getValue("eight")
+        9 -> GlyphList.instance.alphabetGlyphMap.getValue("nine")
+        else -> GlyphList.instance.nameGlyphMap.getValue(number.toString())
     }
 }
 
 fun getCharacter(name: String): GlyphData {
-    return alphabetGlyphMap.getOrElse(name, { blankGlyph })
+    return GlyphList.instance.alphabetGlyphMap.getOrElse(name, { blankGlyph })
 }

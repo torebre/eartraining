@@ -99,6 +99,9 @@ class GeneratedSequenceTest {
 
         println(testScore.renderingElements)
 
+
+        println(createHtmlDocumentString(testScore))
+
         var idCounter = 0
         testScore.renderingElements.forEach { it.id = idCounter++ }
 

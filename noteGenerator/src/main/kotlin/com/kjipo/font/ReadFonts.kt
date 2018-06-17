@@ -354,15 +354,51 @@ object ReadFonts {
 
 
     private fun writeKotlinData(glyphNames: List<String>, inputXmlData: InputStream, outputStreamWriter: OutputStreamWriter) {
-        val glyphDataCollection = extractGlyphPaths(inputXmlData)
-
-        val glyphsToSave = glyphDataCollection.stream()
-                .filter { glyphData -> glyphNames.contains(glyphData.name) }
-                .collect(Collectors.toList())
-
-        writeGlyphsToOutputStream(glyphsToSave, outputStreamWriter)
+        val glyphsToSave = extractGlyphPaths(inputXmlData)
+                .map { invertYCoordinates(it) }
+                .map { glyphData -> scaleGlyph(glyphData, scale) }
+                .filter { glyphData ->
+                    if (glyphNames.isEmpty()) {
+                        true
+                    } else {
+                        glyphNames.contains(glyphData.name)
+                    }
+                }
+                .toList()
+        writeKotlinData(glyphsToSave, outputStreamWriter)
     }
 
+
+    private fun writeKotlinData(glyphs: Collection<GlyphData>, outputStreamWriter: OutputStreamWriter) {
+        outputStreamWriter.write("mapOf(")
+
+        outputStreamWriter.write(glyphs.map {
+            var result = """Pair("${it.name}", """
+
+            val pathElements = it.pathElements.map {
+                val numbers = it.numbers.mapIndexed({ index, value ->
+                    value.toString()
+                }).joinToString()
+
+                "PathElement(PathCommand.${it.command}, listOf(${numbers}))".trimIndent()
+            }.joinToString()
+
+
+
+            result += """
+                GlyphData("${it.name}", listOf($pathElements), ${it.strokeWidth},
+                BoundingBox(${it.boundingBox.xMin}, ${it.boundingBox.yMin}, ${it.boundingBox.xMax}, ${it.boundingBox.yMax})))
+
+            """.trimIndent()
+
+            result
+
+        }.joinToString())
+
+        outputStreamWriter.write(")")
+
+
+    }
 
 
     @Throws(Exception::class)
@@ -376,8 +412,8 @@ object ReadFonts {
 //        }
 
 
-        val outputFilePath = Paths.get("output3.xml")
-        generateGlyphsNeededForVisualizer(outputFilePath)
+//        val outputFilePath = Paths.get("output3.xml")
+//        generateGlyphsNeededForVisualizer(outputFilePath)
 
         // Creates a document with all glyphs
 //        val outputFilePath = Paths.get("output2.xml")
@@ -397,12 +433,40 @@ object ReadFonts {
 //        "rests.0", "rests.0o"), svgFontFile, outputFilePath, 0.1)
 
 
-        //        Path outputFilePath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/glyphs.json");
+//        val outputFilePath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/glyphs.json")
         //        Path svgFontFile = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
-        //
 
+
+//        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg")).use { inputData ->
+//            OutputStreamWriter(System.out).use {
+//                writeKotlinData(listOf("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0", "rests.M3", "rests.M2", "rests.M1", "rests.2",
+//                        "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
+//                        "rests.0", "rests.0o"), inputData, it)
+//            }
+//        }
+
+
+        val charactersToInclude = setOf(
+                "zero",
+                "one",
+                "two",
+                "three",
+                "four",
+                "five",
+                "six",
+                "seven",
+                "eight",
+                "nine")
+        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/gonvillealpha11.svg")).use { inputData ->
+            OutputStreamWriter(System.out).use {
+                writeKotlinData(extractGlyphPaths(inputData).filter {
+                    charactersToInclude.contains(it.name)
+                }
+                        .map { invertYCoordinates(it) }
+                        .map { glyphData -> scaleGlyph(glyphData, scale) }, it)
+            }
+        }
 
     }
-
 
 }
