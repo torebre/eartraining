@@ -97,13 +97,8 @@ class GeneratedSequenceTest {
 
         }
 
-        println(testScore.renderingElements)
-
-
-        println(createHtmlDocumentString(testScore))
-
-        var idCounter = 0
-        testScore.renderingElements.forEach { it.id = idCounter++ }
+//        println(testScore.renderingElements)
+//        println(createHtmlDocumentString(testScore))
 
         startApplication()
 
@@ -151,8 +146,8 @@ class GeneratedSequenceTest {
 
         println(testScore.renderingElements)
 
-        var idCounter = 0
-        testScore.renderingElements.forEach { it.id = idCounter++ }
+//        var idCounter = 0
+//        testScore.renderingElements.forEach { it.id = idCounter++ }
 
         startApplication()
 

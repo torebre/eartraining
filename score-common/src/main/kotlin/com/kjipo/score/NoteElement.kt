@@ -8,11 +8,12 @@ class NoteElement(val note: NoteType,
                   override val duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,
-                  override val beamGroup: Int) : ScoreRenderingElement, Stemable, TemporalElement {
+                  override val beamGroup: Int,
+                  val id: String) : ScoreRenderingElement, Stemable, TemporalElement {
     var bar: BAR? = null
 
     override fun toRenderingElement(): PositionedRenderingElement {
-        val noteRenderedElement = RenderingElementImpl(getGlyph(duration))
+        val noteRenderedElement = RenderingElementImpl(getGlyph(duration), id)
 
         noteRenderedElement.xPosition = xPosition
         noteRenderedElement.yPosition = yPosition

@@ -57,8 +57,8 @@ fun generateSequence() {
 
     println(testScore.renderingElements)
 
-    var idCounter = 0
-    testScore.renderingElements.forEach { it.id = idCounter++ }
+//    var idCounter = 0
+//    testScore.renderingElements.forEach { it.id = idCounter++ }
 
     val htmlPath = Paths.get("test_output.html")
     writeToHtmlFile(testScore, htmlPath)

@@ -1,7 +1,7 @@
 package com.kjipo.score
 
 interface PositionedRenderingElement : RenderingElement {
-    var id: Int
+    val id: String
     var xPosition: Int
     var yPosition: Int
 

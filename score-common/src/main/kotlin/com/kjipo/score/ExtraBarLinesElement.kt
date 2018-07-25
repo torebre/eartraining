@@ -6,6 +6,10 @@ import com.kjipo.svg.*
 class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: Int,
                            val yPositions: List<Int>, val leftStart: Int, val rightEnd: Int) : ScoreRenderingElement {
 
+    companion object {
+        var idCounter = 0
+    }
+
     override fun toRenderingElement(): PositionedRenderingElement {
         val pathElements = yPositions.map {
             listOf(
@@ -25,7 +29,7 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
                         yMin.toDouble(),
                         leftStart.plus(rightEnd).toDouble(),
                         yMax.toDouble()),
-                0)
+                "bar-${idCounter++}")
 
         renderingElement.xPosition = xPosition
         renderingElement.yPosition = yPosition
@@ -36,7 +40,7 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
 }
 
 
-class BarLines(override var xPosition: Int, override var yPosition: Int) : ScoreRenderingElement {
+class BarLines(override var xPosition: Int, override var yPosition: Int, val id: String) : ScoreRenderingElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val spaceBetweenLines = 2 * DEFAULT_VERTICAL_NOTE_SPACING
@@ -54,8 +58,7 @@ class BarLines(override var xPosition: Int, override var yPosition: Int) : Score
         }
 
         val renderingElement = RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
-                findBoundingBox(pathElements),
-                0)
+                findBoundingBox(pathElements), id)
 
         renderingElement.xPosition = 0
         renderingElement.yPosition = 0
@@ -66,7 +69,7 @@ class BarLines(override var xPosition: Int, override var yPosition: Int) : Score
 }
 
 
-class Box(override var xPosition: Int, override var yPosition: Int, val width: Int, val height: Int) : ScoreRenderingElement {
+class Box(override var xPosition: Int, override var yPosition: Int, val width: Int, val height: Int, val id: String) : ScoreRenderingElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val pathElements = listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
@@ -76,7 +79,7 @@ class Box(override var xPosition: Int, override var yPosition: Int, val width: I
 
         return RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
                 findBoundingBox(pathElements),
-                0)
+                id)
     }
 
 }

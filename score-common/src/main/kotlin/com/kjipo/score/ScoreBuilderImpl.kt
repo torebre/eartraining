@@ -8,6 +8,11 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     private val noteElements = mutableListOf<TemporalElement>()
     private val bars = mutableListOf<BAR>()
 
+    private var restCounter = 0
+    private var noteCounter = 0
+    private var stemCounter = 0
+    private var beamCounter = 0
+
 
     override fun onBarAdded(bar: BAR) {
         // TODO Figure out best way to set the value
@@ -22,14 +27,14 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     }
 
     override fun onNoteAdded(note: NOTE) {
-        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, calculateVerticalOffset(note.note, note.octave), note.beamGroup)
+        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, calculateVerticalOffset(note.note, note.octave), note.beamGroup, "note-${noteCounter++}")
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
     }
 
     override fun onRestAdded(rest: REST) {
-        val restElement = RestElement(rest.duration, 0, 0)
+        val restElement = RestElement(rest.duration, 0, 0, "rest-${restCounter++}")
 
         currentElements.add(restElement)
         noteElements.add(restElement)
@@ -61,7 +66,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
                 .forEach {
                     if (it.requiresStem()) {
                         val stem = addStem(it.toRenderingElement().boundingBox)
-                        val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it)
+                        val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it, "stem-${stemCounter++}")
 
                         if (beamGroups.containsKey(it.beamGroup)) {
                             beamGroups.get(it.beamGroup)?.add(stemElement)
@@ -118,11 +123,10 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
                 -height.toInt()
         )
 
-
         return BeamElement(stemMinimum.xPosition,
                 stemMinimum.yPosition,
                 listOf(beamElement),
-                findBoundingBox(beamElement.pathElements))
+                findBoundingBox(beamElement.pathElements), "beam-${beamCounter++}")
     }
 
 }

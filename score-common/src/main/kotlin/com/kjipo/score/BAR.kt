@@ -36,25 +36,23 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
     }
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): List<PositionedRenderingElement> {
-        val clefElement = clef?.let { ClefElement(it, 0, 0) }
+        val clefElement = clef?.let { ClefElement(it, 0, 0, "clef") }
 
         val timeSignatureElement = if (timeSignature.nominator == 0) {
             null
         } else {
-            timeSignature.let { TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset) }
+            timeSignature.let { TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset, "time") }
         }
 
         widthAvailableForTemporalElements = DEFAULT_BAR_WIDTH
-                .minus(clefElement?.
-                        let {
-                            val renderingElement = it.toRenderingElement()
-                            renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
-                        } ?: 0)
-                .minus(timeSignatureElement?.
-                        let {
-                            val renderingElement = it.toRenderingElement()
-                            renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
-                        } ?: 0)
+                .minus(clefElement?.let {
+                    val renderingElement = it.toRenderingElement()
+                    renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
+                } ?: 0)
+                .minus(timeSignatureElement?.let {
+                    val renderingElement = it.toRenderingElement()
+                    renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
+                } ?: 0)
                 .minus(START_NOTE_ELEMENT_MARGIN)
 
 
@@ -78,9 +76,9 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
                     it.yPosition += barYoffset
                     tickCounter += it.duration.ticks
 
-                    if(consumer.debug) {
+                    if (consumer.debug) {
                         val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))).minus(it.xPosition).toInt()
-                        val debugBox = Box(it.xPosition, it.yPosition, width, it.yPosition)
+                        val debugBox = Box(it.xPosition, it.yPosition, width, it.yPosition, "debug")
                         returnList.add(debugBox.toRenderingElement())
                     }
 
@@ -95,7 +93,7 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
                 .filterNotNull()
                 .let { returnList.addAll(it.map { it.toRenderingElement() }) }
 
-        returnList.add(BarLines(barXoffset, barYoffset).toRenderingElement())
+        returnList.add(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement())
 
         return returnList
     }

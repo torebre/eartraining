@@ -108,7 +108,6 @@ fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
                 addPath(svgElement,
                         transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
                         pathInterface.strokeWidth,
-                        // TODO Now multiple paths will have the same ID
                         it.id)
             }
         }
@@ -134,13 +133,13 @@ fun writeDocumentToFile(svgDocument: Document, outputPath: Path) {
 }
 
 @JvmOverloads
-fun addPath(node: Node, path: String, strokeWidth: Int, id: Int? = null) {
+fun addPath(node: Node, path: String, strokeWidth: Int, id: String? = null) {
     val path1 = node.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
     path1.setAttribute("d", path)
     path1.setAttribute("stroke", "blue")
     path1.setAttribute("fill", "yellow")
     if (id != null) {
-        path1.setAttribute("id", "note" + id.toString())
+        path1.setAttribute("id", id)
     }
 
     path1.setAttribute("stroke-width", strokeWidth.toString())
@@ -163,14 +162,14 @@ fun addLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int, node: Node, strokeWi
     node.appendChild(path1)
 }
 
-fun addPathUsingReference(node: Node, reference: String, x: Int, y: Int, id: Int?) {
+fun addPathUsingReference(node: Node, reference: String, x: Int, y: Int, id: String?) {
     val useTag = node.ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
     useTag.setAttribute("xlink:href", "#$reference")
     useTag.setAttribute("x", x.toString())
     useTag.setAttribute("y", y.toString())
     node.appendChild(useTag)
     if (id != null) {
-        useTag.setAttribute("id", "note" + id.toString())
+        useTag.setAttribute("id", id)
     }
 }
 
