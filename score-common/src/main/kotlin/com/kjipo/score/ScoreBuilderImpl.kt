@@ -27,7 +27,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     }
 
     override fun onNoteAdded(note: NOTE) {
-        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, calculateVerticalOffset(note.note, note.octave), note.beamGroup, "note-${noteCounter++}")
+        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, "note-${noteCounter++}")
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
@@ -47,9 +47,14 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
         // TODO The position will be wrong when there are multiple bars
         val renderingElements = mutableListOf<PositionedRenderingElement>()
 
+        noteElements.filter { it is NoteElement }
+                .map { it as NoteElement }
+                .forEach {
+                    it.yPosition = calculateVerticalOffset(it.note, it.octave)
+        }
+
         var barXoffset = 0
         var barYoffset = 0
-
         val barXspace = 0
         val barYspace = 200
 
@@ -127,6 +132,23 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
                 stemMinimum.yPosition,
                 listOf(beamElement),
                 findBoundingBox(beamElement.pathElements), "beam-${beamCounter++}")
+    }
+
+//    fun moveNote(elementId: String, noteType: NoteType, octave: Int) {
+//        noteElements.filter { it is NoteElement }
+//                .map { it as NoteElement }
+//                .find { it.id.equals(elementId) }
+//                ?.let {
+//                    it.note = noteType
+//                    it.octave = octave
+//                }
+//
+//    }
+
+    fun findNote(elementId: String): NoteElement? {
+        return noteElements.filter { it is NoteElement }
+                .map { it as NoteElement }
+                .find { it.id.equals(elementId) }
     }
 
 }

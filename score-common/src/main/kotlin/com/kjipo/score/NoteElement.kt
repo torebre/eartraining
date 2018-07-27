@@ -3,8 +3,8 @@ package com.kjipo.score
 import com.kjipo.svg.getGlyph
 
 
-class NoteElement(val note: NoteType,
-                  val octave: Int,
+class NoteElement(var note: NoteType,
+                  var octave: Int,
                   override val duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,

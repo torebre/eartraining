@@ -1,33 +1,39 @@
+import com.kjipo.handler.ScoreHandler
 import com.kjipo.score.RenderingSequence
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import org.w3c.dom.Element
 import org.w3c.dom.Node
-import org.w3c.dom.get
 import kotlin.browser.document
+import kotlin.dom.clear
 
 
-class WebScore(renderingSequence: RenderingSequence) {
+class WebScore(val scoreHandler: ScoreHandler) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
+
+    var activeElement: String? = "note-1"
     val idSvgElementMap = mutableMapOf<String, Element>()
 
     init {
-        loadScore(renderingSequence)
+        loadScore(scoreHandler.currentScore)
     }
 
 
     fun loadScore(renderingSequence: RenderingSequence) {
-        val xStart = 100
-        val yStart = 400
-//        val usedGlyphs = mutableMapOf<String, GlyphData>()
-
         val divScoreElement = document.getElementById("score")
         val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
 
+        document.addEventListener("keydown", {
+            activeElement?.let {
+                scoreHandler.moveNoteOneStep(it, true)
+                generateSvgData(scoreHandler.currentScore, svgElement)
+            }
+        })
+
+        generateSvgData(renderingSequence, svgElement)
         // TODO Set proper view box
         svgElement.setAttribute("viewBox", "0 0 2000 2000")
-        generateSvgData(renderingSequence, svgElement)
 
         divScoreElement?.appendChild(svgElement)
     }
@@ -39,25 +45,28 @@ class WebScore(renderingSequence: RenderingSequence) {
     }
 
 
-    fun move(id: String, to: Int) {
-
-        // TODO Just her for testing
-        val animateElement = document.createElementNS(SVG_NAMESPACE_URI, "animate")
-        animateElement.setAttribute("attributeName", "opacity")
-        animateElement.setAttribute("from", "1")
-        animateElement.setAttribute("to", "0")
-        animateElement.setAttribute("repeatCount", "indefinite")
-        animateElement.setAttribute("dur", "5s")
-        animateElement.setAttribute("attributeType", "CSS")
-
-        idSvgElementMap[id]?.appendChild(animateElement)
-
-    }
+//    fun move(id: String, to: Int) {
+//
+//        // TODO Just her for testing
+//        val animateElement = document.createElementNS(SVG_NAMESPACE_URI, "animate")
+//        animateElement.setAttribute("attributeName", "opacity")
+//        animateElement.setAttribute("from", "1")
+//        animateElement.setAttribute("to", "0")
+//        animateElement.setAttribute("repeatCount", "indefinite")
+//        animateElement.setAttribute("dur", "5s")
+//        animateElement.setAttribute("attributeType", "CSS")
+//
+//        idSvgElementMap[id]?.appendChild(animateElement)
+//
+//    }
 
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
         val xStart = 100
         val yStart = 400
+
+        svgElement.clear()
+
 //        val usedGlyphs = mutableSetOf<String>()
 
 
@@ -89,8 +98,6 @@ class WebScore(renderingSequence: RenderingSequence) {
                                 transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
                                 pathInterface.strokeWidth,
                                 it.id)
-
-
 
                         println("Path: ${path?.id ?: "none"}")
 
