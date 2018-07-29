@@ -1,9 +1,6 @@
 package com.kjipo.handler
 
-import com.kjipo.score.NoteType
-import com.kjipo.score.RenderingSequence
-import com.kjipo.score.SCORE
-import com.kjipo.score.ScoreBuilderImpl
+import com.kjipo.score.*
 
 
 class ScoreHandler(init: SCORE.() -> Unit) {
@@ -21,7 +18,7 @@ class ScoreHandler(init: SCORE.() -> Unit) {
                     it.note = NoteType.C
                     ++it.octave
                 } else {
-                    it.note = NoteType.values()[it.note.ordinal + 1 % NoteType.values().size]
+                    it.note = NoteType.values()[(it.note.ordinal + 1) % NoteType.values().size]
                 }
             } else {
                 if (it.note == NoteType.C) {
@@ -35,6 +32,9 @@ class ScoreHandler(init: SCORE.() -> Unit) {
         currentScore = scoreBuilder.build()
     }
 
+    internal fun findNote(id: String): NoteElement? {
+        return scoreBuilder.findNote(id)
+    }
 
 }
 

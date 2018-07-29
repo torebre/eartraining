@@ -12,6 +12,7 @@ buildscript {
 
 
 apply plugin: 'kotlin-platform-js'
+apply plugin: 'com.moowork.node'
 
 
 dependencies {
@@ -19,3 +20,104 @@ dependencies {
     compile libraries.kotlin_stdlib_js
     testCompile libraries.kotlin_test_js
 }
+
+
+
+
+
+[compileKotlin2Js]*.configure {
+    kotlinOptions {
+        sourceMap = true
+        sourceMapEmbedSources = "always"
+//        moduleKind = 'commonjs'
+    }
+}
+
+[compileTestKotlin2Js]*.configure {
+    kotlinOptions {
+        sourceMap = true
+        sourceMapEmbedSources = "always"
+//        moduleKind = 'commonjs'
+    }
+}
+
+task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
+    from compileKotlin2Js.destinationDir
+
+    configurations.testCompile.each {
+
+
+
+        from zipTree(it.absolutePath).matching { include '*.js' }
+    }
+
+    into "${buildDir}/node_modules"
+}
+
+node {
+    version = nodeVersion
+    download = true
+}
+
+
+
+// Mocha
+task installMocha(type: NpmTask) {
+    args = ['install', 'mocha']
+}
+
+task runMocha(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installMocha]) {
+    script = file('node_modules/mocha/bin/mocha')
+
+    args = [compileTestKotlin2Js.outputFile]
+}
+
+test.dependsOn runMocha
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.kotlin
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+
+// Jasmine
+//task installJasmine(type: NpmTask) {
+//    args = ['install', 'jasmine']
+//}
+//
+//task runJasmine(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installJasmine]) {
+//    script = file('node_modules/jasmine/bin/jasmine.js')
+//    args = [compileTestKotlin2Js.outputFile]
+//}
+//
+//test.dependsOn runJasmine
+
+// Qunit
+//task installQunit(type: NpmTask) {
+//    args = ['install', 'qunitjs']
+//}
+//
+//task runQunit(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installQunit]) {
+//    script = file('node_modules/qunitjs/bin/qunit')
+//    args = [projectDir.toPath().relativize(file(compileTestKotlin2Js.outputFile).toPath())]
+//}
+//
+//test.dependsOn runQunit
+
+
+
+// Tape
+//task installTape(type: NpmTask) {
+//    args = ['install', 'tape']
+//}
+//
+//task testTape(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installTape]) {
+//    script = file('node_modules/tape/bin/tape')
+//    args = ['tape-plugin.js', 'kotlin.js', compileTestKotlin2Js.outputFile]
+//}
+//
+//test.dependsOn testTape

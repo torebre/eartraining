@@ -11,9 +11,8 @@ buildscript {
 
 
 apply plugin: 'kotlin-platform-common'
+apply plugin: 'com.moowork.node'
 
-
-//archivesBaseName = 'score-common'
 
 dependencies {
     compile libraries.kotlin_stdlib_common
@@ -22,12 +21,3 @@ dependencies {
 }
 
 
-
-//task sourcesJar(type: Jar) {
-//    classifier = 'sources'
-//    from sourceSets.main.kotlin
-//}
-//
-//artifacts {
-//    archives sourcesJar
-//}

@@ -27,7 +27,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     }
 
     override fun onNoteAdded(note: NOTE) {
-        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, "note-${noteCounter++}")
+        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, note.id ?: "note-${noteCounter++}" )
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
