@@ -23,9 +23,9 @@ compileKotlin2Js {
     }
 }
 
-compileTestKotlin2Js {
-    kotlinOptions.moduleKind = "commonjs"
-}
+//compileTestKotlin2Js {
+//    kotlinOptions.moduleKind = "commonjs"
+//}
 
 
 repositories {

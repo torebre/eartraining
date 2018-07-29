@@ -4,6 +4,7 @@ import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import org.w3c.dom.events.KeyboardEvent
 import kotlin.browser.document
 import kotlin.dom.clear
 
@@ -25,9 +26,13 @@ class WebScore(val scoreHandler: ScoreHandler) {
         val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
 
         document.addEventListener("keydown", {
-            activeElement?.let {
-                scoreHandler.moveNoteOneStep(it, true)
-                generateSvgData(scoreHandler.currentScore, svgElement)
+            val keyboardEvent = it as KeyboardEvent
+
+            if (keyboardEvent.keyCode == 38 || keyboardEvent.keyCode == 40) {
+                activeElement?.let {
+                    scoreHandler.moveNoteOneStep(it, keyboardEvent.keyCode == 38)
+                    generateSvgData(scoreHandler.currentScore, svgElement)
+                }
             }
         })
 
@@ -41,24 +46,14 @@ class WebScore(val scoreHandler: ScoreHandler) {
 
     fun highlight(id: String) {
         idSvgElementMap[id]?.setAttribute("fill", "red")
-
     }
 
+    private fun highLightActiveElement() {
+        activeElement?.let {
+            document.getElementById(it)?.setAttribute("fill", "red")
 
-//    fun move(id: String, to: Int) {
-//
-//        // TODO Just her for testing
-//        val animateElement = document.createElementNS(SVG_NAMESPACE_URI, "animate")
-//        animateElement.setAttribute("attributeName", "opacity")
-//        animateElement.setAttribute("from", "1")
-//        animateElement.setAttribute("to", "0")
-//        animateElement.setAttribute("repeatCount", "indefinite")
-//        animateElement.setAttribute("dur", "5s")
-//        animateElement.setAttribute("attributeType", "CSS")
-//
-//        idSvgElementMap[id]?.appendChild(animateElement)
-//
-//    }
+        }
+    }
 
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
@@ -66,24 +61,6 @@ class WebScore(val scoreHandler: ScoreHandler) {
         val yStart = 400
 
         svgElement.clear()
-
-//        val usedGlyphs = mutableSetOf<String>()
-
-
-//        renderingSequence.renderingElements.forEach {
-//            it.glyphData?.let {
-//                if (!usedGlyphs.contains(it.name)) {
-//                    val defsElement = svgElement.ownerDocument!!.createElementNS(SVG_NAMESPACE_URI, "defs")
-//                    val pathElement = defsElement.ownerDocument!!.createElementNS(SVG_NAMESPACE_URI, "path")
-//                    pathElement.setAttribute("id", it.name)
-//                    pathElement.setAttribute("d", transformToPathString(it.pathElements))
-//
-//                    usedGlyphs.add(it.name)
-//                    defsElement.appendChild(pathElement)
-//                    svgElement.appendChild(defsElement)
-//                }
-//            }
-//        }
 
         renderingSequence.renderingElements.forEach {
             if (it.glyphData != null) {
@@ -105,9 +82,6 @@ class WebScore(val scoreHandler: ScoreHandler) {
                             idSvgElementMap.put(it.id, element)
                         }
                     }
-
-
-//                addPathUsingReference(svgElement, glyphData.name, xStart + it.xPosition, yStart + it.yPosition, it.id)
                 }
             } else {
                 for (pathInterface in it.renderingPath) {
@@ -123,6 +97,7 @@ class WebScore(val scoreHandler: ScoreHandler) {
             }
         }
 
+        highLightActiveElement()
     }
 
 
