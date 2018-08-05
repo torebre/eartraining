@@ -1,23 +1,46 @@
 buildscript {
     ext.kotlin_version = '1.2.50'
+    ext.serialization_version = '0.6.0'
 
     repositories {
         mavenCentral()
+        maven { url "https://kotlin.bintray.com/kotlinx" }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlinx:kotlinx-gradle-serialization-plugin:$serialization_version"
     }
+}
+
+
+
+plugins {
+    id 'maven-publish'
 }
 
 
 apply plugin: 'kotlin-platform-common'
 apply plugin: 'com.moowork.node'
+apply plugin: 'kotlinx-serialization'
 
+repositories {
+//    jcenter()
+    maven { url "https://kotlin.bintray.com/kotlinx" }
+}
 
 dependencies {
     compile libraries.kotlin_stdlib_common
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
     testCompile libraries.kotlin_test_annotations_common
     testCompile libraries.kotlin_test_common
 }
 
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'score-common'
+//            from components.java
+        }
+    }
+}

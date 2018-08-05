@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.getGlyph
 
 
@@ -8,17 +9,14 @@ class NoteElement(var note: NoteType,
                   override val duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,
-                  override val beamGroup: Int,
-                  val id: String) : ScoreRenderingElement, Stemable, TemporalElement {
-    var bar: BAR? = null
+                  val beamGroup: Int,
+                  val id: String) : ScoreRenderingElement, TemporalElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
-        val noteRenderedElement = RenderingElementImpl(getGlyph(duration), id)
-
-        noteRenderedElement.xPosition = xPosition
-        noteRenderedElement.yPosition = yPosition
-
-        return noteRenderedElement
+        val glyphData = getGlyph(duration)
+        return PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
+                xPosition,
+                yPosition)
     }
 
     fun requiresStem(): Boolean {
@@ -29,11 +27,11 @@ class NoteElement(var note: NoteType,
     fun getClef(): Clef {
         // TODO The clef can change withing a bar. This is not handled at present
         // Defaulting to G
-        return bar?.clef ?: Clef.G
+        return Clef.G
     }
 
     override fun toString(): String {
-        return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, beamGroup=$beamGroup, bar=$bar)"
+        return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, beamGroup=$beamGroup, id='$id')"
     }
 
 

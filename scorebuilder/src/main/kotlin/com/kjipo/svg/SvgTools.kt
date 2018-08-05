@@ -78,38 +78,31 @@ fun writeToFile(renderingSequence: RenderingSequence, outputFilePath: Path) {
 fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
     val xStart = 100
     val yStart = 400
-    val usedGlyphs = mutableSetOf<String>()
 
+//    val usedGlyphs = mutableSetOf<String>()
+//
+//
+//    renderingSequence.renderingElements.forEach {
+//        it.glyphData?.let {
+//            if (!usedGlyphs.contains(it.name)) {
+//                val defsElement = svgElement.ownerDocument!!.createElementNS(SVG_NAMESPACE_URI, "defs")
+//                val pathElement = defsElement.ownerDocument!!.createElementNS(SVG_NAMESPACE_URI, "path")
+//                pathElement.setAttribute("id", it.name)
+//                pathElement.setAttribute("d", transformToPathString(it.pathElements))
+//
+//                usedGlyphs.add(it.name)
+//                defsElement.appendChild(pathElement)
+//                svgElement.appendChild(defsElement)
+//            }
+//        }
+//    }
 
     renderingSequence.renderingElements.forEach {
-        it.glyphData?.let {
-            if (!usedGlyphs.contains(it.name)) {
-                val defsElement = svgElement.ownerDocument!!.createElementNS(SVG_NAMESPACE_URI, "defs")
-                val pathElement = defsElement.ownerDocument!!.createElementNS(SVG_NAMESPACE_URI, "path")
-                pathElement.setAttribute("id", it.name)
-                pathElement.setAttribute("d", transformToPathString(it.pathElements))
-
-                usedGlyphs.add(it.name)
-                defsElement.appendChild(pathElement)
-                svgElement.appendChild(defsElement)
-            }
-        }
-    }
-
-    renderingSequence.renderingElements.forEach {
-        if (it.glyphData != null) {
-            it.glyphData?.let { glyphData ->
-                addPathUsingReference(svgElement, glyphData.name, xStart + it.xPosition, yStart + it.yPosition, it.id)
-            }
-
-
-        } else {
-            for (pathInterface in it.renderingPath) {
-                addPath(svgElement,
-                        transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
-                        pathInterface.strokeWidth,
-                        it.id)
-            }
+        for (pathInterface in it.renderingPath) {
+            addPath(svgElement,
+                    transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
+                    pathInterface.strokeWidth,
+                    it.id)
         }
     }
 

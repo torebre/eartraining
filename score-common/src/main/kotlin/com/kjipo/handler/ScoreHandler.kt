@@ -1,9 +1,10 @@
 package com.kjipo.handler
 
 import com.kjipo.score.*
+import kotlinx.serialization.json.JSON
 
 
-class ScoreHandler(init: SCORE.() -> Unit) {
+class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
     private val scoreBuilder = ScoreBuilderImpl()
     var currentScore: RenderingSequence
 
@@ -11,7 +12,7 @@ class ScoreHandler(init: SCORE.() -> Unit) {
         currentScore = scoreBuilder.score(init)
     }
 
-    fun moveNoteOneStep(id: String, up: Boolean) {
+    override fun moveNoteOneStep(id: String, up: Boolean) {
         scoreBuilder.findNote(id)?.let {
             if (up) {
                 if (it.note == NoteType.H) {
@@ -34,6 +35,10 @@ class ScoreHandler(init: SCORE.() -> Unit) {
 
     internal fun findNote(id: String): NoteElement? {
         return scoreBuilder.findNote(id)
+    }
+
+    override fun getScoreAsJson(): String {
+        return JSON.stringify(currentScore)
     }
 
 }

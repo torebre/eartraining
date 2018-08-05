@@ -21,13 +21,16 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
         if (bars.isNotEmpty()) {
             // TODO Is this the correct direction? In which direction are the bars added through the method calls?
             bar.previousBar = bars.last()
-            bar.scoreRenderingElements.filter { it is NoteElement }.map { it as NoteElement }.forEach { it.bar = bar }
+
+
+//            bar.scoreRenderingElements.filter { it is NoteElement }.map { it as NoteElement }.forEach { it.bar = bar }
         }
         bars.add(bar)
     }
 
     override fun onNoteAdded(note: NOTE) {
-        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, note.id ?: "note-${noteCounter++}" )
+        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, note.id
+                ?: "note-${noteCounter++}")
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
@@ -51,7 +54,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
                 .map { it as NoteElement }
                 .forEach {
                     it.yPosition = calculateVerticalOffset(it.note, it.octave)
-        }
+                }
 
         var barXoffset = 0
         var barYoffset = 0
@@ -64,14 +67,18 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
             barYoffset += barYspace
         }
 
-        val beamGroups = mutableMapOf<Int, MutableCollection<StemElement>>()
+        val beamGroups = mutableMapOf<Int, MutableCollection<PositionedRenderingElement>>()
 
         noteElements.filter { it is NoteElement }
                 .map { it as NoteElement }
                 .forEach {
                     if (it.requiresStem()) {
                         val stem = addStem(it.toRenderingElement().boundingBox)
-                        val stemElement = StemElement(it.xPosition, it.yPosition, listOf(stem), findBoundingBox(stem.pathElements), it, "stem-${stemCounter++}")
+                        val stemElement = PositionedRenderingElement(listOf(stem),
+                                findBoundingBox(stem.pathElements),
+                                "stem-${stemCounter++}",
+                                it.xPosition,
+                                it.yPosition)
 
                         if (beamGroups.containsKey(it.beamGroup)) {
                             beamGroups.get(it.beamGroup)?.add(stemElement)
@@ -95,7 +102,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     }
 
 
-    private fun handleBeams(beamGroup: Collection<StemElement>): BeamElement {
+    private fun handleBeams(beamGroup: Collection<PositionedRenderingElement>): PositionedRenderingElement {
         val stemMinimum = beamGroup.reduce({ s, t ->
             s.let {
                 if (it.xPosition < t.xPosition) {
@@ -124,26 +131,17 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
         val beamElement = addBeam(0, 0,
                 stemMaximum.xPosition.minus(stemMinimum.xPosition),
                 -boundingBoxHeight.toInt(),
-                stemMinimum.noteElement.toRenderingElement().boundingBox.width().toInt(),
+                // TODO This probably does not work now
+                stemMinimum.boundingBox.width().toInt(),
                 -height.toInt()
         )
 
-        return BeamElement(stemMinimum.xPosition,
-                stemMinimum.yPosition,
-                listOf(beamElement),
-                findBoundingBox(beamElement.pathElements), "beam-${beamCounter++}")
+        return PositionedRenderingElement(listOf(beamElement),
+                findBoundingBox(beamElement.pathElements),
+                "beam-${beamCounter++}",
+                stemMinimum.xPosition,
+                stemMinimum.yPosition)
     }
-
-//    fun moveNote(elementId: String, noteType: NoteType, octave: Int) {
-//        noteElements.filter { it is NoteElement }
-//                .map { it as NoteElement }
-//                .find { it.id.equals(elementId) }
-//                ?.let {
-//                    it.note = noteType
-//                    it.octave = octave
-//                }
-//
-//    }
 
     fun findNote(elementId: String): NoteElement? {
         return noteElements.filter { it is NoteElement }

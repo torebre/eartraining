@@ -1,29 +1,34 @@
 buildscript {
     ext.kotlin_version = '1.2.50'
+    ext.serialization_version = '0.6.0'
 
     repositories {
         mavenCentral()
+        maven { url "https://kotlin.bintray.com/kotlinx" }
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlinx:kotlinx-gradle-serialization-plugin:$serialization_version"
     }
 }
 
-
-
 apply plugin: 'kotlin-platform-js'
 apply plugin: 'com.moowork.node'
+apply plugin: 'kotlinx-serialization'
+
+
+//repositories {
+//    maven { url "https://kotlin.bintray.com/kotlinx" }
+//}
 
 
 dependencies {
     expectedBy project(':score-common')
     compile libraries.kotlin_stdlib_js
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
     testCompile libraries.kotlin_test_js
 }
-
-
-
-
 
 [compileKotlin2Js]*.configure {
     kotlinOptions {

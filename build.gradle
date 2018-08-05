@@ -37,6 +37,8 @@ subprojects {
     repositories {
         jcenter()
         mavenCentral()
+        // TODO It should not be necessary to define this at this location
+        maven { url "https://kotlin.bintray.com/kotlinx" }
     }
 }
 

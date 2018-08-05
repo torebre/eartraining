@@ -23,7 +23,7 @@ private fun addExtraBarLinesForGClef(noteElement: NoteElement): ScoreRenderingEl
 }
 
 
-fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInterface {
+fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInterfaceImpl {
     val yEnd = if (stemUp) -DEFAULT_STEM_HEIGHT.toDouble() else DEFAULT_STEM_HEIGHT.toDouble()
     return translateGlyph(PathInterfaceImpl(listOf(
             PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
@@ -34,7 +34,7 @@ fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInter
             noteHeadBoundingBox.xMax.toInt(), 0)
 }
 
-fun addBeam(xMin: Int, yMin: Int, xMax: Int, yMax: Int, startX: Int, startY: Int): PathInterface {
+fun addBeam(xMin: Int, yMin: Int, xMax: Int, yMax: Int, startX: Int, startY: Int): PathInterfaceImpl {
     return translateGlyph(PathInterfaceImpl(listOf(
             PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(DEFAULT_BEAM_HEIGHT.toDouble())),

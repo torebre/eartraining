@@ -1,7 +1,8 @@
-import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.score.RenderingSequence
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
+import kotlinx.serialization.json.JSON
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.KeyboardEvent
@@ -9,7 +10,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(val scoreHandler: ScoreHandler) {
+class WebScore(val scoreHandler: ScoreHandlerInterface) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
 
@@ -17,7 +18,22 @@ class WebScore(val scoreHandler: ScoreHandler) {
     val idSvgElementMap = mutableMapOf<String, Element>()
 
     init {
-        loadScore(scoreHandler.currentScore)
+        loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
+    }
+
+
+    fun reload() {
+        loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
+    }
+
+    fun loadScoreFromJson(jsonData: String) {
+        // TODO Here for testing
+        transformJsonToRenderingSequence(JSON.parse(jsonData))
+    }
+
+
+    private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
+        return JSON.parse(jsonData)
     }
 
 
@@ -31,7 +47,7 @@ class WebScore(val scoreHandler: ScoreHandler) {
             if (keyboardEvent.keyCode == 38 || keyboardEvent.keyCode == 40) {
                 activeElement?.let {
                     scoreHandler.moveNoteOneStep(it, keyboardEvent.keyCode == 38)
-                    generateSvgData(scoreHandler.currentScore, svgElement)
+                    generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
                 }
             }
         })
@@ -63,27 +79,28 @@ class WebScore(val scoreHandler: ScoreHandler) {
         svgElement.clear()
 
         renderingSequence.renderingElements.forEach {
-            if (it.glyphData != null) {
-
-                // TODO Why does using references not work here?
-
-                // TODO The ID setup will only work if there is one path
-
-                it.glyphData?.let { glyphData ->
-                    for (pathInterface in it.renderingPath) {
-                        val path = addPath(svgElement,
-                                transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
-                                pathInterface.strokeWidth,
-                                it.id)
-
-                        println("Path: ${path?.id ?: "none"}")
-
-                        path?.let { element ->
-                            idSvgElementMap.put(it.id, element)
-                        }
-                    }
-                }
-            } else {
+//            if (it.glyphData != null) {
+//
+//                // TODO Why does using references not work here?
+//
+//                // TODO The ID setup will only work if there is one path
+//
+//                it.glyphData?.let { glyphData ->
+//                    for (pathInterface in it.renderingPath) {
+//                        val path = addPath(svgElement,
+//                                transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
+//                                pathInterface.strokeWidth,
+//                                it.id)
+//
+//                        println("Path: ${path?.id ?: "none"}")
+//
+//                        path?.let { element ->
+//                            idSvgElementMap.put(it.id, element)
+//                        }
+//                    }
+//                }
+//            }
+//            else {
                 for (pathInterface in it.renderingPath) {
                     addPath(svgElement,
                             transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
@@ -94,7 +111,7 @@ class WebScore(val scoreHandler: ScoreHandler) {
 
 
                 }
-            }
+//            }
         }
 
         highLightActiveElement()

@@ -1,3 +1,7 @@
 package com.kjipo.svg
 
-class PathInterfaceImpl(override val pathElements: List<PathElement>, override val strokeWidth: Int) : PathInterface
+import kotlinx.serialization.Serializable
+
+@Serializable
+class PathInterfaceImpl(val pathElements: List<PathElement>,
+                        val strokeWidth: Int)

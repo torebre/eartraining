@@ -24,17 +24,16 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
         val yMin = yPositions.min() ?: 0
         val yMax = yPositions.max() ?: yMin
 
-        val renderingElement = RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
+        return PositionedRenderingElement(
+
+                listOf(PathInterfaceImpl(pathElements, 1)),
                 BoundingBox(leftStart.times(-1).toDouble(),
                         yMin.toDouble(),
                         leftStart.plus(rightEnd).toDouble(),
                         yMax.toDouble()),
-                "bar-${idCounter++}")
-
-        renderingElement.xPosition = xPosition
-        renderingElement.yPosition = yPosition
-
-        return renderingElement
+                "bar-${idCounter++}",
+                xPosition,
+                yPosition)
     }
 
 }
@@ -57,11 +56,11 @@ class BarLines(override var xPosition: Int, override var yPosition: Int, val id:
             y += spaceBetweenLines
         }
 
-        val renderingElement = RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
-                findBoundingBox(pathElements), id)
-
-        renderingElement.xPosition = 0
-        renderingElement.yPosition = 0
+        val renderingElement = PositionedRenderingElement(
+                listOf(PathInterfaceImpl(pathElements, 1)),
+                findBoundingBox(pathElements), id,
+                0,
+                0)
 
         return renderingElement
     }
@@ -77,9 +76,10 @@ class Box(override var xPosition: Int, override var yPosition: Int, val width: I
                 PathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(width.toDouble())),
                 PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(height.times(-1).toDouble())))
 
-        return RenderingElementImpl(listOf(PathInterfaceImpl(pathElements, 1)),
+        return PositionedRenderingElement(
+                listOf(PathInterfaceImpl(pathElements, 1)),
                 findBoundingBox(pathElements),
-                id)
+                id, 0, 0)
     }
 
 }

@@ -3,7 +3,13 @@ package com.kjipo.svg
 import kotlin.math.pow
 
 
-fun translateGlyph(pathInterface: PathInterface, xTranslate: Int, yTranslate: Int): PathInterface {
+
+fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
+    return PathInterfaceImpl(glyphData.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, glyphData.strokeWidth)
+}
+
+
+fun translateGlyph(pathInterface: PathInterfaceImpl, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
     return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, pathInterface.strokeWidth)
 }
 
@@ -270,7 +276,7 @@ fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
 }
 
 
-fun transformToPathString(pathInterface: PathInterface) = transformToPathString(pathInterface.pathElements)
+fun transformToPathString(pathInterface: PathInterfaceImpl) = transformToPathString(pathInterface.pathElements)
 
 
 fun transformToPathString(pathElements: Collection<PathElement>): String {

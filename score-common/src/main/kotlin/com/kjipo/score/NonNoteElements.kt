@@ -15,7 +15,7 @@ class ClefElement(val clef: Clef, override var xPosition: Int, override var yPos
             }
         }
 
-        return RenderingElementImpl(glyphData, id)
+        return PositionedRenderingElement.create(glyphData, id)
     }
 }
 
@@ -30,7 +30,7 @@ class TimeSignatureElement(val nominator: Int, val denominator: Int, override va
         pathElements.addAll(translateGlyph(nominatorGlyph, xPosition, yPosition).pathElements)
         pathElements.addAll(translateGlyph(translateGlyph(denominatorGlyph, xPosition, yPosition), 0, 50).pathElements)
 
-        return RenderingElementImpl(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)), id)
+        return PositionedRenderingElement.create(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)), id)
     }
 
 }

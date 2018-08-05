@@ -1,8 +1,10 @@
 package com.kjipo.svg
 
+import kotlinx.serialization.Serializable
 import kotlin.math.absoluteValue
 
 
+@Serializable
 data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val yMax: Double) {
     fun height(): Double {
         return yMax.minus(yMin).absoluteValue
