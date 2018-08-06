@@ -7,3 +7,5 @@ include ':score-common'
 include ':score-jvm'
 include ':score-js'
 include ':webscore'
+include 'scoregenerator'
+
