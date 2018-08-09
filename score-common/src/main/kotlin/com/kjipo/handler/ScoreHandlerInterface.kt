@@ -1,5 +1,6 @@
 package com.kjipo.handler
 
+
 interface ScoreHandlerInterface {
 
     fun getScoreAsJson(): String

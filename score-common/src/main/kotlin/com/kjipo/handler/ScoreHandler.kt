@@ -5,11 +5,17 @@ import kotlinx.serialization.json.JSON
 
 
 class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
-    private val scoreBuilder = ScoreBuilderImpl()
+    var scoreBuilder = ScoreBuilderImpl()
     var currentScore: RenderingSequence
 
     init {
         currentScore = scoreBuilder.score(init)
+    }
+
+    constructor() : this({})
+
+    fun updateScore() {
+        currentScore = scoreBuilder.build()
     }
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
@@ -40,6 +46,7 @@ class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
     override fun getScoreAsJson(): String {
         return JSON.stringify(currentScore)
     }
+
 
 }
 

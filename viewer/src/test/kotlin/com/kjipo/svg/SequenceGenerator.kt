@@ -6,6 +6,7 @@ import java.util.*
 
 class SequenceGenerator {
     private val random = Random()
+    var scoreBuilder : ScoreBuilderImpl = ScoreBuilderImpl()
 
     private val noteStep = mapOf(
             Pair(NoteType.A, 2),
@@ -29,7 +30,7 @@ class SequenceGenerator {
 
         // TODO This only works because there are only two types of notes used so far
 
-        val scoreBuilder = ScoreBuilderImpl(debug)
+        scoreBuilder = ScoreBuilderImpl(debug)
         var bar = BAR(scoreBuilder)
 
         bar.clef = Clef.G

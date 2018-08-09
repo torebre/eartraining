@@ -3,7 +3,7 @@ package com.kjipo.svg
 
 import com.kjipo.score.*
 import com.kjipo.viewer.ScoreController
-import com.kjipo.viewer.startApplication
+import com.kjipo.viewer.WebViewApplication.Companion.startApplication
 import tornadofx.*
 import java.nio.file.Paths
 

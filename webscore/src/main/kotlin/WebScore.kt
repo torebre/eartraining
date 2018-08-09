@@ -44,12 +44,29 @@ class WebScore(val scoreHandler: ScoreHandlerInterface) {
         document.addEventListener("keydown", {
             val keyboardEvent = it as KeyboardEvent
 
-            if (keyboardEvent.keyCode == 38 || keyboardEvent.keyCode == 40) {
-                activeElement?.let {
-                    scoreHandler.moveNoteOneStep(it, keyboardEvent.keyCode == 38)
+            println("Key pressed: ${keyboardEvent.keyCode}")
+
+            when(keyboardEvent.keyCode) {
+                38 -> activeElement?.let {
+                    // Up
+                    scoreHandler.moveNoteOneStep(it, true)
                     generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
                 }
+                40 -> activeElement?.let {
+                    // Down
+                    scoreHandler.moveNoteOneStep(it, false)
+                    generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                }
+                37 -> {
+                    // TODO Left
+                }
+                39 -> {
+                    // TODO Right
+                }
+
+
             }
+
         })
 
         generateSvgData(renderingSequence, svgElement)

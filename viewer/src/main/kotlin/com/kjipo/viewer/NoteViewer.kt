@@ -18,7 +18,7 @@ import java.net.URLStreamHandler
 
 class NoteView : View("Note view"), ScoreControllerListener {
     val scoreController: ScoreController by inject()
-    val webView: WebViewTest = WebViewTest()
+    private val webView: WebViewTest = WebViewTest()
 
     init {
         scoreController.addListener(this)
@@ -45,65 +45,67 @@ class NoteView : View("Note view"), ScoreControllerListener {
         webView.webEngine.executeScript("noteOff(\"note$noteId\");")
     }
 
-}
 
+    private class JavaBridge {
 
-class JavaBridge {
+        fun log(text: String) {
+            println(text)
+        }
 
-    fun log(text: String) {
-        println(text)
     }
 
-}
+    private class WebViewTest : Region() {
+        val browser = WebView()
+        val webEngine = browser.engine
 
-class WebViewTest : Region() {
-    val browser = WebView()
-    val webEngine = browser.engine
-
-    val LOGGER = LoggerFactory.getLogger(WebViewTest::class.java)
+        val LOGGER = LoggerFactory.getLogger(WebViewTest::class.java)
 
 
-    init {
+        init {
 
-        add(browser)
+            add(browser)
 
-        styleClass.add("browser")
+            styleClass.add("browser")
 
-        webEngine.isJavaScriptEnabled = true
+            webEngine.isJavaScriptEnabled = true
 
-        LOGGER.info("Loading class")
+            LOGGER.info("Loading class")
 
-        webEngine.loadWorker.stateProperty().addListener({ observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
-            run {
-                if (state1 == Worker.State.SUCCEEDED) {
-                    val window = webEngine.executeScript("window") as JSObject
-                    val bridge = JavaBridge()
+            webEngine.loadWorker.stateProperty().addListener({ observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
+                run {
+                    if (state1 == Worker.State.SUCCEEDED) {
+                        val window = webEngine.executeScript("window") as JSObject
+                        val bridge = JavaBridge()
 
-                    window.setMember("java", bridge)
-                    webEngine.executeScript("""console.log = function(message) {
+                        window.setMember("java", bridge)
+                        webEngine.executeScript("""console.log = function(message) {
 java.log(message);
 }
 """)
-                    loadAndExecuteResource("/snap.svg-min.js")
-                    loadAndExecuteResource("/js/score_functions.js")
+                        loadAndExecuteResource("/snap.svg-min.js")
+                        loadAndExecuteResource("/js/score_functions.js")
+                    }
+                }
+            })
+
+        }
+
+
+        private fun loadAndExecuteResource(resourcePath: String) {
+            val jqueryCode = StringBuilder()
+            javaClass.getResourceAsStream(resourcePath).use {
+                InputStreamReader(it).useLines {
+                    it.forEach { jqueryCode.append(it).append("\n") }
                 }
             }
-        })
-
-    }
-
-
-    private fun loadAndExecuteResource(resourcePath: String) {
-        val jqueryCode = StringBuilder()
-        javaClass.getResourceAsStream(resourcePath).use {
-            InputStreamReader(it).useLines {
-                it.forEach { jqueryCode.append(it).append("\n") }
-            }
+            webEngine.executeScript(jqueryCode.toString())
         }
-        webEngine.executeScript(jqueryCode.toString())
+
     }
+
 
 }
+
 
 
 class Handler : URLStreamHandler() {

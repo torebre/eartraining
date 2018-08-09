@@ -5,8 +5,8 @@ import tornadofx.*
 import java.net.URL
 
 
-class WebViewApplication : App() {
-    override val primaryView = NoteView::class
+class WebViewApplicationScoreHandlerApplication : App() {
+    override val primaryView = NoteViewerWithScoreHandler::class
 
 
     companion object {
@@ -20,7 +20,7 @@ class WebViewApplication : App() {
                 }
             }
             val startThread = Thread {
-                Application.launch(WebViewApplication::class.java)
+                Application.launch(WebViewApplicationScoreHandlerApplication::class.java)
             }
             startThread.start()
         }
