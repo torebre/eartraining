@@ -47,6 +47,32 @@ class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
         return JSON.stringify(currentScore)
     }
 
+    override fun getIdOfFirstSelectableElement() = scoreBuilder.noteElements.map { it.id }.firstOrNull()
+
+    override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
+        return scoreBuilder.noteElements.find { it.id.equals(activeElement) }?.let { noteElement ->
+            scoreBuilder.noteElements.filter { temporalElement ->
+                temporalElement.id.equals(activeElement)
+            }.map { it ->
+                val index = scoreBuilder.noteElements.indexOf(it)
+                if (lookLeft) {
+                    if (index == 0) {
+                        0
+                    } else {
+                        index - 1
+                    }
+                } else {
+                    if (index == scoreBuilder.noteElements.lastIndex) {
+                        scoreBuilder.noteElements.lastIndex
+                    } else {
+                        index + 1
+                    }
+                }
+            }
+                    .map { scoreBuilder.noteElements[it].id }.firstOrNull()
+        }
+    }
+
 
 }
 

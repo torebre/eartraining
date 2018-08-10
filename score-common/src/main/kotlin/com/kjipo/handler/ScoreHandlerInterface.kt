@@ -7,6 +7,9 @@ interface ScoreHandlerInterface {
 
     fun moveNoteOneStep(id: String, up: Boolean)
 
+    fun getIdOfFirstSelectableElement(): String?
+
+    fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String?
 
 
 }

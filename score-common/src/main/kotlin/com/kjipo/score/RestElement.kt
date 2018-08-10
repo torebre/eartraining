@@ -7,7 +7,7 @@ import com.kjipo.svg.getRest
 class RestElement(override val duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,
-                  val id: String) : TemporalElement {
+                  override val id: String) : TemporalElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val glyphData = getRest(duration)

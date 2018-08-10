@@ -10,7 +10,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(val scoreHandler: ScoreHandlerInterface) {
+class WebScore(var scoreHandler: ScoreHandlerInterface) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
 
@@ -21,6 +21,11 @@ class WebScore(val scoreHandler: ScoreHandlerInterface) {
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
+    fun loadScoreHandler(scoreHandler: ScoreHandlerInterface) {
+        this.scoreHandler = scoreHandler
+        activeElement = scoreHandler.getIdOfFirstSelectableElement()
+        reload()
+    }
 
     fun reload() {
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
@@ -41,39 +46,52 @@ class WebScore(val scoreHandler: ScoreHandlerInterface) {
         val divScoreElement = document.getElementById("score")
         val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
 
-        document.addEventListener("keydown", {
-            val keyboardEvent = it as KeyboardEvent
 
-            println("Key pressed: ${keyboardEvent.keyCode}")
+        document.addEventListener("keydown", { event ->
+            val keyboardEvent = event as KeyboardEvent
 
-            when(keyboardEvent.keyCode) {
+            println("Key pressed: ${keyboardEvent.keyCode}. Active element: ${activeElement}")
+
+            when (keyboardEvent.keyCode) {
                 38 -> activeElement?.let {
                     // Up
                     scoreHandler.moveNoteOneStep(it, true)
                     generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                    highLightActiveElement()
                 }
                 40 -> activeElement?.let {
                     // Down
                     scoreHandler.moveNoteOneStep(it, false)
                     generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                    highLightActiveElement()
                 }
                 37 -> {
-                    // TODO Left
+                    deactivateActiveElement()
+                    activeElement = if (activeElement == null) {
+                        activeElement
+                    } else {
+                        scoreHandler.getNeighbouringElement(activeElement!!, true)
+                    }
+                    highLightActiveElement()
                 }
                 39 -> {
-                    // TODO Right
+                    deactivateActiveElement()
+                    activeElement = if (activeElement == null) {
+                        activeElement
+                    } else {
+                        scoreHandler.getNeighbouringElement(activeElement!!, false)
+                    }
+                    highLightActiveElement()
                 }
-
-
             }
-
         })
 
         generateSvgData(renderingSequence, svgElement)
         // TODO Set proper view box
-        svgElement.setAttribute("viewBox", "0 0 2000 2000")
+        svgElement.setAttribute("viewBox", "0 0 1000 1000")
 
         divScoreElement?.appendChild(svgElement)
+        highLightActiveElement()
     }
 
 
@@ -84,7 +102,12 @@ class WebScore(val scoreHandler: ScoreHandlerInterface) {
     private fun highLightActiveElement() {
         activeElement?.let {
             document.getElementById(it)?.setAttribute("fill", "red")
+        }
+    }
 
+    private fun deactivateActiveElement() {
+        activeElement?.let {
+            document.getElementById(it)?.setAttribute("fill", "yellow")
         }
     }
 
@@ -96,7 +119,7 @@ class WebScore(val scoreHandler: ScoreHandlerInterface) {
         svgElement.clear()
 
         renderingSequence.renderingElements.forEach {
-//            if (it.glyphData != null) {
+            //            if (it.glyphData != null) {
 //
 //                // TODO Why does using references not work here?
 //
@@ -118,16 +141,16 @@ class WebScore(val scoreHandler: ScoreHandlerInterface) {
 //                }
 //            }
 //            else {
-                for (pathInterface in it.renderingPath) {
-                    addPath(svgElement,
-                            transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
-                            pathInterface.strokeWidth,
-                            it.id)?.let { element ->
-                        idSvgElementMap.put(it.id, element)
-                    }
-
-
+            for (pathInterface in it.renderingPath) {
+                addPath(svgElement,
+                        transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
+                        pathInterface.strokeWidth,
+                        it.id)?.let { element ->
+                    idSvgElementMap.put(it.id, element)
                 }
+
+
+            }
 //            }
         }
 

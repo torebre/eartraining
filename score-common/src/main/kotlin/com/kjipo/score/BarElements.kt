@@ -20,9 +20,9 @@ enum class NoteType {
     H,
     C,
     D,
+    E,
     F,
-    G,
-    E
+    G
 }
 
 

@@ -5,7 +5,7 @@ import com.kjipo.svg.findBoundingBox
 
 class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterface<RenderingSequence> {
     private val currentElements = mutableListOf<ScoreRenderingElement>()
-    private val noteElements = mutableListOf<TemporalElement>()
+    val noteElements = mutableListOf<TemporalElement>()
     private val bars = mutableListOf<BAR>()
 
     private var restCounter = 0
@@ -148,5 +148,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
                 .map { it as NoteElement }
                 .find { it.id.equals(elementId) }
     }
+
+
 
 }

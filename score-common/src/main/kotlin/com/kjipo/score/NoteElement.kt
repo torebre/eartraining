@@ -10,7 +10,7 @@ class NoteElement(var note: NoteType,
                   override var xPosition: Int,
                   override var yPosition: Int,
                   val beamGroup: Int,
-                  val id: String) : ScoreRenderingElement, TemporalElement {
+                  override val id: String) : ScoreRenderingElement, TemporalElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val glyphData = getGlyph(duration)
