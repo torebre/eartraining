@@ -12,7 +12,7 @@ class ScoreGenerationVisualizationTest {
 
     @Test
     fun visualizeGeneratedScore() {
-        val scoreGenerator = SequenceGenerator()
+        val scoreGenerator = com.kjipo.scoregenerator.SequenceGenerator()
 
         startApplication()
 
@@ -27,6 +27,9 @@ class ScoreGenerationVisualizationTest {
 
         scoreHandler.scoreBuilder = scoreGenerator.scoreBuilder
         scoreHandler.updateScore()
+
+        println("Pitch sequence:")
+        scoreGenerator.pitchSequence.forEach { System.out.println(it) }
 
         FX.runAndWait { noteViewerWithScoreHandler.load(scoreHandler) }
 

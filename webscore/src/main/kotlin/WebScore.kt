@@ -12,12 +12,15 @@ import kotlin.dom.clear
 
 class WebScore(var scoreHandler: ScoreHandlerInterface) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
-
-
-    var activeElement: String? = "note-1"
+    val divScoreElement: Element? = document.getElementById("score")
+    private val svgElement: Element
+    var activeElement: String? = null
     val idSvgElementMap = mutableMapOf<String, Element>()
 
     init {
+        console.log("Setting up SVG")
+        svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
+        setupSvg()
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
@@ -28,7 +31,8 @@ class WebScore(var scoreHandler: ScoreHandlerInterface) {
     }
 
     fun reload() {
-        loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
+        val score = scoreHandler.getScoreAsJson()
+        loadScore(transformJsonToRenderingSequence(score))
     }
 
     fun loadScoreFromJson(jsonData: String) {
@@ -43,10 +47,32 @@ class WebScore(var scoreHandler: ScoreHandlerInterface) {
 
 
     fun loadScore(renderingSequence: RenderingSequence) {
-        val divScoreElement = document.getElementById("score")
-        val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
+        generateSvgData(renderingSequence, svgElement)
+        if(activeElement == null) {
+            activeElement = scoreHandler.getIdOfFirstSelectableElement()
+        }
+        highLightActiveElement()
+    }
 
 
+    fun highlight(id: String) {
+        idSvgElementMap[id]?.setAttribute("fill", "red")
+    }
+
+    private fun highLightActiveElement() {
+        activeElement?.let {
+            document.getElementById(it)?.setAttribute("fill", "red")
+        }
+    }
+
+    private fun deactivateActiveElement() {
+        activeElement?.let {
+            document.getElementById(it)?.setAttribute("fill", "yellow")
+        }
+    }
+
+
+    private fun setupSvg() {
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
@@ -86,35 +112,19 @@ class WebScore(var scoreHandler: ScoreHandlerInterface) {
             }
         })
 
-        generateSvgData(renderingSequence, svgElement)
+
         // TODO Set proper view box
         svgElement.setAttribute("viewBox", "0 0 1000 1000")
 
         divScoreElement?.appendChild(svgElement)
-        highLightActiveElement()
-    }
-
-
-    fun highlight(id: String) {
-        idSvgElementMap[id]?.setAttribute("fill", "red")
-    }
-
-    private fun highLightActiveElement() {
-        activeElement?.let {
-            document.getElementById(it)?.setAttribute("fill", "red")
-        }
-    }
-
-    private fun deactivateActiveElement() {
-        activeElement?.let {
-            document.getElementById(it)?.setAttribute("fill", "yellow")
-        }
     }
 
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
-        val xStart = 100
-        val yStart = 400
+        val xStart = 50
+        val yStart = 100
+
+        console.log("Generating SVG. Rendering sequence: ${renderingSequence.renderingElements.size}")
 
         svgElement.clear()
 

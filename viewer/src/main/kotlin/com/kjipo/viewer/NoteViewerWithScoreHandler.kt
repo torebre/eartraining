@@ -3,6 +3,7 @@ package com.kjipo.viewer
 import com.kjipo.handler.ScoreHandler
 import javafx.beans.value.ObservableValue
 import javafx.concurrent.Worker
+import javafx.event.EventType
 import javafx.scene.layout.Region
 import javafx.scene.web.WebView
 import netscape.javascript.JSObject
@@ -52,14 +53,13 @@ class NoteViewerWithScoreHandler : View("Note view") {
             styleClass.add("browser")
             webEngine.isJavaScriptEnabled = true
 
-            webEngine.loadWorker.stateProperty().addListener({ observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
+            webEngine.loadWorker.stateProperty().addListener { observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
                 run {
                     if (state1 == Worker.State.SUCCEEDED) {
-                        val window = webEngine.executeScript("window") as JSObject
-                        val bridge = JavaBridge()
-
-                        window.setMember("java", bridge)
-                        webEngine.executeScript("""console.log = function(message) { java.log(message); }""")
+//                        val window = webEngine.executeScript("window") as JSObject
+//                        val bridge = JavaBridge()
+//                        window.setMember("java", bridge)
+//                        webEngine.executeScript("""console.log = function(message) { java.log(message); }""")
 
                         loadAndExecuteResourceFromFile(Paths.get("/home/student/workspace/EarTraining/webscore/web/kotlin.js"))
                         loadAndExecuteResourceFromFile(Paths.get("/home/student/workspace/EarTraining/webscore/web/kotlinx-html-js.js"))
@@ -70,7 +70,7 @@ class NoteViewerWithScoreHandler : View("Note view") {
                         latch.countDown()
                     }
                 }
-            })
+            }
 
             val content = Files.readAllLines(Paths.get("/home/student/workspace/EarTraining/webscore/index.html")).joinToString(separator = "")
             webEngine.loadContent(content)

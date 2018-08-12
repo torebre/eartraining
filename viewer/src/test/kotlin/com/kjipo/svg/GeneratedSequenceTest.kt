@@ -11,7 +11,7 @@ class GeneratedSequenceTest {
 
     @Test
     fun `Visualize generated sequence`() {
-        val sequenceGenerator = SequenceGenerator()
+        val sequenceGenerator = com.kjipo.scoregenerator.SequenceGenerator()
         val renderingSequence = sequenceGenerator.createNewSequence(true)
 
         startApplication()
