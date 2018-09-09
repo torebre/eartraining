@@ -5,7 +5,7 @@ import kotlin.browser.window
 
 
 
-val scoreHandler = ScoreHandler {
+val scoreHandler = ScoreHandlerJavaScript(ScoreHandler {
     bar {
         clef = Clef.G
         timeSignature = TimeSignature(4, 4)
@@ -31,7 +31,8 @@ val scoreHandler = ScoreHandler {
             duration = Duration.QUARTER
         }
     }
-}
+})
+
 //val webScore = WebScore(scoreHandler)
 
 //fun loadJson(serializedRenderSequence: String) {

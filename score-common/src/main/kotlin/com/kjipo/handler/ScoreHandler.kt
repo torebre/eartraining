@@ -73,6 +73,18 @@ class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
         }
     }
 
+    override fun updateDuration(id: String, keyPressed: Int) {
+        scoreBuilder.noteElements.find {
+            it.id.equals(id)
+        }?.let {
+            when (keyPressed) {
+                1 -> it.duration = Duration.QUARTER
+                2 -> it.duration = Duration.HALF
+                3 -> it.duration = Duration.WHOLE
+            }
+            currentScore = scoreBuilder.build()
+        }
+    }
 
 }
 

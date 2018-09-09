@@ -4,7 +4,7 @@ import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.getRest
 
 
-class RestElement(override val duration: Duration,
+class RestElement(override var duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,
                   override val id: String) : TemporalElement {

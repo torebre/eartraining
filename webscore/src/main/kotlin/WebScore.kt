@@ -1,4 +1,3 @@
-import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.score.RenderingSequence
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
@@ -10,7 +9,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(var scoreHandler: ScoreHandlerInterface) {
+class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
     val divScoreElement: Element? = document.getElementById("score")
     private val svgElement: Element
@@ -24,7 +23,7 @@ class WebScore(var scoreHandler: ScoreHandlerInterface) {
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
-    fun loadScoreHandler(scoreHandler: ScoreHandlerInterface) {
+    fun loadScoreHandler(scoreHandler: ScoreHandlerJavaScript) {
         this.scoreHandler = scoreHandler
         activeElement = scoreHandler.getIdOfFirstSelectableElement()
         reload()
@@ -48,7 +47,7 @@ class WebScore(var scoreHandler: ScoreHandlerInterface) {
 
     fun loadScore(renderingSequence: RenderingSequence) {
         generateSvgData(renderingSequence, svgElement)
-        if(activeElement == null) {
+        if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
         highLightActiveElement()
@@ -93,21 +92,24 @@ class WebScore(var scoreHandler: ScoreHandlerInterface) {
                 }
                 37 -> {
                     deactivateActiveElement()
-                    activeElement = if (activeElement == null) {
-                        activeElement
-                    } else {
-                        scoreHandler.getNeighbouringElement(activeElement!!, true)
+                    activeElement = activeElement?.let {
+                        scoreHandler.getNeighbouringElement(it, true)
                     }
                     highLightActiveElement()
                 }
                 39 -> {
                     deactivateActiveElement()
-                    activeElement = if (activeElement == null) {
-                        activeElement
-                    } else {
-                        scoreHandler.getNeighbouringElement(activeElement!!, false)
+                    activeElement = activeElement?.let {
+                        scoreHandler.getNeighbouringElement(it, false)
                     }
                     highLightActiveElement()
+                }
+                97, 98, 99, 100 -> {
+                    activeElement?.let {
+                        scoreHandler.updateDuration(it, keyboardEvent.keyCode - 96)
+                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        highLightActiveElement()
+                    }
                 }
             }
         })

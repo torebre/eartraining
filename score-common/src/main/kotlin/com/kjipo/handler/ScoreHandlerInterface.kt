@@ -11,4 +11,6 @@ interface ScoreHandlerInterface {
 
     fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String?
 
+    fun updateDuration(id: String, keyPressed: Int)
+
 }

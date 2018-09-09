@@ -6,7 +6,7 @@ import com.kjipo.svg.getGlyph
 
 class NoteElement(var note: NoteType,
                   var octave: Int,
-                  override val duration: Duration,
+                  override var duration: Duration,
                   override var xPosition: Int,
                   override var yPosition: Int,
                   val beamGroup: Int,
