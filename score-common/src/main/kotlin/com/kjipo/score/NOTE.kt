@@ -6,5 +6,4 @@ class NOTE(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
     var octave = 5
     var duration = Duration.QUARTER
     var beamGroup: Int = 0
-    var id: String? = null
 }

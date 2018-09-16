@@ -4,12 +4,25 @@ import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
 
 
-class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
+class ScoreHandler private constructor(init: (SCORE.() -> Unit)?, scoreBuilder: ScoreBuilderImpl?) : ScoreHandlerInterface {
     var scoreBuilder = ScoreBuilderImpl()
     var currentScore: RenderingSequence
 
+    constructor(scoreBuilder: ScoreBuilderImpl) : this(null, scoreBuilder)
+
+    constructor(init: SCORE.() -> Unit) : this(init, null)
+
     init {
-        currentScore = scoreBuilder.score(init)
+        this.scoreBuilder = if (scoreBuilder == null) {
+            ScoreBuilderImpl()
+        } else {
+            scoreBuilder
+        }
+        currentScore = if (init == null) {
+            this.scoreBuilder.build()
+        } else {
+            this.scoreBuilder.score(init)
+        }
     }
 
     constructor() : this({})
@@ -84,6 +97,25 @@ class ScoreHandler(init: SCORE.() -> Unit) : ScoreHandlerInterface {
             }
             currentScore = scoreBuilder.build()
         }
+    }
+
+    override fun insertNote(activeElement: String, keyPressed: Int): String? {
+        scoreBuilder.noteElements.find { it.id == activeElement }?.let { element ->
+            val duration = when (keyPressed) {
+                1 -> Duration.QUARTER
+                2 -> Duration.HALF
+                3 -> Duration.WHOLE
+                else -> Duration.QUARTER
+            }
+
+            // TODO Only hardcoded note type and octave for testing
+
+            val insertIndex = scoreBuilder.noteElements.indexOf(element) + 1
+            scoreBuilder.addNote(insertIndex, NoteType.C, 5, duration)
+            currentScore = scoreBuilder.build()
+            return scoreBuilder.noteElements[insertIndex].id
+        }
+        return null
     }
 
 }

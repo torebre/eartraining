@@ -6,7 +6,7 @@ interface ScoreBuilderInterface<out T> {
     val debug: Boolean
 
     fun onBarAdded(bar: BAR)
-    fun onNoteAdded(note: NOTE)
+    fun onNoteAdded(note: NOTE): String
     fun onRestAdded(rest: REST)
     fun build(): T
 }

@@ -1,4 +1,5 @@
 import com.kjipo.handler.ScoreHandlerInterface
+import kotlinx.html.injector.injectTo
 
 class ScoreHandlerJavaScript(val scoreHandler: ScoreHandlerInterface) {
 
@@ -15,6 +16,9 @@ class ScoreHandlerJavaScript(val scoreHandler: ScoreHandlerInterface) {
     fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) = scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
     @JsName("updateDuration")
-    fun updateDuration(id: String, keyPressed:Int) = scoreHandler.updateDuration(id, keyPressed)
+    fun updateDuration(activeElement: String, keyPressed: Int) = scoreHandler.updateDuration(activeElement, keyPressed)
+
+    @JsName("insertNote")
+    fun insertNote(activeElement: String, keyPressed: Int) = scoreHandler.insertNote(activeElement, keyPressed)
 
 }

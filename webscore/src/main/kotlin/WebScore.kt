@@ -104,6 +104,13 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                     }
                     highLightActiveElement()
                 }
+                49, 50, 51, 52 -> {
+                    activeElement?.let {
+                        scoreHandler.insertNote(it, keyboardEvent.keyCode - 48)
+                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        highLightActiveElement()
+                    }
+                }
                 97, 98, 99, 100 -> {
                     activeElement?.let {
                         scoreHandler.updateDuration(it, keyboardEvent.keyCode - 96)

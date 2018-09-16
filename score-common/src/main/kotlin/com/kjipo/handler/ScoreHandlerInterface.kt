@@ -13,4 +13,6 @@ interface ScoreHandlerInterface {
 
     fun updateDuration(id: String, keyPressed: Int)
 
+    fun insertNote(activeElement: String, keyPressed: Int): String?
+
 }

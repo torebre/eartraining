@@ -28,12 +28,14 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
         bars.add(bar)
     }
 
-    override fun onNoteAdded(note: NOTE) {
-        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, note.id
-                ?: "note-${noteCounter++}")
+    override fun onNoteAdded(note: NOTE): String {
+        val id = "note-${noteCounter++}"
+        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, note.beamGroup, id)
 
         currentElements.add(noteElement)
         noteElements.add(noteElement)
+
+        return id
     }
 
     override fun onRestAdded(rest: REST) {
@@ -66,6 +68,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
             barXoffset += barXspace
             barYoffset += barYspace
         }
+
 
         val beamGroups = mutableMapOf<Int, MutableCollection<PositionedRenderingElement>>()
 
@@ -146,9 +149,16 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     fun findNote(elementId: String): NoteElement? {
         return noteElements.filter { it is NoteElement }
                 .map { it as NoteElement }
-                .find { it.id.equals(elementId) }
+                .find { it.id == elementId }
     }
 
+    fun addNote(index: Int, note: NoteType, octave: Int, duration: Duration) {
+        val noteElement = NoteElement(note, octave, duration, 0, 0, 0, "note-${noteCounter++}")
+
+        // TODO Need to figure out how bars fit into this
+        bars.last().scoreRenderingElements.add(index, noteElement)
+        noteElements.add(index, noteElement)
+    }
 
 
 }
