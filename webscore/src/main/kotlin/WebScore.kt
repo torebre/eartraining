@@ -2,8 +2,10 @@ import com.kjipo.score.RenderingSequence
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.serialization.json.JSON
+import org.w3c.dom.DragEvent
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import org.w3c.dom.Touch
 import org.w3c.dom.events.KeyboardEvent
 import kotlin.browser.document
 import kotlin.dom.clear
@@ -72,6 +74,87 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
 
     private fun setupSvg() {
+        var xStart = 0
+        var yStart = 0
+
+
+        document.addEventListener("dragstart", { event ->
+            val dragEvent = event as DragEvent
+            println("Drag start: ${dragEvent.clientX}, ${dragEvent.clientY}")
+        })
+
+        document.addEventListener("dragend", { event ->
+            val dragEvent = event as DragEvent
+            println("Drag end: ${dragEvent.clientX}, ${dragEvent.clientY}")
+        })
+
+        document.addEventListener("touchmove", { event ->
+            val touchEvent: dynamic = event
+
+            println("Touch event: $touchEvent")
+        })
+
+        document.addEventListener("touchstart", { event ->
+            val touchEvent: dynamic = event
+            val changedTouches = touchEvent.changedTouches
+
+            if (changedTouches.length > 0) {
+                xStart = changedTouches[0].pageX
+                yStart = changedTouches[0].pageY
+            }
+
+            println("Touch start: $touchEvent")
+        })
+
+
+        document.addEventListener("touchend", { event ->
+            val touchEvent: dynamic = event
+            val changedTouches = touchEvent.changedTouches
+
+            println("Touch end: $touchEvent")
+
+            if (changedTouches.length > 0) {
+                val xStop = changedTouches[0].pageX
+                val yStop = changedTouches[0].pageY
+
+                val xDiff = xStop - xStart
+                val yDiff = yStop - yStart
+
+
+                if (xDiff < -50) {
+                    deactivateActiveElement()
+                    activeElement = activeElement?.let {
+                        scoreHandler.getNeighbouringElement(it, true)
+                    }
+                    highLightActiveElement()
+                } else if (xDiff > 50) {
+                    deactivateActiveElement()
+                    activeElement = activeElement?.let {
+                        scoreHandler.getNeighbouringElement(it, false)
+                    }
+                    highLightActiveElement()
+                }
+
+                if (yDiff < -50) {
+                    activeElement?.let {
+                        // Up
+                        scoreHandler.moveNoteOneStep(it, true)
+                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        highLightActiveElement()
+                    }
+                } else if (yDiff > 50) {
+                    activeElement?.let {
+                        // Down
+                        scoreHandler.moveNoteOneStep(it, false)
+                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        highLightActiveElement()
+                    }
+                }
+
+                println("x diff: $xDiff y diff: $yDiff")
+            }
+        })
+
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
