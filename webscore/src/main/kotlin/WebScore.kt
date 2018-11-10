@@ -1,6 +1,10 @@
+import com.kjipo.score.DEFAULT_STEM_HEIGHT
+import com.kjipo.score.FILL_COLOUR
 import com.kjipo.score.RenderingSequence
+import com.kjipo.score.STROKE_COLOUR
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
+import kotlinx.html.DefaultUnsafe
 import kotlinx.serialization.json.JSON
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -238,7 +242,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
             }
 //            }
         }
-
+        DEFAULT_STEM_HEIGHT
         highLightActiveElement()
     }
 
@@ -247,8 +251,8 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         return node.ownerDocument?.let {
             val path1 = it.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
-            path1.setAttribute("stroke", "blue")
-            path1.setAttribute("fill", "yellow")
+            path1.setAttribute("stroke", STROKE_COLOUR)
+            path1.setAttribute("fill", FILL_COLOUR)
             id?.let { path1.setAttribute("id", it) }
             path1.setAttribute("stroke-width", strokeWidth.toString())
 
