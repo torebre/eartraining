@@ -72,14 +72,14 @@ fun generateSequence() {
 
     FX.runAndWait { scoreController.fireLoadScore(testScore) }
 
-    Thread.sleep(500)
-    FX.runAndWait { scoreController.fireNoteOn(2) }
-    Thread.sleep(500)
-    FX.runAndWait { scoreController.fireNoteOn(1) }
-    Thread.sleep(500)
-    FX.runAndWait { scoreController.fireNoteOff(2) }
+//    Thread.sleep(500)
+//    FX.runAndWait { scoreController.fireNoteOn(2) }
+//    Thread.sleep(500)
+//    FX.runAndWait { scoreController.fireNoteOn(1) }
+//    Thread.sleep(500)
+//    FX.runAndWait { scoreController.fireNoteOff(2) }
 
-    println("ScoreController: $scoreController")
+//    println("ScoreController: $scoreController")
 
 
 }

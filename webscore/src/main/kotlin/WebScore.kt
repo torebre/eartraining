@@ -2,10 +2,8 @@ import com.kjipo.score.RenderingSequence
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.serialization.json.JSON
-import org.w3c.dom.DragEvent
 import org.w3c.dom.Element
 import org.w3c.dom.Node
-import org.w3c.dom.Touch
 import org.w3c.dom.events.KeyboardEvent
 import kotlin.browser.document
 import kotlin.dom.clear
@@ -13,14 +11,24 @@ import kotlin.dom.clear
 
 class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
-    val divScoreElement: Element? = document.getElementById("score")
     private val svgElement: Element
     var activeElement: String? = null
     val idSvgElementMap = mutableMapOf<String, Element>()
 
     init {
         console.log("Setting up SVG")
-        svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
+
+        val element = document.getElementById("score")
+
+        svgElement = if("svg" == element?.tagName) {
+            element
+        }
+        else {
+            val createdElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
+            document.body?.appendChild(createdElement)
+            createdElement
+        }
+
         setupSvg()
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
@@ -77,23 +85,6 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         var xStart = 0
         var yStart = 0
 
-
-        document.addEventListener("dragstart", { event ->
-            val dragEvent = event as DragEvent
-            println("Drag start: ${dragEvent.clientX}, ${dragEvent.clientY}")
-        })
-
-        document.addEventListener("dragend", { event ->
-            val dragEvent = event as DragEvent
-            println("Drag end: ${dragEvent.clientX}, ${dragEvent.clientY}")
-        })
-
-        document.addEventListener("touchmove", { event ->
-            val touchEvent: dynamic = event
-
-            println("Touch event: $touchEvent")
-        })
-
         document.addEventListener("touchstart", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
@@ -102,16 +93,11 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 xStart = changedTouches[0].pageX
                 yStart = changedTouches[0].pageY
             }
-
-            println("Touch start: $touchEvent")
         })
-
 
         document.addEventListener("touchend", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
-
-            println("Touch end: $touchEvent")
 
             if (changedTouches.length > 0) {
                 val xStop = changedTouches[0].pageX
@@ -119,7 +105,6 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
                 val xDiff = xStop - xStart
                 val yDiff = yStop - yStart
-
 
                 if (xDiff < -50) {
                     deactivateActiveElement()
@@ -151,6 +136,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                     }
                 }
 
+                // TODO Remove after debugging
                 println("x diff: $xDiff y diff: $yDiff")
             }
         })
@@ -203,18 +189,15 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 }
             }
         })
-
-
-        // TODO Set proper view box
-        svgElement.setAttribute("viewBox", "0 0 1000 1000")
-
-        divScoreElement?.appendChild(svgElement)
     }
 
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
-        val xStart = 50
-        val yStart = 100
+        svgElement.setAttribute("viewBox",
+                "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
+
+
+//        svgElement.setAttribute("preserveAspectRatio", "none")
 
         console.log("Generating SVG. Rendering sequence: ${renderingSequence.renderingElements.size}")
 
@@ -245,7 +228,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 //            else {
             for (pathInterface in it.renderingPath) {
                 addPath(svgElement,
-                        transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
+                        transformToPathString(translateGlyph(pathInterface, it.xPosition, it.yPosition)),
                         pathInterface.strokeWidth,
                         it.id)?.let { element ->
                     idSvgElementMap.put(it.id, element)

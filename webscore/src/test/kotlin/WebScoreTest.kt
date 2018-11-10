@@ -7,7 +7,6 @@ import kotlin.test.Test
 
 class WebScoreTest {
 
-
     @Test
     fun checkLoadingScoreWorks() {
         val scoreHandler = ScoreHandler {
@@ -38,7 +37,7 @@ class WebScoreTest {
             }
         }
 
-        val webScore = WebScore(scoreHandler)
+        val webScore = WebScore(ScoreHandlerJavaScript(scoreHandler))
         webScore.highlight("note-1")
 
     }

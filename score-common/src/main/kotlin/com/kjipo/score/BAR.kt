@@ -41,7 +41,7 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
         val timeSignatureElement = if (timeSignature.nominator == 0) {
             null
         } else {
-            timeSignature.let { TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset, "time") }
+            TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset, "time")
         }
 
         widthAvailableForTemporalElements = DEFAULT_BAR_WIDTH
