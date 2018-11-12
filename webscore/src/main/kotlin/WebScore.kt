@@ -242,7 +242,6 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
             }
 //            }
         }
-        DEFAULT_STEM_HEIGHT
         highLightActiveElement()
     }
 

@@ -8,10 +8,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
-                                      val boundingBox: BoundingBox,
-                                      var id: String,
-                                      var xPosition: Int,
-                                      var yPosition: Int) {
+                                 val boundingBox: BoundingBox,
+                                 var id: String,
+                                 var xPosition: Int,
+                                 var yPosition: Int) {
 
     var glyphData: GlyphData? = null
 
@@ -37,6 +37,10 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
         }
 
 
+    }
+
+    override fun toString(): String {
+        return "PositionedRenderingElement(renderingPath=$renderingPath, boundingBox=$boundingBox, id='$id', xPosition=$xPosition, yPosition=$yPosition, glyphData=$glyphData)"
     }
 
 

@@ -5,6 +5,7 @@ import com.kjipo.viewer.ScoreController
 import com.kjipo.viewer.WebViewApplication.Companion.startApplication
 import org.junit.Test
 import tornadofx.*
+import java.nio.file.Paths
 
 
 class GeneratedSequenceTest {
@@ -32,8 +33,8 @@ class GeneratedSequenceTest {
     fun `Visualize scale`() {
         val testScore = createScore().score {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A
@@ -100,6 +101,9 @@ class GeneratedSequenceTest {
 //        println(testScore.renderingElements)
 //        println(createHtmlDocumentString(testScore))
 
+        val htmlPath = Paths.get("test_output.html")
+        writeToHtmlFile(testScore, htmlPath)
+
         startApplication()
 
         Thread.sleep(5000)
@@ -116,8 +120,8 @@ class GeneratedSequenceTest {
     fun `Shows rests`() {
         val testScore = createScore().score {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A
@@ -159,6 +163,74 @@ class GeneratedSequenceTest {
         FX.runAndWait { scoreController.fireLoadScore(testScore) }
 
         Thread.sleep(Long.MAX_VALUE)
+    }
+
+
+    @Test
+    fun `Tie test`() {
+//        val testScore = createScore().score {
+//            bar {
+//                barData.clef = Clef.G
+//                barData.timeSignature = TimeSignature(4, 4)
+//
+//                note {
+//                    note = NoteType.A
+//                    duration = Duration.QUARTER
+//                    octave = 4
+//                }
+//
+//                note {
+//                    note = NoteType.H
+//                    duration = Duration.QUARTER
+//                    octave = 4
+//                }
+//
+//                note {
+//                    note = NoteType.C
+//                    duration = Duration.QUARTER
+//                }
+//
+//                rest {
+//                    duration = Duration.QUARTER
+//                }
+//
+//            }
+//
+//        }
+
+        val scoreData = ScoreSetup()
+
+        var idCounter = 0
+        val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter")
+        ++idCounter
+
+        scoreData.noteElements.add(note1)
+
+        val barData = BarData()
+        barData.clef = Clef.G
+        barData.scoreRenderingElements.add(note1)
+
+        scoreData.bars.add(barData)
+
+        println("Score data: ${scoreData.build()}")
+
+        val htmlPath = Paths.get("test_output.html")
+        writeToHtmlFile(scoreData.build(), htmlPath)
+
+
+        startApplication()
+
+
+        Thread.sleep(5000)
+        println("Initialized: ${FX.initialized.value}")
+
+        val scoreController = FX.find(ScoreController::class.java)
+
+        FX.runAndWait { scoreController.fireLoadScore(scoreData.build()) }
+
+        Thread.sleep(Long.MAX_VALUE)
+
+
     }
 
 

@@ -7,8 +7,8 @@ import kotlin.browser.window
 
 val scoreHandler = ScoreHandlerJavaScript(ScoreHandler {
     bar {
-        clef = Clef.G
-        timeSignature = TimeSignature(4, 4)
+        barData.clef = Clef.G
+        barData.timeSignature = TimeSignature(4, 4)
 
         note {
             note = NoteType.A
@@ -17,13 +17,13 @@ val scoreHandler = ScoreHandlerJavaScript(ScoreHandler {
         }
 
         note {
-            note = NoteType.H
+            note = NoteType.D
             duration = Duration.QUARTER
             octave = 4
         }
 
         note {
-            note = NoteType.C
+            note = NoteType.G
             duration = Duration.QUARTER
         }
 

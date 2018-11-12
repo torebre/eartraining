@@ -11,8 +11,8 @@ class SerializationTest {
     fun serializeRenderingSequence() {
         val scoreHandler = ScoreHandler {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A
@@ -38,21 +38,13 @@ class SerializationTest {
         }
 
 
-//        val scope = SerialContext()
-//        scope.registerSerializer(Double::class, Double::class.serializer())
-//        scope.registerSerializer(List::class., Double::class.serializer().list)
-
-
-        val jsonData = JSON.stringify(scoreHandler.currentScore)
-
+        val jsonData = JSON.stringify(scoreHandler.scoreData.build())
 
         println("jsonData: $jsonData")
 
         val deserializedRenderedSequence = JSON.parse<RenderingSequence>(jsonData)
 
         println("Deserialized: $deserializedRenderedSequence")
-
-
     }
 
 

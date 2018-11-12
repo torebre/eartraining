@@ -11,8 +11,8 @@ import java.nio.file.Paths
 fun generateSequence() {
     val testScore = createScore().score {
         bar {
-            clef = Clef.G
-            timeSignature = TimeSignature(4, 4)
+            barData.clef = Clef.G
+            barData.timeSignature = TimeSignature(4, 4)
 
             note {
                 note = NoteType.C

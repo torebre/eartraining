@@ -4,103 +4,27 @@ import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
 
 
-class ScoreHandler private constructor(init: (SCORE.() -> Unit)?, scoreBuilder: ScoreBuilderImpl?) : ScoreHandlerInterface {
-    var scoreBuilder = ScoreBuilderImpl()
-    var currentScore: RenderingSequence
+class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterface {
+    private var noteCounter = 0
 
-    constructor(scoreBuilder: ScoreBuilderImpl) : this(null, scoreBuilder)
+    constructor(init: SCORE.() -> Unit) : this(init.let {
+        val scoreBuilder = ScoreBuilderImpl()
+        scoreBuilder.score(init)
+        scoreBuilder.scoreData
+    })
 
-    constructor(init: SCORE.() -> Unit) : this(init, null)
+    override fun getScoreAsJson() = JSON.stringify(scoreData.build())
 
-    init {
-        this.scoreBuilder = if (scoreBuilder == null) {
-            ScoreBuilderImpl()
-        } else {
-            scoreBuilder
-        }
-        currentScore = if (init == null) {
-            this.scoreBuilder.build()
-        } else {
-            this.scoreBuilder.score(init)
-        }
-    }
+    override fun moveNoteOneStep(id: String, up: Boolean) = scoreData.moveNoteOneStep(id, up)
 
-    constructor() : this({})
+    override fun getIdOfFirstSelectableElement() = scoreData.getIdOfFirstSelectableElement()
 
-    fun updateScore() {
-        currentScore = scoreBuilder.build()
-    }
+    override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) = scoreData.getNeighbouringElement(activeElement, lookLeft)
 
-    override fun moveNoteOneStep(id: String, up: Boolean) {
-        scoreBuilder.findNote(id)?.let {
-            if (up) {
-                if (it.note == NoteType.H) {
-                    it.note = NoteType.C
-                    ++it.octave
-                } else {
-                    it.note = NoteType.values()[(it.note.ordinal + 1) % NoteType.values().size]
-                }
-            } else {
-                if (it.note == NoteType.C) {
-                    it.note = NoteType.H
-                    --it.octave
-                } else {
-                    it.note = NoteType.values()[(NoteType.values().size + it.note.ordinal - 1) % NoteType.values().size]
-                }
-            }
-        }
-        currentScore = scoreBuilder.build()
-    }
-
-    internal fun findNote(id: String): NoteElement? {
-        return scoreBuilder.findNote(id)
-    }
-
-    override fun getScoreAsJson(): String {
-        return JSON.stringify(currentScore)
-    }
-
-    override fun getIdOfFirstSelectableElement() = scoreBuilder.noteElements.map { it.id }.firstOrNull()
-
-    override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
-        return scoreBuilder.noteElements.find { it.id.equals(activeElement) }?.let { noteElement ->
-            scoreBuilder.noteElements.filter { temporalElement ->
-                temporalElement.id.equals(activeElement)
-            }.map { it ->
-                val index = scoreBuilder.noteElements.indexOf(it)
-                if (lookLeft) {
-                    if (index == 0) {
-                        0
-                    } else {
-                        index - 1
-                    }
-                } else {
-                    if (index == scoreBuilder.noteElements.lastIndex) {
-                        scoreBuilder.noteElements.lastIndex
-                    } else {
-                        index + 1
-                    }
-                }
-            }
-                    .map { scoreBuilder.noteElements[it].id }.firstOrNull()
-        }
-    }
-
-    override fun updateDuration(id: String, keyPressed: Int) {
-        scoreBuilder.noteElements.find {
-            it.id.equals(id)
-        }?.let {
-            when (keyPressed) {
-                1 -> it.duration = Duration.QUARTER
-                2 -> it.duration = Duration.HALF
-                3 -> it.duration = Duration.WHOLE
-            }
-            currentScore = scoreBuilder.build()
-        }
-    }
+    override fun updateDuration(id: String, keyPressed: Int) = scoreData.updateDuration(id, keyPressed)
 
     override fun insertNote(activeElement: String, keyPressed: Int): String? {
-        scoreBuilder.noteElements.find { it.id == activeElement }?.let { element ->
+        scoreData.noteElements.find { it.id == activeElement }?.let { element ->
             val duration = when (keyPressed) {
                 1 -> Duration.QUARTER
                 2 -> Duration.HALF
@@ -110,12 +34,19 @@ class ScoreHandler private constructor(init: (SCORE.() -> Unit)?, scoreBuilder: 
 
             // TODO Only hardcoded note type and octave for testing
 
-            val insertIndex = scoreBuilder.noteElements.indexOf(element) + 1
-            scoreBuilder.addNote(insertIndex, NoteType.C, 5, duration)
-            currentScore = scoreBuilder.build()
-            return scoreBuilder.noteElements[insertIndex].id
+            val insertIndex = scoreData.noteElements.indexOf(element) + 1
+            addNote(insertIndex, NoteType.C, 5, duration)
+            return scoreData.noteElements[insertIndex].id
         }
         return null
+    }
+
+    private fun addNote(index: Int, note: NoteType, octave: Int, duration: Duration) {
+        val noteElement = NoteElement(note, octave, duration, 0, 0, 0, "note-${noteCounter++}")
+
+        // TODO Need to figure out how bars fit into this
+        scoreData.bars.last().scoreRenderingElements.add(index, noteElement)
+        scoreData.noteElements.add(index, noteElement)
     }
 
 }

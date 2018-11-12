@@ -11,8 +11,8 @@ class WebScoreTest {
     fun checkLoadingScoreWorks() {
         val scoreHandler = ScoreHandler {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A

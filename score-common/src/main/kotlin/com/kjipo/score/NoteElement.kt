@@ -1,7 +1,6 @@
 package com.kjipo.score
 
-import com.kjipo.svg.PathInterfaceImpl
-import com.kjipo.svg.getGlyph
+import com.kjipo.svg.*
 
 
 class NoteElement(var note: NoteType,
@@ -10,7 +9,8 @@ class NoteElement(var note: NoteType,
                   override var xPosition: Int,
                   override var yPosition: Int,
                   val beamGroup: Int,
-                  override val id: String) : ScoreRenderingElement, TemporalElement {
+                  override val id: String,
+                  val tie: String? = null) : ScoreRenderingElement, TemporalElement {
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val glyphData = getGlyph(duration)
@@ -32,6 +32,30 @@ class NoteElement(var note: NoteType,
 
     override fun toString(): String {
         return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, beamGroup=$beamGroup, id='$id')"
+    }
+
+
+}
+
+
+class TieElement(val id: String, override var xPosition: Int,
+                 override var yPosition: Int, var xStop: Double, var yStop: Double) : ScoreRenderingElement {
+
+
+    override fun toRenderingElement(): PositionedRenderingElement {
+        val xDiff = xStop - xPosition
+        val xPoint1 = xPosition + xDiff.div(3.0)
+        val xPoint2 = xPosition + xDiff.div(3.0).times(2.0)
+
+        val yDiff = yStop - yPosition
+        val yPoint1 = yPosition + yDiff.div(3.0)
+        val yPoint2 = yPosition + yDiff.div(3.0).times(2.0)
+
+        val tieElement = PathInterfaceImpl(listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPoint1.toDouble())),
+                PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint1, xPoint2, yPoint2))), 1)
+
+        return PositionedRenderingElement(listOf(tieElement),
+                findBoundingBox(tieElement.pathElements), id, 0, 0)
     }
 
 

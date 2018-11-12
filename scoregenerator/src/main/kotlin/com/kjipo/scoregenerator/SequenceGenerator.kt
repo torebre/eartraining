@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 class SequenceGenerator : ScoreHandlerInterface {
     private val random = Random()
     var scoreBuilder: ScoreBuilderImpl = ScoreBuilderImpl()
-    var scoreHandler: ScoreHandler = ScoreHandler(scoreBuilder)
+    var scoreHandler: ScoreHandler = ScoreHandler(ScoreSetup())
     val pitchSequence = mutableListOf<Pitch>()
 
     private val logger = LoggerFactory.getLogger(SequenceGenerator::class.java)
@@ -23,10 +23,10 @@ class SequenceGenerator : ScoreHandlerInterface {
         pitchSequence.clear()
 
         scoreBuilder = ScoreBuilderImpl(debug)
-        scoreHandler.scoreBuilder = scoreBuilder
+        scoreHandler = ScoreHandler(scoreBuilder.scoreData)
         val bar = BAR(scoreBuilder)
-        bar.clef = com.kjipo.score.Clef.G
-        bar.timeSignature = TimeSignature(4, 4)
+        bar.barData.clef = com.kjipo.score.Clef.G
+        bar.barData.timeSignature = TimeSignature(4, 4)
 
         val noteOrder = NoteType.values()
         var currentNote = NoteType.C
@@ -122,7 +122,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                 .find { it.id == id }?.let { pitch ->
 
                     // TODO Only works because C major is the only key used so far
-                    scoreBuilder.findNote(id)?.let { noteElement ->
+                    scoreHandler.scoreData.findNote(id)?.let { noteElement ->
                         val pitchStep = determinePitchStep(noteElement, up)
                         val index = pitchSequence.indexOf(pitch)
                         pitchSequence[index].pitch += pitchStep
@@ -135,7 +135,7 @@ class SequenceGenerator : ScoreHandlerInterface {
     override fun updateDuration(id: String, keyPressed: Int) {
         pitchSequence
                 .find { it.id == id }?.let { pitch ->
-                    scoreBuilder.findNote(id)?.let { noteElement ->
+                    scoreHandler.scoreData.findNote(id)?.let { noteElement ->
                         pitch.duration = when (keyPressed) {
                             1 -> Duration.QUARTER
                             2 -> Duration.HALF
@@ -202,7 +202,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
             pitchSequence
                     .find { it.id == activeElement }?.let { pitch ->
-                        scoreHandler.scoreBuilder.noteElements.find { it.id == idInsertedNote }?.let { temporalElement ->
+                        scoreHandler.scoreData.noteElements.find { it.id == idInsertedNote }?.let { temporalElement ->
                             if (temporalElement is NoteElement) {
                                 pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, getPitch(temporalElement.note, temporalElement.octave), temporalElement.duration))
                             }

@@ -53,7 +53,7 @@ class NoteViewerWithScoreHandler : View("Note view") {
             styleClass.add("browser")
             webEngine.isJavaScriptEnabled = true
 
-            webEngine.loadWorker.stateProperty().addListener { observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
+            webEngine.loadWorker.stateProperty().addListener { observableValue: ObservableValue<out Worker.State>, _: Worker.State, state1: Worker.State ->
                 run {
                     if (state1 == Worker.State.SUCCEEDED) {
 //                        val window = webEngine.executeScript("window") as JSObject

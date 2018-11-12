@@ -71,7 +71,7 @@ class NoteView : View("Note view"), ScoreControllerListener {
 
             LOGGER.info("Loading class")
 
-            webEngine.loadWorker.stateProperty().addListener({ observableValue: ObservableValue<out Worker.State>, state: Worker.State, state1: Worker.State ->
+            webEngine.loadWorker.stateProperty().addListener({ _: ObservableValue<out Worker.State>, _: Worker.State, state1: Worker.State ->
                 run {
                     if (state1 == Worker.State.SUCCEEDED) {
                         val window = webEngine.executeScript("window") as JSObject
