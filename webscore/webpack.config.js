@@ -33,13 +33,17 @@ module.exports = {
     },
     devtool: 'cheap-source-map',
     plugins: [
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
-            filename: 'vendor.bundle.js'
-        }),
+        // TODO There is something going on with following plugin that seem to cause
+        // a problem like this: Uncaught ReferenceError: webpackJsonp is not defined
+        // Commenting it out for now
+
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     name: 'vendor',
+        //     filename: 'vendor.bundle.js'
+        // }),
         new HtmlWebpackPlugin({
             chunks: ['vendor', 'main'],
-            chunksSortMode: 'manual',
+            chunksSortMode: 'dependency',
             minify: {
                 removeAttributeQuotes: false,
                 collapseWhitespace: false,

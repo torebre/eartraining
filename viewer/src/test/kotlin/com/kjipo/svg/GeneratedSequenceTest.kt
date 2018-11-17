@@ -168,58 +168,30 @@ class GeneratedSequenceTest {
 
     @Test
     fun `Tie test`() {
-//        val testScore = createScore().score {
-//            bar {
-//                barData.clef = Clef.G
-//                barData.timeSignature = TimeSignature(4, 4)
-//
-//                note {
-//                    note = NoteType.A
-//                    duration = Duration.QUARTER
-//                    octave = 4
-//                }
-//
-//                note {
-//                    note = NoteType.H
-//                    duration = Duration.QUARTER
-//                    octave = 4
-//                }
-//
-//                note {
-//                    note = NoteType.C
-//                    duration = Duration.QUARTER
-//                }
-//
-//                rest {
-//                    duration = Duration.QUARTER
-//                }
-//
-//            }
-//
-//        }
-
         val scoreData = ScoreSetup()
-
         var idCounter = 0
         val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter")
         ++idCounter
+        val note2 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter", tie = note1.id)
+        ++idCounter
 
         scoreData.noteElements.add(note1)
+        scoreData.noteElements.add(note2)
 
         val barData = BarData()
         barData.clef = Clef.G
         barData.scoreRenderingElements.add(note1)
+        barData.scoreRenderingElements.add(note2)
 
         scoreData.bars.add(barData)
 
+
         println("Score data: ${scoreData.build()}")
 
-        val htmlPath = Paths.get("test_output.html")
-        writeToHtmlFile(scoreData.build(), htmlPath)
-
+//        val htmlPath = Paths.get("test_output.html")
+//        writeToHtmlFile(scoreData.build(), htmlPath)
 
         startApplication()
-
 
         Thread.sleep(5000)
         println("Initialized: ${FX.initialized.value}")
@@ -230,10 +202,7 @@ class GeneratedSequenceTest {
 
         Thread.sleep(Long.MAX_VALUE)
 
-
     }
-
-
 
 
 }

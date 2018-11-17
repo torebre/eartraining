@@ -2,29 +2,30 @@ package com.kjipo.score
 
 import com.kjipo.handler.ScoreHandlerInterface
 
-class ScoreBuilderSequence : ScoreHandlerInterface {
-    private val scoreData = ScoreSetup()
+class ScoreBuilderSequence(private val scoreData: ScoreSetup) : ScoreHandlerInterface {
     private var noteCounter = 0
+
+    constructor() : this(ScoreSetup())
 
 
     override fun getScoreAsJson(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return scoreData.getScoreAsJson()
     }
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return scoreData.moveNoteOneStep(id, up)
     }
 
     override fun getIdOfFirstSelectableElement(): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return scoreData.getIdOfFirstSelectableElement()
     }
 
     override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return scoreData.getNeighbouringElement(activeElement, lookLeft)
     }
 
     override fun updateDuration(id: String, keyPressed: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return scoreData.updateDuration(id, keyPressed)
     }
 
     override fun insertNote(activeElement: String, keyPressed: Int): String? {
@@ -53,14 +54,13 @@ class ScoreBuilderSequence : ScoreHandlerInterface {
 
     private fun updateBars() {
         scoreData.bars.clear()
-        
+
 
 
         for (noteElement in scoreData.noteElements) {
             // TODO
 
             noteElement.duration
-
 
 
         }

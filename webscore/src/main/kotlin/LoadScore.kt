@@ -4,7 +4,6 @@ import kotlinx.serialization.json.JSON
 import kotlin.browser.window
 
 
-
 val scoreHandler = ScoreHandlerJavaScript(ScoreHandler {
     bar {
         barData.clef = Clef.G
@@ -33,11 +32,24 @@ val scoreHandler = ScoreHandlerJavaScript(ScoreHandler {
     }
 })
 
-//val webScore = WebScore(scoreHandler)
 
-//fun loadJson(serializedRenderSequence: String) {
-//    val deserializedRenderedSequence = JSON.parse<RenderingSequence>(serializedRenderSequence)
-//
-//    scoreHandler.currentScore = deserializedRenderedSequence
-//    webScore.reload()
-//}
+val scoreHandler2 = ScoreHandlerJavaScript({
+    val scoreData = ScoreSetup()
+    var idCounter = 0
+    val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter")
+    ++idCounter
+    val note2 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter", tie = note1.id)
+    ++idCounter
+
+    scoreData.noteElements.add(note1)
+    scoreData.noteElements.add(note2)
+
+    val barData = BarData()
+    barData.clef = Clef.G
+    barData.scoreRenderingElements.add(note1)
+    barData.scoreRenderingElements.add(note2)
+
+    scoreData.bars.add(barData)
+
+    ScoreBuilderSequence(scoreData)
+}())

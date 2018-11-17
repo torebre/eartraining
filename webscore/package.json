@@ -18,7 +18,7 @@
     "webpack": "3.11.0"
   },
   "scripts": {
-    "start": "webpack",
+    "start": "webpack --display-entrypoints",
     "bundle": "webpack --display-entrypoints --config webpack.deploy.config.js",
     "test": "karma start"
   }
