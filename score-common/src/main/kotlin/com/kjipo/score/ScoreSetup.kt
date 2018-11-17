@@ -9,6 +9,8 @@ class ScoreSetup {
     val noteElements = mutableListOf<TemporalElement>()
     val bars = mutableListOf<BarData>()
 
+    val test = mutableListOf<Int>()
+
     fun findNote(elementId: String): NoteElement? {
         return noteElements.filter { it is NoteElement }
                 .map { it as NoteElement }
@@ -130,6 +132,20 @@ class ScoreSetup {
                 renderingElements.add(handleBeams(it.value))
             }
         }
+
+
+        var tieElementCounter = 0
+
+        noteElements.filter { it is NoteElement }
+                .map { it as NoteElement }
+                .filter { it.tie != null }
+                .forEach { from ->
+                    findNote(from.tie!!)?.let { to ->
+                        val tieElement = TieElement("tie-element-$tieElementCounter", from.xPosition, from.yPosition, to.xPosition.toDouble(), to.yPosition.toDouble())
+                        ++tieElementCounter
+                        renderingElements.add(tieElement.toRenderingElement())
+                    }
+                }
 
         return RenderingSequence(renderingElements, determineViewBox(renderingElements))
     }

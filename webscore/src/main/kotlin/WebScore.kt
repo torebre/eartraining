@@ -139,9 +139,6 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                         highLightActiveElement()
                     }
                 }
-
-                // TODO Remove after debugging
-                println("x diff: $xDiff y diff: $yDiff")
             }
         })
 
@@ -234,7 +231,8 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 addPath(svgElement,
                         transformToPathString(translateGlyph(pathInterface, it.xPosition, it.yPosition)),
                         pathInterface.strokeWidth,
-                        it.id)?.let { element ->
+                        it.id,
+                        pathInterface.fill)?.let { element ->
                     idSvgElementMap.put(it.id, element)
                 }
 
@@ -246,12 +244,12 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     }
 
 
-    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String?): Element? {
+    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String?, fill: String): Element? {
         return node.ownerDocument?.let {
             val path1 = it.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
             path1.setAttribute("stroke", STROKE_COLOUR)
-            path1.setAttribute("fill", FILL_COLOUR)
+            path1.setAttribute("fill", fill)
             id?.let { path1.setAttribute("id", it) }
             path1.setAttribute("stroke-width", strokeWidth.toString())
 

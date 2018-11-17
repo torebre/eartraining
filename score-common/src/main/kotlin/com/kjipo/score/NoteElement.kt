@@ -51,8 +51,13 @@ class TieElement(val id: String, override var xPosition: Int,
         val yPoint1 = yPosition + yDiff.div(3.0)
         val yPoint2 = yPosition + yDiff.div(3.0).times(2.0)
 
-        val tieElement = PathInterfaceImpl(listOf(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPoint1.toDouble())),
-                PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint1, xPoint2, yPoint2))), 1)
+        val tieElement = PathInterfaceImpl(
+                listOf(
+                        PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
+//                        PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(50.0, 50.0)),
+                PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint2, yPoint2, xStop, yStop))),
+//                PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(100.0, 100.0, 150.0, 150.0, 200.0, 200.0))),
+                2, fill = "transparent")
 
         return PositionedRenderingElement(listOf(tieElement),
                 findBoundingBox(tieElement.pathElements), id, 0, 0)

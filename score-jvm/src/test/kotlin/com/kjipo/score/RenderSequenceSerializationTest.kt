@@ -16,8 +16,8 @@ class RenderSequenceSerializationTest {
     fun serializeRenderingSequence() {
         val scoreHandler = ScoreHandler {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A
@@ -50,8 +50,7 @@ class RenderSequenceSerializationTest {
 //        scope.registerSerializer(List::class., Double::class.serializer().list)
 
 
-        val jsonData = JSON.stringify(scoreHandler.currentScore)
-
+        val jsonData = scoreHandler.getScoreAsJson()
 
         println("jsonData: $jsonData")
 

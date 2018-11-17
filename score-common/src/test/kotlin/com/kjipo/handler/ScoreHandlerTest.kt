@@ -34,22 +34,22 @@ class ScoreHandlerTest {
     fun moveNoteMoreThanOneOctaveUp() {
         val scoreHandler = ScoreHandler {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A
                     duration = Duration.QUARTER
                     octave = 4
-                    id = "note-1"
+//                    id = "note-1"
                 }
             }
         }
 
         for (i in 1..10) {
-            val currentNote = scoreHandler.findNote("note-1")!!.note
+            val currentNote = scoreHandler.scoreData.findNote("note-1")!!.note
             scoreHandler.moveNoteOneStep("note-1", true)
-            val newCurrentNote = scoreHandler.findNote("note-1")!!.note
+            val newCurrentNote = scoreHandler.scoreData.findNote("note-1")!!.note
 
             assertTrue { noteNextMapUp[currentNote]!!.equals(newCurrentNote) }
         }
@@ -60,22 +60,22 @@ class ScoreHandlerTest {
     fun moveNoteMoreThanOneOctaveDown() {
         val scoreHandler = ScoreHandler {
             bar {
-                clef = Clef.G
-                timeSignature = TimeSignature(4, 4)
+                barData.clef = Clef.G
+                barData.timeSignature = TimeSignature(4, 4)
 
                 note {
                     note = NoteType.A
                     duration = Duration.QUARTER
                     octave = 4
-                    id = "note-1"
+//                    id = "note-1"
                 }
             }
         }
 
         for (i in 1..10) {
-            val currentNote = scoreHandler.findNote("note-1")!!.note
+            val currentNote = scoreHandler.scoreData.findNote("note-1")!!.note
             scoreHandler.moveNoteOneStep("note-1", false)
-            val newCurrentNote = scoreHandler.findNote("note-1")!!.note
+            val newCurrentNote = scoreHandler.scoreData.findNote("note-1")!!.note
 
             assertTrue { noteNextMapDown[currentNote]!!.equals(newCurrentNote) }
         }
