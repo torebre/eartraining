@@ -54,6 +54,7 @@ module.exports = {
         }),
         new BrowserSyncPlugin({
             host: 'localhost',
+            browser: "google-chrome",
             port: 8080,
             server: {
                 baseDir: ['./build/dist']
