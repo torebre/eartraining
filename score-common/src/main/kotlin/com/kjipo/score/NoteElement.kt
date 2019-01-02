@@ -54,9 +54,7 @@ class TieElement(val id: String, override var xPosition: Int,
         val tieElement = PathInterfaceImpl(
                 listOf(
                         PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
-//                        PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(50.0, 50.0)),
-                PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint2, yPoint2, xStop, yStop))),
-//                PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(100.0, 100.0, 150.0, 150.0, 200.0, 200.0))),
+                        PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint2, yPoint2, xStop, yStop))),
                 2, fill = "transparent")
 
         return PositionedRenderingElement(listOf(tieElement),

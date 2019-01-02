@@ -1,10 +1,9 @@
-import com.kjipo.score.DEFAULT_STEM_HEIGHT
-import com.kjipo.score.FILL_COLOUR
 import com.kjipo.score.RenderingSequence
 import com.kjipo.score.STROKE_COLOUR
+import com.kjipo.score.Transform
+import com.kjipo.svg.GlyphData
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
-import kotlinx.html.DefaultUnsafe
 import kotlinx.serialization.json.JSON
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -20,14 +19,11 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     val idSvgElementMap = mutableMapOf<String, Element>()
 
     init {
-        console.log("Setting up SVG")
-
         val element = document.getElementById("score")
 
-        svgElement = if("svg" == element?.tagName) {
+        svgElement = if ("svg" == element?.tagName) {
             element
-        }
-        else {
+        } else {
             val createdElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
             document.body?.appendChild(createdElement)
             createdElement
@@ -198,47 +194,61 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
 
 
-//        svgElement.setAttribute("preserveAspectRatio", "none")
+        val defsMap = mutableMapOf<String, GlyphData>()
 
         console.log("Generating SVG. Rendering sequence: ${renderingSequence.renderingElements.size}")
 
         svgElement.clear()
 
-        renderingSequence.renderingElements.forEach {
-            //            if (it.glyphData != null) {
-//
-//                // TODO Why does using references not work here?
-//
-//                // TODO The ID setup will only work if there is one path
-//
-//                it.glyphData?.let { glyphData ->
-//                    for (pathInterface in it.renderingPath) {
-//                        val path = addPath(svgElement,
-//                                transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
-//                                pathInterface.strokeWidth,
-//                                it.id)
-//
-//                        println("Path: ${path?.id ?: "none"}")
-//
-//                        path?.let { element ->
-//                            idSvgElementMap.put(it.id, element)
-//                        }
-//                    }
-//                }
-//            }
-//            else {
-            for (pathInterface in it.renderingPath) {
-                addPath(svgElement,
-                        transformToPathString(translateGlyph(pathInterface, it.xPosition, it.yPosition)),
-                        pathInterface.strokeWidth,
-                        it.id,
-                        pathInterface.fill)?.let { element ->
-                    idSvgElementMap.put(it.id, element)
+        renderingSequence.renderingElements.forEach { renderingElement ->
+            renderingElement.transform?.let {
+                when (it) {
+                    is Transform.Translation -> {
+                        println("Found transformation: ${it}")
+
+                    }
+
                 }
-
-
             }
-//            }
+
+            if (renderingElement.glyphData != null) {
+                val glyphData = renderingElement.glyphData!!
+                defsMap.put(glyphData.name, glyphData)
+
+                println("Glyph data: ${renderingElement.glyphData}")
+
+                // TODO Why does using references not work here?
+
+                // TODO The ID setup will only work if there is one path
+
+                renderingElement.glyphData?.let { glyphData ->
+                    for (pathInterface in renderingElement.renderingPath) {
+                        val path = addPath(svgElement,
+                                transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
+                                pathInterface.strokeWidth,
+                                renderingElement.id,
+                                pathInterface.fill)
+
+                        println("Path: ${path?.id ?: "none"}")
+
+                        path?.let { element ->
+                            idSvgElementMap.put(renderingElement.id, element)
+                        }
+                    }
+                }
+            } else {
+                for (pathInterface in renderingElement.renderingPath) {
+                    addPath(svgElement,
+                            transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
+                            pathInterface.strokeWidth,
+                            renderingElement.id,
+                            pathInterface.fill)?.let { element ->
+                        idSvgElementMap.put(renderingElement.id, element)
+                    }
+
+
+                }
+            }
         }
         highLightActiveElement()
     }

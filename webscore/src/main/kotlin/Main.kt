@@ -8,7 +8,7 @@ fun main(args: Array<String>) {
     var idCounter = 0
     val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter")
     ++idCounter
-    val note2 = NoteElement(NoteType.D, 5, Duration.HALF, 0, 0, 0, "note-$idCounter", tie = note1.id)
+    val note2 = NoteElement(NoteType.E, 5, Duration.HALF, 0, 0, 0, "note-$idCounter", tie = note1.id)
     ++idCounter
 
     scoreData.noteElements.add(note1)
