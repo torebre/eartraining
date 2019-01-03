@@ -133,7 +133,6 @@ class ScoreSetup {
             }
         }
 
-
         var tieElementCounter = 0
 
         noteElements.filter { it is NoteElement }

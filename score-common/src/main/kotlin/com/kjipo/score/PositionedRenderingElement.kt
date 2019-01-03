@@ -11,8 +11,8 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                                  val boundingBox: BoundingBox,
                                  var id: String,
                                  var xPosition: Int,
-                                 var yPosition: Int) {
-//                                 var transform: Transform? = null) {
+                                 var yPosition: Int,
+                                 var transform: Translation? = null) {
 
     var glyphData: GlyphData? = null
 
@@ -35,6 +35,20 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                     boundingBox, id,
                     xPosition,
                     yPosition)
+        }
+
+        fun create(renderingPath: List<PathInterfaceImpl>,
+                   boundingBox: BoundingBox,
+                   id: String,
+                   xPosition: Int,
+                   yPosition: Int,
+                   transform: Translation?): PositionedRenderingElement {
+            return PositionedRenderingElement(
+                    renderingPath,
+                    boundingBox, id,
+                    xPosition,
+                    yPosition,
+                    transform)
         }
 
 

@@ -68,6 +68,9 @@ class BarData(val debug: Boolean = false) {
             when (it) {
                 is TemporalElement -> {
                     it.xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
+
+
+
                     it.yPosition += barYoffset
                     tickCounter += it.duration.ticks
 

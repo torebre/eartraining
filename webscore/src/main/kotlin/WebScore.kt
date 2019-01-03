@@ -1,6 +1,6 @@
 import com.kjipo.score.RenderingSequence
 import com.kjipo.score.STROKE_COLOUR
-import com.kjipo.score.Transform
+import com.kjipo.score.Translation
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
@@ -208,16 +208,23 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
         svgElement.clear()
 
+
+
         renderingSequence.renderingElements.forEach { renderingElement ->
-//            renderingElement.transform?.let {
-//                when (it) {
-//                    is Transform.Translation -> {
-//                        println("Found transformation: ${it}")
-//
-//                    }
-//
-//                }
-//            }
+            var nodeToAddPathTo = svgElement
+
+            renderingElement.transform?.let {translation ->
+                println("Found transformation: ${translation}")
+
+                svgElement.ownerDocument?.let {
+                    val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
+                    groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
+
+                    svgElement.appendChild(groupingElement)
+                    nodeToAddPathTo = groupingElement
+                }
+
+            }
 
             if (renderingElement.glyphData != null) {
                 val glyphData = renderingElement.glyphData!!
@@ -231,7 +238,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
                 renderingElement.glyphData?.let { glyphData ->
                     for (pathInterface in renderingElement.renderingPath) {
-                        val path = addPath(svgElement,
+                        val path = addPath(nodeToAddPathTo,
                                 transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
                                 pathInterface.strokeWidth,
                                 renderingElement.id,
@@ -246,7 +253,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 }
             } else {
                 for (pathInterface in renderingElement.renderingPath) {
-                    addPath(svgElement,
+                    addPath(nodeToAddPathTo,
                             transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
                             pathInterface.strokeWidth,
                             renderingElement.id,

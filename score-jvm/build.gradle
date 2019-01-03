@@ -1,4 +1,6 @@
 buildscript {
+    ext.serialization_version = '0.9.0'
+    
     repositories {
         jcenter()
         maven { url "https://kotlin.bintray.com/kotlinx" }
@@ -21,7 +23,7 @@ apply plugin: 'kotlinx-serialization'
 dependencies {
     expectedBy project(":score-common")
     compile libraries.kotlin_stdlib
-    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinVersion"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
     testCompile libraries.kotlin_test_junit
 }
 
