@@ -11,8 +11,8 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                                  val boundingBox: BoundingBox,
                                  var id: String,
                                  var xPosition: Int,
-                                 var yPosition: Int,
-                                 var transform: Transform? = null) {
+                                 var yPosition: Int) {
+//                                 var transform: Transform? = null) {
 
     var glyphData: GlyphData? = null
 

@@ -4,7 +4,9 @@ import com.kjipo.score.Transform
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
+import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.JSON
+import kotlinx.serialization.parse
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.KeyboardEvent
@@ -12,6 +14,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
+@ImplicitReflectionSerializer
 class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
     private val svgElement: Element
@@ -33,23 +36,27 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
+    @ImplicitReflectionSerializer
     fun loadScoreHandler(scoreHandler: ScoreHandlerJavaScript) {
         this.scoreHandler = scoreHandler
         activeElement = scoreHandler.getIdOfFirstSelectableElement()
         reload()
     }
 
+    @ImplicitReflectionSerializer
     fun reload() {
         val score = scoreHandler.getScoreAsJson()
         loadScore(transformJsonToRenderingSequence(score))
     }
 
+    @ImplicitReflectionSerializer
     fun loadScoreFromJson(jsonData: String) {
         // TODO Here for testing
         transformJsonToRenderingSequence(JSON.parse(jsonData))
     }
 
 
+    @ImplicitReflectionSerializer
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
         return JSON.parse(jsonData)
     }
@@ -81,6 +88,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     }
 
 
+    @ImplicitReflectionSerializer
     private fun setupSvg() {
         var xStart = 0
         var yStart = 0
@@ -124,14 +132,14 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                     activeElement?.let {
                         // Up
                         scoreHandler.moveNoteOneStep(it, true)
-                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 } else if (yDiff > 50) {
                     activeElement?.let {
                         // Down
                         scoreHandler.moveNoteOneStep(it, false)
-                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 }
@@ -147,13 +155,13 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 38 -> activeElement?.let {
                     // Up
                     scoreHandler.moveNoteOneStep(it, true)
-                    generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                    generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
                     highLightActiveElement()
                 }
                 40 -> activeElement?.let {
                     // Down
                     scoreHandler.moveNoteOneStep(it, false)
-                    generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                    generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
                     highLightActiveElement()
                 }
                 37 -> {
@@ -201,15 +209,15 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         svgElement.clear()
 
         renderingSequence.renderingElements.forEach { renderingElement ->
-            renderingElement.transform?.let {
-                when (it) {
-                    is Transform.Translation -> {
-                        println("Found transformation: ${it}")
-
-                    }
-
-                }
-            }
+//            renderingElement.transform?.let {
+//                when (it) {
+//                    is Transform.Translation -> {
+//                        println("Found transformation: ${it}")
+//
+//                    }
+//
+//                }
+//            }
 
             if (renderingElement.glyphData != null) {
                 val glyphData = renderingElement.glyphData!!

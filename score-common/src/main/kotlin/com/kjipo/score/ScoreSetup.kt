@@ -38,7 +38,7 @@ class ScoreSetup {
     }
 
     fun getScoreAsJson(): String {
-        return JSON.stringify(build())
+        return JSON.stringify(RenderingSequence.serializer(), build())
     }
 
     fun getIdOfFirstSelectableElement() = noteElements.map { it.id }.firstOrNull()

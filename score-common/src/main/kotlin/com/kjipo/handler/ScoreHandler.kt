@@ -13,7 +13,7 @@ class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterfac
         scoreBuilder.scoreData
     })
 
-    override fun getScoreAsJson() = JSON.stringify(scoreData.build())
+    override fun getScoreAsJson() = JSON.stringify(RenderingSequence.serializer(), scoreData.build())
 
     override fun moveNoteOneStep(id: String, up: Boolean) = scoreData.moveNoteOneStep(id, up)
 

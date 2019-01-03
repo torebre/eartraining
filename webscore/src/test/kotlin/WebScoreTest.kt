@@ -3,10 +3,12 @@ import com.kjipo.score.Clef
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import com.kjipo.score.TimeSignature
+import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlin.test.Test
 
 class WebScoreTest {
 
+    @ImplicitReflectionSerializer
     @Test
     fun checkLoadingScoreWorks() {
         val scoreHandler = ScoreHandler {
