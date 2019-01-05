@@ -99,14 +99,17 @@ fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
 //        }
 //    }
 
-    renderingSequence.renderingElements.forEach {
-        for (pathInterface in it.renderingPath) {
-            addPath(svgElement,
-                    transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
-                    pathInterface.strokeWidth,
-                    it.id)
-        }
-    }
+
+    // TODO Fix method so that it adds elements
+
+//    renderingSequence.renderingElements.forEach {
+//        for (pathInterface in it.renderingPath) {
+//            addPath(svgElement,
+//                    transformToPathString(translateGlyph(pathInterface, xStart + it.xPosition, yStart + it.yPosition)),
+//                    pathInterface.strokeWidth,
+//                    it.id)
+//        }
+//    }
 
 }
 

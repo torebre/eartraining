@@ -1,7 +1,10 @@
 package com.kjipo.score
 
+import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
+import com.kjipo.svg.getGlyph
 import kotlinx.serialization.json.JSON
+import kotlinx.serialization.list
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -80,16 +83,19 @@ class ScoreSetup {
     }
 
     fun build(): RenderingSequence {
-        var stemCounter = 0
-
         // TODO Possible to use immutable lists here?
         // TODO The position will be wrong when there are multiple bars
+        val renderingSequences = mutableListOf<RenderingSequence>()
         val renderingElements = mutableListOf<PositionedRenderingElement>()
+        val definitionMap = mutableMapOf<String, GlyphData>()
 
         noteElements.filter { it is NoteElement }
                 .map { it as NoteElement }
                 .forEach {
                     it.yPosition = calculateVerticalOffset(it.note, it.octave)
+
+                    definitionMap.put(it.duration.name, getGlyph(it.duration))
+
                 }
 
         var barXoffset = 0
@@ -97,32 +103,14 @@ class ScoreSetup {
         val barXspace = 0
         val barYspace = 0
 
-        bars.forEach {
-            renderingElements.addAll(it.build(barXoffset, barYoffset))
+        bars.forEach { barData ->
+            val currentBar = barData.build(barXoffset, barYoffset)
+            renderingSequences.add(currentBar)
             barXoffset += barXspace
             barYoffset += barYspace
         }
 
         val beamGroups = mutableMapOf<Int, MutableCollection<PositionedRenderingElement>>()
-
-        noteElements.filter { it is NoteElement }
-                .map { it as NoteElement }
-                .forEach {
-                    if (it.requiresStem()) {
-                        val stem = addStem(it.toRenderingElement().boundingBox)
-                        val stemElement = PositionedRenderingElement(listOf(stem),
-                                findBoundingBox(stem.pathElements),
-                                "stem-${stemCounter++}",
-                                it.xPosition,
-                                it.yPosition)
-
-                        if (beamGroups.containsKey(it.beamGroup)) {
-                            beamGroups.get(it.beamGroup)?.add(stemElement)
-                        } else {
-                            beamGroups.put(it.beamGroup, mutableListOf(stemElement))
-                        }
-                    }
-                }
 
         beamGroups.forEach {
             if (it.key == 0) {
@@ -146,47 +134,25 @@ class ScoreSetup {
                     }
                 }
 
-        return RenderingSequence(renderingElements, determineViewBox(renderingElements))
+        renderingSequences.add(RenderingSequence(listOf(RenderGroup(renderingElements, null)), determineViewBox(renderingElements), definitionMap))
+
+        return mergeRenderingSequences(renderingSequences)
     }
 
-    private fun determineViewBox(renderingElements: Collection<PositionedRenderingElement>): ViewBox {
-        var xMin = 0.0
-        var yMin = 0.0
-        var xMax = 0.0
-        var yMax = 0.0
-        renderingElements.forEach {
-            if (xMin > it.boundingBox.xMin) {
-                xMin = it.boundingBox.xMin
-            }
-            if (xMax < it.boundingBox.xMax) {
-                xMax = it.boundingBox.xMax
-            }
-            if (yMin > it.boundingBox.yMin) {
-                yMin = it.boundingBox.yMin
-            }
-            if (yMax < it.boundingBox.yMax) {
-                yMax = it.boundingBox.yMax
+
+    private fun mergeRenderingSequences(renderingSequences: Collection<RenderingSequence>): RenderingSequence {
+        val renderGroups = renderingSequences.flatMap { it.renderGroups }.toList()
+        val definitions = mutableMapOf<String, GlyphData>()
+        renderingSequences.flatMap { it.definitions.entries }.forEach {
+            if (!definitions.containsKey(it.key)) {
+                definitions.put(it.key, it.value)
             }
         }
 
-        xMin -= LEFT_MARGIN
-        yMin -= TOP_MARGIN
-        xMax += RIGHT_MARGIN
-        yMax += BOTTOM_MARGIN
-
-        // This is to try to get to cropping when xMin and/or yMin are less than 0
-        if (xMin < 0) {
-            xMax += abs(xMin)
-        }
-        if (yMin < 0) {
-            yMax += abs(yMin)
-        }
-
-        return ViewBox(xMin.roundToInt(),
-                yMin.roundToInt(),
-                xMax.roundToInt(),
-                yMax.roundToInt())
+        // TODO Viewbox will be wrong since translations are not taken into account
+        return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
     }
+
 
     private fun handleBeams(beamGroup: Collection<PositionedRenderingElement>): PositionedRenderingElement {
         var beamCounter = 0
@@ -231,8 +197,3 @@ class ScoreSetup {
     }
 
 }
-
-
-
-
-

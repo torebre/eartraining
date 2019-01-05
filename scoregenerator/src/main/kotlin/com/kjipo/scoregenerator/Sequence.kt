@@ -12,12 +12,10 @@ class Sequence {
     var tempoInMillisecondsPerQuarterNote: Int = 0
 
     var pitchSequence = mutableListOf<Pitch>()
-    var renderingSequence: RenderingSequence = RenderingSequence(emptyList(), ViewBox(0, 0, 0, 0))
+    var renderingSequence: RenderingSequence = RenderingSequence(emptyList(), ViewBox(0, 0, 0, 0), emptyMap())
 
 
-    constructor() {
-
-    }
+    constructor()
 
     constructor(sequence: Sequence) : this(sequence.clef, sequence.timeSignatureNominator,
             sequence.timeSignatureDenominator,
@@ -35,7 +33,7 @@ class Sequence {
         this.clef = clef
         this.timeSignatureNominator = timeSignatureNominator
         this.timeSignatureDenominator = timeSignatureDenominator
-        this.renderingSequence = renderingSequence?: RenderingSequence(emptyList(), ViewBox(0, 0, 0, 0))
+        this.renderingSequence = renderingSequence?: RenderingSequence(emptyList(), ViewBox(0, 0, 0, 0), emptyMap())
         this.durationOfBar = durationOfBar
         this.tempoInMillisecondsPerQuarterNote = tempoInMillisecondsPerQuarterNote
         this.pitchSequence = pitchSequence

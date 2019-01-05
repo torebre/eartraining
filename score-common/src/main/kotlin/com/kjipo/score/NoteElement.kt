@@ -14,11 +14,12 @@ class NoteElement(var note: NoteType,
 
     override fun toRenderingElement(): PositionedRenderingElement {
         val glyphData = getGlyph(duration)
-        return PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
+        val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
                 xPosition,
-                yPosition,
-                // TODO This is only here to test the translation functionality
-                transform = Translation(100, 100))
+                yPosition)
+        positionedRenderingElement.duration = duration
+
+        return positionedRenderingElement
     }
 
     fun requiresStem(): Boolean {

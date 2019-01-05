@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.kjipo.svg.findBoundingBox
 import kotlin.math.ceil
 
 class BarData(val debug: Boolean = false) {
@@ -30,7 +31,7 @@ class BarData(val debug: Boolean = false) {
         return timeSignature.nominator.div(4).times(TICKS_PER_QUARTER_NOTE)
     }
 
-    fun build(barXoffset: Int = 0, barYoffset: Int = 0): List<PositionedRenderingElement> {
+    fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
         val clefElement = clef?.let { ClefElement(it, 0, 0, "clef") }
 
         val timeSignatureElement = if (timeSignature.nominator == 0) {
@@ -39,7 +40,88 @@ class BarData(val debug: Boolean = false) {
             TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset, "time")
         }
 
-        widthAvailableForTemporalElements = DEFAULT_BAR_WIDTH
+        widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
+
+        val valTotalTicksInBar = scoreRenderingElements.filter { it is TemporalElement }
+                .map { (it as TemporalElement).duration.ticks }.sum()
+        val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
+        val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
+        val returnList = mutableListOf<RenderGroup>()
+
+        clefElement?.let { returnList.add(RenderGroup(listOf(clefElement.toRenderingElement()), null)) }
+        timeSignatureElement?.let { returnList.add(RenderGroup(listOf(timeSignatureElement.toRenderingElement()), null)) }
+
+        var tickCounter = 0
+        var stemCounter = 0
+
+        for (scoreRenderingElement in scoreRenderingElements) {
+            when (scoreRenderingElement) {
+                is TemporalElement -> {
+                    val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
+                    val elements = mutableListOf<PositionedRenderingElement>()
+                    val renderingElement = scoreRenderingElement.toRenderingElement()
+
+                    scoreRenderingElement.xPosition = 0
+
+                    if (scoreRenderingElement is NoteElement) {
+                        val noteRenderingElement = scoreRenderingElement.toRenderingElement()
+                        addExtraBarLinesForGClef(scoreRenderingElement.note, scoreRenderingElement.octave,
+                                0,
+                                noteRenderingElement.boundingBox.xMin.toInt(),
+                                noteRenderingElement.boundingBox.xMax.toInt())?.let {
+                            elements.add(it.toRenderingElement())
+                        }
+
+                        if (scoreRenderingElement.requiresStem()) {
+                            val stem = addStem(renderingElement.boundingBox)
+                            val stemElement = PositionedRenderingElement(listOf(stem),
+                                    findBoundingBox(stem.pathElements),
+                                    "stem-${barNumber++}-${stemCounter++}",
+                                    0, //it.xPosition,
+                                    0) // it.yPosition)
+
+//                        if (beamGroups.containsKey(it.beamGroup)) {
+//                            beamGroups.get(it.beamGroup)?.add(stemElement)
+//                        } else {
+//                            beamGroups.put(it.beamGroup, mutableListOf(stemElement))
+//                        }
+
+                            elements.add(stemElement)
+                        }
+                    }
+
+                    scoreRenderingElement.yPosition += barYoffset
+                    tickCounter += scoreRenderingElement.duration.ticks
+
+                    if (debug) {
+                        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))).minus(scoreRenderingElement.xPosition).toInt()
+                        val debugBox = Box(scoreRenderingElement.xPosition, scoreRenderingElement.yPosition, width, scoreRenderingElement.yPosition, "debug")
+                        returnList.add(RenderGroup(listOf(debugBox.toRenderingElement()), null))
+                    }
+
+
+                    elements.add(renderingElement)
+
+                    returnList.add(RenderGroup(elements, Translation(xPosition, 0)))
+
+                }
+            }
+        }
+
+//        returnList.addAll(scoreRenderingElements.map { it.toRenderingElement() })
+
+//        scoreRenderingElements.filter { it is NoteElement }
+//                .map { addExtraBarLines(it as NoteElement) }
+//                .filterNotNull()
+//                .let { returnList.addAll(it.map { it.toRenderingElement() }) }
+
+        returnList.add(RenderGroup(listOf(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement()), null))
+
+        return RenderingSequence(returnList, determineViewBox(returnList.flatMap { it.renderingElements }), emptyMap())
+    }
+
+    private fun getWidthAvailable(clefElement: ClefElement?, timeSignatureElement: TimeSignatureElement?): Int {
+        return DEFAULT_BAR_WIDTH
                 .minus(clefElement?.let {
                     val renderingElement = it.toRenderingElement()
                     renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
@@ -49,51 +131,14 @@ class BarData(val debug: Boolean = false) {
                     renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
                 } ?: 0)
                 .minus(START_NOTE_ELEMENT_MARGIN)
-
-
-        val valTotalTicksInBar = scoreRenderingElements.filter { it is TemporalElement }
-                .map { (it as TemporalElement).duration.ticks }.sum()
-        val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
-
-
-        val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
-
-        val returnList = mutableListOf<PositionedRenderingElement>()
-
-        clefElement?.let { returnList.add(0, clefElement.toRenderingElement()) }
-        timeSignatureElement?.let { returnList.add(0, timeSignatureElement.toRenderingElement()) }
-
-        var tickCounter = 0
-        scoreRenderingElements.forEach {
-            when (it) {
-                is TemporalElement -> {
-                    it.xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
-
-
-
-                    it.yPosition += barYoffset
-                    tickCounter += it.duration.ticks
-
-                    if (debug) {
-                        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))).minus(it.xPosition).toInt()
-                        val debugBox = Box(it.xPosition, it.yPosition, width, it.yPosition, "debug")
-                        returnList.add(debugBox.toRenderingElement())
-                    }
-
-                }
-            }
-        }
-
-        returnList.addAll(scoreRenderingElements.map { it.toRenderingElement() })
-
-        scoreRenderingElements.filter { it is NoteElement }
-                .map { addExtraBarLines(it as NoteElement) }
-                .filterNotNull()
-                .let { returnList.addAll(it.map { it.toRenderingElement() }) }
-
-        returnList.add(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement())
-
-        return returnList
     }
+
+
+    companion object {
+        var barNumber = 0
+    }
+
+
+
 
 }

@@ -8,6 +8,6 @@ class BAR(consumer: ScoreBuilderInterface<*>) : ScoreElement(consumer) {
 
     fun rest(init: REST.() -> Unit) = doInit(REST(consumer), init)
 
-    fun build(barXoffset: Int = 0, barYoffset: Int = 0): List<PositionedRenderingElement> = barData.build(barXoffset, barYoffset)
+    fun build(barXoffset: Int = 0, barYoffset: Int = 0): List<RenderingSequence> = listOf(barData.build(barXoffset, barYoffset))
 
 }

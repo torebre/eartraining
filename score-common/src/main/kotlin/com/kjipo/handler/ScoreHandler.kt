@@ -2,6 +2,7 @@ package com.kjipo.handler
 
 import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
+import kotlinx.serialization.list
 
 
 class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterface {

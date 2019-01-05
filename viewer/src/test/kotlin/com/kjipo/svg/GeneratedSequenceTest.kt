@@ -148,8 +148,6 @@ class GeneratedSequenceTest {
 
         }
 
-        println(testScore.renderingElements)
-
 //        var idCounter = 0
 //        testScore.renderingElements.forEach { it.id = idCounter++ }
 
@@ -201,6 +199,40 @@ class GeneratedSequenceTest {
         FX.runAndWait { scoreController.fireLoadScore(scoreData.build()) }
 
         Thread.sleep(Long.MAX_VALUE)
+
+    }
+
+    @Test
+    fun `Check generated sequence`() {
+        val scoreData = ScoreSetup()
+        var idCounter = 0
+
+        val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter")
+        ++idCounter
+        val note2 = NoteElement(NoteType.D, 5, Duration.HALF, 0, 0, 0, "note-$idCounter", tie = note1.id)
+        ++idCounter
+
+        scoreData.noteElements.add(note1)
+        scoreData.noteElements.add(note2)
+
+        val barData = BarData()
+        barData.clef = Clef.G
+        barData.scoreRenderingElements.add(note1)
+        barData.scoreRenderingElements.add(note2)
+
+        scoreData.bars.add(barData)
+
+        scoreData.test.add(21)
+
+        val scoreBuilderSequence = ScoreBuilderSequence(scoreData)
+
+        println(scoreBuilderSequence)
+
+        val renderingSequence = scoreData.build()
+
+        println(renderingSequence)
+
+
 
     }
 

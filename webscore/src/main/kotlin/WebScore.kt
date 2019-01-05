@@ -1,12 +1,7 @@
-import com.kjipo.score.RenderingSequence
-import com.kjipo.score.STROKE_COLOUR
-import com.kjipo.score.Translation
-import com.kjipo.svg.GlyphData
+import com.kjipo.score.*
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.JSON
-import kotlinx.serialization.parse
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.KeyboardEvent
@@ -14,7 +9,6 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-@ImplicitReflectionSerializer
 class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
     private val svgElement: Element
@@ -36,29 +30,19 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
-    @ImplicitReflectionSerializer
     fun loadScoreHandler(scoreHandler: ScoreHandlerJavaScript) {
         this.scoreHandler = scoreHandler
         activeElement = scoreHandler.getIdOfFirstSelectableElement()
         reload()
     }
 
-    @ImplicitReflectionSerializer
     fun reload() {
         val score = scoreHandler.getScoreAsJson()
         loadScore(transformJsonToRenderingSequence(score))
     }
 
-    @ImplicitReflectionSerializer
-    fun loadScoreFromJson(jsonData: String) {
-        // TODO Here for testing
-        transformJsonToRenderingSequence(JSON.parse(jsonData))
-    }
-
-
-    @ImplicitReflectionSerializer
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
-        return JSON.parse(jsonData)
+        return JSON.parse(RenderingSequence.serializer(), jsonData)
     }
 
 
@@ -87,8 +71,6 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         }
     }
 
-
-    @ImplicitReflectionSerializer
     private fun setupSvg() {
         var xStart = 0
         var yStart = 0
@@ -132,14 +114,14 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                     activeElement?.let {
                         // Up
                         scoreHandler.moveNoteOneStep(it, true)
-                        generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 } else if (yDiff > 50) {
                     activeElement?.let {
                         // Down
                         scoreHandler.moveNoteOneStep(it, false)
-                        generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 }
@@ -155,13 +137,13 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 38 -> activeElement?.let {
                     // Up
                     scoreHandler.moveNoteOneStep(it, true)
-                    generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                     highLightActiveElement()
                 }
                 40 -> activeElement?.let {
                     // Down
                     scoreHandler.moveNoteOneStep(it, false)
-                    generateSvgData(JSON.parse(RenderingSequence.serializer(), scoreHandler.getScoreAsJson()), svgElement)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                     highLightActiveElement()
                 }
                 37 -> {
@@ -181,14 +163,14 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 49, 50, 51, 52 -> {
                     activeElement?.let {
                         scoreHandler.insertNote(it, keyboardEvent.keyCode - 48)
-                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 }
                 97, 98, 99, 100 -> {
                     activeElement?.let {
                         scoreHandler.updateDuration(it, keyboardEvent.keyCode - 96)
-                        generateSvgData(JSON.parse(scoreHandler.getScoreAsJson()), svgElement)
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 }
@@ -201,81 +183,80 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         svgElement.setAttribute("viewBox",
                 "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
 
-
-        val defsMap = mutableMapOf<String, GlyphData>()
-
-        console.log("Generating SVG. Rendering sequence: ${renderingSequence.renderingElements.size}")
+        console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
         svgElement.clear()
 
+        svgElement.ownerDocument?.let {
+            val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
+
+            for (definition in renderingSequence.definitions) {
+                addPath(defsTag,
+                        transformToPathString(definition.value.pathElements),
+                        definition.value.strokeWidth,
+                        definition.key)
+            }
+
+            svgElement.appendChild(defsTag)
+        }
 
 
-        renderingSequence.renderingElements.forEach { renderingElement ->
-            var nodeToAddPathTo = svgElement
+        renderingSequence.renderGroups.forEach { renderGroup ->
+            val svgElement = if (renderGroup.transform != null) {
+                println("Found transformation: ${renderGroup.transform}")
 
-            renderingElement.transform?.let {translation ->
-                println("Found transformation: ${translation}")
-
+                val translation = renderGroup?.transform ?: Translation(0, 0)
                 svgElement.ownerDocument?.let {
                     val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
                     groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
 
                     svgElement.appendChild(groupingElement)
-                    nodeToAddPathTo = groupingElement
+                    groupingElement
                 }
-
+            } else {
+                svgElement
             }
 
-            if (renderingElement.glyphData != null) {
-                val glyphData = renderingElement.glyphData!!
-                defsMap.put(glyphData.name, glyphData)
+            svgElement?.let {
 
-                println("Glyph data: ${renderingElement.glyphData}")
+                println("Adding element")
 
-                // TODO Why does using references not work here?
+                addPositionRenderingElements(renderGroup.renderingElements, it)
+            }
 
-                // TODO The ID setup will only work if there is one path
+        }
+        highLightActiveElement()
+    }
 
-                renderingElement.glyphData?.let { glyphData ->
-                    for (pathInterface in renderingElement.renderingPath) {
-                        val path = addPath(nodeToAddPathTo,
-                                transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
-                                pathInterface.strokeWidth,
-                                renderingElement.id,
-                                pathInterface.fill)
 
-                        println("Path: ${path?.id ?: "none"}")
-
-                        path?.let { element ->
-                            idSvgElementMap.put(renderingElement.id, element)
-                        }
-                    }
+    private fun addPositionRenderingElements(renderingElements: Collection<PositionedRenderingElement>, element: Element) {
+        for (renderingElement in renderingElements) {
+            if (renderingElement.duration != null) {
+                renderingElement.duration?.let { duration ->
+                    addPathUsingReference(element, duration.name, renderingElement.id, mapOf(Pair("y", renderingElement.yPosition.toString())))
+                    idSvgElementMap.put(renderingElement.id, element)
                 }
             } else {
                 for (pathInterface in renderingElement.renderingPath) {
-                    addPath(nodeToAddPathTo,
+                    addPath(element,
                             transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
                             pathInterface.strokeWidth,
                             renderingElement.id,
                             pathInterface.fill)?.let { element ->
                         idSvgElementMap.put(renderingElement.id, element)
                     }
-
-
                 }
             }
         }
-        highLightActiveElement()
     }
 
-
-    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String?, fill: String): Element? {
-        return node.ownerDocument?.let {
-            val path1 = it.createElementNS(SVG_NAMESPACE_URI, "path")
+    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String, fill: String? = null): Element? {
+        return node.ownerDocument?.let { ownerDocument ->
+            val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
             path1.setAttribute("stroke", STROKE_COLOUR)
-            path1.setAttribute("fill", fill)
-            id?.let { path1.setAttribute("id", it) }
+            fill?.let { path1.setAttribute("fill", it) }
+            path1.setAttribute("id", id)
             path1.setAttribute("stroke-width", strokeWidth.toString())
 
             node.appendChild(path1)
@@ -283,17 +264,19 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         }
     }
 
+    private fun addPathUsingReference(node: Node, reference: String, id: String, extraAttributes: Map<String, String> = emptyMap()): Element? {
+        return node.ownerDocument?.let { ownerDocument ->
+            val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
+            useTag.setAttribute("href", "#$reference")
+            useTag.setAttribute("id", id)
 
-    private fun addPathUsingReference(node: Node, reference: String, x: Int, y: Int, id: String?) {
-        node.ownerDocument?.let {
-            val useTag = it.createElementNS(SVG_NAMESPACE_URI, "use")
-            useTag.setAttribute("xlink:href", "#$reference")
-            useTag.setAttribute("x", x.toString())
-            useTag.setAttribute("y", y.toString())
-            node.appendChild(useTag)
-            if (id != null) {
-                useTag.setAttribute("id", id)
+            extraAttributes.forEach {
+                useTag.setAttribute(it.key, it.value)
             }
+
+            node.appendChild(useTag)
+
+            useTag
         }
     }
 

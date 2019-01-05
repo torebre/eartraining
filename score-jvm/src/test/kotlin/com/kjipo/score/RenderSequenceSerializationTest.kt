@@ -54,7 +54,7 @@ class RenderSequenceSerializationTest {
 
         println("jsonData: $jsonData")
 
-        val deserializedRenderedSequence = JSON.parse<RenderingSequence>(jsonData)
+        val deserializedRenderedSequence = JSON.parse(RenderingSequence.serializer(), jsonData)
 
         println("Deserialized: $deserializedRenderedSequence")
 
@@ -82,7 +82,7 @@ class RenderSequenceSerializationTest {
         val pathElement = PathElement(PathCommand.MOVE_TO_ABSOLUTE,
                 listOf(1.0, 2.0, 3.0))
 
-        val jsonData = JSON.stringify(pathElement)
+        val jsonData = JSON.stringify(PathElement.serializer(), pathElement)
 
         println("jsonData: $jsonData")
     }
@@ -99,12 +99,12 @@ class RenderSequenceSerializationTest {
                 1, BoundingBox(0.0, 0.0, 100.0, 100.0))
 
 
-        val jsonData = JSON.stringify(glyphData)
+        val jsonData = JSON.stringify(GlyphData.serializer(), glyphData)
 
         println("jsonData: $jsonData")
 
 
-        val deserializedRenderedSequence = JSON.parse<GlyphData>(jsonData)
+        val deserializedRenderedSequence = JSON.parse(GlyphData.serializer(), jsonData)
 
         println("Deserialized: $deserializedRenderedSequence")
 
@@ -127,11 +127,11 @@ class RenderSequenceSerializationTest {
                 "note-1",
                 0, 0)
 
-        val jsonData = JSON.stringify(renderingElement)
+        val jsonData = JSON.stringify(PositionedRenderingElement.serializer(), renderingElement)
 
         println("jsonData: $jsonData")
 
-        val deserializedRenderedSequence = JSON.parse<PositionedRenderingElement>(jsonData)
+        val deserializedRenderedSequence = JSON.parse(PositionedRenderingElement.serializer(), jsonData)
 
         println("Deserialized: $deserializedRenderedSequence")
 
@@ -152,7 +152,7 @@ class RenderSequenceSerializationTest {
                 2)
 
 
-        val jsonData = JSON.stringify(PathInterfaceImpl::class.serializer().list, listOf(pathInterfaceImpl))
+        val jsonData = JSON.stringify(PathInterfaceImpl.serializer().list, listOf(pathInterfaceImpl))
 
         println("jsonData: $jsonData")
 

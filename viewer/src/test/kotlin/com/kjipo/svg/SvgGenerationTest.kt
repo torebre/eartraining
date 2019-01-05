@@ -55,8 +55,6 @@ fun generateSequence() {
 
     }
 
-    println(testScore.renderingElements)
-
 //    var idCounter = 0
 //    testScore.renderingElements.forEach { it.id = idCounter++ }
 

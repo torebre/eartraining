@@ -11,10 +11,10 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                                  val boundingBox: BoundingBox,
                                  var id: String,
                                  var xPosition: Int,
-                                 var yPosition: Int,
-                                 var transform: Translation? = null) {
+                                 var yPosition: Int) {
 
     var glyphData: GlyphData? = null
+    var duration : Duration? = null
 
 
     companion object {
@@ -35,20 +35,6 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                     boundingBox, id,
                     xPosition,
                     yPosition)
-        }
-
-        fun create(renderingPath: List<PathInterfaceImpl>,
-                   boundingBox: BoundingBox,
-                   id: String,
-                   xPosition: Int,
-                   yPosition: Int,
-                   transform: Translation?): PositionedRenderingElement {
-            return PositionedRenderingElement(
-                    renderingPath,
-                    boundingBox, id,
-                    xPosition,
-                    yPosition,
-                    transform)
         }
 
 

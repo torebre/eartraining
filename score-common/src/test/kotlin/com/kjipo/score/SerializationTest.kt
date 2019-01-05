@@ -38,11 +38,11 @@ class SerializationTest {
         }
 
 
-        val jsonData = JSON.stringify(scoreHandler.scoreData.build())
+        val jsonData = JSON.stringify(RenderingSequence.serializer(), scoreHandler.scoreData.build())
 
         println("jsonData: $jsonData")
 
-        val deserializedRenderedSequence = JSON.parse<RenderingSequence>(jsonData)
+        val deserializedRenderedSequence = JSON.parse(RenderingSequence.serializer(), jsonData)
 
         println("Deserialized: $deserializedRenderedSequence")
     }

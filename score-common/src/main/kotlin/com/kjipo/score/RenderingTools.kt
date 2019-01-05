@@ -12,15 +12,21 @@ fun addExtraBarLines(noteElement: NoteElement): ScoreRenderingElement? {
 }
 
 private fun addExtraBarLinesForGClef(noteElement: NoteElement): ScoreRenderingElement? {
-    getExtraBarlines(noteElement.note, noteElement.octave).let {
+    val noteRenderingElement = noteElement.toRenderingElement()
+    return addExtraBarLinesForGClef(noteElement.note, noteElement.octave, noteElement.xPosition, noteRenderingElement.boundingBox.xMin.toInt(), noteRenderingElement.boundingBox.xMax.toInt())
+}
+
+fun addExtraBarLinesForGClef(note: NoteType, octave: Int, xPosition: Int, boundingBoxMin: Int, boundingBoxMax: Int): ScoreRenderingElement? {
+    getExtraBarlines(note, octave).let {
         if (it.isEmpty()) {
             return null
         }
-        val noteRenderingElement = noteElement.toRenderingElement()
-        return ExtraBarLinesElement(noteElement.xPosition, 0, it,
-                noteRenderingElement.boundingBox.xMin.toInt().plus(EXTRA_BAR_LINE_LEFT_PADDING), noteRenderingElement.boundingBox.xMax.toInt().plus(EXTRA_BAR_LINE_RIGHT_PADDING))
+        return ExtraBarLinesElement(xPosition, 0, it,
+                boundingBoxMin.plus(EXTRA_BAR_LINE_LEFT_PADDING),
+                boundingBoxMax.plus(EXTRA_BAR_LINE_RIGHT_PADDING))
     }
 }
+
 
 
 fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInterfaceImpl {
