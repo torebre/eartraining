@@ -5,17 +5,17 @@ import com.kjipo.svg.*
 
 class ClefElement(val clef: Clef, override var xPosition: Int, override var yPosition: Int, val id: String) : ScoreRenderingElement {
 
-
     override fun toRenderingElement(): PositionedRenderingElement {
-        val glyphData = when {
-            clef == Clef.G -> getGlyph("clefs.G")
-            clef == Clef.NONE -> blankGlyph
-            else -> {
-                blankGlyph
-            }
-        }
+        val positionedRenderingElement = PositionedRenderingElement.create(getGlyphData(), id)
+        positionedRenderingElement.typeId = clef.name
+        return positionedRenderingElement;
+    }
 
-        return PositionedRenderingElement.create(glyphData, id)
+    fun getGlyphData(): GlyphData {
+        return when (clef) {
+            Clef.G -> getGlyph("clefs.G")
+            Clef.NONE -> blankGlyph
+        }
     }
 }
 

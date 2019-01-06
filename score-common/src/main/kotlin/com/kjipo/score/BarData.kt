@@ -34,8 +34,13 @@ class BarData(val debug: Boolean = false) {
     }
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
-        val clefElement = clef?.let { ClefElement(it, 0, 0, "clef") }
         val definitions = mutableMapOf<String, GlyphData>()
+
+        val clefElement = clef?.let {
+            val element = ClefElement(it, 0, 0, "clef")
+            definitions[it.name] = element.getGlyphData()
+            element
+        }
 
         val timeSignatureElement = if (timeSignature.nominator == 0) {
             null
