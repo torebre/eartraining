@@ -1,5 +1,7 @@
 package com.kjipo.score
 
+import com.kjipo.svg.BoundingBox
+import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import kotlin.math.ceil
 
@@ -33,6 +35,7 @@ class BarData(val debug: Boolean = false) {
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
         val clefElement = clef?.let { ClefElement(it, 0, 0, "clef") }
+        val definitions = mutableMapOf<String, GlyphData>()
 
         val timeSignatureElement = if (timeSignature.nominator == 0) {
             null
@@ -58,6 +61,7 @@ class BarData(val debug: Boolean = false) {
             when (scoreRenderingElement) {
                 is TemporalElement -> {
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
+                    var yPosition = 0
                     val elements = mutableListOf<PositionedRenderingElement>()
                     val renderingElement = scoreRenderingElement.toRenderingElement()
 
@@ -65,20 +69,27 @@ class BarData(val debug: Boolean = false) {
 
                     if (scoreRenderingElement is NoteElement) {
                         val noteRenderingElement = scoreRenderingElement.toRenderingElement()
+                        yPosition = calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
                         addExtraBarLinesForGClef(scoreRenderingElement.note, scoreRenderingElement.octave,
                                 0,
+                                -yPosition,
                                 noteRenderingElement.boundingBox.xMin.toInt(),
                                 noteRenderingElement.boundingBox.xMax.toInt())?.let {
                             elements.add(it.toRenderingElement())
                         }
 
                         if (scoreRenderingElement.requiresStem()) {
+                            // TODO Determine whether the stem should go up or down
                             val stem = addStem(renderingElement.boundingBox)
+
                             val stemElement = PositionedRenderingElement(listOf(stem),
                                     findBoundingBox(stem.pathElements),
                                     "stem-${barNumber++}-${stemCounter++}",
-                                    0, //it.xPosition,
-                                    0) // it.yPosition)
+                                    0,
+                                    0)
+                            stemElement.typeId = STEM_UP
+
+                            definitions[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
 
 //                        if (beamGroups.containsKey(it.beamGroup)) {
 //                            beamGroups.get(it.beamGroup)?.add(stemElement)
@@ -99,25 +110,15 @@ class BarData(val debug: Boolean = false) {
                         returnList.add(RenderGroup(listOf(debugBox.toRenderingElement()), null))
                     }
 
-
                     elements.add(renderingElement)
-
-                    returnList.add(RenderGroup(elements, Translation(xPosition, 0)))
-
+                    returnList.add(RenderGroup(elements, Translation(xPosition, yPosition)))
                 }
             }
         }
 
-//        returnList.addAll(scoreRenderingElements.map { it.toRenderingElement() })
-
-//        scoreRenderingElements.filter { it is NoteElement }
-//                .map { addExtraBarLines(it as NoteElement) }
-//                .filterNotNull()
-//                .let { returnList.addAll(it.map { it.toRenderingElement() }) }
-
         returnList.add(RenderGroup(listOf(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement()), null))
 
-        return RenderingSequence(returnList, determineViewBox(returnList.flatMap { it.renderingElements }), emptyMap())
+        return RenderingSequence(returnList, determineViewBox(returnList.flatMap { it.renderingElements }), definitions)
     }
 
     private fun getWidthAvailable(clefElement: ClefElement?, timeSignatureElement: TimeSignatureElement?): Int {
@@ -137,8 +138,6 @@ class BarData(val debug: Boolean = false) {
     companion object {
         var barNumber = 0
     }
-
-
 
 
 }

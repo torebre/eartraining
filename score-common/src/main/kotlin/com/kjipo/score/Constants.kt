@@ -20,3 +20,6 @@ const val RIGHT_MARGIN = 100
 
 const val STROKE_COLOUR = "black"
 const val FILL_COLOUR = "black"
+
+
+const val STEM_UP = "stem-up"

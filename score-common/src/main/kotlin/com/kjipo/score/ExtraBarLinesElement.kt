@@ -25,7 +25,6 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
         val yMax = yPositions.max() ?: yMin
 
         return PositionedRenderingElement(
-
                 listOf(PathInterfaceImpl(pathElements, 1)),
                 BoundingBox(leftStart.times(-1).toDouble(),
                         yMin.toDouble(),
@@ -33,7 +32,7 @@ class ExtraBarLinesElement(override var xPosition: Int, override var yPosition: 
                         yMax.toDouble()),
                 "bar-${idCounter++}",
                 xPosition,
-                yPosition)
+                0)
     }
 
 }

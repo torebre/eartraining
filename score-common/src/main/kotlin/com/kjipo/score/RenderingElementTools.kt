@@ -6,7 +6,6 @@ fun getExtraBarlines(note: NoteType, octave: Int): List<Int> {
     val halfSteps = getPlacementAndOctave(note)
     val halfStepNumber = (octave - 5) * 7 + (halfSteps - 4)
 
-    // TODO Mixing SVG and note layout here on the y-axis is confusing. Try to make clearer
     if (halfStepNumber < -3) {
         return generateSequence(-4, { it - 2 }).takeWhile { it >= halfStepNumber }.map { it * -DEFAULT_VERTICAL_NOTE_SPACING }.toList()
     }

@@ -17,7 +17,7 @@ class NoteElement(var note: NoteType,
         val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
                 xPosition,
                 yPosition)
-        positionedRenderingElement.duration = duration
+        positionedRenderingElement.typeId = duration.name
 
         return positionedRenderingElement
     }

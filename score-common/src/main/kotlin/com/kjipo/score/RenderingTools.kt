@@ -3,31 +3,16 @@ package com.kjipo.score
 import com.kjipo.svg.*
 
 
-fun addExtraBarLines(noteElement: NoteElement): ScoreRenderingElement? {
-    return when (noteElement.getClef()) {
-    // TODO Only handling G-clef for now
-        Clef.G -> addExtraBarLinesForGClef(noteElement)
-        else -> null
-    }
-}
-
-private fun addExtraBarLinesForGClef(noteElement: NoteElement): ScoreRenderingElement? {
-    val noteRenderingElement = noteElement.toRenderingElement()
-    return addExtraBarLinesForGClef(noteElement.note, noteElement.octave, noteElement.xPosition, noteRenderingElement.boundingBox.xMin.toInt(), noteRenderingElement.boundingBox.xMax.toInt())
-}
-
-fun addExtraBarLinesForGClef(note: NoteType, octave: Int, xPosition: Int, boundingBoxMin: Int, boundingBoxMax: Int): ScoreRenderingElement? {
+fun addExtraBarLinesForGClef(note: NoteType, octave: Int, xPosition: Int, yPosition: Int, boundingBoxMin: Int, boundingBoxMax: Int): ScoreRenderingElement? {
     getExtraBarlines(note, octave).let {
         if (it.isEmpty()) {
             return null
         }
-        return ExtraBarLinesElement(xPosition, 0, it,
+        return ExtraBarLinesElement(xPosition, yPosition, it,
                 boundingBoxMin.plus(EXTRA_BAR_LINE_LEFT_PADDING),
                 boundingBoxMax.plus(EXTRA_BAR_LINE_RIGHT_PADDING))
     }
 }
-
-
 
 fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInterfaceImpl {
     val yEnd = if (stemUp) -DEFAULT_STEM_HEIGHT.toDouble() else DEFAULT_STEM_HEIGHT.toDouble()

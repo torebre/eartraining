@@ -200,11 +200,8 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
             svgElement.appendChild(defsTag)
         }
 
-
         renderingSequence.renderGroups.forEach { renderGroup ->
-            val svgElement = if (renderGroup.transform != null) {
-                println("Found transformation: ${renderGroup.transform}")
-
+            val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
                 val translation = renderGroup?.transform ?: Translation(0, 0)
                 svgElement.ownerDocument?.let {
                     val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
@@ -217,10 +214,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                 svgElement
             }
 
-            svgElement?.let {
-
-                println("Adding element")
-
+            elementToAddRenderingElementsTo?.let {
                 addPositionRenderingElements(renderGroup.renderingElements, it)
             }
 
@@ -231,9 +225,9 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
     private fun addPositionRenderingElements(renderingElements: Collection<PositionedRenderingElement>, element: Element) {
         for (renderingElement in renderingElements) {
-            if (renderingElement.duration != null) {
-                renderingElement.duration?.let { duration ->
-                    addPathUsingReference(element, duration.name, renderingElement.id, mapOf(Pair("y", renderingElement.yPosition.toString())))
+            if (renderingElement.typeId != null) {
+                renderingElement.typeId?.let { typeId ->
+                    addPathUsingReference(element, typeId, renderingElement.id)
                     idSvgElementMap.put(renderingElement.id, element)
                 }
             } else {

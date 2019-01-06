@@ -4,9 +4,6 @@ import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getGlyph
 import kotlinx.serialization.json.JSON
-import kotlinx.serialization.list
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
 class ScoreSetup {
     val noteElements = mutableListOf<TemporalElement>()
@@ -47,9 +44,9 @@ class ScoreSetup {
     fun getIdOfFirstSelectableElement() = noteElements.map { it.id }.firstOrNull()
 
     fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
-        return noteElements.find { it.id.equals(activeElement) }?.let { noteElement ->
+        return noteElements.find { it.id == activeElement }?.let {
             noteElements.filter { temporalElement ->
-                temporalElement.id.equals(activeElement)
+                temporalElement.id == activeElement
             }.map { it ->
                 val index = noteElements.indexOf(it)
                 if (lookLeft) {
@@ -92,10 +89,7 @@ class ScoreSetup {
         noteElements.filter { it is NoteElement }
                 .map { it as NoteElement }
                 .forEach {
-                    it.yPosition = calculateVerticalOffset(it.note, it.octave)
-
-                    definitionMap.put(it.duration.name, getGlyph(it.duration))
-
+                    definitionMap[it.duration.name] = getGlyph(it.duration)
                 }
 
         var barXoffset = 0
@@ -105,6 +99,12 @@ class ScoreSetup {
 
         bars.forEach { barData ->
             val currentBar = barData.build(barXoffset, barYoffset)
+            currentBar.definitions.forEach {
+                if(!definitionMap.containsKey(it.key)) {
+                    definitionMap[it.key] = it.value
+                }
+            }
+
             renderingSequences.add(currentBar)
             barXoffset += barXspace
             barYoffset += barYspace
