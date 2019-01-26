@@ -3,6 +3,9 @@ package com.kjipo.svg
 import kotlin.math.pow
 
 
+private const val MAX_NUMBER_OF_DECIMALS = 5
+private const val STEP_SIZE = 0.1
+
 
 fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
     return PathInterfaceImpl(glyphData.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, glyphData.strokeWidth)
@@ -12,7 +15,6 @@ fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): Path
 fun translateGlyph(pathInterface: PathInterfaceImpl, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
     return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, pathInterface.strokeWidth)
 }
-
 
 
 fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {
@@ -34,11 +36,7 @@ fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate
             it + xTranslate
         }
     }
-
 }
-
-
-private val STEP_SIZE = 0.1
 
 
 fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
@@ -228,7 +226,7 @@ fun processSingleCubicBezierCurve(points: List<CoordinatePair>): List<Coordinate
 }
 
 private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double, p2: Double, p3: Double): Double {
-    return  (1 - t).pow(3) * p0 + 3 * (1 - t).pow(2) * p1 * t + 3 * (1 - t) * p2 * t.pow(2) + t.pow(3) * p3
+    return (1 - t).pow(3) * p0 + 3 * (1 - t).pow(2) * p1 * t + 3 * (1 - t) * p2 * t.pow(2) + t.pow(3) * p3
 }
 
 fun offSetBoundingBox(boundingBox: BoundingBox, xOffset: Int, yOffset: Int): BoundingBox {
@@ -284,8 +282,15 @@ fun transformToPathString(pathElements: Collection<PathElement>): String {
         it.command.command
                 .plus(" ")
                 .plus(it.numbers.joinToString(" ") {
-                    // TODO How to limit the number of decimals?
-                    it.toString()
+                    val numberAsString = it.toString()
+                    val decimalPoint = numberAsString.indexOf('.')
+
+                    // Cut off places that lie beyond the max number of allowed decimal places
+                    if (decimalPoint < numberAsString.length - MAX_NUMBER_OF_DECIMALS) {
+                        numberAsString.subSequence(0, decimalPoint + MAX_NUMBER_OF_DECIMALS)
+                    } else {
+                        numberAsString
+                    }
                 })
     }
             .joinToString(" ")

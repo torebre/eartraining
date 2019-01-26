@@ -1,8 +1,6 @@
 import com.kjipo.score.*
 
 fun main(args: Array<String>) {
-    println("Hello, browser!")
-
     val scoreData = ScoreSetup()
     var idCounter = 0
 
@@ -20,8 +18,6 @@ fun main(args: Array<String>) {
     barData.scoreRenderingElements.add(note2)
 
     scoreData.bars.add(barData)
-
-    scoreData.test.add(21)
 
     WebScore(ScoreHandlerJavaScript(ScoreBuilderSequence(scoreData)))
 }

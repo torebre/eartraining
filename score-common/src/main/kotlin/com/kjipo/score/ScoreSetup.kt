@@ -8,8 +8,7 @@ import kotlinx.serialization.json.JSON
 class ScoreSetup {
     val noteElements = mutableListOf<TemporalElement>()
     val bars = mutableListOf<BarData>()
-
-    val test = mutableListOf<Int>()
+    val ties = mutableListOf<TieElement>()
 
     fun findNote(elementId: String): NoteElement? {
         return noteElements.filter { it is NoteElement }

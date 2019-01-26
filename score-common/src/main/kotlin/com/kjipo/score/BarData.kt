@@ -1,6 +1,5 @@
 package com.kjipo.score
 
-import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import kotlin.math.ceil
@@ -17,21 +16,6 @@ class BarData(val debug: Boolean = false) {
 
     val timeSignatureXOffset = 80
     val timeSignatureYOffset = -25
-
-
-    private fun ticksInMeasure(): Int {
-        // TODO Need to look at time signature defined in earlier bars
-        return if (timeSignature.denominator == 0) {
-            4
-        } else {
-            timeSignature.nominator * denominatorInTicks()
-        }
-    }
-
-    private fun denominatorInTicks(): Int {
-        // TODO Is this correct?
-        return timeSignature.nominator.div(4).times(TICKS_PER_QUARTER_NOTE)
-    }
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
         val definitions = mutableMapOf<String, GlyphData>()
@@ -95,12 +79,6 @@ class BarData(val debug: Boolean = false) {
                             stemElement.typeId = STEM_UP
 
                             definitions[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
-
-//                        if (beamGroups.containsKey(it.beamGroup)) {
-//                            beamGroups.get(it.beamGroup)?.add(stemElement)
-//                        } else {
-//                            beamGroups.put(it.beamGroup, mutableListOf(stemElement))
-//                        }
 
                             elements.add(stemElement)
                         }
