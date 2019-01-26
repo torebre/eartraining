@@ -129,7 +129,7 @@ class ScoreSetup {
                     findNote(from.tie!!)?.let { to ->
                         val tieElement = TieElement("tie-element-$tieElementCounter", from.xPosition, from.yPosition, to.xPosition.toDouble(), to.yPosition.toDouble())
                         ++tieElementCounter
-                        renderingElements.add(tieElement.toRenderingElement())
+                        renderingElements.addAll(tieElement.toRenderingElement())
                     }
                 }
 

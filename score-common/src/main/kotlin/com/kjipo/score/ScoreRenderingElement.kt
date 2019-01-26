@@ -4,5 +4,5 @@ interface ScoreRenderingElement {
     var xPosition: Int
     var yPosition: Int
 
-    fun toRenderingElement(): PositionedRenderingElement
+    fun toRenderingElement(): List<PositionedRenderingElement>
 }

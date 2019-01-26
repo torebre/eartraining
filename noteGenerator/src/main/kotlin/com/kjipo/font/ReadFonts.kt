@@ -356,7 +356,7 @@ object ReadFonts {
     private fun writeKotlinData(glyphNames: List<String>, inputXmlData: InputStream, outputStreamWriter: OutputStreamWriter) {
         val glyphsToSave = extractGlyphPaths(inputXmlData)
                 .map { invertYCoordinates(it) }
-                .map { glyphData -> scaleGlyph(glyphData, scale) }
+                .map { glyphData -> scaleGlyph(glyphData, SCALE) }
                 .filter { glyphData ->
                     if (glyphNames.isEmpty()) {
                         true
@@ -437,35 +437,35 @@ object ReadFonts {
         //        Path svgFontFile = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
 
 
-//        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg")).use { inputData ->
-//            OutputStreamWriter(System.out).use {
-//                writeKotlinData(listOf("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0", "rests.M3", "rests.M2", "rests.M1", "rests.2",
-//                        "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
-//                        "rests.0", "rests.0o"), inputData, it)
-//            }
-//        }
-
-
-        val charactersToInclude = setOf(
-                "zero",
-                "one",
-                "two",
-                "three",
-                "four",
-                "five",
-                "six",
-                "seven",
-                "eight",
-                "nine")
-        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/gonvillealpha11.svg")).use { inputData ->
+        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg")).use { inputData ->
             OutputStreamWriter(System.out).use {
-                writeKotlinData(extractGlyphPaths(inputData).filter {
-                    charactersToInclude.contains(it.name)
-                }
-                        .map { invertYCoordinates(it) }
-                        .map { glyphData -> scaleGlyph(glyphData, scale) }, it)
+                writeKotlinData(listOf("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0", "rests.M3", "rests.M2", "rests.M1", "rests.2",
+                        "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
+                        "rests.0", "rests.0o", "accidentals.sharp", "accidentals.flat"), inputData, it)
             }
         }
+
+
+//        val charactersToInclude = setOf(
+//                "zero",
+//                "one",
+//                "two",
+//                "three",
+//                "four",
+//                "five",
+//                "six",
+//                "seven",
+//                "eight",
+//                "nine")
+//        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/gonvillealpha11.svg")).use { inputData ->
+//            OutputStreamWriter(System.out).use {
+//                writeKotlinData(extractGlyphPaths(inputData).filter {
+//                    charactersToInclude.contains(it.name)
+//                }
+//                        .map { invertYCoordinates(it) }
+//                        .map { glyphData -> scaleGlyph(glyphData, SCALE) }, it)
+//            }
+//        }
 
     }
 

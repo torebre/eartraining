@@ -36,9 +36,10 @@ val scoreHandler = ScoreHandlerJavaScript(ScoreHandler {
 val scoreHandler2 = ScoreHandlerJavaScript({
     val scoreData = ScoreSetup()
     var idCounter = 0
-    val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter")
+    val note1 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, "note-$idCounter")
     ++idCounter
-    val note2 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, 0, "note-$idCounter", tie = note1.id)
+    val note2 = NoteElement(NoteType.C, 5, Duration.HALF, 0, 0, "note-$idCounter")
+    note2.tie = note1.id
     ++idCounter
 
     scoreData.noteElements.add(note1)

@@ -1,17 +1,12 @@
 package com.kjipo.svg
 
 
+import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 
 
-//val nameGlyphMap = mapOf<String, GlyphData>()
-//val alphabetGlyphMap = mapOf<String, GlyphData>()
-
-val scale = 0.1
-val glyphResource = "/glyphs.json"
+const val SCALE = 0.1
 val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0.0))
-
-val alphabetResource = "/alpha.json"
 
 
 fun getGlyph(noteType: Duration): GlyphData {
@@ -19,6 +14,13 @@ fun getGlyph(noteType: Duration): GlyphData {
         Duration.QUARTER -> getGlyph("noteheads.s2")
         Duration.HALF -> getGlyph("noteheads.s1")
         Duration.WHOLE -> getGlyph("noteheads.s0")
+    }
+}
+
+fun getGlyph(accidental: Accidental): GlyphData {
+    return when (accidental) {
+        Accidental.FLAT -> getGlyph("accidental.flat")
+        Accidental.SHARP -> getGlyph("accidental.sharp")
     }
 }
 

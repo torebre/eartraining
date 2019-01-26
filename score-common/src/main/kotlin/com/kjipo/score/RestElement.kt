@@ -9,13 +9,13 @@ class RestElement(override var duration: Duration,
                   override var yPosition: Int,
                   override val id: String) : TemporalElement {
 
-    override fun toRenderingElement(): PositionedRenderingElement {
+    override fun toRenderingElement(): List<PositionedRenderingElement> {
         val glyphData = getRest(duration)
-        return PositionedRenderingElement(listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
+        return listOf(PositionedRenderingElement(listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
                 glyphData.boundingBox,
                 id,
                 xPosition,
-                yPosition)
+                yPosition))
     }
 
 }

@@ -1,7 +1,9 @@
 package com.kjipo.score
 
+import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
+import com.kjipo.svg.getGlyph
 import kotlin.math.ceil
 
 class BarData(val debug: Boolean = false) {
@@ -16,6 +18,7 @@ class BarData(val debug: Boolean = false) {
 
     val timeSignatureXOffset = 80
     val timeSignatureYOffset = -25
+
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
         val definitions = mutableMapOf<String, GlyphData>()
@@ -40,11 +43,10 @@ class BarData(val debug: Boolean = false) {
         val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
         val returnList = mutableListOf<RenderGroup>()
 
-        clefElement?.let { returnList.add(RenderGroup(listOf(clefElement.toRenderingElement()), null)) }
-        timeSignatureElement?.let { returnList.add(RenderGroup(listOf(timeSignatureElement.toRenderingElement()), null)) }
+        clefElement?.let { returnList.add(RenderGroup(clefElement.toRenderingElement(), null)) }
+        timeSignatureElement?.let { returnList.add(RenderGroup(timeSignatureElement.toRenderingElement(), null)) }
 
         var tickCounter = 0
-        var stemCounter = 0
 
         for (scoreRenderingElement in scoreRenderingElements) {
             when (scoreRenderingElement) {
@@ -57,30 +59,33 @@ class BarData(val debug: Boolean = false) {
                     scoreRenderingElement.xPosition = 0
 
                     if (scoreRenderingElement is NoteElement) {
-                        val noteRenderingElement = scoreRenderingElement.toRenderingElement()
+//                        val noteRenderingElement = scoreRenderingElement.toRenderingElement()
                         yPosition = calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
-                        addExtraBarLinesForGClef(scoreRenderingElement.note, scoreRenderingElement.octave,
-                                0,
-                                -yPosition,
-                                noteRenderingElement.boundingBox.xMin.toInt(),
-                                noteRenderingElement.boundingBox.xMax.toInt())?.let {
-                            elements.add(it.toRenderingElement())
-                        }
+//                        addExtraBarLinesForGClef(scoreRenderingElement.note, scoreRenderingElement.octave,
+//                                0,
+//                                -yPosition,
+//                                noteRenderingElement.boundingBox.xMin.toInt(),
+//                                noteRenderingElement.boundingBox.xMax.toInt())?.let {
+//                            elements.add(it.toRenderingElement())
+//                        }
 
                         if (scoreRenderingElement.requiresStem()) {
                             // TODO Determine whether the stem should go up or down
-                            val stem = addStem(renderingElement.boundingBox)
 
-                            val stemElement = PositionedRenderingElement(listOf(stem),
-                                    findBoundingBox(stem.pathElements),
-                                    "stem-${barNumber++}-${stemCounter++}",
-                                    0,
-                                    0)
-                            stemElement.typeId = STEM_UP
+                            // Use the bounding box for the note head of a half note to determine
+                            // how far to move the stem so that it is on the right side of the note head
+                            val stem = addStem(getGlyph(Duration.HALF).boundingBox)
+
+//                            val stemElement = PositionedRenderingElement(listOf(stem),
+//                                    findBoundingBox(stem.pathElements),
+//                                    "stem-${barNumber++}-${stemCounter++}",
+//                                    0,
+//                                    0)
+//                            stemElement.typeId = STEM_UP
 
                             definitions[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
 
-                            elements.add(stemElement)
+//                            elements.add(stemElement)
                         }
                     }
 
@@ -90,16 +95,16 @@ class BarData(val debug: Boolean = false) {
                     if (debug) {
                         val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))).minus(scoreRenderingElement.xPosition).toInt()
                         val debugBox = Box(scoreRenderingElement.xPosition, scoreRenderingElement.yPosition, width, scoreRenderingElement.yPosition, "debug")
-                        returnList.add(RenderGroup(listOf(debugBox.toRenderingElement()), null))
+                        returnList.add(RenderGroup(debugBox.toRenderingElement(), null))
                     }
 
-                    elements.add(renderingElement)
+                    elements.addAll(renderingElement)
                     returnList.add(RenderGroup(elements, Translation(xPosition, yPosition)))
                 }
             }
         }
 
-        returnList.add(RenderGroup(listOf(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement()), null))
+        returnList.add(RenderGroup(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement(), null))
 
         return RenderingSequence(returnList, determineViewBox(returnList.flatMap { it.renderingElements }), definitions)
     }
@@ -108,11 +113,11 @@ class BarData(val debug: Boolean = false) {
         return DEFAULT_BAR_WIDTH
                 .minus(clefElement?.let {
                     val renderingElement = it.toRenderingElement()
-                    renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
+                    renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
                 } ?: 0)
                 .minus(timeSignatureElement?.let {
                     val renderingElement = it.toRenderingElement()
-                    renderingElement.boundingBox.xMax.minus(renderingElement.boundingBox.xMin).toInt()
+                    renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
                 } ?: 0)
                 .minus(START_NOTE_ELEMENT_MARGIN)
     }
@@ -120,6 +125,7 @@ class BarData(val debug: Boolean = false) {
 
     companion object {
         var barNumber = 0
+        var stemCounter = 0
     }
 
 

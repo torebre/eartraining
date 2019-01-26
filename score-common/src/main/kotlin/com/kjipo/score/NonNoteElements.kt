@@ -5,10 +5,10 @@ import com.kjipo.svg.*
 
 class ClefElement(val clef: Clef, override var xPosition: Int, override var yPosition: Int, val id: String) : ScoreRenderingElement {
 
-    override fun toRenderingElement(): PositionedRenderingElement {
+    override fun toRenderingElement(): List<PositionedRenderingElement> {
         val positionedRenderingElement = PositionedRenderingElement.create(getGlyphData(), id)
         positionedRenderingElement.typeId = clef.name
-        return positionedRenderingElement;
+        return listOf(positionedRenderingElement)
     }
 
     fun getGlyphData(): GlyphData {
@@ -22,7 +22,7 @@ class ClefElement(val clef: Clef, override var xPosition: Int, override var yPos
 
 class TimeSignatureElement(val nominator: Int, val denominator: Int, override var xPosition: Int, override var yPosition: Int, val id: String) : ScoreRenderingElement {
 
-    override fun toRenderingElement(): PositionedRenderingElement {
+    override fun toRenderingElement(): List<PositionedRenderingElement> {
         val nominatorGlyph = getNumberGlyph(nominator)
         val denominatorGlyph = getNumberGlyph(denominator)
         val pathElements = mutableListOf<PathElement>()
@@ -30,7 +30,7 @@ class TimeSignatureElement(val nominator: Int, val denominator: Int, override va
         pathElements.addAll(translateGlyph(nominatorGlyph, xPosition, yPosition).pathElements)
         pathElements.addAll(translateGlyph(translateGlyph(denominatorGlyph, xPosition, yPosition), 0, 50).pathElements)
 
-        return PositionedRenderingElement.create(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)), id)
+        return listOf(PositionedRenderingElement.create(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)), id))
     }
 
 }

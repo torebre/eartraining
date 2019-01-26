@@ -23,3 +23,9 @@ const val FILL_COLOUR = "black"
 
 
 const val STEM_UP = "stem-up"
+
+
+enum class Accidental {
+    SHARP,
+    FLAT
+}
