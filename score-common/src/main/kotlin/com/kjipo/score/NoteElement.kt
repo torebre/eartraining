@@ -22,7 +22,7 @@ class NoteElement(var note: NoteType,
             val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
                     xPosition,
                     yPosition)
-            positionedRenderingElement.typeId = accidentalGlyph.name
+            positionedRenderingElement.typeId = it.name
             result.add(positionedRenderingElement)
         }
 
@@ -71,6 +71,44 @@ class NoteElement(var note: NoteType,
         // TODO The clef can change withing a bar. This is not handled at present
         // Defaulting to G
         return Clef.G
+    }
+
+
+    fun getGlyphsUsed(): Collection<String> {
+        val glyphsUsed = mutableListOf<String>()
+
+
+        if (requiresStem()) {
+            glyphsUsed.add(STEM_UP)
+        }
+
+        accidental?.let {
+            glyphsUsed.add(it.name)
+        }
+
+        glyphsUsed.add(duration.name)
+
+        return glyphsUsed
+    }
+
+    fun getGlyphs(): Map<String, GlyphData> {
+        val glyphsUsed = mutableMapOf<String, GlyphData>()
+
+        if (requiresStem()) {
+            // Use the bounding box for the note head of a half note to determine
+            // how far to move the stem so that it is on the right side of the note head
+            val stem = addStem(getGlyph(Duration.HALF).boundingBox)
+
+            glyphsUsed.put(STEM_UP, GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements)))
+        }
+
+        accidental?.let {
+            glyphsUsed.put(it.name, getGlyph(it))
+        }
+
+        glyphsUsed.put(duration.name, getGlyph(Duration.QUARTER))
+
+        return glyphsUsed
     }
 
     override fun toString(): String {

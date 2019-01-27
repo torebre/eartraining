@@ -19,8 +19,8 @@ fun getGlyph(noteType: Duration): GlyphData {
 
 fun getGlyph(accidental: Accidental): GlyphData {
     return when (accidental) {
-        Accidental.FLAT -> getGlyph("accidental.flat")
-        Accidental.SHARP -> getGlyph("accidental.sharp")
+        Accidental.FLAT -> getGlyph("accidentals.flat")
+        Accidental.SHARP -> getGlyph("accidentals.sharp")
     }
 }
 

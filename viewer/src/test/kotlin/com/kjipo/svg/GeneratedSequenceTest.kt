@@ -222,8 +222,6 @@ class GeneratedSequenceTest {
 
         scoreData.bars.add(barData)
 
-        scoreData.test.add(21)
-
         val scoreBuilderSequence = ScoreBuilderSequence(scoreData)
 
         println(scoreBuilderSequence)

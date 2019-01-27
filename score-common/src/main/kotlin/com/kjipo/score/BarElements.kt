@@ -25,14 +25,6 @@ enum class NoteType {
     G
 }
 
-
-enum class NoteModifier {
-    NONE,
-    SHARP,
-    FLAT
-}
-
-
 enum class Duration(val ticks: Int) {
     QUARTER(TICKS_PER_QUARTER_NOTE),
     HALF(2 * TICKS_PER_QUARTER_NOTE),

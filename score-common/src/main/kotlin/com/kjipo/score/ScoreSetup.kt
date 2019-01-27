@@ -88,7 +88,10 @@ class ScoreSetup {
         noteElements.filter { it is NoteElement }
                 .map { it as NoteElement }
                 .forEach {
-                    definitionMap[it.duration.name] = getGlyph(it.duration)
+
+                    // TODO Can be more efficient
+                    definitionMap.putAll(it.getGlyphs())
+
                 }
 
         var barXoffset = 0
@@ -99,7 +102,7 @@ class ScoreSetup {
         bars.forEach { barData ->
             val currentBar = barData.build(barXoffset, barYoffset)
             currentBar.definitions.forEach {
-                if(!definitionMap.containsKey(it.key)) {
+                if (!definitionMap.containsKey(it.key)) {
                     definitionMap[it.key] = it.value
                 }
             }
