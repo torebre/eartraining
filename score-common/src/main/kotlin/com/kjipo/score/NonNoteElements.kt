@@ -3,7 +3,7 @@ package com.kjipo.score
 import com.kjipo.svg.*
 
 
-class ClefElement(val clef: Clef, override var xPosition: Int, override var yPosition: Int, val id: String) : ScoreRenderingElement {
+class ClefElement(val clef: Clef, xPosition: Int, yPosition: Int, val id: String) : ScoreRenderingElement(xPosition, yPosition) {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val positionedRenderingElement = PositionedRenderingElement.create(getGlyphData(), id)
@@ -20,7 +20,8 @@ class ClefElement(val clef: Clef, override var xPosition: Int, override var yPos
 }
 
 
-class TimeSignatureElement(val nominator: Int, val denominator: Int, override var xPosition: Int, override var yPosition: Int, val id: String) : ScoreRenderingElement {
+class TimeSignatureElement(private val nominator: Int, private val denominator: Int,
+                           xPosition: Int, yPosition: Int, val id: String) : ScoreRenderingElement(xPosition, yPosition) {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val nominatorGlyph = getNumberGlyph(nominator)

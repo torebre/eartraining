@@ -43,7 +43,7 @@ class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterfac
     }
 
     private fun addNote(index: Int, note: NoteType, octave: Int, duration: Duration) {
-        val noteElement = NoteElement(note, octave, duration, 0, 0, "note-${noteCounter++}")
+        val noteElement = NoteElement(note, octave, duration, "note-${noteCounter++}")
 
         // TODO Need to figure out how bars fit into this
         scoreData.bars.last().scoreRenderingElements.add(index, noteElement)

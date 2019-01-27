@@ -1,6 +1,5 @@
 package com.kjipo.score
 
-import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getGlyph
@@ -59,15 +58,7 @@ class BarData(val debug: Boolean = false) {
                     scoreRenderingElement.xPosition = 0
 
                     if (scoreRenderingElement is NoteElement) {
-//                        val noteRenderingElement = scoreRenderingElement.toRenderingElement()
                         yPosition = calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
-//                        addExtraBarLinesForGClef(scoreRenderingElement.note, scoreRenderingElement.octave,
-//                                0,
-//                                -yPosition,
-//                                noteRenderingElement.boundingBox.xMin.toInt(),
-//                                noteRenderingElement.boundingBox.xMax.toInt())?.let {
-//                            elements.add(it.toRenderingElement())
-//                        }
 
                         if (scoreRenderingElement.requiresStem()) {
                             // TODO Determine whether the stem should go up or down
@@ -75,17 +66,7 @@ class BarData(val debug: Boolean = false) {
                             // Use the bounding box for the note head of a half note to determine
                             // how far to move the stem so that it is on the right side of the note head
                             val stem = addStem(getGlyph(Duration.HALF).boundingBox)
-
-//                            val stemElement = PositionedRenderingElement(listOf(stem),
-//                                    findBoundingBox(stem.pathElements),
-//                                    "stem-${barNumber++}-${stemCounter++}",
-//                                    0,
-//                                    0)
-//                            stemElement.typeId = STEM_UP
-
                             definitions[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
-
-//                            elements.add(stemElement)
                         }
                     }
 
@@ -99,7 +80,16 @@ class BarData(val debug: Boolean = false) {
                     }
 
                     elements.addAll(renderingElement)
-                    returnList.add(RenderGroup(elements, Translation(xPosition, yPosition)))
+
+                    val renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))
+
+                    // TODO This is confusing. Try to fit in render groups differently
+                    scoreRenderingElement.renderGroup = renderGroup
+//                    elements.forEach { it.renderGroup = renderGroup }
+
+                    returnList.add(renderGroup)
+
+
                 }
             }
         }

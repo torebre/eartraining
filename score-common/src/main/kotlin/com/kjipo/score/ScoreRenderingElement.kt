@@ -1,8 +1,8 @@
 package com.kjipo.score
 
-interface ScoreRenderingElement {
-    var xPosition: Int
-    var yPosition: Int
+abstract class ScoreRenderingElement(var xPosition: Int = 0,
+                                     var yPosition: Int = 0,
+                                     var renderGroup: RenderGroup? = null) {
 
-    fun toRenderingElement(): List<PositionedRenderingElement>
+    abstract fun toRenderingElement(): List<PositionedRenderingElement>
 }

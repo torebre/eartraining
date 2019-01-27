@@ -3,7 +3,7 @@ package com.kjipo.score
 
 const val DEFAULT_STEM_HEIGHT = 100
 const val DEFAULT_BAR_WIDTH = 1000
-const val DEFAULT_BEAM_HEIGHT = 12
+const val DEFAULT_BEAM_HEIGHT = 18
 const val DEFAULT_VERTICAL_NOTE_SPACING = 12
 
 const val TICKS_PER_QUARTER_NOTE = 24

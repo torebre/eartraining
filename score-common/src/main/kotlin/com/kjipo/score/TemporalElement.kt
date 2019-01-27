@@ -1,6 +1,6 @@
 package com.kjipo.score
 
-interface TemporalElement: ScoreRenderingElement {
+interface TemporalElement {
     val id: String
     var duration: Duration
 

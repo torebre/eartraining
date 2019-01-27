@@ -1,14 +1,13 @@
 package com.kjipo.score
 
 import com.kjipo.svg.GlyphData
-import com.kjipo.svg.findBoundingBox
-import com.kjipo.svg.getGlyph
 import kotlinx.serialization.json.JSON
 
 class ScoreSetup {
     val noteElements = mutableListOf<TemporalElement>()
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TieElement>()
+    val beams = mutableListOf<BeamGroup>()
 
     fun findNote(elementId: String): NoteElement? {
         return noteElements.filter { it is NoteElement }
@@ -112,29 +111,58 @@ class ScoreSetup {
             barYoffset += barYspace
         }
 
-        val beamGroups = mutableMapOf<Int, MutableCollection<PositionedRenderingElement>>()
+        var beamCounter = 0
 
-        beamGroups.forEach {
-            if (it.key == 0) {
-                renderingElements.addAll(it.value)
-            } else {
-                renderingElements.addAll(it.value)
-                renderingElements.add(handleBeams(it.value))
+        beams.map { beam ->
+            val firstNote = beam.noteElements.first()
+            val lastNote = beam.noteElements.last()
+
+            val firstStem = firstNote.getStem()
+            val lastStem = lastNote.getStem()
+
+            var startX = 0.0
+            var startY = 0.0
+
+            firstNote.renderGroup?.let { renderGroup ->
+                renderGroup.transform?.let {
+                    startX = firstStem.boundingBox.xMax + it.xShift
+                    startY = firstStem.boundingBox.yMin + it.yShift
+                }
             }
+
+            var stopX = 0.0
+            var stopY = 0.0
+            lastNote.renderGroup?.let { renderGroup ->
+                renderGroup.transform?.let {
+                    stopX = lastStem.boundingBox.xMax + it.xShift
+                    stopY = lastStem.boundingBox.yMin + it.yShift
+                }
+            }
+
+            val beamElement = BeamElement("beam-${beamCounter++}",
+                    Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
+                    Pair(stopX - startX, stopY - startY), firstNote.renderGroup)
+
+            firstNote.renderGroup?.let {
+                it.renderingElements.addAll(beamElement.toRenderingElement())
+            }
+
         }
 
-        var tieElementCounter = 0
 
-        noteElements.filter { it is NoteElement }
-                .map { it as NoteElement }
-                .filter { it.tie != null }
-                .forEach { from ->
-                    findNote(from.tie!!)?.let { to ->
-                        val tieElement = TieElement("tie-element-$tieElementCounter", from.xPosition, from.yPosition, to.xPosition.toDouble(), to.yPosition.toDouble())
-                        ++tieElementCounter
-                        renderingElements.addAll(tieElement.toRenderingElement())
-                    }
-                }
+        // TODO Put back tie functionality
+
+//        var tieElementCounter = 0
+//        noteElements.filter { it is NoteElement }
+//                .map { it as NoteElement }
+//                .filter { it.tie != null }
+//                .forEach { from ->
+//                    findNote(from.tie!!)?.let { to ->
+//                        val tieElement = TieElement("tie-element-$tieElementCounter", from.xPosition, from.yPosition, to.xPosition.toDouble(), to.yPosition.toDouble())
+//                        ++tieElementCounter
+//                        renderingElements.addAll(tieElement.toRenderingElement())
+//                    }
+//                }
 
         renderingSequences.add(RenderingSequence(listOf(RenderGroup(renderingElements, null)), determineViewBox(renderingElements), definitionMap))
 
@@ -153,49 +181,6 @@ class ScoreSetup {
 
         // TODO Viewbox will be wrong since translations are not taken into account
         return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
-    }
-
-
-    private fun handleBeams(beamGroup: Collection<PositionedRenderingElement>): PositionedRenderingElement {
-        var beamCounter = 0
-        val stemMinimum = beamGroup.reduce({ s, t ->
-            s.let {
-                if (it.xPosition < t.xPosition) {
-                    it
-                } else {
-                    t
-                }
-            }
-        })
-
-        val stemMaximum = beamGroup.reduce({ s, t ->
-            s.let {
-                if (it.xPosition > t.xPosition) {
-                    it
-                } else {
-                    t
-                }
-            }
-        })
-
-        val height = stemMinimum.boundingBox.height()
-        val yStart = minOf(stemMinimum.yPosition.toDouble() + height, stemMaximum.yPosition.toDouble() + height)
-        val yEnd = maxOf(stemMinimum.yPosition.toDouble() + height, stemMaximum.yPosition.toDouble() + height)
-        val boundingBoxHeight = yEnd - yStart
-
-        val beamElement = addBeam(0, 0,
-                stemMaximum.xPosition.minus(stemMinimum.xPosition),
-                -boundingBoxHeight.toInt(),
-                // TODO This probably does not work now
-                stemMinimum.boundingBox.width().toInt(),
-                -height.toInt()
-        )
-
-        return PositionedRenderingElement(listOf(beamElement),
-                findBoundingBox(beamElement.pathElements),
-                "beam-${beamCounter++}",
-                stemMinimum.xPosition,
-                stemMinimum.yPosition)
     }
 
 }

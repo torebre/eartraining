@@ -25,7 +25,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
 
     override fun onNoteAdded(note: NOTE): String {
         val id = "note-${noteCounter++}"
-        val noteElement = NoteElement(note.note, note.octave, note.duration, 0, 0, id)
+        val noteElement = NoteElement(note.note, note.octave, note.duration, id)
 
         currentElements.add(noteElement)
         scoreData.noteElements.add(noteElement)
@@ -34,7 +34,7 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     }
 
     override fun onRestAdded(rest: REST) {
-        val restElement = RestElement(rest.duration, 0, 0, "rest-${restCounter++}")
+        val restElement = RestElement(rest.duration, "rest-${restCounter++}")
 
         currentElements.add(restElement)
         scoreData.noteElements.add(restElement)

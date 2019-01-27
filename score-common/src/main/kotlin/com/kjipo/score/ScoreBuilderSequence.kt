@@ -43,7 +43,7 @@ class ScoreBuilderSequence(private val scoreData: ScoreSetup) : ScoreHandlerInte
 
             // TODO Need to insert note and recalculate the bar data
 
-            scoreData.noteElements.add(insertIndex, NoteElement(NoteType.C, 5, duration, 0, 0, "note-${noteCounter++}"))
+            scoreData.noteElements.add(insertIndex, NoteElement(NoteType.C, 5, duration, "note-${noteCounter++}"))
 
 //            addNote(insertIndex, NoteType.C, 5, duration)
             return scoreData.noteElements[insertIndex].id

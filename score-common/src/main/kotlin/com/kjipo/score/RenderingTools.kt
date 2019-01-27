@@ -25,16 +25,15 @@ fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInter
             noteHeadBoundingBox.xMax.toInt(), 0)
 }
 
-fun addBeam(xMin: Int, yMin: Int, xMax: Int, yMax: Int, startX: Int, startY: Int): PathInterfaceImpl {
-    return translateGlyph(PathInterfaceImpl(listOf(
-            PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
+fun addBeam(xMin: Double, yMin: Double, xMax: Double, yMax: Double): PathInterfaceImpl {
+    return PathInterfaceImpl(listOf(
+            PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xMin, yMin)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(DEFAULT_BEAM_HEIGHT.toDouble())),
             PathElement(PathCommand.LINE_TO_RELATIVE, listOf(0.0,
-                    yMin.toDouble(),
-                    xMax.toDouble() - xMin.toDouble(),
-                    yMax.toDouble())),
+                    0.0,
+                    xMax,
+                    yMax)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(-DEFAULT_BEAM_HEIGHT.toDouble())),
-            PathElement(PathCommand.CLOSE_PATH, emptyList())), 1),
-            startX, startY)
+            PathElement(PathCommand.CLOSE_PATH, emptyList())), 1)
 }
 

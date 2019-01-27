@@ -185,6 +185,15 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
         console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
+        renderingSequence.renderGroups.forEach {
+
+            println("Render group:")
+            it.renderingElements.forEach {
+                println(it.id)
+            }
+
+        }
+
         svgElement.clear()
 
         svgElement.ownerDocument?.let {

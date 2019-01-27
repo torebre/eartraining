@@ -7,9 +7,7 @@ import com.kjipo.svg.*
 class NoteElement(var note: NoteType,
                   var octave: Int,
                   override var duration: Duration,
-                  override var xPosition: Int,
-                  override var yPosition: Int,
-                  override val id: String) : ScoreRenderingElement, TemporalElement {
+                  override val id: String) : ScoreRenderingElement(), TemporalElement {
     var tie: String? = null
     var accidental: Accidental? = null
 
@@ -35,7 +33,6 @@ class NoteElement(var note: NoteType,
         positionedRenderingElement.typeId = duration.name
         result.add(positionedRenderingElement)
 
-
         addExtraBarLinesForGClef(note, octave,
                 0,
                 -yPosition,
@@ -44,24 +41,22 @@ class NoteElement(var note: NoteType,
             result.addAll(it.toRenderingElement())
         }
 
-
         if (requiresStem()) {
-            // TODO Determine whether the stem should go up or down
-            val stem = addStem(glyphData.boundingBox)
-
-            val stemElement = PositionedRenderingElement(listOf(stem),
-                    findBoundingBox(stem.pathElements),
-                    "stem-${BarData.barNumber++}-${stemCounter++}",
-                    0,
-                    0)
+            val stemElement = getStem()
             stemElement.typeId = STEM_UP
-
-//            definitions[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
-
             result.add(stemElement)
         }
 
         return result
+    }
+
+    fun getStem(): PositionedRenderingElement {
+        // TODO Determine whether the stem should go up or down
+        val stem = addStem(getGlyph(duration).boundingBox)
+
+        return PositionedRenderingElement(listOf(stem),
+                findBoundingBox(stem.pathElements),
+                "stem-${BarData.barNumber++}-${stemCounter++}")
     }
 
     fun requiresStem(): Boolean {
@@ -121,8 +116,7 @@ class NoteElement(var note: NoteType,
 }
 
 
-class TieElement(val id: String, override var xPosition: Int,
-                 override var yPosition: Int, var xStop: Double, var yStop: Double) : ScoreRenderingElement {
+class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRenderingElement() {
 
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -141,8 +135,24 @@ class TieElement(val id: String, override var xPosition: Int,
                 2, fill = "transparent")
 
         return listOf(PositionedRenderingElement(listOf(tieElement),
-                findBoundingBox(tieElement.pathElements), id, 0, 0))
+                findBoundingBox(tieElement.pathElements), id))
     }
 
 
+}
+
+
+class BeamGroup(val noteElements: List<NoteElement>)
+
+
+class BeamElement(val id: String, private val start: Pair<Double, Double>, private val stop: Pair<Double, Double>, renderGroup: RenderGroup?) : ScoreRenderingElement(0, 0, renderGroup) {
+
+    override fun toRenderingElement(): List<PositionedRenderingElement> {
+        val beamElement = addBeam(start.first, start.second,
+                stop.first, stop.second)
+
+        return listOf(PositionedRenderingElement(listOf(beamElement),
+                findBoundingBox(beamElement.pathElements),
+                id))
+    }
 }
