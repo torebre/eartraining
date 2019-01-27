@@ -15,6 +15,8 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
 
     var glyphData: GlyphData? = null
     var typeId : String? = null
+    var xTranslate = 0
+    var yTranslate = 0
 
 
     companion object {

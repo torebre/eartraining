@@ -227,7 +227,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         for (renderingElement in renderingElements) {
             if (renderingElement.typeId != null) {
                 renderingElement.typeId?.let { typeId ->
-                    addPathUsingReference(element, typeId, renderingElement.id)
+                    addPathUsingReference(element, typeId, renderingElement)
                     idSvgElementMap.put(renderingElement.id, element)
                 }
             } else {
@@ -258,19 +258,26 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         }
     }
 
-    private fun addPathUsingReference(node: Node, reference: String, id: String, extraAttributes: Map<String, String> = emptyMap()): Element? {
-        return node.ownerDocument?.let { ownerDocument ->
+    private fun addPathUsingReference(node: Node, reference: String, positionedRenderingElement: PositionedRenderingElement, extraAttributes: Map<String, String> = emptyMap()) {
+        node.ownerDocument?.let { ownerDocument ->
             val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
             useTag.setAttribute("href", "#$reference")
-            useTag.setAttribute("id", id)
+            useTag.setAttribute("id", positionedRenderingElement.id)
 
             extraAttributes.forEach {
                 useTag.setAttribute(it.key, it.value)
             }
 
-            node.appendChild(useTag)
+            if (positionedRenderingElement.xTranslate != 0
+                    || positionedRenderingElement.yTranslate != 0) {
+                val groupingElement = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "g")
+                groupingElement.setAttribute("transform", "translate(${positionedRenderingElement.xTranslate}, ${positionedRenderingElement.yTranslate})")
+                groupingElement.appendChild(useTag)
+                node.appendChild(groupingElement)
+            } else {
+                node.appendChild(useTag)
+            }
 
-            useTag
         }
     }
 

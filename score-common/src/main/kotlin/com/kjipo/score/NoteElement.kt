@@ -23,6 +23,8 @@ class NoteElement(var note: NoteType,
                     xPosition,
                     yPosition)
             positionedRenderingElement.typeId = it.name
+            positionedRenderingElement.xTranslate = -30
+
             result.add(positionedRenderingElement)
         }
 
