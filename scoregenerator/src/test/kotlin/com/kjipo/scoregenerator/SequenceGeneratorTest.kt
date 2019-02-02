@@ -1,8 +1,10 @@
 package com.kjipo.scoregenerator
 
 
-import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.*
+import org.hamcrest.core.IsNot.not
 import org.junit.Test
+
 
 class SequenceGeneratorTest {
 
@@ -19,6 +21,27 @@ class SequenceGeneratorTest {
 
         assertEquals(lengthBeforeInsertion + 1, sequenceGenerator.scoreBuilder.scoreData.noteElements.size)
         assertEquals(pitchesBeforeInsertion + 1, sequenceGenerator.pitchSequence.size)
+    }
+
+
+    @Test
+    fun `Generated simple note sequence is loaded`() {
+        val generator = SimpleSequenceGenerator.createSequence()
+        val sequenceGenerator = SequenceGenerator()
+
+        sequenceGenerator.loadSimpleNoteSequence(generator)
+
+        assertFalse(sequenceGenerator.pitchSequence.isEmpty())
+
+        val renderingSequence = sequenceGenerator.scoreBuilder.build()
+
+
+        assertTrue(renderingSequence.renderGroups.isNotEmpty())
+        assertTrue(renderingSequence.renderGroups[0].renderingElements.isNotEmpty())
+
+        println(renderingSequence)
+
+
     }
 
 

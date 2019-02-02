@@ -47,6 +47,7 @@ fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
     for (pathElement in pathElements) {
         when (pathElement.command) {
             PathCommand.CURVE_TO_RELATIVE -> processCurveToRelative(pathElement.numbers, pathAsLineSegments.last())
+            PathCommand.CURVE_TO_ABSOLUTE -> processCurveToAbsolute(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.VERTICAL_LINE_TO_RELATIVE -> processVerticalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> processVerticalLineToAbsolute(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.HORIZONAL_LINE_TO_RELATIVE -> processHorizontalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
@@ -210,6 +211,33 @@ fun processCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePai
     return outputPoints
 }
 
+
+fun processCurveToAbsolute(numbers: List<Double>, startCoordinate: CoordinatePair): List<CoordinatePair> {
+    val inputPoints = mutableListOf<CoordinatePair>()
+
+    // TODO This will cause duplicate points
+//    inputPoints.add(startCoordinate)
+
+    for (i in 0..numbers.size - 1 step 2) {
+        inputPoints.add(CoordinatePair(numbers.get(i), numbers.get(i + 1)))
+    }
+
+    val n = inputPoints.size
+    var currentPoint = startCoordinate
+    val outputPoints = mutableListOf<CoordinatePair>()
+
+    for (curveNumber in 0..n - 1 step 3) {
+        val bezierCurve = processSingleCubicBezierCurve(listOf(currentPoint, inputPoints.get(curveNumber),
+                inputPoints.get(curveNumber + 1), inputPoints.get(curveNumber + 2)))
+        outputPoints.addAll(bezierCurve)
+        currentPoint = inputPoints.get(curveNumber + 2)
+    }
+    return outputPoints
+}
+
+
+
+
 fun processSingleCubicBezierCurve(points: List<CoordinatePair>): List<CoordinatePair> {
     val xCoordinates = mutableListOf<Double>()
     val yCoordinates = mutableListOf<Double>()
@@ -245,6 +273,7 @@ fun invertYCoordinates(glyphData: GlyphData): GlyphData {
             PathCommand.MOVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.LINE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
+            PathCommand.CURVE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.CLOSE_PATH -> emptyList()
             PathCommand.SMOOTH_CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
         }.let { newFontPathElements.add(PathElement(fontPathElement.command, it)) }

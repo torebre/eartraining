@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JSON
 class ScoreSetup {
     val noteElements = mutableListOf<TemporalElement>()
     val bars = mutableListOf<BarData>()
-    val ties = mutableListOf<TieElement>()
+    val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
 
     fun findNote(elementId: String): NoteElement? {
@@ -146,23 +146,39 @@ class ScoreSetup {
             firstNote.renderGroup?.let {
                 it.renderingElements.addAll(beamElement.toRenderingElement())
             }
-
         }
 
 
-        // TODO Put back tie functionality
+        for ((tieElementCounter, tie) in ties.withIndex()) {
+            val firstStem = tie.startNote.getStem()
+            val lastStem = tie.endNote.getStem()
 
-//        var tieElementCounter = 0
-//        noteElements.filter { it is NoteElement }
-//                .map { it as NoteElement }
-//                .filter { it.tie != null }
-//                .forEach { from ->
-//                    findNote(from.tie!!)?.let { to ->
-//                        val tieElement = TieElement("tie-element-$tieElementCounter", from.xPosition, from.yPosition, to.xPosition.toDouble(), to.yPosition.toDouble())
-//                        ++tieElementCounter
-//                        renderingElements.addAll(tieElement.toRenderingElement())
-//                    }
-//                }
+            var startX = 0.0
+            var startY = 0.0
+
+            tie.startNote.renderGroup?.let { renderGroup ->
+                renderGroup.transform?.let {
+                    startX = firstStem.boundingBox.xMax + it.xShift
+                    startY = firstStem.boundingBox.yMin + it.yShift
+                }
+            }
+
+            var stopX = 0.0
+            var stopY = 0.0
+            tie.endNote.renderGroup?.let { renderGroup ->
+                renderGroup.transform?.let {
+                    stopX = lastStem.boundingBox.xMax + it.xShift
+                    stopY = lastStem.boundingBox.yMin + it.yShift
+                }
+            }
+
+            val tieElement = TieElement("tie-element-$tieElementCounter", stopX, stopY)
+
+            tieElement.xPosition = startX.toInt()
+            tieElement.yPosition = startY.toInt()
+
+            renderingElements.addAll(tieElement.toRenderingElement())
+        }
 
         renderingSequences.add(RenderingSequence(listOf(RenderGroup(renderingElements, null)), determineViewBox(renderingElements), definitionMap))
 

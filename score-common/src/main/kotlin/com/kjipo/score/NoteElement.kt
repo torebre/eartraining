@@ -8,7 +8,6 @@ class NoteElement(var note: NoteType,
                   var octave: Int,
                   override var duration: Duration,
                   override val id: String) : ScoreRenderingElement(), TemporalElement {
-    var tie: String? = null
     var accidental: Accidental? = null
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -74,7 +73,6 @@ class NoteElement(var note: NoteType,
     fun getGlyphsUsed(): Collection<String> {
         val glyphsUsed = mutableListOf<String>()
 
-
         if (requiresStem()) {
             glyphsUsed.add(STEM_UP)
         }
@@ -88,7 +86,7 @@ class NoteElement(var note: NoteType,
         return glyphsUsed
     }
 
-    fun getGlyphs(): Map<String, GlyphData> {
+    override fun getGlyphs(): Map<String, GlyphData> {
         val glyphsUsed = mutableMapOf<String, GlyphData>()
 
         if (requiresStem()) {
@@ -121,17 +119,18 @@ class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRe
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val xDiff = xStop - xPosition
-        val xPoint1 = xPosition + xDiff.div(3.0)
-        val xPoint2 = xPosition + xDiff.div(3.0).times(2.0)
+        val xPoint1 = xDiff.div(3.0)
+        val xPoint2 = xDiff.div(3.0).times(2.0)
 
         val yDiff = yStop - yPosition
-        val yPoint1 = yPosition + yDiff.div(3.0)
-        val yPoint2 = yPosition + yDiff.div(3.0).times(2.0)
+        val yPoint1 = -10.0
+        val yPoint2 = -10.0
 
         val tieElement = PathInterfaceImpl(
                 listOf(
                         PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
-                        PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint2, yPoint2, xStop, yStop))),
+                        PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint2, yPoint2, xDiff, yDiff))
+                ),
                 2, fill = "transparent")
 
         return listOf(PositionedRenderingElement(listOf(tieElement),
@@ -143,6 +142,8 @@ class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRe
 
 
 class BeamGroup(val noteElements: List<NoteElement>)
+
+class TiePair(val startNote: NoteElement, val endNote: NoteElement)
 
 
 class BeamElement(val id: String, private val start: Pair<Double, Double>, private val stop: Pair<Double, Double>, renderGroup: RenderGroup?) : ScoreRenderingElement(0, 0, renderGroup) {

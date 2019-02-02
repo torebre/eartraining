@@ -28,14 +28,11 @@ class SequenceGenerator : ScoreHandlerInterface {
         bar.barData.clef = com.kjipo.score.Clef.G
         bar.barData.timeSignature = TimeSignature(4, 4)
 
-        val noteOrder = NoteType.values()
         var currentNote = NoteType.C
         var currentOctave = 5
 
 
         for (i in 0..4) {
-            var currentIndex = noteOrder.indexOf(currentNote)
-            val step = random.nextInt(0..3)
             val stepUp = random.nextBoolean()
 
             if (stepUp) {
@@ -71,6 +68,42 @@ class SequenceGenerator : ScoreHandlerInterface {
         scoreBuilder.onBarAdded(bar)
 
         return scoreBuilder.build()
+    }
+
+
+    fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence, debug: Boolean = false) {
+        var timeCounter = 0
+        pitchSequence.clear()
+
+        scoreBuilder = ScoreBuilderImpl(debug)
+        scoreHandler = ScoreHandler(scoreBuilder.scoreData)
+        val bar = BAR(scoreBuilder)
+        bar.barData.clef = com.kjipo.score.Clef.G
+        bar.barData.timeSignature = TimeSignature(4, 4)
+
+        for (element in simpleNoteSequence.elements) {
+            val durationInMilliseconds = getDurationInMilliseconds(element.duration)
+
+            when (element) {
+                is NoteSequenceElement.RestElement -> {
+                    val rest = REST(scoreBuilder)
+                    scoreBuilder.onRestAdded(rest)
+                }
+                is NoteSequenceElement.NoteElement -> {
+                    val note = NOTE(scoreBuilder)
+                    note.octave = element.octave
+                    note.duration = element.duration
+                    note.note = element.note
+
+                    val id = scoreBuilder.onNoteAdded(note)
+                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, getPitch(element.note, element.octave), element.duration))
+                }
+            }
+
+            timeCounter += durationInMilliseconds
+        }
+
+        scoreBuilder.onBarAdded(bar)
     }
 
 
@@ -190,9 +223,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         }
     }
 
-
     override fun getScoreAsJson() = scoreHandler.getScoreAsJson()
-
 
     override fun getIdOfFirstSelectableElement() = scoreHandler.getIdOfFirstSelectableElement()
 
@@ -217,7 +248,7 @@ class SequenceGenerator : ScoreHandlerInterface {
 
     companion object {
 
-        private val DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE = 1000
+        private const val DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE = 1000
 
     }
 

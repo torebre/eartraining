@@ -85,13 +85,12 @@ class BarData(val debug: Boolean = false) {
 
                     // TODO This is confusing. Try to fit in render groups differently
                     scoreRenderingElement.renderGroup = renderGroup
-//                    elements.forEach { it.renderGroup = renderGroup }
 
                     returnList.add(renderGroup)
-
-
                 }
             }
+
+            definitions.putAll(scoreRenderingElement.getGlyphs())
         }
 
         returnList.add(RenderGroup(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement(), null))

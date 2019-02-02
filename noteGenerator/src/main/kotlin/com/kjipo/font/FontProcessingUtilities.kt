@@ -69,6 +69,12 @@ object FontProcessingUtilities {
                     pathElements.add(parsedElement.value)
                 }
 
+                'C'.toInt() -> {
+                    parsedElement = handleUpperCaseC(charStream).entries.iterator().next()
+                    c = parsedElement.key
+                    pathElements.add(parsedElement.value)
+                }
+
                 'Z'.toInt(), 'z'.toInt() -> {
                     pathElements.add(PathElement(PathCommand.CLOSE_PATH, emptyList()))
                     c = charStream.read()
@@ -196,6 +202,34 @@ object FontProcessingUtilities {
 
         return Collections.singletonMap(c, PathElement(PathCommand.CURVE_TO_RELATIVE, numbers))
     }
+
+    @Throws(IOException::class)
+    private fun handleUpperCaseC(charStream: InputStream): Map<Int, PathElement> {
+        var c = -1
+        val number = ArrayList<Char>()
+        val numbers = ArrayList<Double>()
+
+        do {
+            var pair = Pair(-1, false)
+            for (i in 0..5) {
+                pair = processNumber(charStream, number, numbers)
+                c = pair.first
+                if (pair.second) {
+                    break
+                }
+            }
+            if (pair.second) {
+                break
+            }
+        } while (!CharUtils.isAsciiAlpha(c.toChar()))
+
+        if (LOGGER.isDebugEnabled) {
+            LOGGER.debug("Numbers: {}", numbers)
+        }
+
+        return Collections.singletonMap(c, PathElement(PathCommand.CURVE_TO_ABSOLUTE, numbers))
+    }
+
 
     @Throws(IOException::class)
     private fun processNumber(charStream: InputStream, number: MutableList<Char>, numbers: MutableList<Double>): Pair<Int, Boolean> {

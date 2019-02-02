@@ -1,4 +1,4 @@
-rootProject.name = 'earTraining'
+rootProject.name = 'EarTraining'
 include ':scorebuilder'
 include ':noteGenerator'
 //include ':musicXml'
@@ -8,4 +8,4 @@ include ':score-jvm'
 include ':score-js'
 include ':webscore'
 include 'scoregenerator'
-
+include ':webscore-dev'
