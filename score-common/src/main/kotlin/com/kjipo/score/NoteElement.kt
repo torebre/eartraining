@@ -7,7 +7,7 @@ import com.kjipo.svg.*
 class NoteElement(var note: NoteType,
                   var octave: Int,
                   override var duration: Duration,
-                  override val id: String) : ScoreRenderingElement(), TemporalElement {
+                  override val id: String = "note-${noteElementIdCounter++}") : ScoreRenderingElement(), TemporalElement {
     var accidental: Accidental? = null
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -108,6 +108,11 @@ class NoteElement(var note: NoteType,
 
     override fun toString(): String {
         return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, id='$id')"
+    }
+
+
+    companion object {
+        var noteElementIdCounter = 0
     }
 
 

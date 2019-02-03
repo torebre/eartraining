@@ -199,4 +199,48 @@ class ScoreSetup {
         return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
     }
 
+
+    fun switchBetweenNoteAndRest(id: String): String {
+        noteElements.find { it.id == id }?.let { temporalElement ->
+            when (temporalElement) {
+                is NoteElement -> {
+                    val index = noteElements.indexOf(temporalElement)
+                    noteElements.remove(temporalElement)
+
+                    val restElement = RestElement(temporalElement.duration)
+                    noteElements[index] = restElement
+
+                    for (bar in bars) {
+                        bar.scoreRenderingElements.find { it == temporalElement }?.let {
+                            val index = bar.scoreRenderingElements.indexOf(temporalElement)
+                            bar.scoreRenderingElements.remove(temporalElement)
+                            bar.scoreRenderingElements[index] = restElement
+                        }
+                    }
+                    return restElement.id
+
+                }
+                is RestElement -> {
+                    val index = noteElements.indexOf(temporalElement)
+                    noteElements.remove(temporalElement)
+
+                    val noteElement = NoteElement(NoteType.C, 5, temporalElement.duration)
+                    noteElements[index] = noteElement
+
+                    for (bar in bars) {
+                        bar.scoreRenderingElements.find { it == temporalElement }?.let {
+                            val index = bar.scoreRenderingElements.indexOf(temporalElement)
+                            bar.scoreRenderingElements.remove(temporalElement)
+                            bar.scoreRenderingElements[index] = noteElement
+                        }
+                    }
+                    return noteElement.id
+                }
+            }
+            return id
+        }
+
+
+    }
+
 }

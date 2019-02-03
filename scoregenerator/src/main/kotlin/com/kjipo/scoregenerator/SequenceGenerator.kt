@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory
 
 
 class SequenceGenerator : ScoreHandlerInterface {
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private val random = Random()
     var scoreBuilder: ScoreBuilderImpl = ScoreBuilderImpl()
     var scoreHandler: ScoreHandler = ScoreHandler(ScoreSetup())

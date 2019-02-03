@@ -6,7 +6,7 @@ import com.kjipo.svg.getRest
 
 
 class RestElement(override var duration: Duration,
-                  override val id: String) : ScoreRenderingElement(0, 0), TemporalElement {
+                  override val id: String = "rest_${restIdCounter++}") : ScoreRenderingElement(0, 0), TemporalElement {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val glyphData = getRest(duration)
@@ -19,5 +19,9 @@ class RestElement(override var duration: Duration,
     }
 
     override fun getGlyphs(): Map<String, GlyphData> = mapOf(Pair("rest_${duration.name}", getRest(duration)))
+
+    companion object {
+        var restIdCounter = 0
+    }
 
 }

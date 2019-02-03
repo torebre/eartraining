@@ -29,7 +29,11 @@ dependencies {
     kotlinOptions {
         sourceMap = true
         sourceMapEmbedSources = "always"
-        moduleKind = 'commonjs'
+//        moduleKind = 'commonjs'
+
+        moduleKind = project.javascriptModule
+
+        print("Using module: " +moduleKind)
     }
 }
 
@@ -37,7 +41,12 @@ dependencies {
     kotlinOptions {
         sourceMap = true
         sourceMapEmbedSources = "always"
-        moduleKind = 'commonjs'
+//        moduleKind = 'commonjs'
+
+
+        moduleKind = project.javascriptModule
+
+        println("Setting module variable3: " +project.javascriptModule )
     }
 }
 

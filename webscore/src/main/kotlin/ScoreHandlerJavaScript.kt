@@ -21,4 +21,6 @@ class ScoreHandlerJavaScript(val scoreHandler: ScoreHandlerInterface) {
     @JsName("insertNote")
     fun insertNote(activeElement: String, keyPressed: Int) = scoreHandler.insertNote(activeElement, keyPressed)
 
+    @JsName("switchBetweenNoteAndRest")
+    fun switchBetweenNoteAndRest(activeElement: String, keyPressed: Int) = scoreHandler.switchBetweenNoteAndRest(activeElement, keyPressed)
 }

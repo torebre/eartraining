@@ -51,4 +51,8 @@ class ScoreBuilderSequence(private val scoreData: ScoreSetup) : ScoreHandlerInte
         return null
     }
 
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
+        return scoreData.switchBetweenNoteAndRest(idOfElementToReplace)
+    }
+
 }

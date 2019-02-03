@@ -15,4 +15,6 @@ interface ScoreHandlerInterface {
 
     fun insertNote(activeElement: String, keyPressed: Int): String?
 
+    fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String
+
 }

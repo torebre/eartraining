@@ -2,10 +2,13 @@ package com.kjipo.handler
 
 import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
-import kotlinx.serialization.list
 
 
 class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterface {
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private var noteCounter = 0
 
     constructor(init: SCORE.() -> Unit) : this(init.let {

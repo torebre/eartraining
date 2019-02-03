@@ -30,13 +30,15 @@ compileKotlin2Js {
         metaInfo = true
         sourceMap = true
         sourceMapEmbedSources = 'always'
-        moduleKind = 'commonjs'
+//        moduleKind = 'commonjs'
 //        moduleKind = 'plain'
+
+        moduleKind = project.javascriptModule
     }
 }
 
 compileTestKotlin2Js {
-    kotlinOptions.moduleKind = 'commonjs'
+    kotlinOptions.moduleKind = javascriptModule
 }
 
 task yarnInstall(type: YarnTask) {
@@ -83,6 +85,11 @@ task runKarma(type: YarnTask, dependsOn: [populateNodeModules, yarnInstall]) {
 
 
 task assembleWeb(type: Sync) {
+
+    project.ext.javascriptModule = 'plain'
+
+    println("Setting module variable")
+
     configurations.compile.each { File file ->
         from(zipTree(file.absolutePath), {
             includeEmptyDirs = false
@@ -102,7 +109,32 @@ task assembleWeb(type: Sync) {
 assemble.dependsOn assembleWeb
 
 
+task createBrowserFiles() {
+    project.ext.javascriptModule = 'plain'
 
+
+    println("Setting module variable: " +project.javascriptModule)
+
+}
+
+createBrowserFiles.doFirst {
+    project.ext.javascriptModule = 'plain'
+
+    println("Setting module variable2: " +project.javascriptModule)
+}
+
+
+gradle.taskGraph.whenReady {taskGraph ->
+    if (taskGraph.hasTask(assembleWeb)) {
+        
+        println("Setting to plain")
+        
+        project.ext.javascriptModule  = 'plain'
+    }
+//    else {
+//        project.ext.module = 'plain'
+//    }
+}
 
 
 //task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {

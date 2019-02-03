@@ -31,6 +31,9 @@ ext {
             kotlin_test_js: "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion",
             kotlin_test_junit: "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion",
     ]
+
+    javascriptModule = 'commonjs'
+
 }
 
 subprojects {
@@ -40,6 +43,8 @@ subprojects {
         // TODO It should not be necessary to define this at this location
         maven { url "https://kotlin.bintray.com/kotlinx" }
     }
+
+
 }
 
 

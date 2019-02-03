@@ -67,7 +67,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
     private fun deactivateActiveElement() {
         activeElement?.let {
-            document.getElementById(it)?.setAttribute("fill", "yellow")
+            document.getElementById(it)?.setAttribute("fill", "black")
         }
     }
 
@@ -131,7 +131,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
-            println("Key pressed: ${keyboardEvent.keyCode}. Active element: ${activeElement}")
+            println("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
 
             when (keyboardEvent.keyCode) {
                 38 -> activeElement?.let {
@@ -174,6 +174,15 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                         highLightActiveElement()
                     }
                 }
+
+                78 -> {
+                    activeElement?.let {
+                        activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyboardEvent.keyCode)
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                        highLightActiveElement()
+                    }
+                }
+
             }
         })
     }

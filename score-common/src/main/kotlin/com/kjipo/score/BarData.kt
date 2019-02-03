@@ -15,9 +15,6 @@ class BarData(val debug: Boolean = false) {
 
     var timeSignature = TimeSignature(0, 0)
 
-    val timeSignatureXOffset = 80
-    val timeSignatureYOffset = -25
-
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
         val definitions = mutableMapOf<String, GlyphData>()
