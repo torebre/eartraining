@@ -5,11 +5,6 @@ import kotlinx.serialization.json.JSON
 
 
 class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterface {
-    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    private var noteCounter = 0
 
     constructor(init: SCORE.() -> Unit) : this(init.let {
         val scoreBuilder = ScoreBuilderImpl()
@@ -45,8 +40,10 @@ class ScoreHandler constructor(val scoreData: ScoreSetup) : ScoreHandlerInterfac
         return null
     }
 
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int) = scoreData.switchBetweenNoteAndRest(idOfElementToReplace)
+
     private fun addNote(index: Int, note: NoteType, octave: Int, duration: Duration) {
-        val noteElement = NoteElement(note, octave, duration, "note-${noteCounter++}")
+        val noteElement = NoteElement(note, octave, duration)
 
         // TODO Need to figure out how bars fit into this
         scoreData.bars.last().scoreRenderingElements.add(index, noteElement)

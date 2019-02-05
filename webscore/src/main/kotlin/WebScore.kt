@@ -133,41 +133,46 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
 
             println("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
 
-            when (keyboardEvent.keyCode) {
-                38 -> activeElement?.let {
+            when (keyboardEvent.code) {
+                "ArrowUp" -> activeElement?.let {
                     // Up
                     scoreHandler.moveNoteOneStep(it, true)
                     generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                     highLightActiveElement()
                 }
-                40 -> activeElement?.let {
+
+                "ArrowDown" -> activeElement?.let {
                     // Down
                     scoreHandler.moveNoteOneStep(it, false)
                     generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                     highLightActiveElement()
                 }
-                37 -> {
+
+                "ArrowLeft" -> {
                     deactivateActiveElement()
                     activeElement = activeElement?.let {
                         scoreHandler.getNeighbouringElement(it, true)
                     }
                     highLightActiveElement()
                 }
-                39 -> {
+
+                "ArrowRight" -> {
                     deactivateActiveElement()
                     activeElement = activeElement?.let {
                         scoreHandler.getNeighbouringElement(it, false)
                     }
                     highLightActiveElement()
                 }
-                49, 50, 51, 52 -> {
+
+                "Digit1", "Digit2", "Digit3", "Digit4" -> {
                     activeElement?.let {
                         scoreHandler.insertNote(it, keyboardEvent.keyCode - 48)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
                 }
-                97, 98, 99, 100 -> {
+
+                "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
                     activeElement?.let {
                         scoreHandler.updateDuration(it, keyboardEvent.keyCode - 96)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
@@ -175,7 +180,7 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                     }
                 }
 
-                78 -> {
+                "KeyN" -> {
                     activeElement?.let {
                         activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyboardEvent.keyCode)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)

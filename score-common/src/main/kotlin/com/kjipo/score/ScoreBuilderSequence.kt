@@ -3,7 +3,6 @@ package com.kjipo.score
 import com.kjipo.handler.ScoreHandlerInterface
 
 class ScoreBuilderSequence(private val scoreData: ScoreSetup) : ScoreHandlerInterface {
-    private var noteCounter = 0
 
     constructor() : this(ScoreSetup())
 
@@ -43,9 +42,8 @@ class ScoreBuilderSequence(private val scoreData: ScoreSetup) : ScoreHandlerInte
 
             // TODO Need to insert note and recalculate the bar data
 
-            scoreData.noteElements.add(insertIndex, NoteElement(NoteType.C, 5, duration, "note-${noteCounter++}"))
+            scoreData.noteElements.add(insertIndex, NoteElement(NoteType.C, 5, duration))
 
-//            addNote(insertIndex, NoteType.C, 5, duration)
             return scoreData.noteElements[insertIndex].id
         }
         return null

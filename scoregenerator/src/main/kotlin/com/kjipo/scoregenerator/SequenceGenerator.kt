@@ -10,10 +10,6 @@ import org.slf4j.LoggerFactory
 
 
 class SequenceGenerator : ScoreHandlerInterface {
-    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     private val random = Random()
     var scoreBuilder: ScoreBuilderImpl = ScoreBuilderImpl()
     var scoreHandler: ScoreHandler = ScoreHandler(ScoreSetup())
@@ -125,18 +121,6 @@ class SequenceGenerator : ScoreHandlerInterface {
     }
 
 
-    private fun getPitch(noteType: NoteType, octave: Int): Int {
-        return 12 * octave + when (noteType) {
-            NoteType.A -> 9
-            NoteType.H -> 11
-            NoteType.C -> 0
-            NoteType.D -> 2
-            NoteType.E -> 4
-            NoteType.F -> 5
-            NoteType.G -> 7
-        }
-    }
-
     private fun getDuration(): Duration {
         return if (Math.random() < 0.3) {
             Duration.HALF
@@ -247,6 +231,34 @@ class SequenceGenerator : ScoreHandlerInterface {
             return idInsertedNote
         }
         return null
+    }
+
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
+        val idOfNewElement = scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
+
+        if (idOfNewElement == idOfElementToReplace) {
+            // No change
+            return idOfElementToReplace
+        }
+
+        // Compute the whole pitch sequence again to keep it easy
+        computePitchSequence()
+        return idOfNewElement
+    }
+
+    private fun computePitchSequence() {
+        var timeCounter = 0
+        pitchSequence.clear()
+
+        for (noteElement in scoreHandler.scoreData.noteElements) {
+            val durationInMilliseconds = getDurationInMilliseconds(noteElement.duration)
+
+            if (noteElement is NoteElement) {
+                val pitch = getPitch(noteElement.note, noteElement.octave)
+                pitchSequence.add(Pitch(noteElement.id, timeCounter, timeCounter + durationInMilliseconds, pitch, noteElement.duration))
+            }
+            timeCounter += durationInMilliseconds
+        }
     }
 
 

@@ -208,13 +208,13 @@ class ScoreSetup {
                     noteElements.remove(temporalElement)
 
                     val restElement = RestElement(temporalElement.duration)
-                    noteElements[index] = restElement
+                    noteElements.add(index, restElement)
 
                     for (bar in bars) {
                         bar.scoreRenderingElements.find { it == temporalElement }?.let {
                             val index = bar.scoreRenderingElements.indexOf(temporalElement)
                             bar.scoreRenderingElements.remove(temporalElement)
-                            bar.scoreRenderingElements[index] = restElement
+                            bar.scoreRenderingElements.add(restElement)
                         }
                     }
                     return restElement.id
@@ -225,13 +225,13 @@ class ScoreSetup {
                     noteElements.remove(temporalElement)
 
                     val noteElement = NoteElement(NoteType.C, 5, temporalElement.duration)
-                    noteElements[index] = noteElement
+                    noteElements.add(index, noteElement)
 
                     for (bar in bars) {
                         bar.scoreRenderingElements.find { it == temporalElement }?.let {
                             val index = bar.scoreRenderingElements.indexOf(temporalElement)
                             bar.scoreRenderingElements.remove(temporalElement)
-                            bar.scoreRenderingElements[index] = noteElement
+                            bar.scoreRenderingElements.add(index, noteElement)
                         }
                     }
                     return noteElement.id
