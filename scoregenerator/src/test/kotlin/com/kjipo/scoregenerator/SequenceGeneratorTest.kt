@@ -61,7 +61,7 @@ class SequenceGeneratorTest {
 
         val numberOfNoteElments = sequenceGenerator.scoreHandler.scoreData.noteElements.size
         val restElementId = sequenceGenerator.switchBetweenNoteAndRest(gNote.id, -1)
-        val pitch = getPitch(gNote.note, gNote.octave)
+        val pitch = Utilities.getPitch(gNote.note, gNote.octave)
         val foundPitch = sequenceGenerator.pitchSequence.find { it.pitch == pitch }
 
         assertTrue(foundPitch == null)

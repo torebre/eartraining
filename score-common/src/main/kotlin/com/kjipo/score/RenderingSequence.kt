@@ -12,7 +12,7 @@ data class RenderingSequence(val renderGroups: List<RenderGroup>, val viewBox: V
 data class ViewBox(val xMin: Int, val yMin: Int, val xMax: Int, val yMax: Int)
 
 @Serializable
-class RenderGroup { //(val renderingElements: List<PositionedRenderingElement>, val transform: Translation? = null, val renderGroup: RenderGroup? = null) {
+class RenderGroup {
     val renderingElements: MutableList<PositionedRenderingElement>
     val renderGroup: RenderGroup?
     val transform: Translation?

@@ -101,7 +101,7 @@ class NoteElement(var note: NoteType,
             glyphsUsed.put(it.name, getGlyph(it))
         }
 
-        glyphsUsed.put(duration.name, getGlyph(Duration.QUARTER))
+        glyphsUsed.put(duration.name, getGlyph(duration))
 
         return glyphsUsed
     }

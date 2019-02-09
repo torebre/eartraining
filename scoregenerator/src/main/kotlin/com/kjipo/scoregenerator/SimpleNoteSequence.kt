@@ -4,7 +4,28 @@ import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 
 
-data class SimpleNoteSequence(val elements: List<NoteSequenceElement>)
+data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
+
+
+    fun transformToPitchSequence(): List<Pitch> {
+        var timeCounter = 0
+        val pitchSequence = mutableListOf<Pitch>()
+        var idCounter = 0
+
+        for (element in elements) {
+            val durationInMilliseconds = Utilities.getDurationInMilliseconds(element.duration)
+
+            if (element is NoteSequenceElement.NoteElement) {
+                pitchSequence.add(Pitch(idCounter++.toString(), timeCounter, timeCounter + durationInMilliseconds, Utilities.getPitch(element.note, element.octave), element.duration))
+            }
+            timeCounter += durationInMilliseconds
+        }
+
+        return pitchSequence
+    }
+
+
+}
 
 
 sealed class NoteSequenceElement(val duration: Duration) {

@@ -33,6 +33,7 @@ ext {
     ]
 
     javascriptModule = 'commonjs'
+//    javascriptModule = 'plain'
 
 }
 

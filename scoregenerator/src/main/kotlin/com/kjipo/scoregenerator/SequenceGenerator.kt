@@ -51,9 +51,9 @@ class SequenceGenerator : ScoreHandlerInterface {
                 }
             }
 
-            val pitch = getPitch(currentNote, currentOctave)
+            val pitch = Utilities.getPitch(currentNote, currentOctave)
             val duration = getDuration()
-            val durationInMilliseconds = getDurationInMilliseconds(duration)
+            val durationInMilliseconds = Utilities.getDurationInMilliseconds(duration)
 
             val note = NOTE(scoreBuilder)
             note.octave = currentOctave
@@ -82,7 +82,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         bar.barData.timeSignature = TimeSignature(4, 4)
 
         for (element in simpleNoteSequence.elements) {
-            val durationInMilliseconds = getDurationInMilliseconds(element.duration)
+            val durationInMilliseconds = Utilities.getDurationInMilliseconds(element.duration)
 
             when (element) {
                 is NoteSequenceElement.RestElement -> {
@@ -96,7 +96,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                     note.note = element.note
 
                     val id = scoreBuilder.onNoteAdded(note)
-                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, getPitch(element.note, element.octave), element.duration))
+                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, Utilities.getPitch(element.note, element.octave), element.duration))
                 }
             }
 
@@ -111,7 +111,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         var timeCounter = 0
         pitchSequence.forEach {
             it.timeOn = timeCounter
-            it.timeOff = timeCounter + getDurationInMilliseconds(it.duration)
+            it.timeOff = timeCounter + Utilities.getDurationInMilliseconds(it.duration)
             timeCounter = it.timeOff
         }
     }
@@ -128,15 +128,6 @@ class SequenceGenerator : ScoreHandlerInterface {
             Duration.QUARTER
         }
     }
-
-    private fun getDurationInMilliseconds(duration: Duration): Int {
-        return when (duration) {
-            Duration.HALF -> 2 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
-            Duration.QUARTER -> DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
-            Duration.WHOLE -> 4 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
-        }
-    }
-
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
         pitchSequence
@@ -223,7 +214,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                     .find { it.id == activeElement }?.let { pitch ->
                         scoreHandler.scoreData.noteElements.find { it.id == idInsertedNote }?.let { temporalElement ->
                             if (temporalElement is NoteElement) {
-                                pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, getPitch(temporalElement.note, temporalElement.octave), temporalElement.duration))
+                                pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, Utilities.getPitch(temporalElement.note, temporalElement.octave), temporalElement.duration))
                             }
                         }
                     }
@@ -251,21 +242,15 @@ class SequenceGenerator : ScoreHandlerInterface {
         pitchSequence.clear()
 
         for (noteElement in scoreHandler.scoreData.noteElements) {
-            val durationInMilliseconds = getDurationInMilliseconds(noteElement.duration)
+            val durationInMilliseconds = Utilities.getDurationInMilliseconds(noteElement.duration)
 
             if (noteElement is NoteElement) {
-                val pitch = getPitch(noteElement.note, noteElement.octave)
+                val pitch = Utilities.getPitch(noteElement.note, noteElement.octave)
                 pitchSequence.add(Pitch(noteElement.id, timeCounter, timeCounter + durationInMilliseconds, pitch, noteElement.duration))
             }
             timeCounter += durationInMilliseconds
         }
     }
 
-
-    companion object {
-
-        private const val DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE = 1000
-
-    }
 
 }
