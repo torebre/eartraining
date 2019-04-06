@@ -2,110 +2,40 @@ package com.kjipo.scoregenerator
 
 import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreHandlerInterface
-import java.util.*
+import com.kjipo.handler.ScoreHandlerUtilities
 
 
 import com.kjipo.score.*
 import org.slf4j.LoggerFactory
 
 
+/**
+ * Stores a sequence of pitches, and wraps a score handler that can create a score based on the pitch sequence.
+ */
 class SequenceGenerator : ScoreHandlerInterface {
-    private val random = Random()
-    var scoreBuilder: ScoreBuilderImpl = ScoreBuilderImpl()
-    var scoreHandler: ScoreHandler = ScoreHandler(ScoreSetup())
+    var scoreHandler: ScoreHandler = ScoreHandler()
     val pitchSequence = mutableListOf<Pitch>()
 
-    private val logger = LoggerFactory.getLogger(SequenceGenerator::class.java)
 
-
-    fun createNewSequence(debug: Boolean = false): RenderingSequence {
+    fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {
         var timeCounter = 0
         pitchSequence.clear()
-
-        scoreBuilder = ScoreBuilderImpl(debug)
-        scoreHandler = ScoreHandler(scoreBuilder.scoreData)
-        val bar = BAR(scoreBuilder)
-        bar.barData.clef = com.kjipo.score.Clef.G
-        bar.barData.timeSignature = TimeSignature(4, 4)
-
-        var currentNote = NoteType.C
-        var currentOctave = 5
-
-
-        for (i in 0..4) {
-            val stepUp = random.nextBoolean()
-
-            if (stepUp) {
-                if (currentNote == NoteType.H) {
-                    currentNote = NoteType.C
-                    ++currentOctave
-                } else {
-                    currentNote = NoteType.values()[(currentNote.ordinal + 1) % NoteType.values().size]
-                }
-            } else {
-                if (currentNote == NoteType.C) {
-                    currentNote = NoteType.H
-                    --currentOctave
-                } else {
-                    currentNote = NoteType.values()[(NoteType.values().size + currentNote.ordinal - 1) % NoteType.values().size]
-                }
-            }
-
-            val pitch = Utilities.getPitch(currentNote, currentOctave)
-            val duration = getDuration()
-            val durationInMilliseconds = Utilities.getDurationInMilliseconds(duration)
-
-            val note = NOTE(scoreBuilder)
-            note.octave = currentOctave
-            note.duration = duration
-            note.note = currentNote
-
-            val id = scoreBuilder.onNoteAdded(note)
-            pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, pitch, duration))
-            timeCounter += durationInMilliseconds
-        }
-
-        scoreBuilder.onBarAdded(bar)
-
-        return scoreBuilder.build()
-    }
-
-
-    fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence, debug: Boolean = false) {
-        var timeCounter = 0
-        pitchSequence.clear()
-
-        scoreBuilder = ScoreBuilderImpl(debug)
-        scoreHandler = ScoreHandler(scoreBuilder.scoreData)
-        val bar = BAR(scoreBuilder)
-        bar.barData.clef = com.kjipo.score.Clef.G
-        bar.barData.timeSignature = TimeSignature(4, 4)
 
         for (element in simpleNoteSequence.elements) {
             val durationInMilliseconds = Utilities.getDurationInMilliseconds(element.duration)
 
             when (element) {
                 is NoteSequenceElement.RestElement -> {
-                    val rest = REST(scoreBuilder)
-                    scoreBuilder.onRestAdded(rest)
+                    scoreHandler.insertRest(element.duration)
                 }
                 is NoteSequenceElement.NoteElement -> {
-                    val note = NOTE(scoreBuilder)
-                    note.octave = element.octave
-                    note.duration = element.duration
-                    note.note = element.note
-
-                    val id = scoreBuilder.onNoteAdded(note)
+                    val id = scoreHandler.insertNote(element.duration, element.octave, element.note)
                     pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, Utilities.getPitch(element.note, element.octave), element.duration))
                 }
             }
-
             timeCounter += durationInMilliseconds
         }
-
-        scoreBuilder.onBarAdded(bar)
     }
-
 
     private fun computeOnOffPitches() {
         var timeCounter = 0
@@ -116,28 +46,18 @@ class SequenceGenerator : ScoreHandlerInterface {
         }
     }
 
-    private fun Random.nextInt(range: IntRange): Int {
-        return range.start + nextInt(range.last - range.start)
-    }
-
-
-    private fun getDuration(): Duration {
-        return if (Math.random() < 0.3) {
-            Duration.HALF
-        } else {
-            Duration.QUARTER
-        }
-    }
-
     override fun moveNoteOneStep(id: String, up: Boolean) {
         pitchSequence
                 .find { it.id == id }?.let { pitch ->
 
                     // TODO Only works because C major is the only key used so far
-                    scoreHandler.scoreData.findNote(id)?.let { noteElement ->
-                        val pitchStep = determinePitchStep(noteElement, up)
-                        val index = pitchSequence.indexOf(pitch)
-                        pitchSequence[index].pitch += pitchStep
+                    scoreHandler.moveNoteOneStep(id, up)
+                    val index = pitchSequence.indexOf(pitch)
+                    if (index != -1) {
+                        scoreHandler.findNoteType(id)?.let {
+                            val pitchStep = ScoreHandlerUtilities.determinePitchStep(it, up)
+                            pitchSequence[index].pitch += pitchStep
+                        }
                     }
                 }
         scoreHandler.moveNoteOneStep(id, up)
@@ -147,60 +67,12 @@ class SequenceGenerator : ScoreHandlerInterface {
     override fun updateDuration(id: String, keyPressed: Int) {
         pitchSequence
                 .find { it.id == id }?.let { pitch ->
-                    scoreHandler.scoreData.findNote(id)?.let { noteElement ->
-                        pitch.duration = when (keyPressed) {
-                            1 -> Duration.QUARTER
-                            2 -> Duration.HALF
-                            3 -> Duration.WHOLE
-                            else -> noteElement.duration
-                        }
-                    }
+                    pitch.duration = ScoreHandlerUtilities.getDuration(keyPressed)
                     computeOnOffPitches()
                 }
         scoreHandler.updateDuration(id, keyPressed)
-
     }
 
-
-    private fun determinePitchStep(noteElement: NoteElement, up: Boolean): Int {
-        return when (noteElement.note) {
-            NoteType.A -> if (up) {
-                2
-            } else {
-                -2
-            }
-            NoteType.H -> if (up) {
-                1
-            } else {
-                -2
-            }
-            NoteType.C -> if (up) {
-                2
-            } else {
-                -1
-            }
-            NoteType.D -> if (up) {
-                2
-            } else {
-                -2
-            }
-            NoteType.E -> if (up) {
-                1
-            } else {
-                -2
-            }
-            NoteType.F -> if (up) {
-                2
-            } else {
-                -1
-            }
-            NoteType.G -> if (up) {
-                2
-            } else {
-                -2
-            }
-        }
-    }
 
     override fun getScoreAsJson() = scoreHandler.getScoreAsJson()
 
@@ -212,10 +84,11 @@ class SequenceGenerator : ScoreHandlerInterface {
         scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
             pitchSequence
                     .find { it.id == activeElement }?.let { pitch ->
-                        scoreHandler.scoreData.noteElements.find { it.id == idInsertedNote }?.let { temporalElement ->
-                            if (temporalElement is NoteElement) {
-                                pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, Utilities.getPitch(temporalElement.note, temporalElement.octave), temporalElement.duration))
+                        scoreHandler.findScoreHandlerElement(idInsertedNote)?.let {
+                            if (it.isNote) {
+                                pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, Utilities.getPitch(it.noteType, it.octave), it.duration))
                             }
+
                         }
                     }
             computeOnOffPitches()
@@ -241,15 +114,20 @@ class SequenceGenerator : ScoreHandlerInterface {
         var timeCounter = 0
         pitchSequence.clear()
 
-        for (noteElement in scoreHandler.scoreData.noteElements) {
-            val durationInMilliseconds = Utilities.getDurationInMilliseconds(noteElement.duration)
+        for (scoreHandlerElement in scoreHandler.getScoreHandlerElements()) {
+            val durationInMilliseconds = Utilities.getDurationInMilliseconds(scoreHandlerElement.duration)
 
-            if (noteElement is NoteElement) {
-                val pitch = Utilities.getPitch(noteElement.note, noteElement.octave)
-                pitchSequence.add(Pitch(noteElement.id, timeCounter, timeCounter + durationInMilliseconds, pitch, noteElement.duration))
+            if (scoreHandlerElement.isNote) {
+                val pitch = Utilities.getPitch(scoreHandlerElement.noteType, scoreHandlerElement.octave)
+                pitchSequence.add(Pitch(scoreHandlerElement.id, timeCounter, timeCounter + durationInMilliseconds, pitch, scoreHandlerElement.duration))
             }
             timeCounter += durationInMilliseconds
         }
+    }
+
+    override fun deleteElement(id: String) {
+        scoreHandler.deleteElement(id)
+        computePitchSequence()
     }
 
 

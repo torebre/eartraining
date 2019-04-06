@@ -9,36 +9,14 @@ class SerializationTest {
 
     @Test
     fun serializeRenderingSequence() {
-        val scoreHandler = ScoreHandler {
-            bar {
-                barData.clef = Clef.G
-                barData.timeSignature = TimeSignature(4, 4)
+        val scoreHandler = ScoreHandler()
 
-                note {
-                    note = NoteType.A
-                    duration = Duration.QUARTER
-                    octave = 4
-                }
+        scoreHandler.insertNote(Duration.QUARTER, 4, NoteType.A)
+        scoreHandler.insertNote(Duration.QUARTER, 4, NoteType.H)
+        scoreHandler.insertNote(Duration.QUARTER, 4, NoteType.C)
+        scoreHandler.insertRest(Duration.QUARTER)
 
-                note {
-                    note = NoteType.H
-                    duration = Duration.QUARTER
-                    octave = 4
-                }
-
-                note {
-                    note = NoteType.C
-                    duration = Duration.QUARTER
-                }
-
-                rest {
-                    duration = Duration.QUARTER
-                }
-            }
-        }
-
-
-        val jsonData = JSON.stringify(RenderingSequence.serializer(), scoreHandler.scoreData.build())
+        val jsonData = scoreHandler.getScoreAsJson()
 
         println("jsonData: $jsonData")
 

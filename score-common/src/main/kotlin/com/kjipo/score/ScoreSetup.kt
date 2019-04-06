@@ -240,7 +240,7 @@ class ScoreSetup {
             return id
         }
 
-
+        return id
     }
 
 }

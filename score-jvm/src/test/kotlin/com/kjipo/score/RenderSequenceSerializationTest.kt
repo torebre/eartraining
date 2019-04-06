@@ -11,57 +11,6 @@ import org.junit.Test
 
 class RenderSequenceSerializationTest {
 
-
-    @Test
-    fun serializeRenderingSequence() {
-        val scoreHandler = ScoreHandler {
-            bar {
-                barData.clef = Clef.G
-                barData.timeSignature = TimeSignature(4, 4)
-
-                note {
-                    note = NoteType.A
-                    duration = Duration.QUARTER
-                    octave = 4
-                }
-
-                note {
-                    note = NoteType.H
-                    duration = Duration.QUARTER
-                    octave = 4
-                }
-
-                note {
-                    note = NoteType.C
-                    duration = Duration.QUARTER
-                }
-
-                note {
-                    note = NoteType.C
-                    octave = 5
-                    duration = Duration.QUARTER
-                }
-            }
-        }
-
-
-//        val scope = SerialContext()
-//        scope.registerSerializer(Double::class, Double::class.serializer())
-//        scope.registerSerializer(List::class., Double::class.serializer().list)
-
-
-        val jsonData = scoreHandler.getScoreAsJson()
-
-        println("jsonData: $jsonData")
-
-        val deserializedRenderedSequence = JSON.parse(RenderingSequence.serializer(), jsonData)
-
-        println("Deserialized: $deserializedRenderedSequence")
-
-
-    }
-
-
     @Test
     fun listSerializationTest() {
         val testList = listOf(1.0, 2.0, 3.0)

@@ -23,4 +23,7 @@ class ScoreHandlerJavaScript(val scoreHandler: ScoreHandlerInterface) {
 
     @JsName("switchBetweenNoteAndRest")
     fun switchBetweenNoteAndRest(activeElement: String, keyPressed: Int) = scoreHandler.switchBetweenNoteAndRest(activeElement, keyPressed)
+
+    @JsName("deleteElement")
+    fun deleteElement(id: String) = scoreHandler.deleteElement(id)
 }

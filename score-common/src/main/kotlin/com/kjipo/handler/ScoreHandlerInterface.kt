@@ -17,4 +17,6 @@ interface ScoreHandlerInterface {
 
     fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String
 
+    fun deleteElement(id: String)
+
 }

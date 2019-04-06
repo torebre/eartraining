@@ -14,7 +14,6 @@ class ScoreSetupTest {
         note1.accidental = Accidental.SHARP
         ++idCounter
         val note2 = NoteElement(NoteType.D, 5, Duration.HALF, "note-$idCounter")
-        note2.tie = note1.id
         note2.accidental = Accidental.SHARP
         ++idCounter
 

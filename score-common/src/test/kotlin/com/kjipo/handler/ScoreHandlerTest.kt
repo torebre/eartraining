@@ -32,53 +32,63 @@ class ScoreHandlerTest {
 
     @Test
     fun moveNoteMoreThanOneOctaveUp() {
-        val scoreHandler = ScoreHandler {
-            bar {
-                barData.clef = Clef.G
-                barData.timeSignature = TimeSignature(4, 4)
-
-                note {
-                    note = NoteType.A
-                    duration = Duration.QUARTER
-                    octave = 4
-//                    id = "note-1"
-                }
-            }
-        }
+        val scoreHandler = ScoreHandler()
 
         for (i in 1..10) {
-            val currentNote = scoreHandler.scoreData.findNote("note-1")!!.note
-            scoreHandler.moveNoteOneStep("note-1", true)
-            val newCurrentNote = scoreHandler.scoreData.findNote("note-1")!!.note
+            val currentNote = scoreHandler.findScoreHandlerElement("1")!!.noteType
+            scoreHandler.moveNoteOneStep("1", true)
+            val newCurrentNote = scoreHandler.findScoreHandlerElement("1")!!.noteType
 
             assertTrue { noteNextMapUp[currentNote]!!.equals(newCurrentNote) }
         }
     }
 
 
+//    @Test
+//    fun moveNoteMoreThanOneOctaveDown() {
+//        val scoreHandler = ScoreHandler {
+//            bar {
+//                barData.clef = Clef.G
+//                barData.timeSignature = TimeSignature(4, 4)
+//
+//                note {
+//                    note = NoteType.A
+//                    duration = Duration.QUARTER
+//                    octave = 4
+////                    id = "note-1"
+//                }
+//            }
+//        }
+//
+//        for (i in 1..10) {
+//            val currentNote = scoreHandler.scoreData.findNote("note-1")!!.note
+//            scoreHandler.moveNoteOneStep("note-1", false)
+//            val newCurrentNote = scoreHandler.scoreData.findNote("note-1")!!.note
+//
+//            assertTrue { noteNextMapDown[currentNote]!!.equals(newCurrentNote) }
+//        }
+//    }
+
+
     @Test
-    fun moveNoteMoreThanOneOctaveDown() {
-        val scoreHandler = ScoreHandler {
-            bar {
-                barData.clef = Clef.G
-                barData.timeSignature = TimeSignature(4, 4)
+    fun deleteNoteTest() {
+        val scoreHandler = ScoreHandler()
+        val id1 = scoreHandler.insertNote(Duration.QUARTER)
+        val id2 = scoreHandler.insertNote(Duration.QUARTER)
 
-                note {
-                    note = NoteType.A
-                    duration = Duration.QUARTER
-                    octave = 4
-//                    id = "note-1"
-                }
-            }
+        assertTrue {
+            scoreHandler.getScoreHandlerElements().size == 2
         }
 
-        for (i in 1..10) {
-            val currentNote = scoreHandler.scoreData.findNote("note-1")!!.note
-            scoreHandler.moveNoteOneStep("note-1", false)
-            val newCurrentNote = scoreHandler.scoreData.findNote("note-1")!!.note
-
-            assertTrue { noteNextMapDown[currentNote]!!.equals(newCurrentNote) }
+        scoreHandler.deleteElement(id1)
+        assertTrue {
+            scoreHandler.getScoreHandlerElements().size == 1
         }
+
+        assertTrue {
+            scoreHandler.getScoreHandlerElements()[0].id == id2
+        }
+
     }
 
 

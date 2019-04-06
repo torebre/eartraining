@@ -9,31 +9,26 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
+class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score") {
     val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
     private val svgElement: Element
     var activeElement: String? = null
-    val idSvgElementMap = mutableMapOf<String, Element>()
+    private val idSvgElementMap = mutableMapOf<String, Element>()
 
     init {
-        val element = document.getElementById("score")
+        val element = document.getElementById(svgElementId)
 
         svgElement = if ("svg" == element?.tagName) {
             element
         } else {
             val createdElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
+            createdElement.id = svgElementId
             document.body?.appendChild(createdElement)
             createdElement
         }
 
         setupSvg()
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
-    }
-
-    fun loadScoreHandler(scoreHandler: ScoreHandlerJavaScript) {
-        this.scoreHandler = scoreHandler
-        activeElement = scoreHandler.getIdOfFirstSelectableElement()
-        reload()
     }
 
     fun reload() {
@@ -60,6 +55,10 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
     }
 
     private fun highLightActiveElement() {
+        if(activeElement == null) {
+            activeElement = scoreHandler.getIdOfFirstSelectableElement()
+        }
+
         activeElement?.let {
             document.getElementById(it)?.setAttribute("fill", "red")
         }
@@ -185,6 +184,27 @@ class WebScore(var scoreHandler: ScoreHandlerJavaScript) {
                         activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyboardEvent.keyCode)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
+                    }
+                }
+
+                "Delete" -> {
+                    activeElement?.let {
+                        deactivateActiveElement()
+                        activeElement = null
+                        scoreHandler.deleteElement(it)
+
+                        var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
+
+                        if (neighbouringElement == null) {
+                            neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
+                        }
+
+                        neighbouringElement?.let {
+                            activeElement = neighbouringElement
+                            highLightActiveElement()
+                        }
+
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                     }
                 }
 

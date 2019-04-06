@@ -53,4 +53,11 @@ class ScoreBuilderSequence(private val scoreData: ScoreSetup) : ScoreHandlerInte
         return scoreData.switchBetweenNoteAndRest(idOfElementToReplace)
     }
 
+    override fun deleteElement(id: String) {
+        scoreData.noteElements.find { it.id == id }?.let { element ->
+            scoreData.noteElements.remove(element)
+        }
+    }
+
+
 }
