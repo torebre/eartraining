@@ -20,7 +20,7 @@ class BarData(val debug: Boolean = false) {
         val definitions = mutableMapOf<String, GlyphData>()
 
         val clefElement = clef?.let {
-            val element = ClefElement(it, 0, 0, "clef")
+            val element = ClefElement(it, barXoffset, barYoffset, "clef")
             definitions[it.name] = element.getGlyphData()
             element
         }
@@ -48,14 +48,14 @@ class BarData(val debug: Boolean = false) {
             when (scoreRenderingElement) {
                 is TemporalElement -> {
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
-                    var yPosition = 0
+                    var yPosition = barYoffset
                     val elements = mutableListOf<PositionedRenderingElement>()
                     val renderingElement = scoreRenderingElement.toRenderingElement()
 
                     scoreRenderingElement.xPosition = 0
 
                     if (scoreRenderingElement is NoteElement) {
-                        yPosition = calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
+                        yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
 
                         if (scoreRenderingElement.requiresStem()) {
                             // TODO Determine whether the stem should go up or down
@@ -67,7 +67,7 @@ class BarData(val debug: Boolean = false) {
                         }
                     }
 
-                    scoreRenderingElement.yPosition += barYoffset
+//                    scoreRenderingElement.yPosition += barYoffset
                     tickCounter += scoreRenderingElement.duration.ticks
 
                     if (debug) {
@@ -75,7 +75,6 @@ class BarData(val debug: Boolean = false) {
                         val debugBox = Box(scoreRenderingElement.xPosition, scoreRenderingElement.yPosition, width, scoreRenderingElement.yPosition, "debug")
                         returnList.add(RenderGroup(debugBox.toRenderingElement(), null))
                     }
-
                     elements.addAll(renderingElement)
 
                     val renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))

@@ -1,81 +1,12 @@
 package com.kjipo.score
 
 import com.kjipo.svg.GlyphData
-import kotlinx.serialization.json.JSON
 
 class ScoreSetup {
-    val noteElements = mutableListOf<TemporalElement>()
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
 
-    fun findNote(elementId: String): NoteElement? {
-        return noteElements.filter { it is NoteElement }
-                .map { it as NoteElement }
-                .find { it.id == elementId }
-    }
-
-    fun moveNoteOneStep(id: String, up: Boolean) {
-        findNote(id)?.let {
-            if (up) {
-                if (it.note == NoteType.H) {
-                    it.note = NoteType.C
-                    ++it.octave
-                } else {
-                    it.note = NoteType.values()[(it.note.ordinal + 1) % NoteType.values().size]
-                }
-            } else {
-                if (it.note == NoteType.C) {
-                    it.note = NoteType.H
-                    --it.octave
-                } else {
-                    it.note = NoteType.values()[(NoteType.values().size + it.note.ordinal - 1) % NoteType.values().size]
-                }
-            }
-        }
-    }
-
-    fun getScoreAsJson(): String {
-        return JSON.stringify(RenderingSequence.serializer(), build())
-    }
-
-    fun getIdOfFirstSelectableElement() = noteElements.map { it.id }.firstOrNull()
-
-    fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
-        return noteElements.find { it.id == activeElement }?.let {
-            noteElements.filter { temporalElement ->
-                temporalElement.id == activeElement
-            }.map { it ->
-                val index = noteElements.indexOf(it)
-                if (lookLeft) {
-                    if (index == 0) {
-                        0
-                    } else {
-                        index - 1
-                    }
-                } else {
-                    if (index == noteElements.lastIndex) {
-                        noteElements.lastIndex
-                    } else {
-                        index + 1
-                    }
-                }
-            }
-                    .map { noteElements[it].id }.firstOrNull()
-        }
-    }
-
-    fun updateDuration(id: String, keyPressed: Int) {
-        noteElements.find {
-            it.id.equals(id)
-        }?.let {
-            when (keyPressed) {
-                1 -> it.duration = Duration.QUARTER
-                2 -> it.duration = Duration.HALF
-                3 -> it.duration = Duration.WHOLE
-            }
-        }
-    }
 
     fun build(): RenderingSequence {
         // TODO Possible to use immutable lists here?
@@ -84,19 +15,17 @@ class ScoreSetup {
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
 
-        noteElements.filter { it is NoteElement }
+        bars.flatMap { it.scoreRenderingElements }
+                .filter { it is NoteElement }
                 .map { it as NoteElement }
-                .forEach {
-
-                    // TODO Can be more efficient
+                .forEach { it ->
                     definitionMap.putAll(it.getGlyphs())
-
                 }
 
         var barXoffset = 0
         var barYoffset = 0
         val barXspace = 0
-        val barYspace = 0
+        val barYspace = 250
 
         bars.forEach { barData ->
             val currentBar = barData.build(barXoffset, barYoffset)
@@ -199,48 +128,5 @@ class ScoreSetup {
         return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
     }
 
-
-    fun switchBetweenNoteAndRest(id: String): String {
-        noteElements.find { it.id == id }?.let { temporalElement ->
-            when (temporalElement) {
-                is NoteElement -> {
-                    val index = noteElements.indexOf(temporalElement)
-                    noteElements.remove(temporalElement)
-
-                    val restElement = RestElement(temporalElement.duration)
-                    noteElements.add(index, restElement)
-
-                    for (bar in bars) {
-                        bar.scoreRenderingElements.find { it == temporalElement }?.let {
-                            val index = bar.scoreRenderingElements.indexOf(temporalElement)
-                            bar.scoreRenderingElements.remove(temporalElement)
-                            bar.scoreRenderingElements.add(restElement)
-                        }
-                    }
-                    return restElement.id
-
-                }
-                is RestElement -> {
-                    val index = noteElements.indexOf(temporalElement)
-                    noteElements.remove(temporalElement)
-
-                    val noteElement = NoteElement(NoteType.C, 5, temporalElement.duration)
-                    noteElements.add(index, noteElement)
-
-                    for (bar in bars) {
-                        bar.scoreRenderingElements.find { it == temporalElement }?.let {
-                            val index = bar.scoreRenderingElements.indexOf(temporalElement)
-                            bar.scoreRenderingElements.remove(temporalElement)
-                            bar.scoreRenderingElements.add(index, noteElement)
-                        }
-                    }
-                    return noteElement.id
-                }
-            }
-            return id
-        }
-
-        return id
-    }
 
 }

@@ -5,10 +5,6 @@ import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.handler.ScoreHandlerUtilities
 
 
-import com.kjipo.score.*
-import org.slf4j.LoggerFactory
-
-
 /**
  * Stores a sequence of pitches, and wraps a score handler that can create a score based on the pitch sequence.
  */

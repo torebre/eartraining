@@ -3,7 +3,7 @@ package com.kjipo.score
 
 class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterface<RenderingSequence> {
     private val currentElements = mutableListOf<ScoreRenderingElement>()
-    val scoreData = ScoreSetup()
+    private val scoreData = ScoreSetup()
     private var restCounter = 0
     private var noteCounter = 0
 
@@ -28,8 +28,6 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
         val noteElement = NoteElement(note.note, note.octave, note.duration, id)
 
         currentElements.add(noteElement)
-        scoreData.noteElements.add(noteElement)
-
         return id
     }
 
@@ -37,7 +35,6 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
         val restElement = RestElement(rest.duration, "rest-${restCounter++}")
 
         currentElements.add(restElement)
-        scoreData.noteElements.add(restElement)
     }
 
     fun score(init: SCORE.() -> Unit) = SCORE(this).apply(init).finalize(this)

@@ -3,6 +3,7 @@ package com.kjipo.handler
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteElement
 import com.kjipo.score.NoteType
+import com.kjipo.score.TICKS_PER_QUARTER_NOTE
 
 object ScoreHandlerUtilities {
 
@@ -59,5 +60,16 @@ object ScoreHandlerUtilities {
                 3 -> Duration.WHOLE
                 else -> Duration.QUARTER
             }
+
+
+    fun getDurationForTicks(ticks: Int): Duration {
+        // TODO Break ticks down into multiple durations if it is not equal to a single one
+        return when(ticks) {
+            TICKS_PER_QUARTER_NOTE -> Duration.QUARTER
+            2 *  TICKS_PER_QUARTER_NOTE -> Duration.HALF
+            4 * TICKS_PER_QUARTER_NOTE -> Duration.WHOLE
+            else -> throw IllegalArgumentException("Unhandled number of ticks: $ticks")
+        }
+    }
 
 }

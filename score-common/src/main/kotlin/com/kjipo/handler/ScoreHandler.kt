@@ -14,6 +14,10 @@ class ScoreHandler : ScoreHandlerInterface {
 
 
     override fun getScoreAsJson(): String {
+        return JSON.stringify(RenderingSequence.serializer(), build())
+    }
+
+    fun build(): RenderingSequence {
         val scoreSetup = ScoreSetup()
         var remainingTicksInBar = ticksPerBar
         var currentBar = BarData()
@@ -23,25 +27,45 @@ class ScoreHandler : ScoreHandlerInterface {
         scoreSetup.bars.add(currentBar)
 
         for (element in scoreHandlerElements) {
-            // TODO For testing making the simplifying assumption that the notes fit exactly within a bar
-            if (remainingTicksInBar == 0) {
+            // TODO This does not tie notes across bars
+
+            var ticks = element.duration.ticks
+
+            if(remainingTicksInBar == 0) {
                 remainingTicksInBar = ticksPerBar
                 currentBar = BarData()
                 scoreSetup.bars.add(currentBar)
             }
+            else if (remainingTicksInBar < ticks) {
+                val durationInCurrentBar = ScoreHandlerUtilities.getDurationForTicks(remainingTicksInBar)
+                val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
+                    NoteElement(element.noteType, element.octave, durationInCurrentBar, element.id)
+                } else {
+                    RestElement(durationInCurrentBar, element.id)
+                }
 
-            remainingTicksInBar -= element.duration.ticks
+                ticks -= remainingTicksInBar
+
+                currentBar.scoreRenderingElements.add(scoreRenderingElement)
+                remainingTicksInBar = ticksPerBar
+                currentBar = BarData()
+                scoreSetup.bars.add(currentBar)
+            }
+            else {
+                remainingTicksInBar -= ticks
+            }
+
+            val duration = ScoreHandlerUtilities.getDurationForTicks(ticks)
             val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                NoteElement(element.noteType, element.octave, element.duration, element.id)
+                NoteElement(element.noteType, element.octave, duration, element.id)
             } else {
-                RestElement(element.duration, element.id)
+                RestElement(duration, element.id)
             }
 
             currentBar.scoreRenderingElements.add(scoreRenderingElement)
-            scoreSetup.noteElements.add(scoreRenderingElement as TemporalElement)
         }
 
-        return JSON.stringify(RenderingSequence.serializer(), scoreSetup.build())
+        return scoreSetup.build()
     }
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
@@ -74,26 +98,24 @@ class ScoreHandler : ScoreHandlerInterface {
     }
 
     override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
-        return scoreHandlerElements.find { it.id == activeElement }?.let {
-            scoreHandlerElements.filter { temporalElement ->
-                temporalElement.id == activeElement
-            }.map { it ->
-                val index = scoreHandlerElements.indexOf(it)
-                if (lookLeft) {
-                    if (index == 0) {
-                        0
-                    } else {
-                        index - 1
-                    }
-                } else {
-                    if (index == scoreHandlerElements.lastIndex) {
-                        scoreHandlerElements.lastIndex
-                    } else {
-                        index + 1
-                    }
+        return scoreHandlerElements.find { it.id == activeElement }?.let { scoreHandlerElement ->
+            val indexOfElement = scoreHandlerElements.indexOf(scoreHandlerElement)
+            if(lookLeft) {
+                if(indexOfElement == 0) {
+                    scoreHandlerElement.id
+                }
+                else {
+                    scoreHandlerElements[indexOfElement - 1].id
                 }
             }
-                    .map { scoreHandlerElements[it].id }.firstOrNull()
+            else {
+                if(indexOfElement == scoreHandlerElements.size - 1) {
+                    scoreHandlerElement.id
+                }
+                else {
+                    scoreHandlerElements[indexOfElement + 1].id
+                }
+            }
         }
     }
 

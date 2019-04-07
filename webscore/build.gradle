@@ -124,19 +124,6 @@ createBrowserFiles.doFirst {
 }
 
 
-gradle.taskGraph.whenReady {taskGraph ->
-    if (taskGraph.hasTask(assembleWeb)) {
-        
-        println("Setting to plain")
-        
-        project.ext.javascriptModule  = 'plain'
-    }
-//    else {
-//        project.ext.module = 'plain'
-//    }
-}
-
-
 //task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
 //    from compileKotlin2Js.destinationDir
 //
