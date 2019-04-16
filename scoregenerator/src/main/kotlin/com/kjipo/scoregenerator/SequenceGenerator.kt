@@ -96,11 +96,6 @@ class SequenceGenerator : ScoreHandlerInterface {
     override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
         val idOfNewElement = scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
 
-        if (idOfNewElement == idOfElementToReplace) {
-            // No change
-            return idOfElementToReplace
-        }
-
         // Compute the whole pitch sequence again to keep it easy
         computePitchSequence()
         return idOfNewElement

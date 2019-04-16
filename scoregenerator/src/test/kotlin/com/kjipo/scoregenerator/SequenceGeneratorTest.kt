@@ -2,7 +2,6 @@ package com.kjipo.scoregenerator
 
 
 import com.kjipo.score.Duration
-import com.kjipo.score.NoteElement
 import com.kjipo.score.NoteType
 import junit.framework.TestCase.*
 import org.junit.Test
@@ -43,42 +42,40 @@ class SequenceGeneratorTest {
     }
 
 
-//    @Test
-//    fun `Switch between note and rest test`() {
-//        val simpleNoteSequence = SimpleNoteSequence(listOf(
-//                NoteSequenceElement.NoteElement(NoteType.A, 5, Duration.QUARTER),
-//                NoteSequenceElement.NoteElement(NoteType.A, 6, Duration.HALF),
-//                NoteSequenceElement.NoteElement(NoteType.G, 5, Duration.QUARTER),
-//                NoteSequenceElement.RestElement(Duration.HALF),
-//                NoteSequenceElement.NoteElement(NoteType.D, 6, Duration.QUARTER)))
-//
-//        val sequenceGenerator = SequenceGenerator()
-//        sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
-//        val gNote = sequenceGenerator.scoreHandler.scoreData.noteElements.filter { it is NoteElement }
-//                .map { it as NoteElement }
-//                .first { it.note == NoteType.G }
-//
-//        assertTrue(sequenceGenerator.scoreHandler.scoreData.noteElements.indexOf(gNote) == 2)
-//        assertTrue(sequenceGenerator.pitchSequence.size == 4)
-//
-//        val numberOfNoteElments = sequenceGenerator.scoreHandler.scoreData.noteElements.size
-//        val restElementId = sequenceGenerator.switchBetweenNoteAndRest(gNote.id, -1)
-//        val pitch = Utilities.getPitch(gNote.note, gNote.octave)
-//        val foundPitch = sequenceGenerator.pitchSequence.find { it.pitch == pitch }
-//
-//        assertTrue(foundPitch == null)
-//        assertTrue(sequenceGenerator.pitchSequence.size == 3)
-//        assertTrue(sequenceGenerator.scoreHandler.scoreData.noteElements.size == numberOfNoteElments)
-//
-//        val newNoteElementId = sequenceGenerator.switchBetweenNoteAndRest(restElementId, -1)
-//        val aNoteSecond = sequenceGenerator.scoreHandler.scoreData.noteElements.filter { it is NoteElement }
-//                .map { it as NoteElement }
-//                .find { it.note == NoteType.A && it.octave == 6 }
-//        val indexOfSecondANote = sequenceGenerator.scoreHandler.scoreData.noteElements.indexOf(aNoteSecond!!)
-//
-//        assertTrue(sequenceGenerator.scoreHandler.scoreData.noteElements[indexOfSecondANote + 1].id == newNoteElementId)
-//        assertTrue(sequenceGenerator.pitchSequence.size == 4)
-//        assertTrue(sequenceGenerator.scoreHandler.scoreData.noteElements.size == numberOfNoteElments)
-//    }
+    @Test
+    fun `Switch between note and rest test`() {
+        val simpleNoteSequence = SimpleNoteSequence(listOf(
+                NoteSequenceElement.NoteElement(NoteType.A, 5, Duration.QUARTER),
+                NoteSequenceElement.NoteElement(NoteType.A, 6, Duration.HALF),
+                NoteSequenceElement.NoteElement(NoteType.G, 5, Duration.QUARTER),
+                NoteSequenceElement.RestElement(Duration.HALF),
+                NoteSequenceElement.NoteElement(NoteType.D, 6, Duration.QUARTER)))
+
+        val sequenceGenerator = SequenceGenerator()
+        sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
+        val gNote = sequenceGenerator.scoreHandler.getScoreHandlerElements().filter { it.isNote }
+                .first { it.noteType == NoteType.G }
+
+        assertTrue(sequenceGenerator.scoreHandler.getScoreHandlerElements().indexOf(gNote) == 2)
+        assertTrue(sequenceGenerator.pitchSequence.size == 4)
+
+        val numberOfNoteElments = sequenceGenerator.scoreHandler.getScoreHandlerElements().size
+        val restElementId = sequenceGenerator.switchBetweenNoteAndRest(gNote.id, -1)
+        val pitch = Utilities.getPitch(gNote.noteType, gNote.octave)
+        val foundPitch = sequenceGenerator.pitchSequence.find { it.pitch == pitch }
+
+        assertTrue(foundPitch == null)
+        assertTrue(sequenceGenerator.pitchSequence.size == 3)
+        assertTrue(sequenceGenerator.scoreHandler.getScoreHandlerElements().size == numberOfNoteElments)
+
+        val newNoteElementId = sequenceGenerator.switchBetweenNoteAndRest(restElementId, -1)
+        val aNoteSecond = sequenceGenerator.scoreHandler.getScoreHandlerElements().filter { it.isNote }
+                .find { it.noteType == NoteType.A && it.octave == 6 }
+        val indexOfSecondANote = sequenceGenerator.scoreHandler.getScoreHandlerElements().indexOf(aNoteSecond!!)
+
+        assertTrue(sequenceGenerator.scoreHandler.getScoreHandlerElements()[indexOfSecondANote + 1].id == newNoteElementId)
+        assertTrue(sequenceGenerator.pitchSequence.size == 4)
+        assertTrue(sequenceGenerator.scoreHandler.getScoreHandlerElements().size == numberOfNoteElments)
+    }
 
 }
