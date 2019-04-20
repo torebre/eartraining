@@ -12,6 +12,8 @@ class ScoreHandler : ScoreHandlerInterface {
     private var idCounter = 0
     private val ticksPerBar = 4 * TICKS_PER_QUARTER_NOTE
 
+    var trimEndBars = true
+
 
     override fun getScoreAsJson(): String {
         return JSON.stringify(RenderingSequence.serializer(), build())
@@ -23,39 +25,55 @@ class ScoreHandler : ScoreHandlerInterface {
         var currentBar = BarData()
         currentBar.clef = com.kjipo.score.Clef.G
         currentBar.timeSignature = TimeSignature(4, 4)
-
-        scoreSetup.bars.add(currentBar)
+        val bars = mutableListOf(currentBar)
 
         for (element in scoreHandlerElements) {
             // TODO This does not tie notes across bars
 
-            var ticks = element.duration.ticks
+            var ticksNeededForElement = element.duration.ticks
 
-            if(remainingTicksInBar == 0) {
-                remainingTicksInBar = ticksPerBar
-                currentBar = BarData()
-                scoreSetup.bars.add(currentBar)
-            }
-            else if (remainingTicksInBar < ticks) {
-                val durationInCurrentBar = ScoreHandlerUtilities.getDurationForTicks(remainingTicksInBar)
-                val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                    NoteElement(element.noteType, element.octave, durationInCurrentBar, element.id)
-                } else {
-                    RestElement(durationInCurrentBar, element.id)
+            when {
+                remainingTicksInBar == 0 -> {
+                    remainingTicksInBar = ticksPerBar
+                    currentBar = BarData()
+                    bars.add(currentBar)
                 }
+                remainingTicksInBar < ticksNeededForElement -> {
+                    val (durationInCurrentBar, durationInNextPar) = ScoreHandlerUtilities.splitDuration(ticksNeededForElement, remainingTicksInBar)
 
-                ticks -= remainingTicksInBar
+                    val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
+                        NoteElement(element.noteType, element.octave, durationInCurrentBar, element.id)
+                    } else {
+                        RestElement(durationInCurrentBar, element.id)
+                    }
 
-                currentBar.scoreRenderingElements.add(scoreRenderingElement)
-                remainingTicksInBar = ticksPerBar
-                currentBar = BarData()
-                scoreSetup.bars.add(currentBar)
+                    ticksNeededForElement -= remainingTicksInBar
+                    currentBar.scoreRenderingElements.add(scoreRenderingElement)
+                    remainingTicksInBar = ticksPerBar
+                    currentBar = BarData()
+
+
+                    if (durationInCurrentBar != Duration.ZERO) {
+                        val scoreRenderingElementInNextBar: ScoreRenderingElement = if (element.isNote) {
+                            NoteElement(element.noteType, element.octave, durationInNextPar, element.id)
+                        } else {
+                            RestElement(durationInCurrentBar, element.id)
+                        }
+                        currentBar.scoreRenderingElements.add(scoreRenderingElementInNextBar)
+
+                        // Add a tie between the part of the note in the current bar and the note in the next bar
+                        if(scoreRenderingElementInNextBar is NoteElement) {
+                            scoreSetup.ties.add(TiePair(scoreRenderingElement as NoteElement, scoreRenderingElementInNextBar))
+                        }
+
+                    }
+
+                    bars.add(currentBar)
+                }
+                else -> remainingTicksInBar -= ticksNeededForElement
             }
-            else {
-                remainingTicksInBar -= ticks
-            }
 
-            val duration = ScoreHandlerUtilities.getDurationForTicks(ticks)
+            val duration = ScoreHandlerUtilities.getDurationForTicks(ticksNeededForElement)
             val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
                 NoteElement(element.noteType, element.octave, duration, element.id)
             } else {
@@ -65,7 +83,20 @@ class ScoreHandler : ScoreHandlerInterface {
             currentBar.scoreRenderingElements.add(scoreRenderingElement)
         }
 
+        if (trimEndBars) {
+            trimBars(bars)
+        }
+        scoreSetup.bars.addAll(bars)
+
         return scoreSetup.build()
+    }
+
+
+    private fun trimBars(bars: MutableList<BarData>) {
+        if (bars.isEmpty()) {
+            return
+        }
+        bars.takeLastWhile { bar -> bar.scoreRenderingElements.all { it is RestElement } }.forEach { bars.remove(it) }
     }
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
@@ -100,19 +131,16 @@ class ScoreHandler : ScoreHandlerInterface {
     override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
         return scoreHandlerElements.find { it.id == activeElement }?.let { scoreHandlerElement ->
             val indexOfElement = scoreHandlerElements.indexOf(scoreHandlerElement)
-            if(lookLeft) {
-                if(indexOfElement == 0) {
+            if (lookLeft) {
+                if (indexOfElement == 0) {
                     scoreHandlerElement.id
-                }
-                else {
+                } else {
                     scoreHandlerElements[indexOfElement - 1].id
                 }
-            }
-            else {
-                if(indexOfElement == scoreHandlerElements.size - 1) {
+            } else {
+                if (indexOfElement == scoreHandlerElements.size - 1) {
                     scoreHandlerElement.id
-                }
-                else {
+                } else {
                     scoreHandlerElements[indexOfElement + 1].id
                 }
             }

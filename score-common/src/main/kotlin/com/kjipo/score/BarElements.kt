@@ -26,6 +26,7 @@ enum class NoteType {
 }
 
 enum class Duration(val ticks: Int) {
+    ZERO(0),
     QUARTER(TICKS_PER_QUARTER_NOTE),
     HALF(2 * TICKS_PER_QUARTER_NOTE),
     WHOLE(4 * TICKS_PER_QUARTER_NOTE)

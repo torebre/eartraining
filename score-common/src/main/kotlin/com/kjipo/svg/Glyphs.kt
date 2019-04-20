@@ -11,6 +11,7 @@ val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0
 
 fun getGlyph(noteType: Duration): GlyphData {
     return when (noteType) {
+        Duration.ZERO -> blankGlyph
         Duration.QUARTER -> getGlyph("noteheads.s2")
         Duration.HALF -> getGlyph("noteheads.s1")
         Duration.WHOLE -> getGlyph("noteheads.s0")
@@ -26,6 +27,7 @@ fun getGlyph(accidental: Accidental): GlyphData {
 
 fun getRest(restDuration: Duration): GlyphData {
     return when (restDuration) {
+        Duration.ZERO -> blankGlyph
         Duration.QUARTER -> getGlyph("rests.2")
         Duration.HALF -> getGlyph("rests.1")
         Duration.WHOLE -> getGlyph("rests.0")

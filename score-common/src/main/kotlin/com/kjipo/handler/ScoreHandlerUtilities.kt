@@ -4,6 +4,7 @@ import com.kjipo.score.Duration
 import com.kjipo.score.NoteElement
 import com.kjipo.score.NoteType
 import com.kjipo.score.TICKS_PER_QUARTER_NOTE
+import kotlin.math.absoluteValue
 
 object ScoreHandlerUtilities {
 
@@ -70,6 +71,15 @@ object ScoreHandlerUtilities {
             4 * TICKS_PER_QUARTER_NOTE -> Duration.WHOLE
             else -> throw IllegalArgumentException("Unhandled number of ticks: $ticks")
         }
+    }
+
+    fun splitDuration(ticks: Int, ticksLeftInBar: Int): Pair<Duration, Duration> {
+        if(ticks < ticksLeftInBar) {
+            return Pair(getDurationForTicks(ticks), Duration.ZERO)
+        }
+
+        val remainder = ticksLeftInBar.minus(ticks).absoluteValue
+        return Pair(getDurationForTicks(ticks - remainder), getDurationForTicks(remainder))
     }
 
 }
