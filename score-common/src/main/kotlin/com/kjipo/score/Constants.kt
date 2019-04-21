@@ -23,6 +23,7 @@ const val FILL_COLOUR = "black"
 
 
 const val STEM_UP = "stem-up"
+const val STEM_DOWN = "stem-down"
 
 const val timeSignatureXOffset = 80
 const val timeSignatureYOffset = -25
@@ -31,4 +32,10 @@ const val timeSignatureYOffset = -25
 enum class Accidental {
     SHARP,
     FLAT
+}
+
+enum class Stem {
+    NONE,
+    UP,
+    DOWN
 }

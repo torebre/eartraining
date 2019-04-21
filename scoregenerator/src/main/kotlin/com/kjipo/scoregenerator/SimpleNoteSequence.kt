@@ -1,5 +1,7 @@
 package com.kjipo.scoregenerator
 
+import com.kjipo.handler.ScoreHandlerUtilities.getDurationInMilliseconds
+import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 
@@ -13,10 +15,10 @@ data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
         var idCounter = 0
 
         for (element in elements) {
-            val durationInMilliseconds = Utilities.getDurationInMilliseconds(element.duration)
+            val durationInMilliseconds = getDurationInMilliseconds(element.duration)
 
             if (element is NoteSequenceElement.NoteElement) {
-                pitchSequence.add(Pitch(idCounter++.toString(), timeCounter, timeCounter + durationInMilliseconds, Utilities.getPitch(element.note, element.octave), element.duration))
+                pitchSequence.add(Pitch(idCounter++.toString(), timeCounter, timeCounter + durationInMilliseconds, getPitch(element.note, element.octave), element.duration))
             }
             timeCounter += durationInMilliseconds
         }

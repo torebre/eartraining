@@ -9,6 +9,7 @@ class NoteElement(var note: NoteType,
                   override var duration: Duration,
                   override val id: String = "note-${noteElementIdCounter++}") : ScoreRenderingElement(), TemporalElement {
     var accidental: Accidental? = null
+    var stem = Stem.NONE
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val result = mutableListOf<PositionedRenderingElement>()
@@ -42,7 +43,7 @@ class NoteElement(var note: NoteType,
 
         if (requiresStem()) {
             val stemElement = getStem()
-            stemElement.typeId = STEM_UP
+            stemElement.typeId = stem.name
             result.add(stemElement)
         }
 
@@ -50,8 +51,7 @@ class NoteElement(var note: NoteType,
     }
 
     fun getStem(): PositionedRenderingElement {
-        // TODO Determine whether the stem should go up or down
-        val stem = addStem(getGlyph(duration).boundingBox)
+        val stem = addStem(getGlyph(duration).boundingBox, stem != Stem.DOWN)
 
         return PositionedRenderingElement(listOf(stem),
                 findBoundingBox(stem.pathElements),
@@ -74,7 +74,7 @@ class NoteElement(var note: NoteType,
         val glyphsUsed = mutableListOf<String>()
 
         if (requiresStem()) {
-            glyphsUsed.add(STEM_UP)
+            glyphsUsed.add(stem.name)
         }
 
         accidental?.let {

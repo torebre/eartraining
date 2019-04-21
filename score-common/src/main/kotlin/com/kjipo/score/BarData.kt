@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getGlyph
@@ -58,16 +59,17 @@ class BarData(val debug: Boolean = false) {
                         yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
 
                         if (scoreRenderingElement.requiresStem()) {
-                            // TODO Determine whether the stem should go up or down
-
-                            // Use the bounding box for the note head of a half note to determine
-                            // how far to move the stem so that it is on the right side of the note head
-                            val stem = addStem(getGlyph(Duration.HALF).boundingBox)
-                            definitions[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
+                            if (scoreRenderingElement.stem == Stem.UP) {
+                                // Use the bounding box for the note head of a half note to determine
+                                // how far to move the stem so that it is on the right side of the note head
+                                val stem = addStem(getGlyph(Duration.HALF).boundingBox)
+                                definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
+                            } else if (scoreRenderingElement.stem == Stem.DOWN) {
+                                val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
+                                definitions[Stem.DOWN.name] = GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
+                            }
                         }
                     }
-
-//                    scoreRenderingElement.yPosition += barYoffset
                     tickCounter += scoreRenderingElement.duration.ticks
 
                     if (debug) {

@@ -1,5 +1,6 @@
 package com.kjipo.handler
 
+import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
 
@@ -42,7 +43,6 @@ class ScoreHandler : ScoreHandlerInterface {
                 }
                 remainingTicksInBar < ticksNeededForElement -> {
                     val durations = ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement)
-//                    val durations = ScoreHandlerUtilities.splitDuration(ticksNeededForElement, remainingTicksInBar)
 
                     println("Test24: ${durations}")
 
@@ -55,7 +55,9 @@ class ScoreHandler : ScoreHandlerInterface {
                         }
 
                         val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                            NoteElement(element.noteType, element.octave, duration, element.id)
+                            NoteElement(element.noteType, element.octave, duration, element.id).also {
+                                it.stem = stemUp(getPitch(element.noteType, element.octave))
+                            }
                         } else {
                             RestElement(duration, element.id)
                         }
@@ -75,7 +77,9 @@ class ScoreHandler : ScoreHandlerInterface {
 
                     for (i in counter until durations.size) {
                         val tiedElement: ScoreRenderingElement = if (element.isNote) {
-                            NoteElement(element.noteType, element.octave, durations[i], element.id)
+                            NoteElement(element.noteType, element.octave, durations[i], element.id).also {
+                                it.stem = stemUp(getPitch(element.noteType, element.octave))
+                            }
                         } else {
                             RestElement(durations[i], element.id)
                         }
@@ -116,9 +120,22 @@ class ScoreHandler : ScoreHandlerInterface {
         return scoreSetup.build()
     }
 
+
+    private fun stemUp(pitch: Int): Stem {
+        // TODO This only works for C scale and G clef
+        return if (pitch >= 71) {
+            Stem.DOWN
+        } else {
+            Stem.UP
+        }
+    }
+
+
     private fun addElement(element: ScoreHandlerElement, currentBar: BarData) {
         val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-            NoteElement(element.noteType, element.octave, element.duration, element.id)
+            NoteElement(element.noteType, element.octave, element.duration, element.id).also {
+                it.stem = stemUp(getPitch(element.noteType, element.octave))
+            }
         } else {
             RestElement(element.duration, element.id)
         }
