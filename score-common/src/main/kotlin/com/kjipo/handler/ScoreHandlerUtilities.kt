@@ -64,22 +64,36 @@ object ScoreHandlerUtilities {
 
 
     fun getDurationForTicks(ticks: Int): Duration {
-        // TODO Break ticks down into multiple durations if it is not equal to a single one
-        return when(ticks) {
+        return when (ticks) {
             TICKS_PER_QUARTER_NOTE -> Duration.QUARTER
-            2 *  TICKS_PER_QUARTER_NOTE -> Duration.HALF
+            2 * TICKS_PER_QUARTER_NOTE -> Duration.HALF
             4 * TICKS_PER_QUARTER_NOTE -> Duration.WHOLE
             else -> throw IllegalArgumentException("Unhandled number of ticks: $ticks")
         }
     }
 
-    fun splitDuration(ticks: Int, ticksLeftInBar: Int): Pair<Duration, Duration> {
-        if(ticks < ticksLeftInBar) {
-            return Pair(getDurationForTicks(ticks), Duration.ZERO)
+    fun splitDuration(ticks: Int, ticksLeftInBar: Int): List<Duration> {
+        if (ticks < ticksLeftInBar) {
+            return listOf(getDurationForTicks(ticks))
         }
-
         val remainder = ticksLeftInBar.minus(ticks).absoluteValue
-        return Pair(getDurationForTicks(ticks - remainder), getDurationForTicks(remainder))
+        return listOf(getDurationForTicks(ticksLeftInBar)) + splitIntoDurations(remainder)
+    }
+
+    fun splitIntoDurations(ticks: Int): List<Duration> {
+        if (ticks == 0) {
+            return emptyList()
+        }
+        var ticksCounter = ticks
+        val result = mutableListOf<Duration>()
+
+        while (ticksCounter != 0) {
+            Duration.values().last { it.ticks <= ticksCounter }.let {
+                result.add(it)
+                ticksCounter -= it.ticks
+            }
+        }
+        return result
     }
 
 }

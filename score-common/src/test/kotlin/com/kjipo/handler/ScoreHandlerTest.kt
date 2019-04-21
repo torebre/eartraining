@@ -39,7 +39,7 @@ class ScoreHandlerTest {
             scoreHandler.moveNoteOneStep("1", true)
             val newCurrentNote = scoreHandler.findScoreHandlerElement("1")!!.noteType
 
-            assertTrue { noteNextMapUp[currentNote]!!.equals(newCurrentNote) }
+            assertTrue { noteNextMapUp[currentNote] == newCurrentNote }
         }
     }
 
@@ -91,5 +91,29 @@ class ScoreHandlerTest {
 
     }
 
+
+    @Test
+    fun sequenceTest() {
+        val scoreHandler = ScoreHandler()
+        scoreHandler.insertNote(Duration.QUARTER)
+        scoreHandler.insertNote(Duration.HALF)
+        scoreHandler.insertNote(Duration.WHOLE)
+
+        // Just check that the build does not fail
+        scoreHandler.build()
+    }
+
+    @Test
+    fun sequenceTest2() {
+        val scoreHandler = ScoreHandler()
+        scoreHandler.insertNote(Duration.HALF)
+        scoreHandler.insertNote(Duration.QUARTER)
+        scoreHandler.insertNote(Duration.HALF)
+        scoreHandler.insertNote(Duration.WHOLE)
+        scoreHandler.insertNote(Duration.QUARTER)
+
+        // Just check that the build does not fail
+        scoreHandler.build()
+    }
 
 }

@@ -55,7 +55,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
     }
 
     private fun highLightActiveElement() {
-        if(activeElement == null) {
+        if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
 
@@ -191,20 +191,21 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                     activeElement?.let {
                         deactivateActiveElement()
                         activeElement = null
-                        scoreHandler.deleteElement(it)
 
                         var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
-
                         if (neighbouringElement == null) {
-                            neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
+                            neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
                         }
+                        scoreHandler.deleteElement(it)
+                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
 
-                        neighbouringElement?.let {
+                        if (neighbouringElement != null) {
                             activeElement = neighbouringElement
                             highLightActiveElement()
+                        } else {
+                            scoreHandler.getIdOfFirstSelectableElement()
                         }
 
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                     }
                 }
 
@@ -214,12 +215,12 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
+        svgElement.clear()
         svgElement.setAttribute("viewBox",
                 "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
 
         console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
-        svgElement.clear()
         svgElement.ownerDocument?.let {
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
 
