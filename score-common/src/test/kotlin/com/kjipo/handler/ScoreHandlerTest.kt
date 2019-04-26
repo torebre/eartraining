@@ -5,6 +5,8 @@ import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import com.kjipo.score.TimeSignature
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 
@@ -115,5 +117,30 @@ class ScoreHandlerTest {
         // Just check that the build does not fail
         scoreHandler.build()
     }
+
+
+    @Test
+    fun insertNoteTest() {
+        val scoreHandler = ScoreHandler()
+        val noteId = scoreHandler.insertNote(Duration.QUARTER)
+        scoreHandler.insertNote(Duration.QUARTER)
+        scoreHandler.insertNote(Duration.QUARTER)
+        scoreHandler.insertNote(Duration.QUARTER)
+        scoreHandler.insertNote(noteId, Duration.HALF)
+        scoreHandler.build()
+
+        val scoreHandlerElements = scoreHandler.getScoreHandlerElements()
+        scoreHandlerElements.forEach { println(it) }
+
+        assertEquals(scoreHandlerElements.size, 6)
+        assertEquals(scoreHandlerElements[0].duration, Duration.QUARTER)
+        assertEquals(scoreHandlerElements[1].duration, Duration.HALF)
+        assertEquals(scoreHandlerElements[2].duration, Duration.QUARTER)
+        assertEquals(scoreHandlerElements[3].duration, Duration.QUARTER)
+        assertEquals(scoreHandlerElements[4].duration, Duration.QUARTER)
+        assertEquals(scoreHandlerElements[5].duration, Duration.HALF)
+        assertFalse(scoreHandlerElements[5].isNote)
+    }
+
 
 }

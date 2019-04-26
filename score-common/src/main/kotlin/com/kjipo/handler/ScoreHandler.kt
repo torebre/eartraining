@@ -24,7 +24,7 @@ class ScoreHandler : ScoreHandlerInterface {
         val scoreSetup = ScoreSetup()
         var remainingTicksInBar = ticksPerBar
         var currentBar = BarData()
-        currentBar.clef = com.kjipo.score.Clef.G
+        currentBar.clef = Clef.G
         currentBar.timeSignature = TimeSignature(4, 4)
         val bars = mutableListOf(currentBar)
 
@@ -34,18 +34,38 @@ class ScoreHandler : ScoreHandlerInterface {
         for (element in scoreHandlerElements) {
             var ticksNeededForElement = element.duration.ticks
 
+            if (remainingTicksInBar == 0) {
+                // No more room in bar, start on a new one
+                remainingTicksInBar = ticksPerBar
+                currentBar = BarData()
+                bars.add(currentBar)
+            }
+
             when {
-                remainingTicksInBar == 0 -> {
-                    remainingTicksInBar = ticksPerBar
+                remainingTicksInBar < ticksNeededForElement -> {
+                    val duration = ScoreHandlerUtilities.getDurationForTicks(remainingTicksInBar)
+                    val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
+                        NoteElement(element.noteType, element.octave, duration, element.id).also {
+                            it.stem = stemUp(getPitch(element.noteType, element.octave))
+                        }
+                    } else {
+                        RestElement(duration, element.id)
+                    }
+
+                    // Add one element filling up the remaining space
+                    currentBar.scoreRenderingElements.add(scoreRenderingElement)
                     currentBar = BarData()
                     bars.add(currentBar)
-                    addElement(element, currentBar)
-                }
-                remainingTicksInBar < ticksNeededForElement -> {
-                    val durations = ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement)
+
+                    val ticksInNextBar = ticksNeededForElement - remainingTicksInBar
+                    remainingTicksInBar = ticksPerBar
+
+                    val durations = ScoreHandlerUtilities.splitIntoDurations(ticksInNextBar)
 
                     println("Test24: ${durations}")
 
+
+                    // There should be enough room for the rest in the next bar
                     var counter = 0
                     var previous: ScoreRenderingElement? = null
 
@@ -94,6 +114,7 @@ class ScoreHandler : ScoreHandlerInterface {
                 }
             }
 
+
         }
 
 
@@ -113,6 +134,9 @@ class ScoreHandler : ScoreHandlerInterface {
         }
 
         println("Test28: Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+
+        bars.forEach { println(it) }
+
 
 
         scoreSetup.bars.addAll(bars)

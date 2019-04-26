@@ -18,7 +18,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         pitchSequence.clear()
 
         for (element in simpleNoteSequence.elements) {
-            val durationInMilliseconds = Utilities.getDurationInMilliseconds(element.duration)
+            val durationInMilliseconds = ScoreHandlerUtilities.getDurationInMilliseconds(element.duration)
 
             when (element) {
                 is NoteSequenceElement.RestElement -> {
@@ -26,7 +26,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                 }
                 is NoteSequenceElement.NoteElement -> {
                     val id = scoreHandler.insertNote(element.duration, element.octave, element.note)
-                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, Utilities.getPitch(element.note, element.octave), element.duration))
+                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, ScoreHandlerUtilities.getPitch(element.note, element.octave), element.duration))
                 }
             }
             timeCounter += durationInMilliseconds
@@ -37,7 +37,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         var timeCounter = 0
         pitchSequence.forEach {
             it.timeOn = timeCounter
-            it.timeOff = timeCounter + Utilities.getDurationInMilliseconds(it.duration)
+            it.timeOff = timeCounter + ScoreHandlerUtilities.getDurationInMilliseconds(it.duration)
             timeCounter = it.timeOff
         }
     }
@@ -82,7 +82,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                     .find { it.id == activeElement }?.let { pitch ->
                         scoreHandler.findScoreHandlerElement(idInsertedNote)?.let {
                             if (it.isNote) {
-                                pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, Utilities.getPitch(it.noteType, it.octave), it.duration))
+                                pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, ScoreHandlerUtilities.getPitch(it.noteType, it.octave), it.duration))
                             }
 
                         }
@@ -106,10 +106,10 @@ class SequenceGenerator : ScoreHandlerInterface {
         pitchSequence.clear()
 
         for (scoreHandlerElement in scoreHandler.getScoreHandlerElements()) {
-            val durationInMilliseconds = Utilities.getDurationInMilliseconds(scoreHandlerElement.duration)
+            val durationInMilliseconds = ScoreHandlerUtilities.getDurationInMilliseconds(scoreHandlerElement.duration)
 
             if (scoreHandlerElement.isNote) {
-                val pitch = Utilities.getPitch(scoreHandlerElement.noteType, scoreHandlerElement.octave)
+                val pitch = ScoreHandlerUtilities.getPitch(scoreHandlerElement.noteType, scoreHandlerElement.octave)
                 pitchSequence.add(Pitch(scoreHandlerElement.id, timeCounter, timeCounter + durationInMilliseconds, pitch, scoreHandlerElement.duration))
             }
             timeCounter += durationInMilliseconds

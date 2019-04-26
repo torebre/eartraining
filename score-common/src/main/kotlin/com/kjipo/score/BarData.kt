@@ -109,11 +109,18 @@ class BarData(val debug: Boolean = false) {
                 .minus(START_NOTE_ELEMENT_MARGIN)
     }
 
+    override fun toString(): String {
+        return "BarData(scoreRenderingElements=$scoreRenderingElements)"
+    }
+
 
     companion object {
         var barNumber = 0
         var stemCounter = 0
     }
+
+
+
 
 
 }
