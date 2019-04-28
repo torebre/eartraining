@@ -64,7 +64,7 @@ class ScoreHandler : ScoreHandlerInterface {
         println("Test26: Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
         var lastBarTrimmed = false
-        if (trimEndBars) {
+        if (trimEndBars && bars.size > 1) {
             val barsBeforeTrimming = bars.size
             trimBars(bars)
             lastBarTrimmed = barsBeforeTrimming != bars.size

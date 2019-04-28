@@ -171,18 +171,27 @@ class ScoreHandlerTest {
         scoreHandler.build()
 
         assertEquals(1, scoreHandler.scoreSetup.bars.size)
-
         assertEquals(listOf(Duration.QUARTER, Duration.QUARTER, Duration.HALF), getDurationsInBar(scoreHandler.scoreSetup.bars[0].scoreRenderingElements))
 
         scoreHandler.insertNote(noteId2, Duration.QUARTER)
         scoreHandler.build()
 
         assertEquals(2, scoreHandler.scoreSetup.bars.size)
-
         assertEquals(listOf(Duration.QUARTER, Duration.QUARTER, Duration.QUARTER, Duration.QUARTER), getDurationsInBar(scoreHandler.scoreSetup.bars[0].scoreRenderingElements))
         assertEquals(listOf(Duration.QUARTER, Duration.HALF, Duration.QUARTER), getDurationsInBar(scoreHandler.scoreSetup.bars[1].scoreRenderingElements))
     }
 
+    @Test
+    fun allRestsTest() {
+        val scoreHandler = ScoreHandler()
+        scoreHandler.insertRest(Duration.QUARTER)
+        scoreHandler.insertRest(Duration.QUARTER)
+        scoreHandler.insertRest(Duration.QUARTER)
+        scoreHandler.insertRest(Duration.QUARTER)
+        scoreHandler.build()
+
+        assertEquals(1, scoreHandler.scoreSetup.bars.size)
+    }
 
     private fun getDurationsInBar(scoreRenderingElements: List<ScoreRenderingElement>): List<Duration> {
         return scoreRenderingElements.map {
