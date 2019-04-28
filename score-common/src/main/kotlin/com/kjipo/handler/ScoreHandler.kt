@@ -13,6 +13,8 @@ class ScoreHandler : ScoreHandlerInterface {
     private var idCounter = 0
     private val ticksPerBar = 4 * TICKS_PER_QUARTER_NOTE
 
+    internal var scoreSetup = ScoreSetup()
+
     private var trimEndBars = true
 
 
@@ -21,7 +23,7 @@ class ScoreHandler : ScoreHandlerInterface {
     }
 
     fun build(): RenderingSequence {
-        val scoreSetup = ScoreSetup()
+        scoreSetup = ScoreSetup()
         var remainingTicksInBar = ticksPerBar
         var currentBar = BarData()
         currentBar.clef = Clef.G
@@ -43,80 +45,21 @@ class ScoreHandler : ScoreHandlerInterface {
 
             when {
                 remainingTicksInBar < ticksNeededForElement -> {
-                    val duration = ScoreHandlerUtilities.getDurationForTicks(remainingTicksInBar)
-                    val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                        NoteElement(element.noteType, element.octave, duration, element.id).also {
-                            it.stem = stemUp(getPitch(element.noteType, element.octave))
-                        }
-                    } else {
-                        RestElement(duration, element.id)
-                    }
+                    val durationsInCurrentbar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
+                    val durationsInNextBar = ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
 
-                    // Add one element filling up the remaining space
-                    currentBar.scoreRenderingElements.add(scoreRenderingElement)
+                    var previous = addAndTie(element, durationsInCurrentbar, currentBar)
+                    remainingTicksInBar += ticksPerBar - ticksNeededForElement
                     currentBar = BarData()
                     bars.add(currentBar)
-
-                    val ticksInNextBar = ticksNeededForElement - remainingTicksInBar
-                    remainingTicksInBar = ticksPerBar
-
-                    val durations = ScoreHandlerUtilities.splitIntoDurations(ticksInNextBar)
-
-                    println("Test24: ${durations}")
-
-
-                    // There should be enough room for the rest in the next bar
-                    var counter = 0
-                    var previous: ScoreRenderingElement? = null
-
-                    for (duration in durations) {
-                        if (remainingTicksInBar == 0) {
-                            break
-                        }
-
-                        val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                            NoteElement(element.noteType, element.octave, duration, element.id).also {
-                                it.stem = stemUp(getPitch(element.noteType, element.octave))
-                            }
-                        } else {
-                            RestElement(duration, element.id)
-                        }
-
-                        remainingTicksInBar -= duration.ticks
-                        currentBar.scoreRenderingElements.add(scoreRenderingElement)
-                        ++counter
-
-                        if (previous != null && scoreRenderingElement is NoteElement) {
-                            scoreSetup.ties.add(TiePair(previous as NoteElement, scoreRenderingElement))
-                        }
-                        previous = scoreRenderingElement
-                    }
-                    bars.add(currentBar)
-                    currentBar = BarData()
-                    remainingTicksInBar = ticksPerBar
-
-                    for (i in counter until durations.size) {
-                        val tiedElement: ScoreRenderingElement = if (element.isNote) {
-                            NoteElement(element.noteType, element.octave, durations[i], element.id).also {
-                                it.stem = stemUp(getPitch(element.noteType, element.octave))
-                            }
-                        } else {
-                            RestElement(durations[i], element.id)
-                        }
-                        currentBar.scoreRenderingElements.add(tiedElement)
-                        remainingTicksInBar -= durations[i].ticks
-                    }
-                    bars.add(currentBar)
+                    addAndTie(element, durationsInNextBar, currentBar, previous)
                 }
                 else -> {
                     remainingTicksInBar -= ticksNeededForElement
                     addElement(element, currentBar)
                 }
             }
-
-
         }
-
 
         println("Test26: Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
@@ -142,6 +85,29 @@ class ScoreHandler : ScoreHandlerInterface {
         scoreSetup.bars.addAll(bars)
 
         return scoreSetup.build()
+    }
+
+
+    private fun addAndTie(element: ScoreHandlerElement, durations: List<Duration>, barData: BarData, previous: ScoreRenderingElement? = null): ScoreRenderingElement? {
+        var previousInternal = previous
+        for (duration in durations) {
+            val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
+                NoteElement(element.noteType, element.octave, duration, element.id).also {
+                    it.stem = stemUp(getPitch(element.noteType, element.octave))
+                }
+            } else {
+                RestElement(duration, element.id)
+            }
+
+            barData.scoreRenderingElements.add(scoreRenderingElement)
+
+            if (previous != null && scoreRenderingElement is NoteElement) {
+                scoreSetup.ties.add(TiePair(previous as NoteElement, scoreRenderingElement))
+            }
+            previousInternal = scoreRenderingElement
+        }
+
+        return previousInternal
     }
 
 

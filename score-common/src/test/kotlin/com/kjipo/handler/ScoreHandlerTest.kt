@@ -1,9 +1,6 @@
 package com.kjipo.handler
 
-import com.kjipo.score.Clef
-import com.kjipo.score.Duration
-import com.kjipo.score.NoteType
-import com.kjipo.score.TimeSignature
+import com.kjipo.score.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -140,6 +137,62 @@ class ScoreHandlerTest {
         assertEquals(scoreHandlerElements[4].duration, Duration.QUARTER)
         assertEquals(scoreHandlerElements[5].duration, Duration.HALF)
         assertFalse(scoreHandlerElements[5].isNote)
+    }
+
+    @Test
+    fun insertNoteTest2() {
+        val scoreHandler = ScoreHandler()
+        val noteId = scoreHandler.insertNote(Duration.QUARTER)
+        val noteId2 = scoreHandler.insertNote(noteId, Duration.HALF)!!
+        val noteId3 = scoreHandler.insertNote(noteId2, Duration.QUARTER)!!
+        scoreHandler.insertNote(noteId3, Duration.QUARTER)
+        scoreHandler.build()
+
+        assertEquals(scoreHandler.scoreSetup.bars.size, 2)
+
+        assertEquals(listOf(Duration.QUARTER, Duration.HALF, Duration.QUARTER), getDurationsInBar(scoreHandler.scoreSetup.bars[0].scoreRenderingElements))
+        assertEquals(listOf(Duration.QUARTER, Duration.HALF, Duration.QUARTER), getDurationsInBar(scoreHandler.scoreSetup.bars[1].scoreRenderingElements))
+
+        scoreHandler.insertNote(noteId, Duration.QUARTER)
+        scoreHandler.build()
+
+        assertEquals(scoreHandler.scoreSetup.bars.size, 2)
+
+        assertEquals(listOf(Duration.QUARTER, Duration.QUARTER, Duration.HALF), getDurationsInBar(scoreHandler.scoreSetup.bars[0].scoreRenderingElements))
+        assertEquals(listOf(Duration.QUARTER, Duration.QUARTER, Duration.HALF), getDurationsInBar(scoreHandler.scoreSetup.bars[1].scoreRenderingElements))
+    }
+
+    @Test
+    fun insertNoteTest3() {
+        val scoreHandler = ScoreHandler()
+        val noteId = scoreHandler.insertNote(Duration.QUARTER)
+        val noteId2 = scoreHandler.insertNote(noteId, Duration.QUARTER)!!
+        scoreHandler.insertNote(noteId2, Duration.HALF)!!
+        scoreHandler.build()
+
+        assertEquals(1, scoreHandler.scoreSetup.bars.size)
+
+        assertEquals(listOf(Duration.QUARTER, Duration.QUARTER, Duration.HALF), getDurationsInBar(scoreHandler.scoreSetup.bars[0].scoreRenderingElements))
+
+        scoreHandler.insertNote(noteId2, Duration.QUARTER)
+        scoreHandler.build()
+
+        assertEquals(2, scoreHandler.scoreSetup.bars.size)
+
+        assertEquals(listOf(Duration.QUARTER, Duration.QUARTER, Duration.QUARTER, Duration.QUARTER), getDurationsInBar(scoreHandler.scoreSetup.bars[0].scoreRenderingElements))
+        assertEquals(listOf(Duration.QUARTER, Duration.HALF, Duration.QUARTER), getDurationsInBar(scoreHandler.scoreSetup.bars[1].scoreRenderingElements))
+    }
+
+
+    private fun getDurationsInBar(scoreRenderingElements: List<ScoreRenderingElement>): List<Duration> {
+        return scoreRenderingElements.map {
+            when (it) {
+                is NoteElement -> it.duration
+                is RestElement -> it.duration
+                else -> null
+            }
+        }.filterNotNull().toList()
+
     }
 
 
