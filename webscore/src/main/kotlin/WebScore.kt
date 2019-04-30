@@ -9,11 +9,15 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score") {
-    val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
-    private val svgElement: Element
+class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", val allowInput: Boolean = true) {
     var activeElement: String? = null
+    private val svgElement: Element
     private val idSvgElementMap = mutableMapOf<String, Element>()
+
+    companion object {
+        const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
+
+    }
 
     init {
         val element = document.getElementById(svgElementId)
@@ -27,7 +31,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
             createdElement
         }
 
-        setupSvg()
+        setupEventHandling()
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
@@ -70,11 +74,14 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         }
     }
 
-    private fun setupSvg() {
+    private fun setupEventHandling() {
+        if (!allowInput) {
+            return
+        }
         var xStart = 0
         var yStart = 0
 
-        document.addEventListener("touchstart", { event ->
+        svgElement.addEventListener("touchstart", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
 
@@ -84,7 +91,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
             }
         })
 
-        document.addEventListener("touchend", { event ->
+        svgElement.addEventListener("touchend", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
 
@@ -220,6 +227,9 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                 "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
 
         console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
+
+        console.log("Rendering sequence: $renderingSequence")
+
 
         svgElement.ownerDocument?.let {
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")

@@ -1,5 +1,6 @@
 package com.kjipo.scoregenerator
 
+import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import org.hamcrest.core.IsEqual
@@ -18,9 +19,9 @@ class SimpleNoteSequenceTest {
         val pitchSequence = simpleNoteSequence.transformToPitchSequence()
 
         assertThat(pitchSequence.size, IsEqual(3))
-        assertThat(pitchSequence[0], IsEqual(Pitch("0", 0, Utilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 57, Duration.QUARTER)))
-        assertThat(pitchSequence[1], IsEqual(Pitch("1", Utilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 2 * Utilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 59, Duration.QUARTER)))
-        assertThat(pitchSequence[2], IsEqual(Pitch("2", 2 * Utilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 3 * Utilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 60, Duration.QUARTER)))
+        assertThat(pitchSequence[0], IsEqual(Pitch("0", 0, ScoreHandlerUtilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 57, Duration.QUARTER)))
+        assertThat(pitchSequence[1], IsEqual(Pitch("1", ScoreHandlerUtilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 2 * ScoreHandlerUtilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 59, Duration.QUARTER)))
+        assertThat(pitchSequence[2], IsEqual(Pitch("2", 2 * ScoreHandlerUtilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 3 * ScoreHandlerUtilities.DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE, 60, Duration.QUARTER)))
     }
 
 

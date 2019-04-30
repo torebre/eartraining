@@ -80,6 +80,8 @@ class ScoreHandler : ScoreHandlerInterface {
 
         bars.forEach { println(it) }
 
+        println("Test30")
+
 
 
         scoreSetup.bars.addAll(bars)
@@ -145,7 +147,6 @@ class ScoreHandler : ScoreHandlerInterface {
             }
         }
     }
-
 
     private fun trimBars(bars: MutableList<BarData>) {
         if (bars.isEmpty()) {

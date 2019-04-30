@@ -1,6 +1,7 @@
 package com.kjipo.scoregenerator
 
 
+import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import junit.framework.TestCase.*
@@ -61,7 +62,7 @@ class SequenceGeneratorTest {
 
         val numberOfNoteElments = sequenceGenerator.scoreHandler.getScoreHandlerElements().size
         val restElementId = sequenceGenerator.switchBetweenNoteAndRest(gNote.id, -1)
-        val pitch = Utilities.getPitch(gNote.noteType, gNote.octave)
+        val pitch = ScoreHandlerUtilities.getPitch(gNote.noteType, gNote.octave)
         val foundPitch = sequenceGenerator.pitchSequence.find { it.pitch == pitch }
 
         assertTrue(foundPitch == null)

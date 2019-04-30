@@ -26,6 +26,12 @@ class NoteElement(var note: NoteType,
             result.add(positionedRenderingElement)
         }
 
+        if (requiresStem()) {
+            val stemElement = getStem()
+            stemElement.typeId = stem.name
+            result.add(stemElement)
+        }
+
         val glyphData = getGlyph(duration)
         val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
                 xPosition,
@@ -39,12 +45,6 @@ class NoteElement(var note: NoteType,
                 glyphData.boundingBox.xMin.toInt(),
                 glyphData.boundingBox.xMax.toInt())?.let {
             result.addAll(it.toRenderingElement())
-        }
-
-        if (requiresStem()) {
-            val stemElement = getStem()
-            stemElement.typeId = stem.name
-            result.add(stemElement)
         }
 
         return result
