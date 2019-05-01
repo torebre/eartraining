@@ -9,7 +9,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", val allowInput: Boolean = true) {
+class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", private val allowInput: Boolean = true) {
     var activeElement: String? = null
     private val svgElement: Element
     private val idSvgElementMap = mutableMapOf<String, Element>()

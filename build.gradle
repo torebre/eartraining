@@ -22,19 +22,23 @@ ext {
     nodeVersion = '8.11.1'
     qunitVersion = '2.6.0'
     libraries = [
-            junit: "junit:junit:4.12",
-            kotlin_stdlib: "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-            kotlin_stdlib_common: "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-            kotlin_stdlib_js: "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion",
+            junit                         : "junit:junit:4.12",
+            kotlin_stdlib                 : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+            kotlin_stdlib_common          : "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+            kotlin_stdlib_js              : "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion",
             kotlin_test_annotations_common: "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion",
-            kotlin_test_common: "org.jetbrains.kotlin:kotlin-test-common:$kotlinVersion",
-            kotlin_test_js: "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion",
-            kotlin_test_junit: "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion",
+            kotlin_test_common            : "org.jetbrains.kotlin:kotlin-test-common:$kotlinVersion",
+            kotlin_test_js                : "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion",
+            kotlin_test_junit             : "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion",
     ]
 
-    javascriptModule = 'commonjs'
-//    javascriptModule = 'plain'
+    if (!project.hasProperty("javascriptModule")) {
+        javascriptModule = 'plain'
+    } else {
+        javascriptModule = 'commonjs'
+    }
 
+    println("Using Javascript module type: " + javascriptModule)
 }
 
 subprojects {
@@ -45,8 +49,4 @@ subprojects {
         maven { url "https://kotlin.bintray.com/kotlinx" }
     }
 
-
 }
-
-
-

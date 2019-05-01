@@ -30,9 +30,6 @@ compileKotlin2Js {
         metaInfo = true
         sourceMap = true
         sourceMapEmbedSources = 'always'
-//        moduleKind = 'commonjs'
-//        moduleKind = 'plain'
-
         moduleKind = project.javascriptModule
     }
 }
@@ -41,55 +38,8 @@ compileTestKotlin2Js {
     kotlinOptions.moduleKind = javascriptModule
 }
 
-task yarnInstall(type: YarnTask) {
-    args = ['install']
-}
-
-// Creates minified, packed main.bundle.js at build/dist
-task bundle(type: YarnTask, dependsOn: [runDceKotlinJs, yarnInstall]) {
-    args = ["run", "bundle"]
-    assemble.dependsOn bundle
-}
-
-// Copies files from src/main/resouces to build/dist. These resources will be served by dev server
-task copyStaticResources(type: Copy) {
-    from sourceSets.main.resources
-    into "${buildDir}/dist"
-    bundle.dependsOn copyStaticResources
-}
-
-// Extracts JS libs from included dependencies to node_modules in build directory:
-task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
-    from compileKotlin2Js.destinationDir
-
-    configurations.testCompile.each {
-        from zipTree(it.absolutePath).matching { include '*.js' }
-    }
-
-    into "${buildDir}/node_modules"
-}
-
-
-// Starts dev server that serves built application in dev mode
-task run(type: YarnTask, dependsOn: [copyStaticResources, populateNodeModules, yarnInstall]) {
-    args = ["run", "start"]
-}
-
-// Test runner
-task runKarma(type: YarnTask, dependsOn: [populateNodeModules, yarnInstall]) {
-    args = ['test']
-    test.dependsOn runKarma
-}
-
-
-
 
 task assembleWeb(type: Sync) {
-
-    project.ext.javascriptModule = 'plain'
-
-    println("Setting module variable")
-
     configurations.compile.each { File file ->
         from(zipTree(file.absolutePath), {
             includeEmptyDirs = false
@@ -107,56 +57,3 @@ task assembleWeb(type: Sync) {
 }
 
 assemble.dependsOn assembleWeb
-
-
-task createBrowserFiles() {
-    project.ext.javascriptModule = 'plain'
-
-
-    println("Setting module variable: " +project.javascriptModule)
-
-}
-
-createBrowserFiles.doFirst {
-    project.ext.javascriptModule = 'plain'
-
-    println("Setting module variable2: " +project.javascriptModule)
-}
-
-
-//task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
-//    from compileKotlin2Js.destinationDir
-//
-//    configurations.testCompile.each {
-//        from zipTree(it.absolutePath).matching { include '*.js' }
-//    }
-//
-//    into "${buildDir}/node_modules"
-//}
-
-node {
-    download = true
-}
-
-//task installMocha(type: NpmTask) {
-//    args = ['install', 'mocha']
-//}
-//
-//task runMocha(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installMocha]) {
-//    script = file('node_modules/mocha/bin/mocha')
-//    args = [compileTestKotlin2Js.outputFile]
-//}
-//
-//test.dependsOn runMocha
-
-
-
-// Recompiles sources on file changes. Invoke 'gradle client:run' and 'gradle -t client:watch' for hot reload.
-task watch {
-    inputs.files 'src/main'
-    doLast {
-        compileKotlin2Js.execute()
-        populateNodeModules.execute()
-        copyStaticResources.execute()
-    }
-}
