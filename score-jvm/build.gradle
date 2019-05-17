@@ -1,6 +1,6 @@
 buildscript {
     ext.serialization_version = '0.9.0'
-    
+
     repositories {
         jcenter()
         maven { url "https://kotlin.bintray.com/kotlinx" }
@@ -24,6 +24,8 @@ dependencies {
     expectedBy project(":score-common")
     compile libraries.kotlin_stdlib
     compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+    implementation "com.github.aakira:napier:$napierVersion"
+    implementation "com.github.aakira:napier-jvm:$napierVersion"
     testCompile libraries.kotlin_test_junit
 }
 

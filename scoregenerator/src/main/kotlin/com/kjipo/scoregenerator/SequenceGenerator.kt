@@ -3,6 +3,7 @@ package com.kjipo.scoregenerator
 import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.handler.ScoreHandlerUtilities
+import com.kjipo.score.Duration
 
 
 /**
@@ -84,7 +85,6 @@ class SequenceGenerator : ScoreHandlerInterface {
                             if (it.isNote) {
                                 pitchSequence.add(pitchSequence.indexOf(pitch) + 1, Pitch(idInsertedNote, 0, 0, ScoreHandlerUtilities.getPitch(it.noteType, it.octave), it.duration))
                             }
-
                         }
                     }
             computeOnOffPitches()
@@ -121,5 +121,16 @@ class SequenceGenerator : ScoreHandlerInterface {
         computePitchSequence()
     }
 
+    override fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? {
+        return scoreHandler.insertNote(activeElement, duration, pitch)?.also {
+            computePitchSequence()
+        }
+    }
+
+    override fun insertRest(activeElement: String, duration: Duration): String? {
+        return scoreHandler.insertRest(activeElement, duration).also {
+            computeOnOffPitches()
+        }
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.kjipo.handler
 
+import com.kjipo.score.Duration
+
 
 interface ScoreHandlerInterface {
 
@@ -14,6 +16,10 @@ interface ScoreHandlerInterface {
     fun updateDuration(id: String, keyPressed: Int)
 
     fun insertNote(activeElement: String, keyPressed: Int): String?
+
+    fun insertNote(activeElement: String, duration: Duration, pitch: Int): String?
+
+    fun insertRest(activeElement: String, duration: Duration): String?
 
     fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String
 

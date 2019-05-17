@@ -21,6 +21,8 @@ buildscript {
 ext {
     nodeVersion = '8.11.1'
     qunitVersion = '2.6.0'
+    napierVersion = "0.0.3"
+    assert4jVersion = '3.12.2'
     libraries = [
             junit                         : "junit:junit:4.12",
             kotlin_stdlib                 : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",

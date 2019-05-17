@@ -97,30 +97,46 @@ object ScoreHandlerUtilities {
     }
 
 
-
-
-        fun getPitch(noteType: NoteType, octave: Int): Int {
-            return 12 * octave + when (noteType) {
-                NoteType.A -> 9
-                NoteType.H -> 11
-                NoteType.C -> 0
-                NoteType.D -> 2
-                NoteType.E -> 4
-                NoteType.F -> 5
-                NoteType.G -> 7
-            }
+    fun getPitch(noteType: NoteType, octave: Int): Int {
+        return 12 * octave + when (noteType) {
+            NoteType.A -> 9
+            NoteType.H -> 11
+            NoteType.C -> 0
+            NoteType.D -> 2
+            NoteType.E -> 4
+            NoteType.F -> 5
+            NoteType.G -> 7
         }
-
-
-        fun getDurationInMilliseconds(duration: Duration): Int {
-            return when (duration) {
-                Duration.ZERO -> 0
-                Duration.HALF -> 2 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
-                Duration.QUARTER -> DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
-                Duration.WHOLE -> 4 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
-            }
-        }
-
-
-
     }
+
+
+    fun getDurationInMilliseconds(duration: Duration): Int {
+        return when (duration) {
+            Duration.ZERO -> 0
+            Duration.HALF -> 2 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
+            Duration.QUARTER -> DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
+            Duration.WHOLE -> 4 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
+        }
+    }
+
+
+    fun pitchToNoteAndOctave(pitch: Int): Pair<NoteType, Int> {
+        // TODO Only works with C-scale so far
+
+        val remainder = pitch.rem(12)
+        val noteType = when (remainder) {
+            9 -> NoteType.A
+            11 -> NoteType.H
+            0 -> NoteType.C
+            2 -> NoteType.D
+            4 -> NoteType.E
+            5 -> NoteType.F
+            7 -> NoteType.G
+            else -> throw IllegalArgumentException("Unhandled pitch: $pitch")
+        }
+
+        return Pair(noteType, pitch.minus(remainder).div(12))
+    }
+
+
+}

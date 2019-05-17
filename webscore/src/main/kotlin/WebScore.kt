@@ -11,6 +11,10 @@ import kotlin.dom.clear
 
 class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", private val allowInput: Boolean = true) {
     var activeElement: String? = null
+        set(value) {
+            field = value
+            reload()
+        }
     private val svgElement: Element
     private val idSvgElementMap = mutableMapOf<String, Element>()
 

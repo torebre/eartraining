@@ -5,11 +5,11 @@ import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import junit.framework.TestCase.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 
 class SequenceGeneratorTest {
-
 
     @Test
     fun scoregeneratorTest() {
@@ -77,6 +77,28 @@ class SequenceGeneratorTest {
         assertTrue(sequenceGenerator.scoreHandler.getScoreHandlerElements()[indexOfSecondANote + 1].id == newNoteElementId)
         assertTrue(sequenceGenerator.pitchSequence.size == 4)
         assertTrue(sequenceGenerator.scoreHandler.getScoreHandlerElements().size == numberOfNoteElments)
+    }
+
+    @Test
+    fun `Inserted note shows up in pitch sequence`() {
+        val simpleNoteSequence = SimpleNoteSequence(listOf(
+                NoteSequenceElement.RestElement(Duration.QUARTER),
+                NoteSequenceElement.RestElement(Duration.QUARTER),
+                NoteSequenceElement.RestElement(Duration.QUARTER),
+                NoteSequenceElement.RestElement(Duration.QUARTER)))
+        val sequenceGenerator = SequenceGenerator()
+        sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
+
+        assertThat(sequenceGenerator.pitchSequence).isEmpty()
+
+        val firstElement = sequenceGenerator.scoreHandler.getScoreHandlerElements().first()
+        sequenceGenerator.insertNote(firstElement.id, Duration.QUARTER, 60)
+
+        assertThat(sequenceGenerator.scoreHandler.getScoreHandlerElements().find { it.isNote }).isNotNull
+
+        val firstPitchElement = sequenceGenerator.pitchSequence.first()
+
+        assertThat(firstPitchElement.pitch).isEqualTo(60)
     }
 
 }

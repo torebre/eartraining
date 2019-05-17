@@ -21,6 +21,9 @@ dependencies {
     compile libraries.kotlin_stdlib_js
     compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
     testCompile libraries.kotlin_test_js
+
+    implementation "com.github.aakira:napier:$napierVersion"
+    implementation "com.github.aakira:napier-js:$napierVersion"
 }
 
 [compileKotlin2Js]*.configure {

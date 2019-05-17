@@ -35,7 +35,7 @@ compileKotlin2Js {
 }
 
 compileTestKotlin2Js {
-    kotlinOptions.moduleKind = javascriptModule
+    kotlinOptions.moduleKind = project.javascriptModule
 }
 
 

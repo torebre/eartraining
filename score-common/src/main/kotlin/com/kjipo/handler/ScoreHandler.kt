@@ -1,5 +1,6 @@
 package com.kjipo.handler
 
+import com.github.aakira.napier.Napier
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
@@ -31,7 +32,7 @@ class ScoreHandler : ScoreHandlerInterface {
         val bars = mutableListOf(currentBar)
 
 
-        println("Test23: ${scoreHandlerElements}")
+        Napier.d("Score handler elements: ${scoreHandlerElements}")
 
         for (element in scoreHandlerElements) {
             var ticksNeededForElement = element.duration.ticks
@@ -61,7 +62,7 @@ class ScoreHandler : ScoreHandlerInterface {
             }
         }
 
-        println("Test26: Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+        Napier.d("Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
         var lastBarTrimmed = false
         if (trimEndBars && bars.size > 1) {
@@ -70,19 +71,15 @@ class ScoreHandler : ScoreHandlerInterface {
             lastBarTrimmed = barsBeforeTrimming != bars.size
         }
 
-        println("Test27: Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+        Napier.d("After trimming. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
         if (!lastBarTrimmed) {
             fillInLastBar(bars, remainingTicksInBar)
         }
 
-        println("Test28: Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+        Napier.d("After fill in. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
         bars.forEach { println(it) }
-
-        println("Test30")
-
-
 
         scoreSetup.bars.addAll(bars)
 
@@ -269,6 +266,24 @@ class ScoreHandler : ScoreHandlerInterface {
 
     fun getScoreHandlerElements(): List<ScoreHandlerElement> {
         return scoreHandlerElements
+    }
+
+    override fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? {
+        scoreHandlerElements.find { it.id == activeElement }?.let { element ->
+
+            // TODO Only hardcoded note type and octave for testing
+
+
+            val insertIndex = scoreHandlerElements.indexOf(element) + 1
+            scoreHandlerElements.add(insertIndex, ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C))
+            return scoreHandlerElements[insertIndex].id
+        }
+        return null
+    }
+
+    override fun insertRest(activeElement: String, duration: Duration): String? {
+        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, false, 5, NoteType.C))
+        return scoreHandlerElements.last().id
     }
 
 }

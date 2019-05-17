@@ -33,6 +33,8 @@ dependencies {
 
     // TODO This setting does not work
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+
+    testCompile group: 'org.assertj', name: 'assertj-core', version: project.assert4jVersion
 }
 
 compileKotlin {

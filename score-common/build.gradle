@@ -25,6 +25,8 @@ repositories {
 dependencies {
     compile libraries.kotlin_stdlib_common
     compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
+    implementation "com.github.aakira:napier:$napierVersion"
+    implementation "com.github.aakira:napier-js:$napierVersion"
     testCompile libraries.kotlin_test_annotations_common
     testCompile libraries.kotlin_test_common
 }
