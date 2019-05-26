@@ -32,7 +32,8 @@ class ExtraBarLinesElement(xPosition: Int, yPosition: Int,
                         yMin.toDouble(),
                         leftStart.plus(rightEnd).toDouble(),
                         yMax.toDouble()),
-                "bar-${idCounter++}"
+                "bar-${idCounter++}",
+                "bar"
         ).let {
             it.xTranslate = xPosition
             it.yTranslate = 0
@@ -62,7 +63,7 @@ class BarLines(xPosition: Int, yPosition: Int, val id: String) : ScoreRenderingE
 
         val renderingElement = PositionedRenderingElement(
                 listOf(PathInterfaceImpl(pathElements, 1)),
-                findBoundingBox(pathElements), id)
+                findBoundingBox(pathElements), id, "bar")
 
         return listOf(renderingElement)
     }

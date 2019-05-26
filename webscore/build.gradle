@@ -22,6 +22,10 @@ dependencies {
     compile libraries.kotlin_stdlib_js
     compile "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
+    
+    implementation "com.github.aakira:napier:$napierVersion"
+    implementation "com.github.aakira:napier-js:$napierVersion"
+    
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion"
 }
 

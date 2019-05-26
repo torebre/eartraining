@@ -1,3 +1,4 @@
+import com.github.aakira.napier.Napier
 import com.kjipo.score.*
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
@@ -232,8 +233,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
         console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
-        console.log("Rendering sequence: $renderingSequence")
-
+        Napier.d("Rendering sequence: $renderingSequence")
 
         svgElement.ownerDocument?.let {
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
@@ -273,9 +273,17 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
     private fun addPositionRenderingElements(renderingElements: Collection<PositionedRenderingElement>, element: Element) {
         for (renderingElement in renderingElements) {
+
+            val groupClass = renderingElement.groupClass
+            val extraAttributes = if (groupClass != null) {
+                mapOf<String, String>(Pair("class", groupClass))
+            } else {
+                emptyMap()
+            }
+
             if (renderingElement.typeId != null) {
                 renderingElement.typeId?.let { typeId ->
-                    addPathUsingReference(element, typeId, renderingElement)
+                    addPathUsingReference(element, typeId, renderingElement, extraAttributes)
                     idSvgElementMap.put(renderingElement.id, element)
                 }
             } else {
@@ -284,7 +292,8 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                             transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
                             pathInterface.strokeWidth,
                             renderingElement.id,
-                            pathInterface.fill)?.let { element ->
+                            pathInterface.fill,
+                            extraAttributes)?.let { element ->
                         idSvgElementMap.put(renderingElement.id, element)
                     }
                 }
@@ -292,14 +301,18 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         }
     }
 
-    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String, fill: String? = null): Element? {
+    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String, fill: String? = null, extraAttributes: Map<String, String> = emptyMap()): Element? {
         return node.ownerDocument?.let { ownerDocument ->
             val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
-            path1.setAttribute("stroke", STROKE_COLOUR)
+//            path1.setAttribute("stroke", STROKE_COLOUR)
             fill?.let { path1.setAttribute("fill", it) }
             path1.setAttribute("id", id)
             path1.setAttribute("stroke-width", strokeWidth.toString())
+
+            extraAttributes.forEach {
+                path1.setAttribute(it.key, it.value)
+            }
 
             node.appendChild(path1)
             path1

@@ -10,7 +10,8 @@ import kotlinx.serialization.Transient
 @Serializable
 class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                                  val boundingBox: BoundingBox,
-                                 var id: String) {
+                                 var id: String,
+                                 val groupClass: String? = null) {
 
     var glyphData: GlyphData? = null
     var typeId: String? = null
