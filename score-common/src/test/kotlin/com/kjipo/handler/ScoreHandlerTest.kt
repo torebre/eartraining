@@ -193,6 +193,21 @@ class ScoreHandlerTest {
         assertEquals(1, scoreHandler.scoreSetup.bars.size)
     }
 
+    @Test
+    fun addBeamTest() {
+        val scoreHandler = ScoreHandler()
+
+        val noteId1 = scoreHandler.insertNote(Duration.QUARTER)
+        val noteId2 = scoreHandler.insertNote(Duration.QUARTER)
+        val noteId3 = scoreHandler.insertNote(Duration.QUARTER)
+        val noteId4 = scoreHandler.insertNote(Duration.QUARTER)
+
+        scoreHandler.addBeams(listOf(noteId1, noteId2))
+
+        // TODO Add check that beam is present
+        val renderingSequence = scoreHandler.build()
+    }
+
     private fun getDurationsInBar(scoreRenderingElements: List<ScoreRenderingElement>): List<Duration> {
         return scoreRenderingElements.map {
             when (it) {

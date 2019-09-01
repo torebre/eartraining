@@ -14,10 +14,11 @@ class ScoreHandler : ScoreHandlerInterface {
     private var idCounter = 0
     private val ticksPerBar = 4 * TICKS_PER_QUARTER_NOTE
 
-    internal var scoreSetup = ScoreSetup()
+    private val beams = mutableListOf<BeamGroup>()
 
     private var trimEndBars = true
 
+    internal var scoreSetup = ScoreSetup()
 
     override fun getScoreAsJson(): String {
         return JSON.stringify(RenderingSequence.serializer(), build())
@@ -25,12 +26,12 @@ class ScoreHandler : ScoreHandlerInterface {
 
     fun build(): RenderingSequence {
         scoreSetup = ScoreSetup()
+        scoreSetup.beams.addAll(beams)
         var remainingTicksInBar = ticksPerBar
         var currentBar = BarData()
         currentBar.clef = Clef.G
         currentBar.timeSignature = TimeSignature(4, 4)
         val bars = mutableListOf(currentBar)
-
 
         Napier.d("Score handler elements: ${scoreHandlerElements}")
 
@@ -107,6 +108,15 @@ class ScoreHandler : ScoreHandlerInterface {
         }
 
         return previousInternal
+    }
+
+    fun addBeams(noteElementIds: List<String>) {
+        val noteElementsToTie = noteElementIds.map { findScoreHandlerElement(it) }
+                .toList()
+        if (noteElementsToTie.any { it == null }) {
+            throw IllegalArgumentException("Not all note elements found. Element IDs: ${noteElementIds}")
+        }
+        beams.add(BeamGroup(noteElementIds))
     }
 
 

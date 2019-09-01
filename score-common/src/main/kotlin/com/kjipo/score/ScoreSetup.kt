@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.github.aakira.napier.Napier
 import com.kjipo.svg.GlyphData
 
 class ScoreSetup {
@@ -43,8 +44,13 @@ class ScoreSetup {
         var beamCounter = 0
 
         beams.map { beam ->
-            val firstNote = beam.noteElements.first()
-            val lastNote = beam.noteElements.last()
+            val firstNote = findNoteElement(beam.noteIds.first(), bars)
+            val lastNote = findNoteElement(beam.noteIds.last(), bars)
+
+            if (firstNote == null || lastNote == null) {
+                Napier.e("Notes not found. First note: $firstNote. Second note: $lastNote")
+                return@map
+            }
 
             val firstStem = firstNote.getStem()
             val lastStem = lastNote.getStem()
@@ -113,6 +119,12 @@ class ScoreSetup {
 
         return mergeRenderingSequences(renderingSequences)
     }
+
+
+    private fun findNoteElement(noteId: String, bars: List<BarData>) = bars.flatMap { it.scoreRenderingElements }
+            .filter { it is NoteElement }
+            .map { it as NoteElement }
+            .find { it.id == noteId }
 
 
     private fun mergeRenderingSequences(renderingSequences: Collection<RenderingSequence>): RenderingSequence {

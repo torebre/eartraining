@@ -146,7 +146,7 @@ class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRe
 }
 
 
-class BeamGroup(val noteElements: List<NoteElement>)
+class BeamGroup(val noteIds: List<String>)
 
 class TiePair(val startNote: NoteElement, val endNote: NoteElement)
 
