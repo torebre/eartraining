@@ -221,6 +221,21 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                     }
                 }
 
+                "KeyF" -> {
+                    if (activeElement == null) {
+                        return@addEventListener
+                    }
+                    scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
+                }
+
+                "KeyS" -> {
+                    if (activeElement == null) {
+                        return@addEventListener
+                    }
+                    scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
+                }
+
+
             }
         })
     }

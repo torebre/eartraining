@@ -1,4 +1,5 @@
 import com.kjipo.handler.ScoreHandlerInterface
+import com.kjipo.score.Accidental
 import kotlinx.html.injector.injectTo
 
 class ScoreHandlerJavaScript(val scoreHandler: ScoreHandlerInterface) {
@@ -26,4 +27,7 @@ class ScoreHandlerJavaScript(val scoreHandler: ScoreHandlerInterface) {
 
     @JsName("deleteElement")
     fun deleteElement(id: String) = scoreHandler.deleteElement(id)
+
+    @JsName("toggleExtra")
+    fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
 }

@@ -1,5 +1,6 @@
 package com.kjipo.handler
 
+import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 
 
@@ -24,5 +25,7 @@ interface ScoreHandlerInterface {
     fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String
 
     fun deleteElement(id: String)
+
+    fun toggleExtra(id: String, extra: Accidental)
 
 }

@@ -4,6 +4,7 @@ import com.github.aakira.napier.Napier
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
+import kotlin.math.acos
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
@@ -36,7 +37,7 @@ class ScoreHandler : ScoreHandlerInterface {
         Napier.d("Score handler elements: ${scoreHandlerElements}")
 
         for (element in scoreHandlerElements) {
-            var ticksNeededForElement = element.duration.ticks
+            val ticksNeededForElement = element.duration.ticks
 
             if (remainingTicksInBar == 0) {
                 // No more room in bar, start on a new one
@@ -47,10 +48,10 @@ class ScoreHandler : ScoreHandlerInterface {
 
             when {
                 remainingTicksInBar < ticksNeededForElement -> {
-                    val durationsInCurrentbar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
+                    val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
                     val durationsInNextBar = ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
 
-                    var previous = addAndTie(element, durationsInCurrentbar, currentBar)
+                    val previous = addAndTie(element, durationsInCurrentBar, currentBar)
                     remainingTicksInBar += ticksPerBar - ticksNeededForElement
                     currentBar = BarData()
                     bars.add(currentBar)
@@ -134,6 +135,9 @@ class ScoreHandler : ScoreHandlerInterface {
         val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
             NoteElement(element.noteType, element.octave, element.duration, element.id).also {
                 it.stem = stemUp(getPitch(element.noteType, element.octave))
+                if (element.accidental != null) {
+                    it.accidental = element.accidental
+                }
             }
         } else {
             RestElement(element.duration, element.id)
@@ -148,7 +152,7 @@ class ScoreHandler : ScoreHandlerInterface {
 
         bars.last().let { lastBar ->
             ScoreHandlerUtilities.splitIntoDurations(ticksRemainingInBar).forEach {
-                val scoreHandlerElement = ScoreHandlerElement((++idCounter).toString(), it, false, 5, NoteType.C)
+                val scoreHandlerElement = ScoreHandlerElement((++idCounter).toString(), it, false, 5, NoteType.C, accidental = null)
                 scoreHandlerElements.add(scoreHandlerElement)
                 lastBar.scoreRenderingElements.add(RestElement(it, scoreHandlerElement.id))
             }
@@ -226,24 +230,24 @@ class ScoreHandler : ScoreHandlerInterface {
             // TODO Only hardcoded note type and octave for testing
 
             val insertIndex = scoreHandlerElements.indexOf(element) + 1
-            scoreHandlerElements.add(insertIndex, ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C))
+            scoreHandlerElements.add(insertIndex, ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null))
             return scoreHandlerElements[insertIndex].id
         }
         return null
     }
 
     fun insertNote(duration: Duration): String {
-        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C))
+        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null))
         return scoreHandlerElements.last().id
     }
 
     fun insertNote(duration: Duration, octave: Int, noteType: NoteType): String {
-        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, true, octave, noteType))
+        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, true, octave, noteType, accidental = null))
         return scoreHandlerElements.last().id
     }
 
     fun insertRest(duration: Duration): String {
-        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, false, 5, NoteType.C))
+        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, false, 5, NoteType.C, accidental = null))
         return scoreHandlerElements.last().id
     }
 
@@ -285,15 +289,28 @@ class ScoreHandler : ScoreHandlerInterface {
 
 
             val insertIndex = scoreHandlerElements.indexOf(element) + 1
-            scoreHandlerElements.add(insertIndex, ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C))
+            scoreHandlerElements.add(insertIndex, ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null))
             return scoreHandlerElements[insertIndex].id
         }
         return null
     }
 
     override fun insertRest(activeElement: String, duration: Duration): String? {
-        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, false, 5, NoteType.C))
+        scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, false, 5, NoteType.C, accidental = null))
         return scoreHandlerElements.last().id
     }
+
+    override fun toggleExtra(id: String, extra: Accidental) {
+        scoreHandlerElements.find { it.id == id }?.let {
+            if (it.isNote) {
+                if (it.accidental == extra) {
+                    it.accidental = null
+                } else {
+                    it.accidental = extra
+                }
+            }
+        }
+    }
+
 
 }
