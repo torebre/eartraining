@@ -226,6 +226,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                         return@addEventListener
                     }
                     scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                 }
 
                 "KeyS" -> {
@@ -233,6 +234,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                         return@addEventListener
                     }
                     scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                 }
 
 

@@ -3,6 +3,7 @@ package com.kjipo.scoregenerator
 import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.handler.ScoreHandlerUtilities
+import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 
 
@@ -132,5 +133,11 @@ class SequenceGenerator : ScoreHandlerInterface {
             computeOnOffPitches()
         }
     }
+
+    override fun toggleExtra(id: String, extra: Accidental) {
+        scoreHandler.toggleExtra(id, extra)
+        computeOnOffPitches()
+    }
+
 
 }

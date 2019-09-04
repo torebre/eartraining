@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
@@ -17,7 +18,7 @@ class BarData(val debug: Boolean = false) {
     var timeSignature = TimeSignature(0, 0)
 
 
-    fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
+    fun build(barXoffset: Int = 0, barYoffset: Int = 0, scoreState: ScoreState): RenderingSequence {
         val definitions = mutableMapOf<String, GlyphData>()
 
         val clefElement = clef?.let {
@@ -34,8 +35,8 @@ class BarData(val debug: Boolean = false) {
 
         widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
 
-        val valTotalTicksInBar = scoreRenderingElements.filter { it is TemporalElement }
-                .map { (it as TemporalElement).duration.ticks }.sum()
+        val valTotalTicksInBar = scoreRenderingElements.filterIsInstance<TemporalElement>()
+                .map { it.duration.ticks }.sum()
         val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
         val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
         val returnList = mutableListOf<RenderGroup>()
@@ -59,6 +60,8 @@ class BarData(val debug: Boolean = false) {
                         yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
 
                         if (scoreRenderingElement.requiresStem()) {
+                            scoreRenderingElement.stem = scoreState.stemUp(scoreRenderingElement.id)
+
                             if (scoreRenderingElement.stem == Stem.UP) {
                                 // Use the bounding box for the note head of a half note to determine
                                 // how far to move the stem so that it is on the right side of the note head

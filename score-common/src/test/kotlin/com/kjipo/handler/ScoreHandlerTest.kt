@@ -204,8 +204,15 @@ class ScoreHandlerTest {
 
         scoreHandler.addBeams(listOf(noteId1, noteId2))
 
-        // TODO Add check that beam is present
         val renderingSequence = scoreHandler.build()
+        val beamCount = renderingSequence.renderGroups.flatMap { it.renderingElements }
+                .filter { it.renderGroup != null }
+                .map { println("ID: ${it.id}")
+                it }
+                .filter { it.id.startsWith("beam") }
+                .count()
+
+        assertTrue { beamCount == 1 }
     }
 
     private fun getDurationsInBar(scoreRenderingElements: List<ScoreRenderingElement>): List<Duration> {

@@ -1,10 +1,8 @@
 package com.kjipo.handler
 
 import com.github.aakira.napier.Napier
-import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.score.*
 import kotlinx.serialization.json.JSON
-import kotlin.math.acos
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
@@ -18,6 +16,7 @@ class ScoreHandler : ScoreHandlerInterface {
     private val beams = mutableListOf<BeamGroup>()
 
     private var trimEndBars = true
+
 
     internal var scoreSetup = ScoreSetup()
 
@@ -93,9 +92,7 @@ class ScoreHandler : ScoreHandlerInterface {
         var previousInternal = previous
         for (duration in durations) {
             val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                NoteElement(element.noteType, element.octave, duration, element.id).also {
-                    it.stem = stemUp(getPitch(element.noteType, element.octave))
-                }
+                NoteElement(element.noteType, element.octave, duration, element.id)
             } else {
                 RestElement(duration, element.id)
             }
@@ -120,21 +117,9 @@ class ScoreHandler : ScoreHandlerInterface {
         beams.add(BeamGroup(noteElementIds))
     }
 
-
-    private fun stemUp(pitch: Int): Stem {
-        // TODO This only works for C scale and G clef
-        return if (pitch >= 71) {
-            Stem.DOWN
-        } else {
-            Stem.UP
-        }
-    }
-
-
     private fun addElement(element: ScoreHandlerElement, currentBar: BarData) {
         val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
             NoteElement(element.noteType, element.octave, element.duration, element.id).also {
-                it.stem = stemUp(getPitch(element.noteType, element.octave))
                 if (element.accidental != null) {
                     it.accidental = element.accidental
                 }

@@ -1,9 +1,10 @@
 package com.kjipo.score
 
 import com.github.aakira.napier.Napier
+import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.svg.GlyphData
 
-class ScoreSetup {
+class ScoreSetup : ScoreState {
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
@@ -19,7 +20,7 @@ class ScoreSetup {
         bars.flatMap { it.scoreRenderingElements }
                 .filter { it is NoteElement }
                 .map { it as NoteElement }
-                .forEach { it ->
+                .forEach {
                     definitionMap.putAll(it.getGlyphs())
                 }
 
@@ -29,7 +30,7 @@ class ScoreSetup {
         val barYspace = 250
 
         bars.forEach { barData ->
-            val currentBar = barData.build(barXoffset, barYoffset)
+            val currentBar = barData.build(barXoffset, barYoffset, this)
             currentBar.definitions.forEach {
                 if (!definitionMap.containsKey(it.key)) {
                     definitionMap[it.key] = it.value
@@ -138,6 +139,25 @@ class ScoreSetup {
 
         // TODO Viewbox will be wrong since translations are not taken into account
         return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
+    }
+
+
+    override fun stemUp(noteId: String): Stem {
+        val noteElement = findNoteElement(noteId, bars)
+
+        if (noteElement == null) {
+            return Stem.UP
+        }
+
+        // If the note is part of a beam group, set it to have the stem in the same direction as the first note in the group
+        for (beamGroup in beams) {
+            if (beamGroup.noteIds.contains(noteId)) {
+                findNoteElement(beamGroup.noteIds.first(), bars)?.let { firstNoteInBeamGroup ->
+                    return super.stemUp(ScoreHandlerUtilities.getPitch(firstNoteInBeamGroup.note, firstNoteInBeamGroup.octave))
+                }
+            }
+        }
+        return Stem.UP
     }
 
 
