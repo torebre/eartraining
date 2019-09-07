@@ -9,28 +9,43 @@ const val SCALE = 0.1
 val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0.0))
 
 
-fun getGlyph(noteType: Duration): GlyphData {
+fun getNoteHeadGlyph(noteType: Duration): GlyphData {
     return when (noteType) {
         Duration.ZERO -> blankGlyph
+        // The note head is the same for the eight as for the quarter note
+        Duration.EIGHT -> getGlyph("noteheads.s2")
         Duration.QUARTER -> getGlyph("noteheads.s2")
         Duration.HALF -> getGlyph("noteheads.s1")
         Duration.WHOLE -> getGlyph("noteheads.s0")
     }
 }
 
-fun getGlyph(accidental: Accidental): GlyphData {
+fun getAccidentalGlyph(accidental: Accidental): GlyphData {
     return when (accidental) {
         Accidental.FLAT -> getGlyph("accidentals.flat")
         Accidental.SHARP -> getGlyph("accidentals.sharp")
     }
 }
 
-fun getRest(restDuration: Duration): GlyphData {
+fun getRestGlyph(restDuration: Duration): GlyphData {
     return when (restDuration) {
         Duration.ZERO -> blankGlyph
+        Duration.EIGHT -> getGlyph("rests.3")
         Duration.QUARTER -> getGlyph("rests.2")
         Duration.HALF -> getGlyph("rests.1")
         Duration.WHOLE -> getGlyph("rests.0")
+    }
+}
+
+fun getFlagGlyph(duration: Duration, up: Boolean): GlyphData {
+    return when (duration) {
+        Duration.EIGHT -> if(up) {
+            getGlyph("flags.u3")
+        }
+        else {
+            getGlyph("flags.d3")
+        }
+        else -> blankGlyph
     }
 }
 

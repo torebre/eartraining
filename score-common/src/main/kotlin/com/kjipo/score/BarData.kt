@@ -1,10 +1,9 @@
 package com.kjipo.score
 
-import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
-import com.kjipo.svg.getGlyph
+import com.kjipo.svg.getNoteHeadGlyph
 import kotlin.math.ceil
 
 class BarData(val debug: Boolean = false) {
@@ -64,7 +63,7 @@ class BarData(val debug: Boolean = false) {
                             if (scoreRenderingElement.stem == Stem.UP) {
                                 // Use the bounding box for the note head of a half note to determine
                                 // how far to move the stem so that it is on the right side of the note head
-                                val stem = addStem(getGlyph(Duration.HALF).boundingBox)
+                                val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
                                 definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
                             } else if (scoreRenderingElement.stem == Stem.DOWN) {
                                 val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
@@ -79,6 +78,7 @@ class BarData(val debug: Boolean = false) {
                         val debugBox = Box(scoreRenderingElement.xPosition, scoreRenderingElement.yPosition, width, scoreRenderingElement.yPosition, "debug")
                         returnList.add(RenderGroup(debugBox.toRenderingElement(), null))
                     }
+
 
                     val renderingElement = scoreRenderingElement.toRenderingElement()
                     elements.addAll(renderingElement)

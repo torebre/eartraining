@@ -16,7 +16,7 @@ class NoteElement(var note: NoteType,
         yPosition = calculateVerticalOffset(note, octave)
 
         accidental?.let {
-            val accidentalGlyph = getGlyph(it)
+            val accidentalGlyph = getAccidentalGlyph(it)
             val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
                     xPosition,
                     yPosition)
@@ -30,9 +30,28 @@ class NoteElement(var note: NoteType,
             val stemElement = getStem()
             stemElement.typeId = stem.name
             result.add(stemElement)
+
+            if(duration == Duration.EIGHT) {
+                val stemDirection = stem == Stem.UP
+                val flagGlyph = getFlagGlyph(duration, stemDirection)
+                val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, id,
+                        stemElement.xPosition,
+                        stemElement.yPosition)
+
+                // TODO Need to think about is the stem is going up or down
+
+                positionedRenderingElement.typeId = flagGlyph.name
+                positionedRenderingElement.yTranslate = -DEFAULT_STEM_HEIGHT
+                positionedRenderingElement.xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+
+                result.add(positionedRenderingElement)
+            }
+
         }
 
-        val glyphData = getGlyph(duration)
+
+
+        val glyphData = getNoteHeadGlyph(duration)
         val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
                 xPosition,
                 yPosition)
@@ -51,7 +70,7 @@ class NoteElement(var note: NoteType,
     }
 
     fun getStem(): PositionedRenderingElement {
-        val stem = addStem(getGlyph(duration).boundingBox, stem != Stem.DOWN)
+        val stem = addStem(getNoteHeadGlyph(duration).boundingBox, stem != Stem.DOWN)
 
         return PositionedRenderingElement(listOf(stem),
                 findBoundingBox(stem.pathElements),
@@ -60,7 +79,7 @@ class NoteElement(var note: NoteType,
 
     fun requiresStem(): Boolean {
         // TODO Make proper computation
-        return duration == Duration.HALF || duration == Duration.QUARTER
+        return duration == Duration.HALF || duration == Duration.QUARTER || duration == Duration.EIGHT
     }
 
     fun getClef(): Clef {
@@ -70,38 +89,28 @@ class NoteElement(var note: NoteType,
     }
 
 
-    fun getGlyphsUsed(): Collection<String> {
-        val glyphsUsed = mutableListOf<String>()
-
-        if (requiresStem()) {
-            glyphsUsed.add(stem.name)
-        }
-
-        accidental?.let {
-            glyphsUsed.add(it.name)
-        }
-
-        glyphsUsed.add(duration.name)
-
-        return glyphsUsed
-    }
-
     override fun getGlyphs(): Map<String, GlyphData> {
         val glyphsUsed = mutableMapOf<String, GlyphData>()
 
         if (requiresStem()) {
             // Use the bounding box for the note head of a half note to determine
             // how far to move the stem so that it is on the right side of the note head
-            val stem = addStem(getGlyph(Duration.HALF).boundingBox)
+            val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
 
-            glyphsUsed.put(STEM_UP, GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements)))
+            glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
         }
 
         accidental?.let {
-            glyphsUsed.put(it.name, getGlyph(it))
+            glyphsUsed.put(it.name, getAccidentalGlyph(it))
         }
 
-        glyphsUsed.put(duration.name, getGlyph(duration))
+        if (duration == Duration.EIGHT) {
+            getFlagGlyph(Duration.EIGHT, stem == Stem.UP).let {
+                glyphsUsed[it.name] = it
+            }
+        }
+
+        glyphsUsed[duration.name] = getNoteHeadGlyph(duration)
 
         return glyphsUsed
     }

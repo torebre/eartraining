@@ -113,6 +113,7 @@ object ScoreHandlerUtilities {
     fun getDurationInMilliseconds(duration: Duration): Int {
         return when (duration) {
             Duration.ZERO -> 0
+            Duration.EIGHT -> DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE / 2
             Duration.HALF -> 2 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
             Duration.QUARTER -> DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE
             Duration.WHOLE -> 4 * DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE

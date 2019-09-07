@@ -32,6 +32,7 @@ import java.lang.RuntimeException
 
 object ReadFonts {
     private val GLYPH = "glyph"
+    const val SCALE = 0.1
 
     val decimalFormatThreadLocal = object : ThreadLocal<DecimalFormat>() {
 
@@ -80,7 +81,7 @@ object ReadFonts {
         val doc = createNewSvgDocument()
 
         Files.list(fontFilesDirectory).forEach { path ->
-            LOGGER.info("Processing: {}", path)
+            LOGGER.info("Processing: $path")
             try {
                 FileInputStream(path.toFile()).use { inputStream ->
                     val glyphDataCollection = extractGlyphPaths(inputStream).stream()
@@ -142,9 +143,9 @@ object ReadFonts {
     }
 
 
-    private fun writeGlyphWithBoundingBoxToFile(glyphNames: Collection<String>, fontFile: Path, outputFilePath: Path, scale: Double = 1.0) {
+    private fun writeGlyphWithBoundingBoxToFile(glyphNames: Collection<String>?, fontFile: Path, outputFilePath: Path, scale: Double = 1.0) {
         val doc = createNewSvgDocument()
-        val currentY = AtomicInteger(50)
+        var currentY = 50
 
         val glyphDataCollection = FileInputStream(fontFile.toFile()).use { inputStream ->
             extractGlyphPaths(inputStream).stream()
@@ -155,16 +156,24 @@ object ReadFonts {
 
 
         val rootElement = doc.documentElement
-        rootElement.setAttributeNS(null, "width", "10000")
-        rootElement.setAttributeNS(null, "height", "5000")
 
 
         glyphDataCollection.stream()
-                .filter { it -> glyphNames.contains(it.name) }
-                .forEach {
-                    addElementsToDocument(doc, currentY.get(), it.name, setOf(it))
-                    currentY.getAndAdd(100)
+                .filter { it ->
+                    if (glyphNames == null) {
+                        true
+                    } else {
+                        glyphNames.contains(it.name)
+                    }
                 }
+                .forEach {
+                    addElementsToDocument(doc, currentY, it.name, setOf(it))
+                    currentY += 100
+                }
+
+        rootElement.setAttributeNS(null, "width", "10000")
+        rootElement.setAttributeNS(null, "height", currentY.plus(100).toString())
+
 
         writeDocumentToFile(doc, outputFilePath)
     }
@@ -226,13 +235,13 @@ object ReadFonts {
                 val glyphName = xmlEventReader.getAttributeValue("", "glyph-name")
 
                 if (LOGGER.isDebugEnabled) {
-                    LOGGER.debug("Processing glyph: " + glyphName)
+                    LOGGER.debug("Processing glyph: $glyphName")
                 }
 
                 val pathAttribute = xmlEventReader.getAttributeValue("", "d")
 
                 if (pathAttribute == null) {
-                    LOGGER.info("No path defined for element: " + glyphName)
+                    LOGGER.info("No path defined for element: $glyphName")
                     continue
                 }
 
@@ -240,11 +249,10 @@ object ReadFonts {
                     val pathElements = FontProcessingUtilities.parsePathData(pathAttribute)
                     glyphDataCollection.add(GlyphData(glyphName, pathElements, findBoundingBox(pathElements)))
                 } catch (e: RuntimeException) {
-                    LOGGER.error("Exception when processing glyph: {}", glyphName, e)
+                    LOGGER.error("Exception when processing glyph: $glyphName", e)
                 } catch (e: IOException) {
-                    LOGGER.error("Exception when processing glyph: {}", glyphName, e)
+                    LOGGER.error("Exception when processing glyph: $glyphName", e)
                 }
-
             }
         }
 
@@ -400,6 +408,29 @@ object ReadFonts {
 
     }
 
+    /**
+     * Creates an XML-document that can be opened in a browser and that can be used to see what the glyphs look like
+     */
+    private fun createDocumentWithAllGlyphs() {
+        // Creates a document with all glyphs
+        val outputFilePath = Paths.get("output2.xml")
+        val fontFilesDirectory = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/")
+        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1)
+    }
+
+
+    /**
+     * Creates an XML-document with the glyphs from a single font file
+     */
+    private fun createGlyphXmlFile() {
+        val outputFilePath = Paths.get("glyph_with_bounding_box.xml")
+        val svgFontFile = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg")
+//        writeGlyphWithBoundingBoxToFile(listOf("clefs.G", "rests.M3", "rests.M2", "rests.M1", "rests.2",
+//        "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
+//        "rests.0", "rests.0o"), svgFontFile, outputFilePath, 0.1)
+        writeGlyphWithBoundingBoxToFile(null, svgFontFile, outputFilePath, 0.1)
+    }
+
 
     @Throws(Exception::class)
     @JvmStatic
@@ -414,11 +445,6 @@ object ReadFonts {
 
 //        val outputFilePath = Paths.get("output3.xml")
 //        generateGlyphsNeededForVisualizer(outputFilePath)
-
-        // Creates a document with all glyphs
-//        val outputFilePath = Paths.get("output2.xml")
-//        val fontFilesDirectory = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/")
-//        createDocumentWithAllGlyphs(fontFilesDirectory, outputFilePath, 0.1)
 
 
 //        val outputAlphabetFilePath = Paths.get("/home/student/workspace/EarTraining/noteVisualiser/src/main/resources/alpha.json")
@@ -441,7 +467,7 @@ object ReadFonts {
             OutputStreamWriter(System.out).use {
                 writeKotlinData(listOf("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0", "rests.M3", "rests.M2", "rests.M1", "rests.2",
                         "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
-                        "rests.0", "rests.0o", "accidentals.sharp", "accidentals.flat"), inputData, it)
+                        "rests.0", "rests.0o", "accidentals.sharp", "accidentals.flat", "flags.d3", "flags.u3"), inputData, it)
             }
         }
 
@@ -466,6 +492,10 @@ object ReadFonts {
 //                        .map { glyphData -> scaleGlyph(glyphData, SCALE) }, it)
 //            }
 //        }
+
+//        createDocumentWithAllGlyphs()
+
+//        createGlyphXmlFile()
 
     }
 
