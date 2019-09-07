@@ -52,7 +52,6 @@ class BarData(val debug: Boolean = false) {
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     var yPosition = barYoffset
                     val elements = mutableListOf<PositionedRenderingElement>()
-                    val renderingElement = scoreRenderingElement.toRenderingElement()
 
                     scoreRenderingElement.xPosition = 0
 
@@ -80,6 +79,8 @@ class BarData(val debug: Boolean = false) {
                         val debugBox = Box(scoreRenderingElement.xPosition, scoreRenderingElement.yPosition, width, scoreRenderingElement.yPosition, "debug")
                         returnList.add(RenderGroup(debugBox.toRenderingElement(), null))
                     }
+
+                    val renderingElement = scoreRenderingElement.toRenderingElement()
                     elements.addAll(renderingElement)
 
                     val renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))
