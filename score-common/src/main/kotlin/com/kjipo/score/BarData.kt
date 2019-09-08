@@ -6,8 +6,8 @@ import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getNoteHeadGlyph
 import kotlin.math.ceil
 
-class BarData(val debug: Boolean = false) {
-    var clef: Clef? = null
+class BarData(private val debug: Boolean = false) {
+    var clef: Clef = Clef.NONE
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
     var previousBar: BarData? = null
 
@@ -20,11 +20,7 @@ class BarData(val debug: Boolean = false) {
     fun build(barXoffset: Int = 0, barYoffset: Int = 0, scoreState: ScoreState): RenderingSequence {
         val definitions = mutableMapOf<String, GlyphData>()
 
-        val clefElement = clef?.let {
-            val element = ClefElement(it, barXoffset, barYoffset, "clef")
-            definitions[it.name] = element.getGlyphData()
-            element
-        }
+        val clefElement = getClefElement(barXoffset, barYoffset, definitions)
 
         val timeSignatureElement = if (timeSignature.nominator == 0) {
             null
@@ -100,6 +96,16 @@ class BarData(val debug: Boolean = false) {
         return RenderingSequence(returnList, determineViewBox(returnList.flatMap { it.renderingElements }), definitions)
     }
 
+    private fun getClefElement(barXoffset: Int, barYoffset: Int, definitions: MutableMap<String, GlyphData>): ClefElement? {
+        return if (clef == Clef.NONE) {
+            null
+        } else {
+            val element = ClefElement(clef, barXoffset, barYoffset, "clef")
+            definitions[clef.name] = element.getGlyphData()
+            element
+        }
+    }
+
     private fun getWidthAvailable(clefElement: ClefElement?, timeSignatureElement: TimeSignatureElement?): Int {
         return DEFAULT_BAR_WIDTH
                 .minus(clefElement?.let {
@@ -122,9 +128,6 @@ class BarData(val debug: Boolean = false) {
         var barNumber = 0
         var stemCounter = 0
     }
-
-
-
 
 
 }

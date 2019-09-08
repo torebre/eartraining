@@ -26,6 +26,8 @@ class ScoreHandler : ScoreHandlerInterface {
 
     fun build(): RenderingSequence {
         scoreSetup = ScoreSetup()
+
+        // TODO Not necessary to have this here. Beams should be computed automatically below
         scoreSetup.beams.addAll(beams)
         var remainingTicksInBar = ticksPerBar
         var currentBar = BarData()
@@ -33,7 +35,7 @@ class ScoreHandler : ScoreHandlerInterface {
         currentBar.timeSignature = TimeSignature(4, 4)
         val bars = mutableListOf(currentBar)
 
-        Napier.d("Score handler elements: ${scoreHandlerElements}")
+        Napier.d("Score handler elements: $scoreHandlerElements")
 
         for (element in scoreHandlerElements) {
             val ticksNeededForElement = element.duration.ticks
@@ -58,7 +60,8 @@ class ScoreHandler : ScoreHandlerInterface {
                 }
                 else -> {
                     remainingTicksInBar -= ticksNeededForElement
-                    addElement(element, currentBar)
+                    val temporalElement = createTemporalElement(element)
+                    currentBar.scoreRenderingElements.add(temporalElement)
                 }
             }
         }
@@ -80,13 +83,33 @@ class ScoreHandler : ScoreHandlerInterface {
 
         Napier.d("After fill in. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
-        bars.forEach { println(it) }
-
+        bars.forEach {
+            scoreSetup.beams.addAll(addBeams(it))
+            Napier.d("Bar data: $it")
+        }
         scoreSetup.bars.addAll(bars)
 
         return scoreSetup.build()
     }
 
+    private fun addBeams(barData: BarData): MutableList<BeamGroup> {
+        val beamGroups = mutableListOf<BeamGroup>()
+        val notesInBeamGroup = mutableListOf<NoteElement>()
+
+        for (scoreRenderingElement in barData.scoreRenderingElements) {
+            if (scoreRenderingElement is NoteElement && scoreRenderingElement.duration == Duration.EIGHT) {
+                notesInBeamGroup.add(scoreRenderingElement)
+            } else if (scoreRenderingElement is RestElement) {
+                // Some other note element or a rest
+                if (notesInBeamGroup.size > 1) {
+                    notesInBeamGroup.forEach { it.partOfBeamGroup = true }
+                    beamGroups.add(BeamGroup(notesInBeamGroup.map { it.id }))
+                }
+                notesInBeamGroup.clear()
+            }
+        }
+        return beamGroups
+    }
 
     private fun addAndTie(element: ScoreHandlerElement, durations: List<Duration>, barData: BarData, previous: ScoreRenderingElement? = null): ScoreRenderingElement? {
         var previousInternal = previous
@@ -117,8 +140,8 @@ class ScoreHandler : ScoreHandlerInterface {
         beams.add(BeamGroup(noteElementIds))
     }
 
-    private fun addElement(element: ScoreHandlerElement, currentBar: BarData) {
-        val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
+    private fun createTemporalElement(element: ScoreHandlerElement): ScoreRenderingElement {
+        return if (element.isNote) {
             NoteElement(element.noteType, element.octave, element.duration, element.id).also {
                 if (element.accidental != null) {
                     it.accidental = element.accidental
@@ -127,7 +150,6 @@ class ScoreHandler : ScoreHandlerInterface {
         } else {
             RestElement(element.duration, element.id)
         }
-        currentBar.scoreRenderingElements.add(scoreRenderingElement)
     }
 
     private fun fillInLastBar(bars: MutableList<BarData>, ticksRemainingInBar: Int) {
@@ -205,9 +227,7 @@ class ScoreHandler : ScoreHandlerInterface {
         }
     }
 
-    override fun insertNote(activeElement: String, keyPressed: Int): String? {
-        return insertNote(activeElement, ScoreHandlerUtilities.getDuration(keyPressed))
-    }
+    override fun insertNote(activeElement: String, keyPressed: Int) = insertNote(activeElement, ScoreHandlerUtilities.getDuration(keyPressed))
 
     fun insertNote(activeElement: String, duration: Duration): String? {
         scoreHandlerElements.find { it.id == activeElement }?.let { element ->

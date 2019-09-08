@@ -4,6 +4,9 @@ import com.github.aakira.napier.Napier
 import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.svg.GlyphData
 
+/**
+ * This class produces the rendering sequence that is used to render the score. It is responsible for the overall layout.
+ */
 class ScoreSetup : ScoreState {
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TiePair>()

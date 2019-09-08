@@ -10,6 +10,7 @@ class NoteElement(var note: NoteType,
                   override val id: String = "note-${noteElementIdCounter++}") : ScoreRenderingElement(), TemporalElement {
     var accidental: Accidental? = null
     var stem = Stem.NONE
+    var partOfBeamGroup = false
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val result = mutableListOf<PositionedRenderingElement>()
@@ -31,7 +32,8 @@ class NoteElement(var note: NoteType,
             stemElement.typeId = stem.name
             result.add(stemElement)
 
-            if(duration == Duration.EIGHT) {
+            if (duration == Duration.EIGHT && !partOfBeamGroup) {
+                // If the note is not part of a beam group, then it should have a flag if the duration requires that it does
                 val stemDirection = stem == Stem.UP
                 val flagGlyph = getFlagGlyph(duration, stemDirection)
                 val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, id,
@@ -48,7 +50,6 @@ class NoteElement(var note: NoteType,
             }
 
         }
-
 
 
         val glyphData = getNoteHeadGlyph(duration)

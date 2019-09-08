@@ -175,7 +175,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                     highLightActiveElement()
                 }
 
-                "Digit1", "Digit2", "Digit3", "Digit4" -> {
+                "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
                     activeElement?.let {
                         scoreHandler.insertNote(it, keyboardEvent.keyCode - 48)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
