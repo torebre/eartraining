@@ -5,3 +5,6 @@
 out/
 **/build
 webscore/web/
+**/node_modules
+synthesizer/web
+**/yarn.lock
