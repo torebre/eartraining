@@ -10,23 +10,27 @@ external open class AudioNode {
 
 }
 
-external class OscillatorNode: AudioNode {
+external class OscillatorNode : AudioNode {
     fun start(time: Double = definedExternally)
 
 }
 
 
-
-
 external class Tone {
 
-    class Sampler(sample: Any, onLoad: Any){
+    class Sampler(sample: Any, onLoad: Any) {
+
+        var loaded: Boolean
+        var volume: Boolean
 
         fun triggerAttack(any: Any)
 
-        fun loaded(): Boolean
+        fun triggerAttackRelease(any: Any, durationInSeconds: Double)
+        fun triggerAttackRelease(any: Any, durationInSeconds: Double, timeStart: Double)
 
-        fun volume(): Any
+        fun sync()
+
+        fun toMaster(): Any
 
     }
 
@@ -39,44 +43,53 @@ external class Tone {
 
     }
 
+    class Transport {
+
+        companion object {
+            fun start()
+
+            fun stop()
+
+        }
+
+
+    }
+
 }
 
-fun playNote() {
-//    val context = AudioContext()
-//    println(context.sampleRate)
-//    val osc = context.createOscillator()
-//    osc.connect(context.destination)
-//    osc.start()
-
-    var sampler: Tone.Sampler? = null
-//    var buffer = Tone.Buffer("samples/UR1_C1_f_RR1.wav", {
-    var buffer = Tone.Buffer("samples/chord.mp3", {
-        val samples : dynamic = Any()
-//        samples.C1 = "samples/UR1_C1_f_RR1.wav"
-        samples.C1 = "samples/chord.mp3"
-
-         sampler = Tone.Sampler(samples, {
-            console.log("Test24")
 
 
-        })
+fun playNote(sampler: Tone.Sampler) {
 
+    console.log("Test23. Loaded: ${sampler.loaded}. Volume: ${sampler.volume}")
 
+    Tone.Transport.stop()
 
-    })
+    sampler.sync()
 
-    console.log("Test25. Duration: ${buffer.duration}")
+    sampler.triggerAttackRelease("C3", 0.5)
+    sampler.triggerAttackRelease("C#3", 0.5, 0.5)
+    sampler.triggerAttackRelease("D3", 0.5, 1.0)
+    sampler.triggerAttackRelease("D#3", 0.5, 1.5)
+    sampler.triggerAttackRelease("E3", 0.5, 2.0)
+    sampler.triggerAttackRelease("F3", 0.5, 2.5)
+    sampler.triggerAttackRelease("F#3", 0.5, 3.0)
+    sampler.triggerAttackRelease("G3", 0.5, 3.5)
+    sampler.triggerAttackRelease("G#3", 0.5, 4.0)
+    sampler.triggerAttackRelease("A3", 0.5, 4.5)
+    sampler.triggerAttackRelease("A#3", 0.5, 5.0)
+    sampler.triggerAttackRelease("B3", 0.5, 5.5)
+    sampler.triggerAttackRelease("C4", 0.5, 6.0)
 
+    Tone.Transport.start()
 
-    Tone.Buffer.on("load", {
-
-        console.log("Test23. Loaded: ${sampler!!.loaded()}. Volume: ${sampler!!.volume()}")
-
-        sampler!!.triggerAttack("C1")
-
-    })
-
-
+//    Tone.Buffer.on("load", {
+//
+//        console.log("Test30. Loaded: ${sampler.loaded}. Volume: ${sampler.volume}")
+//
+//        sampler.triggerAttack("C1")
+//
+//    })
 
 
 }
