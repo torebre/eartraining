@@ -49,7 +49,6 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         return JSON.parse(RenderingSequence.serializer(), jsonData)
     }
 
-
     fun loadScore(renderingSequence: RenderingSequence) {
         generateSvgData(renderingSequence, svgElement)
         if (activeElement == null) {
@@ -57,7 +56,6 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         }
         highLightActiveElement()
     }
-
 
     fun highlight(id: String) {
         idSvgElementMap[id]?.setAttribute("fill", "red")
@@ -358,6 +356,5 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
         }
     }
-
 
 }

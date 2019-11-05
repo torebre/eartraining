@@ -27,6 +27,8 @@ fun main() {
     var sampler = Tone.Sampler(samples, parameters)
     sampler.toMaster()
 
+    Tone.Transport.start()
+
     document.querySelector("button")!!.addEventListener("click", {
         playNote(sampler)
     })

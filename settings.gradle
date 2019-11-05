@@ -5,13 +5,17 @@ include ':noteGenerator'
 
 //include ':viewer'
 
-include ':score-common'
-include ':score-jvm'
-include ':score-js'
+//include ':score-common'
+//include ':score-jvm'
+//include ':score-js'
 include ':webscore'
 //include 'scoregenerator'
 include ':webscore-dev'
-//include ':scoregenerator-common'
+include ':scoregenerator-common'
 include ':synthesizer'
-include ':scoregen-common'
-include ':scoregen-js'
+//include ':scoregen-common'
+//include ':scoregen-js'
+include ':score-multimodule'
+
+
+enableFeaturePreview('GRADLE_METADATA')

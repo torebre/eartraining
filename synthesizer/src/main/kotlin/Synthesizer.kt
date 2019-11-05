@@ -50,6 +50,8 @@ external class Tone {
 
             fun stop()
 
+            fun now(): Double
+
         }
 
 
@@ -58,39 +60,24 @@ external class Tone {
 }
 
 
-
 fun playNote(sampler: Tone.Sampler) {
 
     console.log("Test23. Loaded: ${sampler.loaded}. Volume: ${sampler.volume}")
 
-    Tone.Transport.stop()
-
-    sampler.sync()
-
+    val now = Tone.Transport.now()
     sampler.triggerAttackRelease("C3", 0.5)
-    sampler.triggerAttackRelease("C#3", 0.5, 0.5)
-    sampler.triggerAttackRelease("D3", 0.5, 1.0)
-    sampler.triggerAttackRelease("D#3", 0.5, 1.5)
-    sampler.triggerAttackRelease("E3", 0.5, 2.0)
-    sampler.triggerAttackRelease("F3", 0.5, 2.5)
-    sampler.triggerAttackRelease("F#3", 0.5, 3.0)
-    sampler.triggerAttackRelease("G3", 0.5, 3.5)
-    sampler.triggerAttackRelease("G#3", 0.5, 4.0)
-    sampler.triggerAttackRelease("A3", 0.5, 4.5)
-    sampler.triggerAttackRelease("A#3", 0.5, 5.0)
-    sampler.triggerAttackRelease("B3", 0.5, 5.5)
-    sampler.triggerAttackRelease("C4", 0.5, 6.0)
-
-    Tone.Transport.start()
-
-//    Tone.Buffer.on("load", {
-//
-//        console.log("Test30. Loaded: ${sampler.loaded}. Volume: ${sampler.volume}")
-//
-//        sampler.triggerAttack("C1")
-//
-//    })
-
+    sampler.triggerAttackRelease("C#3", 0.5, now + 0.5)
+    sampler.triggerAttackRelease("D3", 0.5, now + 1.0)
+    sampler.triggerAttackRelease("D#3", 0.5, now + 1.5)
+    sampler.triggerAttackRelease("E3", 0.5, now + 2.0)
+    sampler.triggerAttackRelease("F3", 0.5, now + 2.5)
+    sampler.triggerAttackRelease("F#3", 0.5, now + 3.0)
+    sampler.triggerAttackRelease("G3", 0.5, now + 3.5)
+    sampler.triggerAttackRelease("G#3", 0.5, now + 4.0)
+    sampler.triggerAttackRelease("A3", 0.5, now + 4.5)
+    sampler.triggerAttackRelease("A#3", 0.5, now + 5.0)
+    sampler.triggerAttackRelease("B3", 0.5, now + 5.5)
+    sampler.triggerAttackRelease("C4", 0.5, now + 6.0)
 
 }
 

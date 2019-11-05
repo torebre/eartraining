@@ -2,7 +2,7 @@ apply plugin: 'kotlin'
 
 description = ''
 dependencies {
-    compile project(':score-jvm')
+    compile project(':score-multimodule')
     compile libraries.kotlin_stdlib
     compile group: 'com.google.guava', name: 'guava', version:'22.0-android'
     compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.25'

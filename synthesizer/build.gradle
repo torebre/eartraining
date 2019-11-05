@@ -12,17 +12,23 @@ buildscript {
 apply plugin: 'kotlin-platform-js'
 // Dead code elimination
 apply plugin: 'kotlin-dce-js'
-apply plugin: 'com.moowork.node'
+
+// TODO
+//apply plugin: 'com.moowork.node'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile project(':webscore')
-    compile "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
+    implementation project(':webscore')
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion"
+    implementation "com.github.aakira:napier-js:$napierVersion"
 }
 
 compileKotlin2Js {
@@ -30,68 +36,70 @@ compileKotlin2Js {
         metaInfo = true
         sourceMap = true
         sourceMapEmbedSources = 'always'
-        moduleKind = 'commonjs'
+        moduleKind = 'plain'
         main = 'Main'
     }
 }
 
 compileTestKotlin2Js {
-    kotlinOptions.moduleKind = 'commonjs'
+    kotlinOptions.moduleKind = 'plain'
 }
 
-task yarnInstall(type: YarnTask) {
-    args = ['install']
-}
-
-// Creates minified, packed main.bundle.js at build/dist
-task bundle(type: YarnTask, dependsOn: [runDceKotlinJs, yarnInstall]) {
-    args = ["run", "bundle"]
-    assemble.dependsOn bundle
-}
-
-// Copies files from src/main/resouces to build/dist. These resources will be served by dev server
-task copyStaticResources(type: Copy) {
-    from sourceSets.main.resources
-    into "${buildDir}/dist"
-    bundle.dependsOn copyStaticResources
-}
-
-// Extracts JS libs from included dependencies to node_modules in build directory:
-task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
-    from compileKotlin2Js.destinationDir
-
-    configurations.testCompile.each {
-        from zipTree(it.absolutePath).matching { include '*.js' }
-    }
-
-    into "${buildDir}/node_modules"
-}
-
-
-// Starts dev server that serves built application in dev mode
-task run(type: YarnTask, dependsOn: [copyStaticResources, populateNodeModules, yarnInstall]) {
-    args = ["run", "start"]
-}
-
-// Test runner
-task runKarma(type: YarnTask, dependsOn: [populateNodeModules, yarnInstall]) {
-    args = ['test']
-    test.dependsOn runKarma
-}
-
-node {
-    download = true
-}
-
-// Recompiles sources on file changes. Invoke 'gradle client:run' and 'gradle -t client:watch' for hot reload.
-task watch {
-    inputs.files 'src/main', '../webscore/src/main', '../score-common/src/main'
-    doLast {
-        compileKotlin2Js.execute()
-        populateNodeModules.execute()
-        copyStaticResources.execute()
-    }
-}
+//task yarnInstall(type: YarnTask) {
+//    args = ['install']
+//}
+//
+//// Creates minified, packed main.bundle.js at build/dist
+//task bundle(type: YarnTask, dependsOn: [runDceKotlinJs, yarnInstall]) {
+//    args = ["run", "bundle"]
+//    assemble.dependsOn bundle
+//}
+//
+//// Copies files from src/main/resouces to build/dist. These resources will be served by dev server
+//task copyStaticResources(type: Copy) {
+//    from sourceSets.main.resources
+//
+//    into "${buildDir}/dist"
+//    bundle.dependsOn copyStaticResources
+//}
+//
+//// Extracts JS libs from included dependencies to node_modules in build directory:
+//task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
+//    from compileKotlin2Js.destinationDir
+//
+//    // TODO
+//
+//    configurations.testCompile.each {
+//        from zipTree(it.absolutePath).matching { include '*.js' }
+//    }
+//
+//    into "${buildDir}/node_modules"
+//}
+//
+//
+//// Starts dev server that serves built application in dev mode
+//task run(type: YarnTask, dependsOn: [copyStaticResources, populateNodeModules, yarnInstall]) {
+//    args = ["run", "start"]
+//}
+//
+//// Test runner
+////task runKarma(type: YarnTask, dependsOn: [populateNodeModules, yarnInstall]) {
+////    args = ['test']
+////    test.dependsOn runKarma
+////}
+//
+////node {
+//
+//
+//// Recompiles sources on file changes. Invoke 'gradle client:run' and 'gradle -t client:watch' for hot reload.
+//task watch {
+//    inputs.files 'src/main', '../webscore/src/main', '../score-common/src/main'
+//    doLast {
+//        compileKotlin2Js.execute()
+//        populateNodeModules.execute()
+//        copyStaticResources.execute()
+//    }
+//}
 
 
 
