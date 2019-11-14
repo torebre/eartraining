@@ -17,8 +17,8 @@ buildscript {
 
 apply plugin: "kotlin2js"
 // Dead code elimination
-//apply plugin: 'kotlin-dce-js'
-apply plugin: "org.jetbrains.kotlin.frontend"
+apply plugin: 'kotlin-dce-js'
+//apply plugin: "org.jetbrains.kotlin.frontend"
 
 repositories {
     mavenCentral()
@@ -46,20 +46,16 @@ compileKotlin2Js {
     }
 }
 
-//compileTestKotlin2Js {
-//    kotlinOptions.moduleKind = 'plain'
+//kotlinFrontend {
+//    npm {
+//        dependency "style-loader"
+//        dependency "tone"
+//        devDependency "karma"
+//    }
+//
+//    webpackBundle {
+//        bundleName = "main"
+//        contentPath = file('src/main/web')
+//        port = 8092
+//    }
 //}
-
-kotlinFrontend {
-    npm {
-        dependency "style-loader"
-        dependency "tone"
-        devDependency "karma"
-    }
-
-    webpackBundle {
-        bundleName = "main"
-        contentPath = file('src/main/web')
-        port = 8092
-    }
-}
