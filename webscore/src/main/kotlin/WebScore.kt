@@ -28,13 +28,21 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         val element = document.getElementById(svgElementId)
 
         svgElement = if ("svg" == element?.tagName) {
+
+            console.log("Found existing SVG element")
+
             element
         } else {
+
+            console.log("Creating new SVG element")
+
             val createdElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
             createdElement.id = svgElementId
             document.body?.appendChild(createdElement)
             createdElement
         }
+
+        console.log("SVG element: $svgElement")
 
         setupEventHandling()
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
@@ -55,6 +63,9 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
         highLightActiveElement()
+
+        console.log("Number of child nodes: ${svgElement.childNodes.length}")
+
     }
 
     fun highlight(id: String) {
@@ -248,9 +259,12 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
         console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
-        Napier.d("Rendering sequence: $renderingSequence")
+//        console.log("Rendering sequence: $renderingSequence")
 
         svgElement.ownerDocument?.let {
+
+            console.log("Adding definitions")
+
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
 
             for (definition in renderingSequence.definitions) {
@@ -291,7 +305,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
             val groupClass = renderingElement.groupClass
             val extraAttributes = if (groupClass != null) {
-                mapOf<String, String>(Pair("class", groupClass))
+                mapOf(Pair("class", groupClass))
             } else {
                 emptyMap()
             }

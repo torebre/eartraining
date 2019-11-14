@@ -11,7 +11,7 @@ buildscript {
 
 apply plugin: 'kotlin-platform-js'
 apply plugin: 'kotlin-dce-js'
-apply plugin: 'com.moowork.node'
+//apply plugin: 'com.moowork.node'
 
 repositories {
     mavenCentral()
@@ -37,12 +37,13 @@ compileKotlin2Js {
         metaInfo = true
         sourceMap = true
         sourceMapEmbedSources = 'always'
-        moduleKind = "plain" //project.javascriptModule
+        outputFile = "$project.buildDir.path/js/${project.name}.js"
+        moduleKind = "commonjs" //project.javascriptModule
     }
 }
 
 compileTestKotlin2Js {
-    kotlinOptions.moduleKind = "plain" //project.javascriptModule
+    kotlinOptions.moduleKind = "commonjs" //project.javascriptModule
 }
 
 
