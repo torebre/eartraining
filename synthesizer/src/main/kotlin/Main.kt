@@ -30,6 +30,9 @@ fun main() {
     Tone.Transport.start()
 
     document.querySelector("button")!!.addEventListener("click", {
+
+        console.log("Test23")
+
         playNote(sampler)
     })
 }
