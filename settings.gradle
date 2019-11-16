@@ -3,18 +3,10 @@ include ':scorebuilder'
 include ':noteGenerator'
 //include ':musicXml'
 
-//include ':viewer'
-
-//include ':score-common'
-//include ':score-jvm'
-//include ':score-js'
 include ':webscore'
-//include 'scoregenerator'
 include ':webscore-dev'
 include ':scoregenerator-common'
 include ':synthesizer'
-//include ':scoregen-common'
-//include ':scoregen-js'
 include ':score-multimodule'
 
 

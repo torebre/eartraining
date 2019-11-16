@@ -11,11 +11,12 @@ import com.kjipo.score.Duration
  * Stores a sequence of pitches, and wraps a score handler that can create a score based on the pitch sequence.
  */
 class SequenceGenerator : ScoreHandlerInterface {
-    var scoreHandler: ScoreHandler = ScoreHandler()
-    val pitchSequence = mutableListOf<Pitch>()
+    private var scoreHandler: ScoreHandler = ScoreHandler()
+    private val pitchSequence = mutableListOf<Pitch>()
 
 
     fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {
+        scoreHandler.clear()
         var timeCounter = 0
         pitchSequence.clear()
 

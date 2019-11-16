@@ -9,7 +9,6 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-//        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
         classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.45"
     }
 }
@@ -19,7 +18,6 @@ apply plugin: "kotlin2js"
 //apply plugin: 'kotlin-platform-js'
 // Dead code elimination
 apply plugin: 'kotlin-dce-js'
-//apply plugin: 'com.moowork.node'
 apply plugin: "org.jetbrains.kotlin.frontend"
 
 repositories {
@@ -28,11 +26,7 @@ repositories {
 
 dependencies {
     implementation project(':webscore')
-
     implementation project(':synthesizer')
-
-//    implementation project(':scoregenerator-common')
-//    implementation project(':score-multimodule')
 
     implementation "com.github.aakira:napier:$napierVersion"
     implementation "com.github.aakira:napier-js:$napierVersion"

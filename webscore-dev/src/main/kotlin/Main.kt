@@ -1,5 +1,7 @@
 import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerWrapper
 import com.kjipo.score.Duration
+import com.kjipo.scoregenerator.SequenceGenerator
 import com.kjipo.scoregenerator.SimpleSequenceGenerator
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -62,21 +64,33 @@ private fun playNote() {
 
 
 fun main() {
-    val sequenceGenerator = SimpleSequenceGenerator()
+    var simpleNoteSequence = SimpleSequenceGenerator.createSequence()
+    val sequenceGenerator = SequenceGenerator()
+    sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
 
-    val simpleNoteSequence = SimpleSequenceGenerator.createSequence()
-    val pitchSequence = simpleNoteSequence.transformToPitchSequence()
+    val scoreHandlerWrapper = ScoreHandlerWrapper(sequenceGenerator)
+    val webScore = WebScore(ScoreHandlerJavaScript(scoreHandlerWrapper))
+
 
     val synthesizerScript = SynthesizerScript()
 
-    val midiScript = MidiScript(pitchSequence, synthesizerScript)
+    var midiScript = MidiScript(simpleNoteSequence.transformToPitchSequence(), synthesizerScript)
 
     setupTestScore2()
 
-    document.querySelector("button")!!.addEventListener("click", {
+    document.querySelector("#playButton")?.addEventListener("click", {
         GlobalScope.launch {
             midiScript.play()
         }
+    })
+
+    document.querySelector("#generateSequence")?.addEventListener("click", {
+        val sequence = SimpleSequenceGenerator.createSequence()
+
+        midiScript = MidiScript(sequence.transformToPitchSequence(), synthesizerScript)
+        sequenceGenerator.loadSimpleNoteSequence(sequence)
+
+        webScore.reload()
     })
 
 }

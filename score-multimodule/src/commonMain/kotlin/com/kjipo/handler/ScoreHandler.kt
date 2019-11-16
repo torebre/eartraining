@@ -18,14 +18,20 @@ class ScoreHandler : ScoreHandlerInterface {
     private var trimEndBars = true
 
 
-    internal var scoreSetup = ScoreSetup()
+//    private var scoreSetup = ScoreSetup()
 
     override fun getScoreAsJson(): String {
         return JSON.stringify(RenderingSequence.serializer(), build())
     }
 
+    fun clear() {
+        idCounter = 0
+        scoreHandlerElements.clear()
+        beams.clear()
+    }
+
     fun build(): RenderingSequence {
-        scoreSetup = ScoreSetup()
+        var scoreSetup = ScoreSetup()
 
         // TODO Not necessary to have this here. Beams should be computed automatically below
         scoreSetup.beams.addAll(beams)
@@ -52,11 +58,11 @@ class ScoreHandler : ScoreHandlerInterface {
                     val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
                     val durationsInNextBar = ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
 
-                    val previous = addAndTie(element, durationsInCurrentBar, currentBar)
+                    val previous = addAndTie(element, durationsInCurrentBar, currentBar, scoreSetup = scoreSetup)
                     remainingTicksInBar += ticksPerBar - ticksNeededForElement
                     currentBar = BarData()
                     bars.add(currentBar)
-                    addAndTie(element, durationsInNextBar, currentBar, previous)
+                    addAndTie(element, durationsInNextBar, currentBar, previous, scoreSetup = scoreSetup)
                 }
                 else -> {
                     remainingTicksInBar -= ticksNeededForElement
@@ -111,7 +117,7 @@ class ScoreHandler : ScoreHandlerInterface {
         return beamGroups
     }
 
-    private fun addAndTie(element: ScoreHandlerElement, durations: List<Duration>, barData: BarData, previous: ScoreRenderingElement? = null): ScoreRenderingElement? {
+    private fun addAndTie(element: ScoreHandlerElement, durations: List<Duration>, barData: BarData, previous: ScoreRenderingElement? = null, scoreSetup: ScoreSetup): ScoreRenderingElement? {
         var previousInternal = previous
         for (duration in durations) {
             val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
