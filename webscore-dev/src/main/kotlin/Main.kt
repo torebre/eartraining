@@ -1,8 +1,9 @@
 import com.kjipo.handler.ScoreHandler
-import com.kjipo.score.*
+import com.kjipo.score.Duration
 import com.kjipo.scoregenerator.SimpleSequenceGenerator
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.browser.document
-import kotlin.browser.window
 
 
 private fun setupTestScore2() {
@@ -29,12 +30,6 @@ private fun setupEmptyBar() {
 
     WebScore(ScoreHandlerJavaScript(scoreHandler))
 }
-
-
-private fun generateTrainingSequence() {
-    val sequenceGenerator = SimpleSequenceGenerator()
-}
-
 
 private fun playNote() {
 
@@ -63,23 +58,25 @@ private fun playNote() {
     sampler.toMaster()
 
     Tone.Transport.start()
-
-    document.querySelector("button")!!.addEventListener("click", {
-
-        console.log("Test23")
-
-        playNote(sampler)
-    })
 }
 
 
 fun main() {
-//    setupEmptyBar()
+    val sequenceGenerator = SimpleSequenceGenerator()
 
-    console.log("Test23")
+    val simpleNoteSequence = SimpleSequenceGenerator.createSequence()
+    val pitchSequence = simpleNoteSequence.transformToPitchSequence()
 
-    playNote()
+    val synthesizerScript = SynthesizerScript()
+
+    val midiScript = MidiScript(pitchSequence, synthesizerScript)
 
     setupTestScore2()
+
+    document.querySelector("button")!!.addEventListener("click", {
+        GlobalScope.launch {
+            midiScript.play()
+        }
+    })
 
 }

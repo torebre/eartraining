@@ -24,6 +24,7 @@ external class Tone {
         var volume: Boolean
 
         fun triggerAttack(any: Any)
+        fun triggerRelease(any: Any)
 
         fun triggerAttackRelease(any: Any, durationInSeconds: Double)
         fun triggerAttackRelease(any: Any, durationInSeconds: Double, timeStart: Double)
