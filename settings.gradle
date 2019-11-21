@@ -9,5 +9,4 @@ include ':scoregenerator-common'
 include ':synthesizer'
 include ':score-multimodule'
 
-
 enableFeaturePreview('GRADLE_METADATA')

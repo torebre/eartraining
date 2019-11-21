@@ -4,6 +4,8 @@ import com.kjipo.score.Duration
 import com.kjipo.scoregenerator.SequenceGenerator
 import com.kjipo.scoregenerator.SimpleSequenceGenerator
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlin.browser.document
 
@@ -68,20 +70,27 @@ fun main() {
     val sequenceGenerator = SequenceGenerator()
     sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
 
-    val scoreHandlerWrapper = ScoreHandlerWrapper(sequenceGenerator)
-    val webScore = WebScore(ScoreHandlerJavaScript(scoreHandlerWrapper))
+//    val scoreHandlerWrapper = ScoreHandlerWrapper(sequenceGenerator)
+    val webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator))
 
 
     val synthesizerScript = SynthesizerScript()
 
-    var midiScript = MidiScript(simpleNoteSequence.transformToPitchSequence(), synthesizerScript)
-
-    setupTestScore2()
+    var midiScript = MidiScript(sequenceGenerator.pitchSequence, synthesizerScript)
+    var currentPlayJob: Job? = null
 
     document.querySelector("#playButton")?.addEventListener("click", {
-        GlobalScope.launch {
+        val previousPlayJob = currentPlayJob
+
+        currentPlayJob = GlobalScope.launch {
+            previousPlayJob?.cancelAndJoin()
+
+            console.log("Playing sequence: ${sequenceGenerator.pitchSequence}")
+
+            midiScript = MidiScript(sequenceGenerator.pitchSequence, synthesizerScript)
             midiScript.play()
         }
+
     })
 
     document.querySelector("#generateSequence")?.addEventListener("click", {

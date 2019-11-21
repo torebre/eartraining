@@ -12,7 +12,7 @@ import com.kjipo.score.Duration
  */
 class SequenceGenerator : ScoreHandlerInterface {
     private var scoreHandler: ScoreHandler = ScoreHandler()
-    private val pitchSequence = mutableListOf<Pitch>()
+    val pitchSequence = mutableListOf<Pitch>()
 
 
     fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {

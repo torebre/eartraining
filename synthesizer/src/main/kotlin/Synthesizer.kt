@@ -51,10 +51,11 @@ external class Tone {
 
             fun stop()
 
+            fun clear()
+
             fun now(): Double
 
         }
-
 
     }
 

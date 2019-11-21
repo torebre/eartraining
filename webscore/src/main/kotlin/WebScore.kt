@@ -28,22 +28,13 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         val element = document.getElementById(svgElementId)
 
         svgElement = if ("svg" == element?.tagName) {
-
-            console.log("Found existing SVG element")
-
             element
         } else {
-
-            console.log("Creating new SVG element")
-
             val createdElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
             createdElement.id = svgElementId
             document.body?.appendChild(createdElement)
             createdElement
         }
-
-        console.log("SVG element: $svgElement")
-
         setupEventHandling()
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
@@ -63,9 +54,6 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
         highLightActiveElement()
-
-        console.log("Number of child nodes: ${svgElement.childNodes.length}")
-
     }
 
     fun highlight(id: String) {
@@ -129,6 +117,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                     }
                     highLightActiveElement()
                 }
+
 
                 if (yDiff < -50) {
                     activeElement?.let {
@@ -257,14 +246,9 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         svgElement.setAttribute("viewBox",
                 "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
 
-        console.log("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
-
-//        console.log("Rendering sequence: $renderingSequence")
+        Napier.d("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
         svgElement.ownerDocument?.let {
-
-            console.log("Adding definitions")
-
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
 
             for (definition in renderingSequence.definitions) {
@@ -322,8 +306,8 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                             pathInterface.strokeWidth,
                             renderingElement.id,
                             pathInterface.fill,
-                            extraAttributes)?.let { element ->
-                        idSvgElementMap.put(renderingElement.id, element)
+                            extraAttributes)?.let { pathElement ->
+                        idSvgElementMap.put(renderingElement.id, pathElement)
                     }
                 }
             }
@@ -334,7 +318,6 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         return node.ownerDocument?.let { ownerDocument ->
             val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
-//            path1.setAttribute("stroke", STROKE_COLOUR)
             fill?.let { path1.setAttribute("fill", it) }
             path1.setAttribute("id", id)
             path1.setAttribute("stroke-width", strokeWidth.toString())

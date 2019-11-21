@@ -36,7 +36,7 @@ class SynthesizerScript: MidiPlayerInterface {
     }
 
     override fun stop() {
-        // TODO Need to do anything?
+        Tone.Transport.stop()
     }
 
 
