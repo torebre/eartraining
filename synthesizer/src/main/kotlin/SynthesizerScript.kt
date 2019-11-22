@@ -45,12 +45,17 @@ class SynthesizerScript: MidiPlayerInterface {
 
         val note = when(noteType) {
             NoteType.A -> "A"
+            NoteType.A_SHARP -> "A#"
             NoteType.H -> "B"
             NoteType.C -> "C"
+            NoteType.C_SHARP -> "C#"
             NoteType.D -> "D"
+            NoteType.D_SHARP -> "D#"
             NoteType.E -> "E"
             NoteType.F -> "F"
+            NoteType.F_SHARP -> "F#"
             NoteType.G -> "G"
+            NoteType.G_SHARP -> "G#"
         }
 
         return note + octave

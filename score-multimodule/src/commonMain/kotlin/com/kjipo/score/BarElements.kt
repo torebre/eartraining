@@ -17,12 +17,17 @@ enum class Key {
 
 enum class NoteType {
     A,
+    A_SHARP,
     H,
     C,
+    C_SHARP,
     D,
+    D_SHARP,
     E,
     F,
-    G
+    F_SHARP,
+    G,
+    G_SHARP
 }
 
 enum class Duration(val ticks: Int) {

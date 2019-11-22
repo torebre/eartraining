@@ -16,15 +16,8 @@ class NoteElement(var note: NoteType,
         val result = mutableListOf<PositionedRenderingElement>()
         yPosition = calculateVerticalOffset(note, octave)
 
-        accidental?.let {
-            val accidentalGlyph = getAccidentalGlyph(it)
-            val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
-                    xPosition,
-                    yPosition)
-            positionedRenderingElement.typeId = it.name
-            positionedRenderingElement.xTranslate = -30
-
-            result.add(positionedRenderingElement)
+        addAccidentalIfNeeded(note)?.let {
+            result.add(it)
         }
 
         if (requiresStem()) {
@@ -38,19 +31,16 @@ class NoteElement(var note: NoteType,
                 val flagGlyph = getFlagGlyph(duration, stemDirection)
                 val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, id,
                         stemElement.xPosition,
-                        stemElement.yPosition)
-
-                // TODO Need to think about is the stem is going up or down
-
-                positionedRenderingElement.typeId = flagGlyph.name
-                positionedRenderingElement.yTranslate = -DEFAULT_STEM_HEIGHT
-                positionedRenderingElement.xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+                        stemElement.yPosition).apply {
+                    // TODO Need to think about is the stem is going up or down
+                    typeId = flagGlyph.name
+                    yTranslate = -DEFAULT_STEM_HEIGHT
+                    xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+                }
 
                 result.add(positionedRenderingElement)
             }
-
         }
-
 
         val glyphData = getNoteHeadGlyph(duration)
         val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
@@ -68,6 +58,30 @@ class NoteElement(var note: NoteType,
         }
 
         return result
+    }
+
+    private fun addAccidentalIfNeeded(note: NoteType): PositionedRenderingElement? {
+        if (noteRequiresSharp(note)) {
+            return setupAccidental(Accidental.SHARP)
+        }
+        return null
+    }
+
+    private fun noteRequiresSharp(note: NoteType): Boolean {
+        return when (note) {
+            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
+            else -> false
+        }
+    }
+
+    private fun setupAccidental(accidental: Accidental): PositionedRenderingElement {
+        val accidentalGlyph = getAccidentalGlyph(accidental)
+        return PositionedRenderingElement.create(listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
+                xPosition,
+                yPosition).apply {
+            typeId = accidental.name
+            xTranslate = -30
+        }
     }
 
     fun getStem(): PositionedRenderingElement {
@@ -101,7 +115,7 @@ class NoteElement(var note: NoteType,
             glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
         }
 
-        accidental?.let {
+        accidentalInUse()?.let {
             glyphsUsed.put(it.name, getAccidentalGlyph(it))
         }
 
@@ -114,6 +128,20 @@ class NoteElement(var note: NoteType,
         glyphsUsed[duration.name] = getNoteHeadGlyph(duration)
 
         return glyphsUsed
+    }
+
+    private fun accidentalInUse(): Accidental? {
+        return when {
+            accidental != null -> {
+                accidental
+            }
+            noteRequiresSharp(note) -> {
+                Accidental.SHARP
+            }
+            else -> {
+                null
+            }
+        }
     }
 
     override fun toString(): String {
@@ -151,7 +179,6 @@ class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRe
         return listOf(PositionedRenderingElement(listOf(tieElement),
                 findBoundingBox(tieElement.pathElements), id))
     }
-
 
 }
 

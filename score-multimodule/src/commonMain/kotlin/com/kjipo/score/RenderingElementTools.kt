@@ -21,16 +21,17 @@ fun calculateVerticalOffset(note: NoteType, octave: Int): Int {
     return (5 - octave) * 7 * DEFAULT_VERTICAL_NOTE_SPACING + (4 - halfSteps) * DEFAULT_VERTICAL_NOTE_SPACING
 }
 
+/**
+ * Retrieves the line the relative to C the note should be placed on
+ */
 private fun getPlacementAndOctave(note: NoteType): Int {
-    // TODO Only handling key of C for now and not thinking much about sharps and flats
-
     return when (note) {
-        NoteType.C -> 0
-        NoteType.D -> 1
+        NoteType.C, NoteType.C_SHARP -> 0
+        NoteType.D, NoteType.D_SHARP -> 1
         NoteType.E -> 2
-        NoteType.F -> 3
-        NoteType.G -> 4
-        NoteType.A -> 5
+        NoteType.F, NoteType.F_SHARP -> 3
+        NoteType.G, NoteType.G_SHARP -> 4
+        NoteType.A, NoteType.A_SHARP -> 5
         NoteType.H -> 6
     }
 }

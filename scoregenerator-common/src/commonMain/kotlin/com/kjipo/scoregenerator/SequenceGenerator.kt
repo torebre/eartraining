@@ -48,13 +48,14 @@ class SequenceGenerator : ScoreHandlerInterface {
     override fun moveNoteOneStep(id: String, up: Boolean) {
         pitchSequence
                 .find { it.id == id }?.let { pitch ->
-
-                    // TODO Only works because C major is the only key used so far
                     val index = pitchSequence.indexOf(pitch)
                     if (index != -1) {
                         scoreHandler.findNoteType(id)?.let {
-                            val pitchStep = ScoreHandlerUtilities.determinePitchStep(it, up)
-                            pitchSequence[index].pitch += pitchStep
+                            pitchSequence[index].pitch += if (up) {
+                                1
+                            } else {
+                                -1
+                            }
                             scoreHandler.moveNoteOneStep(id, up)
                         }
                     }

@@ -1,58 +1,12 @@
 package com.kjipo.handler
 
 import com.kjipo.score.Duration
-import com.kjipo.score.NoteElement
 import com.kjipo.score.NoteType
 import com.kjipo.score.TICKS_PER_QUARTER_NOTE
 import kotlin.math.absoluteValue
 
 object ScoreHandlerUtilities {
     const val DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE = 1000
-
-    // TODO Only works for the C-scale
-    fun determinePitchStep(noteElement: NoteElement, up: Boolean): Int {
-        return ScoreHandlerUtilities.determinePitchStep(noteElement, up)
-    }
-
-    fun determinePitchStep(noteType: NoteType, up: Boolean): Int {
-        return when (noteType) {
-            NoteType.A -> if (up) {
-                2
-            } else {
-                -2
-            }
-            NoteType.H -> if (up) {
-                1
-            } else {
-                -2
-            }
-            NoteType.C -> if (up) {
-                2
-            } else {
-                -1
-            }
-            NoteType.D -> if (up) {
-                2
-            } else {
-                -2
-            }
-            NoteType.E -> if (up) {
-                1
-            } else {
-                -2
-            }
-            NoteType.F -> if (up) {
-                2
-            } else {
-                -1
-            }
-            NoteType.G -> if (up) {
-                2
-            } else {
-                -2
-            }
-        }
-    }
 
     fun getDuration(keyPressed: Int): Duration =
             when (keyPressed) {
@@ -100,12 +54,17 @@ object ScoreHandlerUtilities {
     fun getPitch(noteType: NoteType, octave: Int): Int {
         return 12 * octave + when (noteType) {
             NoteType.A -> 9
+            NoteType.A_SHARP -> 10
             NoteType.H -> 11
             NoteType.C -> 0
+            NoteType.C_SHARP -> 1
             NoteType.D -> 2
+            NoteType.D_SHARP -> 3
             NoteType.E -> 4
             NoteType.F -> 5
+            NoteType.F_SHARP -> 6
             NoteType.G -> 7
+            NoteType.G_SHARP -> 8
         }
     }
 
@@ -120,19 +79,21 @@ object ScoreHandlerUtilities {
         }
     }
 
-
     fun pitchToNoteAndOctave(pitch: Int): Pair<NoteType, Int> {
-        // TODO Only works with C-scale so far
-
         val remainder = pitch.rem(12)
         val noteType = when (remainder) {
             9 -> NoteType.A
+            10 -> NoteType.A_SHARP
             11 -> NoteType.H
             0 -> NoteType.C
+            1 -> NoteType.C_SHARP
             2 -> NoteType.D
+            3 -> NoteType.D_SHARP
             4 -> NoteType.E
             5 -> NoteType.F
+            6 -> NoteType.F_SHARP
             7 -> NoteType.G
+            8 -> NoteType.G_SHARP
             else -> throw IllegalArgumentException("Unhandled pitch: $pitch")
         }
 

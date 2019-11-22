@@ -118,7 +118,6 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
                     highLightActiveElement()
                 }
 
-
                 if (yDiff < -50) {
                     activeElement?.let {
                         // Up
