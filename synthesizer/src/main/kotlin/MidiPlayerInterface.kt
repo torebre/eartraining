@@ -4,6 +4,8 @@ interface MidiPlayerInterface {
 
     fun noteOff(pitch: Int)
 
+    fun releaseAll()
+
     fun start()
 
     fun stop()

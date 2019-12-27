@@ -2,7 +2,7 @@ package com.kjipo.handler
 
 import com.github.aakira.napier.Napier
 import com.kjipo.score.*
-import kotlinx.serialization.json.JSON
+import kotlinx.serialization.json.Json
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
@@ -18,10 +18,8 @@ class ScoreHandler : ScoreHandlerInterface {
     private var trimEndBars = true
 
 
-//    private var scoreSetup = ScoreSetup()
-
     override fun getScoreAsJson(): String {
-        return JSON.stringify(RenderingSequence.serializer(), build())
+        return Json.stringify(RenderingSequence.serializer(), build())
     }
 
     fun clear() {

@@ -29,6 +29,8 @@ external class Tone {
         fun triggerAttackRelease(any: Any, durationInSeconds: Double)
         fun triggerAttackRelease(any: Any, durationInSeconds: Double, timeStart: Double)
 
+        fun releaseAll()
+
         fun sync()
 
         fun toMaster(): Any

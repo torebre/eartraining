@@ -5,9 +5,9 @@ repositories {
     mavenCentral()
 }
 group 'com.kjipo'
-version '0.4'
+version '0.6-SNAPSHOT'
 
-//apply plugin: 'maven-publish'
+apply plugin: 'maven-publish'
 
 kotlin {
     jvm()

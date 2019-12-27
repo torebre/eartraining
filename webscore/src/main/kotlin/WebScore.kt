@@ -2,7 +2,7 @@ import com.github.aakira.napier.Napier
 import com.kjipo.score.*
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
-import kotlinx.serialization.json.JSON
+import kotlinx.serialization.json.Json
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.KeyboardEvent
@@ -10,7 +10,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", private val allowInput: Boolean = true) {
+class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", private val allowInput: Boolean = true) {
     var activeElement: String? = null
         set(value) {
             field = value
@@ -18,6 +18,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
         }
     private val svgElement: Element
     private val idSvgElementMap = mutableMapOf<String, Element>()
+
 
     companion object {
         const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
@@ -45,7 +46,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
     }
 
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
-        return JSON.parse(RenderingSequence.serializer(), jsonData)
+        return Json.parse(RenderingSequence.serializer(), jsonData)
     }
 
     fun loadScore(renderingSequence: RenderingSequence) {
@@ -58,6 +59,10 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
     fun highlight(id: String) {
         idSvgElementMap[id]?.setAttribute("fill", "red")
+    }
+
+    fun removeHighlight(id: String) {
+        idSvgElementMap[id]?.setAttribute("fill", "black")
     }
 
     private fun highLightActiveElement() {
@@ -262,7 +267,7 @@ class WebScore(val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = 
 
         renderingSequence.renderGroups.forEach { renderGroup ->
             val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
-                val translation = renderGroup?.transform ?: Translation(0, 0)
+                val translation = renderGroup.transform ?: Translation(0, 0)
                 svgElement.ownerDocument?.let {
                     val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
                     groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")

@@ -31,6 +31,10 @@ class SynthesizerScript: MidiPlayerInterface {
         sampler.triggerRelease(pitchToNote(pitch))
     }
 
+    override fun releaseAll() {
+        sampler.releaseAll()
+    }
+
     override fun start() {
         Tone.Transport.start()
     }

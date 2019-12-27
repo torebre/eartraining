@@ -8,18 +8,17 @@ class ScoreBuilderImpl(override val debug: Boolean = false) : ScoreBuilderInterf
     private var noteCounter = 0
 
 
-    override fun onBarAdded(inputBar: BAR) {
+    override fun onBarAdded(bar: BAR) {
         // TODO Figure out best way to set the value
 
-        inputBar.let {
-            val bar = it.barData
-            bar.scoreRenderingElements.addAll(currentElements)
+        with(bar.barData) {
+            scoreRenderingElements.addAll(currentElements)
             currentElements.clear()
             if (scoreData.bars.isNotEmpty()) {
                 // TODO Is this the correct direction? In which direction are the bars added through the method calls?
-                bar.previousBar = scoreData.bars.last()
+                previousBar = scoreData.bars.last()
             }
-            scoreData.bars.add(bar)
+            scoreData.bars.add(this)
         }
     }
 

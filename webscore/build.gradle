@@ -2,32 +2,36 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
+        jcenter()
+        maven {
+            url "https://dl.bintray.com/kotlin/kotlin-eap"
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
+        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.45"
     }
 }
 
-apply plugin: 'kotlin-platform-js'
+apply plugin: "kotlin2js"
 apply plugin: 'kotlin-dce-js'
-//apply plugin: 'com.moowork.node'
+apply plugin: "org.jetbrains.kotlin.frontend"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation project(':scoregenerator-common')
-    implementation project(':score-multimodule')
     implementation libraries.kotlin_stdlib_js
     implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
-//    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.13.0"
 
     implementation "com.github.aakira:napier:$napierVersion"
     implementation "com.github.aakira:napier-js:$napierVersion"
+
+    implementation project(':scoregenerator-common')
+    implementation project(':score-multimodule')
     
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion"
 }
@@ -42,26 +46,17 @@ compileKotlin2Js {
     }
 }
 
-compileTestKotlin2Js {
-    kotlinOptions.moduleKind = "commonjs" //project.javascriptModule
+kotlinFrontend {
+    npm {
+        dependency "style-loader"
+        devDependency "karma"
+    }
+
+    webpackBundle {
+        bundleName = "main"
+        contentPath = file('src/main/web')
+        port = 8089
+//        library = 'webscore-lib'
+        mode = 'production'
+    }
 }
-
-
-//task assembleWeb(type: Sync) {
-//    configurations.compile.each { File file ->
-//        from(zipTree(file.absolutePath), {
-//            includeEmptyDirs = false
-//            include { fileTreeElement ->
-//                def path = fileTreeElement.path
-//                path.endsWith(".js") && (path.startsWith("META-INF/resources/") ||
-//                        !path.startsWith("META-INF/"))
-//            }
-//        })
-//    }
-//    from compileKotlin2Js.destinationDir
-//    into "${projectDir}/web"
-//
-//    dependsOn classes
-//}
-
-//assemble.dependsOn assembleWeb

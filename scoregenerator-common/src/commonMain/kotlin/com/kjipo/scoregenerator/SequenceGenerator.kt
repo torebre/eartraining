@@ -11,29 +11,31 @@ import com.kjipo.score.Duration
  * Stores a sequence of pitches, and wraps a score handler that can create a score based on the pitch sequence.
  */
 class SequenceGenerator : ScoreHandlerInterface {
-    private var scoreHandler: ScoreHandler = ScoreHandler()
+    var scoreHandler: ScoreHandler = ScoreHandler()
     val pitchSequence = mutableListOf<Pitch>()
+    val actionSequence = mutableListOf<Action>()
 
 
     fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {
         scoreHandler.clear()
-        var timeCounter = 0
-        pitchSequence.clear()
+//        var timeCounter = 0
+//        pitchSequence.clear()
 
         for (element in simpleNoteSequence.elements) {
-            val durationInMilliseconds = ScoreHandlerUtilities.getDurationInMilliseconds(element.duration)
+//            val durationInMilliseconds = ScoreHandlerUtilities.getDurationInMilliseconds(element.duration)
 
             when (element) {
                 is NoteSequenceElement.RestElement -> {
                     scoreHandler.insertRest(element.duration)
                 }
                 is NoteSequenceElement.NoteElement -> {
-                    val id = scoreHandler.insertNote(element.duration, element.octave, element.note)
-                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, ScoreHandlerUtilities.getPitch(element.note, element.octave), element.duration))
+                    scoreHandler.insertNote(element.duration, element.octave, element.note)
+//                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, ScoreHandlerUtilities.getPitch(element.note, element.octave), element.duration))
                 }
             }
-            timeCounter += durationInMilliseconds
+//            timeCounter += durationInMilliseconds
         }
+        computePitchSequence()
     }
 
     private fun computeOnOffPitches() {
@@ -106,14 +108,31 @@ class SequenceGenerator : ScoreHandlerInterface {
     private fun computePitchSequence() {
         var timeCounter = 0
         pitchSequence.clear()
+        actionSequence.clear()
 
         for (scoreHandlerElement in scoreHandler.getScoreHandlerElements()) {
             val durationInMilliseconds = ScoreHandlerUtilities.getDurationInMilliseconds(scoreHandlerElement.duration)
+            val pitchOn = timeCounter
+            val pitchOff = timeCounter + durationInMilliseconds
 
             if (scoreHandlerElement.isNote) {
                 val pitch = ScoreHandlerUtilities.getPitch(scoreHandlerElement.noteType, scoreHandlerElement.octave)
-                pitchSequence.add(Pitch(scoreHandlerElement.id, timeCounter, timeCounter + durationInMilliseconds, pitch, scoreHandlerElement.duration))
+
+                pitchSequence.add(Pitch(scoreHandlerElement.id, pitchOn, pitchOff, pitch, scoreHandlerElement.duration))
+
+                actionSequence.add(Action.PitchEvent(pitchOn, pitch, true))
+                actionSequence.add(Action.PitchEvent(pitchOff, pitch, false))
+                actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(scoreHandlerElement.id)))
+                actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(scoreHandlerElement.id)))
             }
+            else {
+                // This is a rest
+                actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(scoreHandlerElement.id)))
+                actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(scoreHandlerElement.id)))
+            }
+
+            actionSequence.sortBy { it.time }
+
             timeCounter += durationInMilliseconds
         }
     }

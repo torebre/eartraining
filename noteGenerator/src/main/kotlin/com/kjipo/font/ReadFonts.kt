@@ -384,7 +384,7 @@ object ReadFonts {
             var result = """Pair("${it.name}", """
 
             val pathElements = it.pathElements.map {
-                val numbers = it.numbers.mapIndexed({ index, value ->
+                val numbers = it.numbers.mapIndexed({ _, value ->
                     value.toString()
                 }).joinToString()
 
