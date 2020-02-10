@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.8.25/Tone.js"></script>
+    <link rel="stylesheet" href="webscore.css">
+    <title>Test: <%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+
+<button id="playButton">Play</button>
+<button id="generateSequence">Generate</button>
+<button id="playCurrent">Play current</button>
+
+<script type="text/javascript" language="JavaScript" src="webscore-multimodule.js"></script>
+
+<script type="module" language="JavaScript">
+
+    // var myModule = require('webscore');
+    import {Webscore } from "main.bundle.js";
+
+    var test = new WebScore(webscore.scoreHandler2);
+
+</script>
+
+</body>
+</html>

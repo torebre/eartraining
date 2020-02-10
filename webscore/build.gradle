@@ -24,6 +24,7 @@ repositories {
 dependencies {
     implementation libraries.kotlin_stdlib_js
     implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
+//    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.13.0"
 
@@ -32,7 +33,7 @@ dependencies {
 
     implementation project(':scoregenerator-common')
     implementation project(':score-multimodule')
-    
+
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlinVersion"
 }
 
@@ -45,6 +46,11 @@ compileKotlin2Js {
         moduleKind = "commonjs" //project.javascriptModule
     }
 }
+
+//compileTestKotlin2Js {
+//    kotlinOptions.moduleKind = "commonjs" //project.javascriptModule
+//}
+
 
 kotlinFrontend {
     npm {
