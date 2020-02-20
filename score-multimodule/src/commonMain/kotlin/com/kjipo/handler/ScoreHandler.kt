@@ -245,6 +245,8 @@ class ScoreHandler : ScoreHandlerInterface {
         return null
     }
 
+    override fun insertNote(keyPressed: Int) = insertNote(ScoreHandlerUtilities.getDuration(keyPressed))
+
     fun insertNote(duration: Duration): String {
         scoreHandlerElements.add(ScoreHandlerElement((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null))
         return scoreHandlerElements.last().id

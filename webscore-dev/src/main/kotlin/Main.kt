@@ -53,21 +53,10 @@ private fun playNote() {
 }
 
 fun main() {
-//    var simpleNoteSequence = SimpleSequenceGenerator.createSequence()
-//    val sequenceGenerator = SequenceGenerator()
-//    sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
-//
-//    val webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator))
-//
-//    val synthesizerScript = SynthesizerScript()
-//
-//    var midiScript = MidiScript(sequenceGenerator.pitchSequence, synthesizerScript)
-//    var currentPlayJob: Job? = null
-
     val playerBackend = PlayerBackend()
 
     document.querySelector("#playButton")?.addEventListener("click", {
-//        val previousPlayJob = currentPlayJob
+        //        val previousPlayJob = currentPlayJob
 //
 //        currentPlayJob = GlobalScope.launch {
 //            previousPlayJob?.cancelAndJoin()

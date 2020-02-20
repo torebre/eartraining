@@ -4,7 +4,7 @@ allprojects {
 }
 
 buildscript {
-    ext.kotlinVersion = '1.3.50'
+    ext.kotlinVersion = '1.3.61'
 
     repositories {
         jcenter()
@@ -21,8 +21,9 @@ ext {
     qunitVersion = '2.6.0'
     napierVersion = "0.0.3"
     assert4jVersion = '3.12.2'
-    kotlinVersion = '1.3.50'
+    kotlinVersion = '1.3.61'
     serializationRuntime = '0.14.0'
+    multiplatform = '1.3.61'
 
     libraries = [
             junit                         : "junit:junit:4.12",

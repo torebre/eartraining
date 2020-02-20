@@ -18,6 +18,8 @@ interface ScoreHandlerInterface {
 
     fun insertNote(activeElement: String, keyPressed: Int): String?
 
+    fun insertNote(keyPressed: Int): String?
+
     fun insertNote(activeElement: String, duration: Duration, pitch: Int): String?
 
     fun insertRest(activeElement: String, duration: Duration): String?

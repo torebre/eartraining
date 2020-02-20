@@ -97,12 +97,8 @@ class SequenceGenerator : ScoreHandlerInterface {
         return null
     }
 
-    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
-        val idOfNewElement = scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
-
-        // Compute the whole pitch sequence again to keep it easy
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int) = scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed).also {
         computePitchSequence()
-        return idOfNewElement
     }
 
     private fun computePitchSequence() {
@@ -124,8 +120,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                 actionSequence.add(Action.PitchEvent(pitchOff, pitch, false))
                 actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(scoreHandlerElement.id)))
                 actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(scoreHandlerElement.id)))
-            }
-            else {
+            } else {
                 // This is a rest
                 actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(scoreHandlerElement.id)))
                 actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(scoreHandlerElement.id)))
@@ -137,27 +132,25 @@ class SequenceGenerator : ScoreHandlerInterface {
         }
     }
 
-    override fun deleteElement(id: String) {
-        scoreHandler.deleteElement(id)
+    override fun deleteElement(id: String) =
+            scoreHandler.deleteElement(id).also {
+                computePitchSequence()
+            }
+
+    override fun insertNote(keyPressed: Int) =
+            scoreHandler.insertNote(keyPressed).also {
+                computePitchSequence()
+            }
+
+    override fun insertNote(activeElement: String, duration: Duration, pitch: Int) = scoreHandler.insertNote(activeElement, duration, pitch)?.also {
         computePitchSequence()
     }
 
-    override fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? {
-        return scoreHandler.insertNote(activeElement, duration, pitch)?.also {
-            computePitchSequence()
-        }
-    }
-
-    override fun insertRest(activeElement: String, duration: Duration): String? {
-        return scoreHandler.insertRest(activeElement, duration).also {
-            computeOnOffPitches()
-        }
-    }
-
-    override fun toggleExtra(id: String, extra: Accidental) {
-        scoreHandler.toggleExtra(id, extra)
+    override fun insertRest(activeElement: String, duration: Duration) = scoreHandler.insertRest(activeElement, duration).also {
         computeOnOffPitches()
     }
 
+    override fun toggleExtra(id: String, extra: Accidental) =
+            scoreHandler.toggleExtra(id, extra).also { computeOnOffPitches() }
 
 }

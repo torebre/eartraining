@@ -8,5 +8,6 @@ include ':webscore-dev'
 include ':scoregenerator-common'
 include ':synthesizer'
 include ':score-multimodule'
+include ':webscore-multimodule'
 
 enableFeaturePreview('GRADLE_METADATA')
