@@ -14,7 +14,7 @@ kotlin {
     js {
         browser {
             webpackTask {
-                sourceMaps = true
+                sourceMaps = false
 //                useCommonJs()
 //                bundleName = "main"
 //                sources = file('src/main/web')

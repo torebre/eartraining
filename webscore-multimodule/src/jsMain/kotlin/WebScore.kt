@@ -5,6 +5,7 @@ import com.kjipo.svg.translateGlyph
 import kotlinx.serialization.json.Json
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
 import kotlin.browser.document
 import kotlin.dom.clear
@@ -16,11 +17,17 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
             field = value
             reload()
         }
+
+    private var direction: Boolean? = null
+    private var movementActive = false
     private val svgElement: Element
     private val idSvgElementMap = mutableMapOf<String, Element>()
 
 
     companion object {
+        private const val VERTICAL_STEP = 10
+        private const val HORIZONTAL_STEP = 30
+
         const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
     }
@@ -88,17 +95,48 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
         var xStart = 0
         var yStart = 0
 
-        svgElement.addEventListener("touchstart", { event ->
+        document.addEventListener("touchstart", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
+            movementActive = true
 
             if (changedTouches.length > 0) {
                 xStart = changedTouches[0].pageX
                 yStart = changedTouches[0].pageY
             }
+
+            console.log("Touch start")
         })
 
-        svgElement.addEventListener("touchend", { event ->
+        document.addEventListener("touchend", { event ->
+            if (!movementActive) {
+                return@addEventListener
+            }
+
+            console.log("Touch end")
+
+            val touchEvent: dynamic = event
+            val changedTouches = touchEvent.changedTouches
+            movementActive = false
+
+            if (changedTouches.length > 0) {
+                val xStop = changedTouches[0].pageX
+                val yStop = changedTouches[0].pageY
+
+                val xDiff = xStop - xStart
+                val yDiff = yStop - yStart
+
+                handleMotionUpdate(xDiff, yDiff, true)
+            }
+        })
+
+        document.addEventListener("touchmove", { event ->
+            if (!movementActive) {
+                return@addEventListener
+            }
+
+            console.log("Touch move")
+
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
 
@@ -109,139 +147,219 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
                 val xDiff = xStop - xStart
                 val yDiff = yStop - yStart
 
-                if (xDiff < -50) {
-                    deactivateActiveElement()
-                    activeElement = activeElement?.let {
-                        scoreHandler.getNeighbouringElement(it, true)
-                    }
-                    highLightActiveElement()
-                } else if (xDiff > 50) {
-                    deactivateActiveElement()
-                    activeElement = activeElement?.let {
-                        scoreHandler.getNeighbouringElement(it, false)
-                    }
-                    highLightActiveElement()
+                if (handleMotionUpdate(xDiff, yDiff, false)) {
+                    xStart = xStop
+                    yStart = yStop
                 }
+            }
+        })
 
-                if (yDiff < -50) {
-                    activeElement?.let {
-                        // Up
-                        scoreHandler.moveNoteOneStep(it, true)
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                        highLightActiveElement()
-                    }
-                } else if (yDiff > 50) {
-                    activeElement?.let {
-                        // Down
-                        scoreHandler.moveNoteOneStep(it, false)
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                        highLightActiveElement()
-                    }
-                }
+        document.addEventListener("mousedown", { event ->
+            val mouseDownEvent: dynamic = event
+            movementActive = true
+
+            console.log("Mouse down")
+
+            xStart = mouseDownEvent.pageX
+            yStart = mouseDownEvent.pageY
+        })
+
+        document.addEventListener("mouseup", { event ->
+            if (!movementActive) {
+                return@addEventListener
+            }
+
+            val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
+            movementActive = false
+
+            console.log("Mouse up")
+
+            if (handleMotionUpdate(xDiff, yDiff, true)) {
+                val mouseDownEvent: dynamic = event
+                xStart = mouseDownEvent.pageX as Int
+                yStart = mouseDownEvent.pageY as Int
+            }
+        })
+
+        document.addEventListener("mousemove", { event ->
+            if (!movementActive) {
+                return@addEventListener
+            }
+
+            console.log("Mouse move")
+
+            val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
+            if (handleMotionUpdate(xDiff, yDiff, false)) {
+                val mouseDownEvent: dynamic = event
+                xStart = mouseDownEvent.pageX as Int
+                yStart = mouseDownEvent.pageY as Int
             }
         })
 
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
-            println("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
+            Napier.d("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
 
-            when (keyboardEvent.code) {
-                "ArrowUp" -> activeElement?.let {
-                    // Up
-                    scoreHandler.moveNoteOneStep(it, true)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                    highLightActiveElement()
-                }
+            handleKeyEvent(keyboardEvent.code, keyboardEvent.keyCode)
+        })
+    }
 
-                "ArrowDown" -> activeElement?.let {
-                    // Down
-                    scoreHandler.moveNoteOneStep(it, false)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                    highLightActiveElement()
-                }
+    private fun extractDiffs(event: Event, xStart: Int, yStart: Int): Pair<Int, Int> {
+        val eventWithPageInformation: dynamic = event
+        val xStop = eventWithPageInformation.pageX as Int
+        val yStop = eventWithPageInformation.pageY as Int
+        val xDiff = xStop - xStart
+        val yDiff = yStop - yStart
 
-                "ArrowLeft" -> {
+        return Pair(xDiff, yDiff)
+    }
+
+    private fun handleMotionUpdate(xDiff: Int, yDiff: Int, motionStopped: Boolean): Boolean {
+        if (direction == null) {
+            direction = xDiff > yDiff
+        }
+
+        val oldDirection = direction
+        if (motionStopped) {
+            direction = null
+        }
+
+        oldDirection?.also {
+            if (it) {
+                if (xDiff < -HORIZONTAL_STEP) {
                     deactivateActiveElement()
                     activeElement = activeElement?.let {
                         scoreHandler.getNeighbouringElement(it, true)
                     }
                     highLightActiveElement()
-                }
-
-                "ArrowRight" -> {
+                    return true
+                } else if (xDiff > HORIZONTAL_STEP) {
                     deactivateActiveElement()
                     activeElement = activeElement?.let {
                         scoreHandler.getNeighbouringElement(it, false)
                     }
                     highLightActiveElement()
+                    return true
                 }
-
-                "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
+            } else {
+                if (yDiff < -VERTICAL_STEP) {
                     activeElement?.let {
-                        scoreHandler.insertNote(it, keyboardEvent.keyCode - 48)
+                        // Up
+                        scoreHandler.moveNoteOneStep(it, true)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
-                }
-
-                "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
+                    return true
+                } else if (yDiff > VERTICAL_STEP) {
                     activeElement?.let {
-                        scoreHandler.updateDuration(it, keyboardEvent.keyCode - 96)
+                        // Down
+                        scoreHandler.moveNoteOneStep(it, false)
                         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
                         highLightActiveElement()
                     }
+                    return true
                 }
-
-                "KeyN" -> {
-                    activeElement?.let {
-                        activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyboardEvent.keyCode)
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                        highLightActiveElement()
-                    }
-                }
-
-                "Delete" -> {
-                    activeElement?.let {
-                        deactivateActiveElement()
-                        activeElement = null
-
-                        var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
-                        if (neighbouringElement == null) {
-                            neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
-                        }
-                        scoreHandler.deleteElement(it)
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-
-                        if (neighbouringElement != null) {
-                            activeElement = neighbouringElement
-                            highLightActiveElement()
-                        } else {
-                            scoreHandler.getIdOfFirstSelectableElement()
-                        }
-
-                    }
-                }
-
-                "KeyF" -> {
-                    if (activeElement == null) {
-                        return@addEventListener
-                    }
-                    scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                }
-
-                "KeyS" -> {
-                    if (activeElement == null) {
-                        return@addEventListener
-                    }
-                    scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
-                }
-
-
             }
-        })
+        }
+
+        return false
+    }
+
+    private fun handleKeyEvent(code: String, keyCode: Int) {
+        when (code) {
+            "ArrowUp" -> activeElement?.let {
+                // Up
+                scoreHandler.moveNoteOneStep(it, true)
+                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                highLightActiveElement()
+            }
+
+            "ArrowDown" -> activeElement?.let {
+                // Down
+                scoreHandler.moveNoteOneStep(it, false)
+                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                highLightActiveElement()
+            }
+
+            "ArrowLeft" -> {
+                deactivateActiveElement()
+                activeElement = activeElement?.let {
+                    scoreHandler.getNeighbouringElement(it, true)
+                }
+                highLightActiveElement()
+            }
+
+            "ArrowRight" -> {
+                deactivateActiveElement()
+                activeElement = activeElement?.let {
+                    scoreHandler.getNeighbouringElement(it, false)
+                }
+                highLightActiveElement()
+            }
+
+            "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
+                activeElement?.let {
+                    scoreHandler.insertNote(it, keyCode - 48)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    highLightActiveElement()
+                }
+            }
+
+            "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
+                activeElement?.let {
+                    scoreHandler.updateDuration(it, keyCode - 96)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    highLightActiveElement()
+                }
+            }
+
+            "KeyN" -> {
+                activeElement?.let {
+                    activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyCode)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    highLightActiveElement()
+                }
+            }
+
+            "Delete" -> {
+                activeElement?.let {
+                    deactivateActiveElement()
+                    activeElement = null
+
+                    var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
+                    if (neighbouringElement == null) {
+                        neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
+                    }
+                    scoreHandler.deleteElement(it)
+                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+
+                    if (neighbouringElement != null) {
+                        activeElement = neighbouringElement
+                        highLightActiveElement()
+                    } else {
+                        scoreHandler.getIdOfFirstSelectableElement()
+                    }
+
+                }
+            }
+
+            "KeyF" -> {
+                if (activeElement == null) {
+                    return
+                }
+                scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
+                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+            }
+
+            "KeyS" -> {
+                if (activeElement == null) {
+                    return
+                }
+                scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
+                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+            }
+        }
     }
 
 
