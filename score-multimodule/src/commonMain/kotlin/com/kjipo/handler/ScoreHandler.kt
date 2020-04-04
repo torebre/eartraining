@@ -18,9 +18,7 @@ class ScoreHandler : ScoreHandlerInterface {
     private var trimEndBars = true
 
 
-    override fun getScoreAsJson(): String {
-        return Json.stringify(RenderingSequence.serializer(), build())
-    }
+    override fun getScoreAsJson() = Json.stringify(RenderingSequence.serializer(), build())
 
     fun clear() {
         idCounter = 0
@@ -29,7 +27,7 @@ class ScoreHandler : ScoreHandlerInterface {
     }
 
     fun build(): RenderingSequence {
-        var scoreSetup = ScoreSetup()
+        val scoreSetup = ScoreSetup()
 
         // TODO Not necessary to have this here. Beams should be computed automatically below
         scoreSetup.beams.addAll(beams)

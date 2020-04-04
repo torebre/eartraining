@@ -22,7 +22,6 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
 
     companion object {
         const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
-
     }
 
     init {

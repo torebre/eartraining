@@ -1,10 +1,10 @@
-import com.kjipo.handler.ScoreHandler
-
-
-val scoreHandler = ScoreHandlerJavaScript(ScoreHandler())
-val intialWebscore = WebScore(scoreHandler)
+// Uncommenting the following will set up an empty webscore automatically when the Javascript in the built module is run
+//val scoreHandler = ScoreHandlerJavaScript(ScoreHandler())
+//val intialWebscore = WebScore(scoreHandler)
 
 fun main() {
+    // Do nothing as default now
+
 //    val scoreHandler = ScoreHandler()
 
 //    val note1 = scoreHandler.insertNote(Duration.EIGHT)

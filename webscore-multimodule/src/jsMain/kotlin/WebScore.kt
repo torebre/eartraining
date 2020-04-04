@@ -1,5 +1,8 @@
 import com.github.aakira.napier.Napier
-import com.kjipo.score.*
+import com.kjipo.score.Accidental
+import com.kjipo.score.PositionedRenderingElement
+import com.kjipo.score.RenderingSequence
+import com.kjipo.score.Translation
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.serialization.json.Json
@@ -12,6 +15,7 @@ import kotlin.dom.clear
 
 
 class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", private val allowInput: Boolean = true) {
+
     var activeElement: String? = null
         set(value) {
             field = value
@@ -247,7 +251,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
                     activeElement?.let {
                         // Up
                         scoreHandler.moveNoteOneStep(it, true)
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                        regenerateSvg()
                         highLightActiveElement()
                     }
                     return true
@@ -255,7 +259,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
                     activeElement?.let {
                         // Down
                         scoreHandler.moveNoteOneStep(it, false)
-                        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                        regenerateSvg()
                         highLightActiveElement()
                     }
                     return true
@@ -271,14 +275,14 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
             "ArrowUp" -> activeElement?.let {
                 // Up
                 scoreHandler.moveNoteOneStep(it, true)
-                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                regenerateSvg()
                 highLightActiveElement()
             }
 
             "ArrowDown" -> activeElement?.let {
                 // Down
                 scoreHandler.moveNoteOneStep(it, false)
-                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                regenerateSvg()
                 highLightActiveElement()
             }
 
@@ -301,7 +305,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
                 activeElement?.let {
                     scoreHandler.insertNote(it, keyCode - 48)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    regenerateSvg()
                     highLightActiveElement()
                 }
             }
@@ -309,7 +313,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
                 activeElement?.let {
                     scoreHandler.updateDuration(it, keyCode - 96)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    regenerateSvg()
                     highLightActiveElement()
                 }
             }
@@ -317,7 +321,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
             "KeyN" -> {
                 activeElement?.let {
                     activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyCode)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    regenerateSvg()
                     highLightActiveElement()
                 }
             }
@@ -332,7 +336,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
                         neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
                     }
                     scoreHandler.deleteElement(it)
-                    generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                    regenerateSvg()
 
                     if (neighbouringElement != null) {
                         activeElement = neighbouringElement
@@ -349,7 +353,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
                     return
                 }
                 scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
-                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                regenerateSvg()
             }
 
             "KeyS" -> {
@@ -357,7 +361,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
                     return
                 }
                 scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
-                generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+                regenerateSvg()
             }
         }
     }
@@ -474,6 +478,10 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
             }
 
         }
+    }
+
+    private fun regenerateSvg() {
+        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
     }
 
 }

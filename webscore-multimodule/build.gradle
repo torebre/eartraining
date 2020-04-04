@@ -5,20 +5,12 @@ plugins {
 repositories {
     mavenCentral()
 }
-//group 'com.example'
-//version '0.0.1'
-
-//apply plugin: 'maven-publish'
 
 kotlin {
     js {
         browser {
             webpackTask {
                 sourceMaps = false
-//                useCommonJs()
-//                bundleName = "main"
-//                sources = file('src/main/web')
-//                main="Main"
             }
 
             // Turning of test task temporarily because of problem finding karma test library
@@ -29,22 +21,10 @@ kotlin {
         }
     }
     sourceSets {
-//        commonMain {
-//            dependencies {
-//                implementation kotlin('stdlib-common')
-//            }
-//        }
-//        commonTest {
-//            dependencies {
-//                implementation kotlin('test-common')
-//                implementation kotlin('test-annotations-common')
-//            }
-//        }
 
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
-//                implementation libraries.kotlin_stdlib_js
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.13.0"
                 implementation "com.github.aakira:napier:$napierVersion"
