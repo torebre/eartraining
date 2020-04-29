@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':webscore')
+    implementation project(':webscore-multimodule')
     implementation project(':scoregenerator-common')
     implementation project(':score-multimodule')
 
