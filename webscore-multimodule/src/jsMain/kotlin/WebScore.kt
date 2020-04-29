@@ -14,7 +14,7 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: String = "score", private val allowInput: Boolean = true) {
+class WebScore(private val scoreHandler: ScoreHandlerJavaScript, private val svgElementId: String = "score", private val allowInput: Boolean = true) {
 
     var activeElement: String? = null
         set(value) {
@@ -51,9 +51,19 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
         loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
     }
 
+    @JsName("reload")
     fun reload() {
         val score = scoreHandler.getScoreAsJson()
         loadScore(transformJsonToRenderingSequence(score))
+    }
+
+    @JsName("setVisible")
+    fun setVisible(visible: Boolean) {
+        document.getElementById(svgElementId)?.setAttribute("visibility", if (visible) {
+            "visible"
+        } else {
+            "hidden"
+        })
     }
 
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {

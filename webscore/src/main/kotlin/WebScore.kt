@@ -64,6 +64,14 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, svgElementId: S
         idSvgElementMap[id]?.setAttribute("fill", "black")
     }
 
+    fun setVisible(visible: Boolean) {
+        document.getElementById(svgElement)?.setAttribute("visibility", if (visible) {
+            "visible"
+        } else {
+            "hidden"
+        })
+    }
+
     private fun highLightActiveElement() {
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
