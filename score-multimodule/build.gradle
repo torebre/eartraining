@@ -63,6 +63,7 @@ kotlin {
                 implementation kotlin('stdlib-jdk8')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
                 implementation "com.github.aakira:napier-jvm:$napierVersion"
+                implementation "com.flipkart.zjsonpatch:zjsonpatch:0.4.10"
             }
         }
         jvmTest {

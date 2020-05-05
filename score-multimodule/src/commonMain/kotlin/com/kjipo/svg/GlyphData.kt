@@ -3,7 +3,7 @@ package com.kjipo.svg
 import kotlinx.serialization.Serializable
 
 @Serializable
-class GlyphData(val name: String, override val pathElements: List<PathElement>, override val strokeWidth: Int, val boundingBox: BoundingBox) : PathInterface {
+data class GlyphData(val name: String, override val pathElements: List<PathElement>, override val strokeWidth: Int, val boundingBox: BoundingBox) : PathInterface {
 
 
     constructor(name: String, pathElements: List<PathElement>, boundingBox: BoundingBox) : this(name, pathElements, 1, boundingBox)

@@ -1,6 +1,5 @@
 import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.score.Accidental
-import kotlinx.html.injector.injectTo
 
 class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
 
