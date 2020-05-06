@@ -21,7 +21,7 @@ class RenderGroup {
         this.renderingElements = renderingElements.toMutableList()
         this.transform = transform
         this.renderGroup = renderGroup
-        renderingElements.forEach { it.renderGroup = this }
+//        renderingElements.forEach { it.renderGroup = this }
     }
 
     override fun equals(other: Any?): Boolean {

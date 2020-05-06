@@ -1,7 +1,6 @@
 package com.kjipo.handler
 
 import com.github.aakira.napier.Napier
-import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 
@@ -36,9 +35,7 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     override fun getIdOfFirstSelectableElement() = scoreHandler.getIdOfFirstSelectableElement()
 
-
     override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) = scoreHandler.getNeighbouringElement(activeElement, lookLeft)
-
 
     override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int) = scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
 

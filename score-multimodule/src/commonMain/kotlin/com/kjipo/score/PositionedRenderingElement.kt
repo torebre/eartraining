@@ -21,8 +21,8 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
     var xPosition: Int = 0
     var yPosition: Int = 0
 
-    @Transient
-    var renderGroup: RenderGroup? = null
+//    @Transient
+//    var renderGroup: RenderGroup? = null
 
 
     companion object {
@@ -65,7 +65,7 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
         if (yTranslate != other.yTranslate) return false
         if (xPosition != other.xPosition) return false
         if (yPosition != other.yPosition) return false
-        if (renderGroup != other.renderGroup) return false
+//        if (renderGroup != other.renderGroup) return false
 
         return true
     }
@@ -81,7 +81,7 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
         result = 31 * result + yTranslate
         result = 31 * result + xPosition
         result = 31 * result + yPosition
-        result = 31 * result + (renderGroup?.hashCode() ?: 0)
+//        result = 31 * result + (renderGroup?.hashCode() ?: 0)
         return result
     }
 
