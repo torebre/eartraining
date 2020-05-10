@@ -1,12 +1,13 @@
 package com.kjipo.handler
 
-interface ScoreHandlerWithState: ScoreHandlerInterface {
+interface ScoreHandlerWithState {
 
+    fun getScoreAsJson(): String
 
-    fun applyOperation(operation: ScoreOperation): String
+    fun getIdOfFirstSelectableElement(): String?
 
+    fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String?
 
-
-
+    fun applyOperation(operation: ScoreOperation): String?
 
 }

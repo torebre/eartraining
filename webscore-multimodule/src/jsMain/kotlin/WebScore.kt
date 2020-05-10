@@ -14,13 +14,18 @@ import kotlin.browser.document
 import kotlin.dom.clear
 
 
-class WebScore(private val scoreHandler: ScoreHandlerJavaScript, private val svgElementId: String = "score", private val allowInput: Boolean = true) {
+class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
+               private val svgElementId: String = "score",
+               private val allowInput: Boolean = true) {
 
     var activeElement: String? = null
         set(value) {
             field = value
             reload()
         }
+
+    private var xStart = 0
+    private var yStart = 0
 
     private var direction: Boolean? = null
     private var movementActive = false
@@ -33,7 +38,6 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, private val svg
         private const val HORIZONTAL_STEP = 30
 
         const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
-
     }
 
     init {
@@ -106,9 +110,64 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, private val svg
         if (!allowInput) {
             return
         }
-        var xStart = 0
-        var yStart = 0
 
+        setupTouchEvents()
+        setupMouseEvent()
+
+        document.addEventListener("keydown", { event ->
+            val keyboardEvent = event as KeyboardEvent
+
+            Napier.d("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
+
+            handleKeyEvent(keyboardEvent.code, keyboardEvent.keyCode)
+        })
+    }
+
+    private fun setupMouseEvent() {
+        document.addEventListener("mousedown", { event ->
+            val mouseDownEvent: dynamic = event
+            movementActive = true
+
+            console.log("Mouse down")
+
+            xStart = mouseDownEvent.pageX
+            yStart = mouseDownEvent.pageY
+        })
+
+        document.addEventListener("mouseup", { event ->
+            if (!movementActive) {
+                return@addEventListener
+            }
+
+            val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
+            movementActive = false
+
+            console.log("Mouse up")
+
+            if (handleMotionUpdate(xDiff, yDiff, true)) {
+                val mouseDownEvent: dynamic = event
+                xStart = mouseDownEvent.pageX as Int
+                yStart = mouseDownEvent.pageY as Int
+            }
+        })
+
+        document.addEventListener("mousemove", { event ->
+            if (!movementActive) {
+                return@addEventListener
+            }
+
+            console.log("Mouse move")
+
+            val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
+            if (handleMotionUpdate(xDiff, yDiff, false)) {
+                val mouseDownEvent: dynamic = event
+                xStart = mouseDownEvent.pageX as Int
+                yStart = mouseDownEvent.pageY as Int
+            }
+        })
+    }
+
+    private fun setupTouchEvents() {
         document.addEventListener("touchstart", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
@@ -166,56 +225,6 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript, private val svg
                     yStart = yStop
                 }
             }
-        })
-
-        document.addEventListener("mousedown", { event ->
-            val mouseDownEvent: dynamic = event
-            movementActive = true
-
-            console.log("Mouse down")
-
-            xStart = mouseDownEvent.pageX
-            yStart = mouseDownEvent.pageY
-        })
-
-        document.addEventListener("mouseup", { event ->
-            if (!movementActive) {
-                return@addEventListener
-            }
-
-            val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
-            movementActive = false
-
-            console.log("Mouse up")
-
-            if (handleMotionUpdate(xDiff, yDiff, true)) {
-                val mouseDownEvent: dynamic = event
-                xStart = mouseDownEvent.pageX as Int
-                yStart = mouseDownEvent.pageY as Int
-            }
-        })
-
-        document.addEventListener("mousemove", { event ->
-            if (!movementActive) {
-                return@addEventListener
-            }
-
-            console.log("Mouse move")
-
-            val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
-            if (handleMotionUpdate(xDiff, yDiff, false)) {
-                val mouseDownEvent: dynamic = event
-                xStart = mouseDownEvent.pageX as Int
-                yStart = mouseDownEvent.pageY as Int
-            }
-        })
-
-        document.addEventListener("keydown", { event ->
-            val keyboardEvent = event as KeyboardEvent
-
-            Napier.d("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
-
-            handleKeyEvent(keyboardEvent.code, keyboardEvent.keyCode)
         })
     }
 
