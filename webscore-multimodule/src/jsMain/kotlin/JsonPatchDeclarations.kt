@@ -1,0 +1,1 @@
+external fun apply_patch(document: String, patch: String): String

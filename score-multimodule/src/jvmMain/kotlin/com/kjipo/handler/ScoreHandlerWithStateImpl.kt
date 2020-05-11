@@ -19,6 +19,10 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
 
 
             }
+            else -> {
+                // TODO
+
+            }
 
             // TODO
 
