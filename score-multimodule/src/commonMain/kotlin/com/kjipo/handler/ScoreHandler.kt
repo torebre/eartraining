@@ -18,7 +18,7 @@ class ScoreHandler : ScoreHandlerInterface {
     private var trimEndBars = true
 
 
-    override fun getScoreAsJson() = Json.stringify(RenderingSequence.serializer(), build())
+    override fun getScoreAsJson() = Json.encodeToString(RenderingSequence.serializer(), build())
 
     fun clear() {
         idCounter = 0

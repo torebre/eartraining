@@ -71,7 +71,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
     }
 
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
-        return Json.parse(RenderingSequence.serializer(), jsonData)
+        return Json.decodeFromString(RenderingSequence.serializer(), jsonData)
     }
 
     fun loadScore(renderingSequence: RenderingSequence) {

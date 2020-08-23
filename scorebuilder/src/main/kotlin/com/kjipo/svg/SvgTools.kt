@@ -53,11 +53,13 @@ fun createHtmlDocument(renderingSequence: RenderingSequence): Document {
     val bodyElement = document.createElementNS(HTML_NAMESPACE, "body")
     rootElement.appendChild(bodyElement)
 
-    val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
-    svgElement.setAttribute("width", "100%")
-    svgElement.setAttribute("height", "100%")
-    svgElement.setAttribute("viewBox", renderingSequence.viewBox.let { "${it.xMin} ${it.yMin} ${it.xMax} ${it.yMax}" })
-    svgElement.setAttribute("id", "score")
+    val svgElement = document.createElementNS(SVG_NAMESPACE_URI, "svg").apply {
+        setAttribute("width", "100%")
+        setAttribute("height", "100%")
+        setAttribute("viewBox", renderingSequence.viewBox.let { "${it.xMin} ${it.yMin} ${it.xMax} ${it.yMax}" })
+        setAttribute("id", "score")
+    }
+
     bodyElement.appendChild(svgElement)
 
     svgElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")

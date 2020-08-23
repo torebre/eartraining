@@ -16,7 +16,7 @@ class ScoreHandlerWithStateImplTest {
 
         val scoreHandlerWithState = ScoreHandlerWithStateImpl(scoreHandler)
 
-        val diff = scoreHandlerWithState.applyOperation(InsertNote(null, Duration.QUARTER))
+        val diff = scoreHandlerWithState.applyOperation(InsertNote(null, duration = Duration.QUARTER))
 
         assertNotNull(diff)
 

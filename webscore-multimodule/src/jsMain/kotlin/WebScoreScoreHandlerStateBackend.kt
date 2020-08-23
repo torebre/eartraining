@@ -16,8 +16,8 @@ import kotlin.dom.clear
 
 
 class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWithState,
-               private val svgElementId: String = "score",
-               private val allowInput: Boolean = true) {
+                                       private val svgElementId: String = "score",
+                                       private val allowInput: Boolean = true) {
 
     var activeElement: String? = null
         set(value) {
@@ -75,7 +75,7 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
     }
 
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
-        return Json.parse(RenderingSequence.serializer(), jsonData)
+        return Json.decodeFromString(RenderingSequence.serializer(), jsonData)
     }
 
     fun loadScore(renderingSequence: RenderingSequence) {
@@ -274,7 +274,6 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
                     activeElement?.let {
                         // Up
                         applyOperationAndUpdateSvg(MoveElement(it, true))
-                        regenerateSvg()
                         highLightActiveElement()
                     }
                     return true
@@ -282,7 +281,6 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
                     activeElement?.let {
                         // Down
                         applyOperationAndUpdateSvg(MoveElement(it, false))
-                        regenerateSvg()
                         highLightActiveElement()
                     }
                     return true
@@ -501,17 +499,19 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
     private fun applyOperationAndUpdateSvg(scoreOperation: ScoreOperation) {
         val applyOperation = scoreHandler.applyOperation(scoreOperation)
 
-        currentJsonScore = currentJsonScore?.let { current ->
-            if(applyOperation != null) {
-                apply_patch(current, applyOperation)
-            }
-            else {
-                current
-            }
-        }
+
+        // TODO Use patch library
+
+//        currentJsonScore = currentJsonScore?.let { current ->
+//            if (applyOperation != null) {
+//                apply_patch(current, applyOperation)
+//            } else {
+//                current
+//            }
+//        }
 
         currentJsonScore?.let {
-            generateSvgData(transformJsonToRenderingSequence(it, svgElement))
+            generateSvgData(transformJsonToRenderingSequence(it), svgElement)
         }
 
 

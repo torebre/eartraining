@@ -4,7 +4,6 @@ import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.PathInterfaceImpl
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 
 @Serializable

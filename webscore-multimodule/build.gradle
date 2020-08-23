@@ -34,7 +34,7 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationRuntime"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
                 implementation "com.github.aakira:napier:$napierVersion"
                 implementation "com.github.aakira:napier-js:$napierVersion"
                 implementation project(':scoregenerator-common')
