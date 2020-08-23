@@ -6,10 +6,11 @@
     <title>Test show score</title>
 </head>
 <body>
-<script type="text/javascript" language="JavaScript" src="jsonpatch.min.js"/>
-<script type="text/javascript" language="JavaScript" src="webscore-multimodule.js"/>
+<!--<script type="text/javascript" language="JavaScript" src="jsonpatch.min.js"/>-->
+<!-- If the form '<script type="text/javascript" src="webscore-multimodule.js"/>' is used instead it does not work in the browser -->
+<script type="text/javascript" src="webscore-multimodule.js"></script>
 
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
     let scoreHandler = webscore.WebScoreFactory.createScoreHandler();
 
     scoreHandler.insertNoteLast(2);

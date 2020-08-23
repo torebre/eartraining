@@ -22,7 +22,7 @@ ext {
     napierVersion = "0.0.3"
     assert4jVersion = '3.12.2'
     kotlinVersion = "$kotlinVersion"
-    serializationRuntime = '0.14.0'
+    serializationRuntime = '0.20.0'
     multiplatform = "$kotlinVersion"
 
     libraries = [
