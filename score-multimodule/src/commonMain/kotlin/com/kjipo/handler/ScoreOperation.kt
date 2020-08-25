@@ -5,7 +5,7 @@ import com.kjipo.score.Duration
 
 sealed class ScoreOperation
 
-class InsertNote(val id: String?, val pitch: Int? = null, val duration: Duration? = null) : ScoreOperation()
+class InsertNote(val id: String? = null, val pitch: Int? = null, val duration: Duration? = null) : ScoreOperation()
 
 class MoveElement(val id: String, val up: Boolean): ScoreOperation()
 

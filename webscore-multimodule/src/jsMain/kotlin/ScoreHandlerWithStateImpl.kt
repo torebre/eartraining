@@ -48,8 +48,6 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
 
     private fun updateCurrentScoreAndGetDiff(): String? {
         val scoreAsJson = scoreHandler.getScoreAsJson()
-
-
         val tempCurrent = currentRenderingTree
 
         if (tempCurrent == null) {
@@ -58,10 +56,11 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
         } else {
 //            apply_patch(currentRenderingTree, patch: String): String
 
-//            val patch = createPatch(tempCurrent, scoreAsJson)
-//            println("Patch: $patch")
+            currentRenderingTree = scoreAsJson
+            currentDiff = createPatch(tempCurrent, scoreAsJson)
 
-            // TODO
+            println("Patch: $currentDiff$")
+
 //            inc("1.2.3", "prerelease", "beta")
 
 

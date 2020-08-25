@@ -17,7 +17,7 @@ kotlin {
 
             // Turning of test task temporarily because of problem finding karma test library
             testTask {
-                enabled = false
+                enabled = true
 
                 useKarma {
                     useChromeHeadless()
@@ -29,7 +29,6 @@ kotlin {
     }
 
     sourceSets {
-
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
@@ -40,9 +39,9 @@ kotlin {
                 implementation project(':scoregenerator-common')
                 implementation project(':score-multimodule')
 
-//                implementation(npm("rfc6902", "3.0.4"))
-//                implementation(npm("semver", "7.3.2"))
-//                implementation(npm("is-sorted", "1.0.5"))
+                implementation(npm("rfc6902", "3.0.4"))
+                implementation(npm("semver", "7.3.2"))
+                implementation(npm("is-sorted", "1.0.5"))
             }
         }
         jsTest {

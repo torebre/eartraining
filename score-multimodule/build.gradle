@@ -1,18 +1,12 @@
 buildscript {
-//    ext.serialization_version = '0.20.0'
-
     repositories {
         mavenCentral()
         jcenter()
     }
-//    dependencies {
-//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-//        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-//    }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform' // version '1.4.0'
+    id 'org.jetbrains.kotlin.multiplatform'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.0'
 }
 
