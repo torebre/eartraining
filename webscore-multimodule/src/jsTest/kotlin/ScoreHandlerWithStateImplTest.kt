@@ -25,9 +25,6 @@ class ScoreHandlerWithStateImplTest {
 //        println("Test23: ${js("""semver.inc('1.2.3', 'prerelease', 'beta');""")}")
 //        inc("1.2.3", "prerelease", "beta")
 
-        console.log("Hello, Kotlin/JS!")
-        console.log(sorted(arrayOf(1,2,3)))
-        console.log(sorted(arrayOf(3,1,2)))
 
 
 //        val objectMapper = ObjectMapper()
