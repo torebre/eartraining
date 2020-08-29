@@ -2,6 +2,7 @@ import com.kjipo.handler.InsertNote
 import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreOperation
 import com.kjipo.score.Duration
+import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
 class ScoreHandlerWithStateImplTest {
@@ -50,9 +51,46 @@ class ScoreHandlerWithStateImplTest {
 
         println("State diff: $stateDiff")
 
+        val currentScore = scoreHandlerState.getScoreAsJson()
         val stateDiff2 = scoreHandlerState.applyOperation(InsertNote(duration = Duration.QUARTER))
 
         println("State diff2: $stateDiff2")
+
+        println("Score before applying patch: $currentScore")
+        stateDiff2?.apply {
+            println("Applying patch")
+
+//            val result = rfc6902.applyPatch(currentScore, stateDiff2)
+//            println("Result of applying patch: $result")
+
+//            println("Score after patch: $currentScore")
+        }
+
+
+    }
+
+    class Person {
+        var first: String? = ""
+
+    }
+
+    @Test
+    fun patchTest() {
+        var oldData = "{ \"first\": \"Chris\" }"
+        var parsedObject = JSON.parse<Person>(oldData)
+        var newDataObject = JSON.parse<Any>("""{"first": "Chris", "last": "Brown"}""")
+
+        val result = rfc6902.createPatch(parsedObject, newDataObject)
+
+        println("Operations:")
+        for(operation in result) {
+            println("Operation: ${operation.op}")
+        }
+
+        println("Data before applying patch: ${JSON.stringify(parsedObject)}")
+        val patchOperationResult = rfc6902.applyPatch(parsedObject, result)
+
+        println("Data after applying patch: ${JSON.stringify(parsedObject)}")
 
     }
 

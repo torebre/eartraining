@@ -1,18 +1,17 @@
 import com.github.aakira.napier.Napier
 import com.kjipo.handler.*
-import com.kjipo.score.Accidental
 import com.kjipo.score.PositionedRenderingElement
 import com.kjipo.score.RenderingSequence
 import com.kjipo.score.Translation
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
+import kotlinx.browser.document
+import kotlinx.dom.clear
 import kotlinx.serialization.json.Json
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
-import kotlinx.browser.document
-import kotlinx.dom.clear
 
 class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWithState,
                                        private val svgElementId: String = "score",
@@ -55,7 +54,10 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
             createdElement
         }
         setupEventHandling()
-        loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
+
+        currentJsonScore = scoreHandler.getScoreAsJson().also {
+            loadScore(transformJsonToRenderingSequence(it))
+        }
     }
 
     @JsName("reload")
@@ -495,19 +497,24 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
         }
     }
 
-    private fun applyOperationAndUpdateSvg(scoreOperation: ScoreOperation) {
+    fun applyOperationAndUpdateSvg(scoreOperation: ScoreOperation) {
         val applyOperation = scoreHandler.applyOperation(scoreOperation)
 
 
-        // TODO Use patch library
+        currentJsonScore?.let { current ->
 
-//        currentJsonScore = currentJsonScore?.let { current ->
-//            if (applyOperation != null) {
-//                apply_patch(current, applyOperation)
-//            } else {
-//                current
-//            }
-//        }
+            var temp = current
+            if (applyOperation != null) {
+                // TODO Update score
+//                val updateScore = rfc6902.applyPatch(temp, applyOperation)
+
+//                println("Updated score: $updateScore")
+
+            } else {
+                current
+            }
+
+        }
 
         currentJsonScore?.let {
             generateSvgData(transformJsonToRenderingSequence(it), svgElement)

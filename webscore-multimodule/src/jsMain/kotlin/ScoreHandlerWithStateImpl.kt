@@ -55,9 +55,13 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
             currentDiff = scoreAsJson
         } else {
             currentRenderingTree = scoreAsJson
-            currentDiff = rfc6902.createPatch(tempCurrent, scoreAsJson)
 
-            println("Patch: $currentDiff")
+            // TODO Apply patch
+//            currentDiff = rfc6902.createPatch(tempCurrent, scoreAsJson)
+//
+//            println("Old score: $tempCurrent")
+//            println("Updated score: $scoreAsJson")
+//            println("Patch: $currentDiff")
 
 
 
