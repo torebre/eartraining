@@ -3,6 +3,7 @@ package com.kjipo.handler
 import com.github.aakira.napier.Napier
 import com.kjipo.score.*
 import kotlinx.serialization.json.Json
+import kotlin.math.truncate
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
@@ -18,7 +19,37 @@ class ScoreHandler : ScoreHandlerInterface {
     private var trimEndBars = true
 
 
-    override fun getScoreAsJson() = Json.encodeToString(RenderingSequence.serializer(), build())
+    override fun getScoreAsJson() = truncateNumbers(Json.encodeToString(RenderingSequence.serializer(), build()))
+
+    /**
+     * It is not necessary to include too many decimal places in the JSON output. This method is a quick fix for truncating the number of decimals in the output.
+     */
+    private fun truncateNumbers(scoreAsJsonString: String, decimalPlacesToInclude: Int = 4): String {
+        val regexp = Regex("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?")
+        val matchResults = regexp.findAll(scoreAsJsonString)
+
+        val numbersToReplace = matchResults.map {
+            val indexOfSeparator = it.value.indexOf('.')
+
+            if (indexOfSeparator == -1) {
+                null
+            } else {
+                val decimalPoints = it.value.substring(indexOfSeparator + 1)
+                if (decimalPoints.length > decimalPlacesToInclude) {
+                    Pair(it.value, it.value.substring(0, indexOfSeparator + decimalPlacesToInclude + 1))
+                } else {
+                    null
+                }
+            }
+        }.filterNotNull().toList()
+
+        var scoreWithShortenedNumbers = scoreAsJsonString
+        for (numberToReplace in numbersToReplace) {
+            scoreWithShortenedNumbers = scoreWithShortenedNumbers.replace(numberToReplace.first, numberToReplace.second)
+        }
+
+        return scoreWithShortenedNumbers
+    }
 
     fun clear() {
         idCounter = 0

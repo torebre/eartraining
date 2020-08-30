@@ -145,39 +145,6 @@ class ScoreHandlerWithStateImplTest {
 
         println("Current score: $currentScore")
 
-
-        val timeNow = currentTimeMillis()
-        val regexp = Regex("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?")
-        val matchResults = regexp.findAll(currentScore)
-
-        println("Time used: ${currentTimeMillis() - timeNow}")
-
-        for (matchResult in matchResults) {
-            println("Match result: ${matchResult.value}")
-        }
-
-        val numbersToReplace = matchResults.map {
-            val indexOfSeparator = it.value.indexOf('.')
-
-            if (indexOfSeparator == -1) {
-                null
-            } else {
-                val decimalPoints = it.value.substring(indexOfSeparator + 1)
-                if (decimalPoints.length > 4) {
-                    Pair(it.value, it.value.substring(0, indexOfSeparator + 5))
-                } else {
-                    null
-                }
-            }
-        }.filterNotNull().toList()
-
-        var scoreWithShortenedNumbers = currentScore
-        for (numberToReplace in numbersToReplace) {
-            scoreWithShortenedNumbers = scoreWithShortenedNumbers.replace(numberToReplace.first, numberToReplace.second)
-        }
-
-        println("Score with shortened numbers: $scoreWithShortenedNumbers")
-
 //        val renderingSequence = scoreHandler.build()
 
 //        val renderingSequenceJson = Json.encodeToString(DoubleDecimalPointsSerializer, renderingSequence)
