@@ -27,6 +27,11 @@ import javax.xml.transform.TransformerException
 import com.kjipo.svg.invertYCoordinates
 import com.kjipo.svg.offSetBoundingBox
 import com.kjipo.svg.processPath
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
 import java.lang.RuntimeException
 
 
@@ -377,36 +382,34 @@ object ReadFonts {
     }
 
 
-    private fun writeKotlinData(glyphs: Collection<GlyphData>, outputStreamWriter: OutputStreamWriter) {
+    private fun writeKotlinData(glyphs: Collection<GlyphData>, outputStreamWriter: OutputStreamWriter, numberOfDecimalPoints: Int = 4) {
         outputStreamWriter.write("mapOf(")
 
-        outputStreamWriter.write(glyphs.map {
-            var result = """Pair("${it.name}", """
+        outputStreamWriter.write(glyphs.map { glyphData ->
+            var result = """Pair("${glyphData.name}", """
 
-            val pathElements = it.pathElements.map {
-                val numbers = it.numbers.mapIndexed({ _, value ->
-                    value.toString()
-                }).joinToString()
+            val pathElements = glyphData.pathElements.map {
+                val numbers = it.numbers.mapIndexed { _, value ->
+                    formatDouble(value, numberOfDecimalPoints)
+                }.joinToString()
 
                 "PathElement(PathCommand.${it.command}, listOf(${numbers}))".trimIndent()
             }.joinToString()
 
-
-
-            result += """
-                GlyphData("${it.name}", listOf($pathElements), ${it.strokeWidth},
-                BoundingBox(${it.boundingBox.xMin}, ${it.boundingBox.yMin}, ${it.boundingBox.xMax}, ${it.boundingBox.yMax})))
-
+            with(glyphData) {
+                result += """
+                GlyphData("${name}", listOf($pathElements), ${strokeWidth},
+                BoundingBox(${formatDouble(boundingBox.xMin, numberOfDecimalPoints)}, ${formatDouble(boundingBox.yMin, numberOfDecimalPoints)}, ${formatDouble(boundingBox.xMax, numberOfDecimalPoints)}, ${formatDouble(boundingBox.yMax, numberOfDecimalPoints)})))
             """.trimIndent()
-
+            }
             result
-
         }.joinToString())
 
         outputStreamWriter.write(")")
-
-
     }
+
+    private fun formatDouble(value: Double, numberOfDecimalPoints: Int) =
+            "%.${numberOfDecimalPoints}f".format(value)
 
     /**
      * Creates an XML-document that can be opened in a browser and that can be used to see what the glyphs look like
@@ -470,7 +473,6 @@ object ReadFonts {
                         "rests.0", "rests.0o", "accidentals.sharp", "accidentals.flat", "flags.d3", "flags.u3"), inputData, it)
             }
         }
-
 
 //        val charactersToInclude = setOf(
 //                "zero",

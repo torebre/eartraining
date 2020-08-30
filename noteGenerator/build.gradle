@@ -3,15 +3,17 @@ apply plugin: 'kotlin'
 
 description = ''
 dependencies {
-    compile libraries.kotlin_stdlib
-    compile project(':scoregenerator-common')
-    compile project(':scorebuilder')
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
-    compile group: 'com.google.guava', name: 'guava', version: '22.0'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.jetbrains.kotlin', name: 'kotlin-test-junit', version: '1.2.41'
-    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+    implementation libraries.kotlin_stdlib
+    implementation project(':scoregenerator-common')
+    implementation project(':scorebuilder')
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
+    implementation group: 'com.google.guava', name: 'guava', version: '22.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.jetbrains.kotlin', name: 'kotlin-test-junit', version: '1.2.41'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.12.2'
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
 }

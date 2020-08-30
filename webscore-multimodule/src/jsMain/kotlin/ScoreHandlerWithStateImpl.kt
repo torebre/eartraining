@@ -3,6 +3,7 @@ import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreHandlerWithState
 import com.kjipo.handler.ScoreOperation
 import com.kjipo.score.Duration
+import kotlinx.serialization.UseSerializers
 
 class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreHandlerWithState {
     private var currentRenderingTree: String? = null
@@ -52,21 +53,19 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
 
         if (tempCurrent == null) {
             currentRenderingTree = scoreAsJson
-            currentDiff = scoreAsJson
+            currentDiff = null
         } else {
             currentRenderingTree = scoreAsJson
 
-            // TODO Apply patch
-//            currentDiff = rfc6902.createPatch(tempCurrent, scoreAsJson)
-//
-//            println("Old score: $tempCurrent")
-//            println("Updated score: $scoreAsJson")
-//            println("Patch: $currentDiff")
+            val currentContextParsed = JSON.parse<Any>(tempCurrent)
+            val updatedDataParsed = JSON.parse<Any>(scoreAsJson)
+            val patchOperations = rfc6902.createPatch(currentContextParsed, updatedDataParsed)
 
+            println("Old score: $tempCurrent")
+            println("Updated score: $scoreAsJson")
+            println("Patch: $currentDiff")
 
-
-//            currentDiff = JsonDiff.asJson(currentRenderingTree, newTree).asText()
-//            currentRenderingTree = newTree
+            currentDiff = JSON.stringify(patchOperations)
         }
 
         return currentDiff
