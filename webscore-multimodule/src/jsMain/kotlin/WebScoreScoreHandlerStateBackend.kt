@@ -507,7 +507,6 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
             if (applyOperation != null) {
                 // TODO Update score
 //                val updateScore = rfc6902.applyPatch(temp, applyOperation)
-
 //                println("Updated score: $updateScore")
 
             } else {

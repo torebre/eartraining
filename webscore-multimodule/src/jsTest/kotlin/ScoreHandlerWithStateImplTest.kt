@@ -98,9 +98,9 @@ class ScoreHandlerWithStateImplTest {
 
     @Test
     fun patchTest() {
-        var oldData = "{ \"first\": \"Chris\" }"
-        var parsedObject = JSON.parse<Any>(oldData)
-        var newDataObject = JSON.parse<Any>("""{"first": "Chris", "last": "Brown"}""")
+        val oldData = "{ \"first\": \"Chris\" }"
+        val parsedObject = JSON.parse<Any>(oldData)
+        val newDataObject = JSON.parse<Any>("""{"first": "Chris", "last": "Brown"}""")
 
         val result = rfc6902.createPatch(parsedObject, newDataObject)
 
@@ -110,9 +110,12 @@ class ScoreHandlerWithStateImplTest {
         }
 
         println("Data before applying patch: ${JSON.stringify(parsedObject)}")
+        // The operations are applied to parsedObject in place
         val patchOperationResult = rfc6902.applyPatch(parsedObject, result)
 
         println("Data after applying patch: ${JSON.stringify(parsedObject)}")
+
+        assertEquals(JSON.stringify(newDataObject), JSON.stringify(parsedObject))
     }
 
     object DoubleDecimalPointsSerializer : KSerializer<Double> {

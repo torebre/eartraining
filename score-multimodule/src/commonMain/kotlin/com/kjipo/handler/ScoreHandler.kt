@@ -36,7 +36,18 @@ class ScoreHandler : ScoreHandlerInterface {
             } else {
                 val decimalPoints = it.value.substring(indexOfSeparator + 1)
                 if (decimalPoints.length > decimalPlacesToInclude) {
-                    Pair(it.value, it.value.substring(0, indexOfSeparator + decimalPlacesToInclude + 1))
+                    var numberAsString = it.value.substring(0, indexOfSeparator + decimalPlacesToInclude + 1)
+                    // Remove unnecessary trailing 0 after the decimal point
+                    while(numberAsString.endsWith('0')) {
+                        numberAsString = numberAsString.substring(0, numberAsString.length - 1)
+                    }
+                    if(numberAsString.endsWith('.')) {
+                        numberAsString = numberAsString.substring(0, numberAsString.length - 1)
+                    }
+                    if(numberAsString == "-0") {
+                        numberAsString = "0"
+                    }
+                    Pair(it.value, numberAsString)
                 } else {
                     null
                 }
