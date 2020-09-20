@@ -12,10 +12,9 @@ plugins {
 
 
 
-group 'com.kjipo'
-version '0.5-SNAPSHOT'
-
-apply plugin: 'maven-publish'
+//group 'com.kjipo'
+//version '0.5-SNAPSHOT'
+//apply plugin: 'maven-publish'
 
 repositories {
     mavenCentral()

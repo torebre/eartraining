@@ -1,4 +1,4 @@
-@file:UseSerializers(ScoreHandlerWithStateImplTest.DoubleDecimalPointsSerializer::class)
+//@file:UseSerializers(ScoreHandlerWithStateImplTest.DoubleDecimalPointsSerializer::class)
 
 import com.kjipo.handler.InsertNote
 import com.kjipo.handler.ScoreHandler
@@ -91,8 +91,6 @@ class ScoreHandlerWithStateImplTest {
         println("Updated score from handler: $updatedScoreFromHandler")
 
         assertEquals(updatedScoreFromHandler, updatedScore)
-
-
     }
 
 
@@ -118,21 +116,21 @@ class ScoreHandlerWithStateImplTest {
         assertEquals(JSON.stringify(newDataObject), JSON.stringify(parsedObject))
     }
 
-    object DoubleDecimalPointsSerializer : KSerializer<Double> {
-        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Double", PrimitiveKind.DOUBLE)
-
-        override fun serialize(encoder: Encoder, value: Double) {
-            val numberOfDecimalPoints = 4
-
-            val formattedValue: String = value.asDynamic().toFixed(numberOfDecimalPoints)
-            encoder.encodeString(formattedValue)
-        }
-
-        override fun deserialize(decoder: Decoder): Double {
-            return decoder.decodeDouble()
-        }
-
-    }
+//    object DoubleDecimalPointsSerializer : KSerializer<Double> {
+//        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Double", PrimitiveKind.DOUBLE)
+//
+//        override fun serialize(encoder: Encoder, value: Double) {
+//            val numberOfDecimalPoints = 4
+//
+//            val formattedValue: String = value.asDynamic().toFixed(numberOfDecimalPoints)
+//            encoder.encodeString(formattedValue)
+//        }
+//
+//        override fun deserialize(decoder: Decoder): Double {
+//            return decoder.decodeDouble()
+//        }
+//
+//    }
 
 
     @Test

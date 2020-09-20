@@ -61,9 +61,9 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
             val updatedDataParsed = JSON.parse<Any>(scoreAsJson)
             val patchOperations = rfc6902.createPatch(currentContextParsed, updatedDataParsed)
 
-            println("Old score: $tempCurrent")
-            println("Updated score: $scoreAsJson")
-            println("Patch: $currentDiff")
+//            println("Old score: $tempCurrent")
+//            println("Updated score: $scoreAsJson")
+//            println("Patch: $currentDiff")
 
             currentDiff = JSON.stringify(patchOperations)
         }

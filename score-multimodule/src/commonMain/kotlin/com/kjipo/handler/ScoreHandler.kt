@@ -38,13 +38,13 @@ class ScoreHandler : ScoreHandlerInterface {
                 if (decimalPoints.length > decimalPlacesToInclude) {
                     var numberAsString = it.value.substring(0, indexOfSeparator + decimalPlacesToInclude + 1)
                     // Remove unnecessary trailing 0 after the decimal point
-                    while(numberAsString.endsWith('0')) {
+                    while (numberAsString.endsWith('0')) {
                         numberAsString = numberAsString.substring(0, numberAsString.length - 1)
                     }
-                    if(numberAsString.endsWith('.')) {
+                    if (numberAsString.endsWith('.')) {
                         numberAsString = numberAsString.substring(0, numberAsString.length - 1)
                     }
-                    if(numberAsString == "-0") {
+                    if (numberAsString == "-0") {
                         numberAsString = "0"
                     }
                     Pair(it.value, numberAsString)
@@ -70,6 +70,13 @@ class ScoreHandler : ScoreHandlerInterface {
 
     fun build(): RenderingSequence {
         val scoreSetup = ScoreSetup()
+
+        // This is to make the IDs the same every time the score is rendered. It is needed to make tests for the diff-functionality pass
+        NoteElement.noteElementIdCounter = 0
+        BarData.barNumber = 0
+        BarData.stemCounter = 0
+        ExtraBarLinesElement.idCounter = 0
+
 
         // TODO Not necessary to have this here. Beams should be computed automatically below
         scoreSetup.beams.addAll(beams)

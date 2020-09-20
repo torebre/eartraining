@@ -2,9 +2,17 @@ import com.kjipo.handler.InsertNote
 import com.kjipo.handler.ScoreHandler
 import com.kjipo.score.Duration
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class DiffTests {
+
+
+    @Test
+    fun thingsShouldWork() {
+        assertEquals(listOf(1,2,3).reversed(), listOf(3,2,1))
+    }
 
     @Test
     fun testDiff() {
@@ -22,8 +30,6 @@ class DiffTests {
         val webScore = WebScoreScoreHandlerStateBackend(scoreHandlerWithState)
 
         webScore.applyOperationAndUpdateSvg(InsertNote(duration = Duration.HALF))
-
-
 
 
     }
