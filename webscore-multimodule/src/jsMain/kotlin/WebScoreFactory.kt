@@ -1,4 +1,5 @@
 import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerWithState
 
 object WebScoreFactory {
 
@@ -8,4 +9,9 @@ object WebScoreFactory {
     @JsName("createWebScore")
     fun createWebScore(scoreHandlerJavaScript: ScoreHandlerJavaScript) = WebScore(scoreHandlerJavaScript)
 
+    @JsName("createScoreHandlerWithState")
+    fun createWebscoreHandlerWithState() = ScoreHandlerWithStateImpl(ScoreHandler())
+
+    @JsName("createWebscoreHandlerStateBackend")
+    fun createWebscoreHandlerStateBackend(scoreHandlerWithState: ScoreHandlerWithState) = WebScoreScoreHandlerStateBackend(scoreHandlerWithState)
 }

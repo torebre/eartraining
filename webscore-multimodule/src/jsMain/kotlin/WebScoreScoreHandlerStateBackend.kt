@@ -522,4 +522,8 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
 
     }
 
+
+    fun getCurrentJson() = currentJsonScore
+
+
 }

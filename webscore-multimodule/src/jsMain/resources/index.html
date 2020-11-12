@@ -10,14 +10,22 @@
 <!-- If the form '<script type="text/javascript" src="webscore-multimodule.js"/>' is used instead it does not work in the browser -->
 <script type="text/javascript" src="webscore-multimodule.js"></script>
 
+<!--<script type="text/javascript">-->
+<!--    let scoreHandler = webscore.WebScoreFactory.createScoreHandler();-->
+
+<!--    scoreHandler.insertNoteLast(2);-->
+<!--    scoreHandler.insertNoteLast(3);-->
+
+<!--    let newWebscore = webscore.WebScoreFactory.createWebScore(scoreHandler);-->
+<!--</script>-->
+
 <script type="text/javascript">
-    let scoreHandler = webscore.WebScoreFactory.createScoreHandler();
+    let scoreHandlerWithState = webscore.WebScoreFactory.createScoreHandlerWithState()
 
-    scoreHandler.insertNoteLast(2);
-    scoreHandler.insertNoteLast(3);
-
-    let newWebscore = webscore.WebScoreFactory.createWebScore(scoreHandler);
+    let diff = scoreHandlerWithState.applyOperation(webscore.InsertNote(null, duration = webscore.com.kjipo.score.Duration.QUARTER))
+    // scoreHandler.insertNoteLast(2);
+    // scoreHandler.insertNoteLast(3);
+    let webscoreHandlerBackEnd = webscore.WebScoreFactory.createWebscoreHandlerStateBackend(scoreHandlerWithState)
 </script>
-
 </body>
 </html>

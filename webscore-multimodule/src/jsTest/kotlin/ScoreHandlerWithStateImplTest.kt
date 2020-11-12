@@ -116,23 +116,6 @@ class ScoreHandlerWithStateImplTest {
         assertEquals(JSON.stringify(newDataObject), JSON.stringify(parsedObject))
     }
 
-//    object DoubleDecimalPointsSerializer : KSerializer<Double> {
-//        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Double", PrimitiveKind.DOUBLE)
-//
-//        override fun serialize(encoder: Encoder, value: Double) {
-//            val numberOfDecimalPoints = 4
-//
-//            val formattedValue: String = value.asDynamic().toFixed(numberOfDecimalPoints)
-//            encoder.encodeString(formattedValue)
-//        }
-//
-//        override fun deserialize(decoder: Decoder): Double {
-//            return decoder.decodeDouble()
-//        }
-//
-//    }
-
-
     @Test
     fun serializationTest() {
         val scoreHandler = ScoreHandler()

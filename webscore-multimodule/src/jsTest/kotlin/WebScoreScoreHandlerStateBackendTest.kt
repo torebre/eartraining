@@ -8,12 +8,6 @@ import kotlin.test.assertTrue
 
 class DiffTests {
 
-
-    @Test
-    fun thingsShouldWork() {
-        assertEquals(listOf(1,2,3).reversed(), listOf(3,2,1))
-    }
-
     @Test
     fun testDiff() {
         val scoreHandler = ScoreHandler()
@@ -31,6 +25,7 @@ class DiffTests {
 
         webScore.applyOperationAndUpdateSvg(InsertNote(duration = Duration.HALF))
 
+        println("Current JSON: ${webScore.getCurrentJson()}")
 
     }
 
