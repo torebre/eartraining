@@ -19,12 +19,13 @@
 <!--    let newWebscore = webscore.WebScoreFactory.createWebScore(scoreHandler);-->
 <!--</script>-->
 
+<!-- Using score handler where only the diff is sent -->
 <script type="text/javascript">
     let scoreHandlerWithState = webscore.WebScoreFactory.createScoreHandlerWithState()
 
-    let diff = scoreHandlerWithState.applyOperation(webscore.InsertNote(null, duration = webscore.com.kjipo.score.Duration.QUARTER))
-    // scoreHandler.insertNoteLast(2);
-    // scoreHandler.insertNoteLast(3);
+    let scoreHandlerInterface = webscore.WebScoreFactory.createScoreManipulationInterface(scoreHandlerWithState)
+    scoreHandlerInterface.insertNoteLast(2);
+    scoreHandlerInterface.insertNoteLast(1);
     let webscoreHandlerBackEnd = webscore.WebScoreFactory.createWebscoreHandlerStateBackend(scoreHandlerWithState)
 </script>
 </body>
