@@ -293,6 +293,9 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
     }
 
     private fun handleKeyEvent(code: String, keyCode: Int) {
+
+        println("Processing event: $code. Key code: $keyCode")
+
         when (code) {
             "ArrowUp" -> activeElement?.let {
                 // Up
@@ -498,11 +501,13 @@ class WebScoreScoreHandlerStateBackend(private val scoreHandler: ScoreHandlerWit
     }
 
     fun applyOperationAndUpdateSvg(scoreOperation: ScoreOperation) {
+        println("Applying operation: ${scoreOperation}")
+
         val applyOperation = scoreHandler.applyOperation(scoreOperation)
 
+        println("Result of apply operation: $applyOperation")
 
         currentJsonScore?.let { current ->
-
             var temp = current
             if (applyOperation != null) {
                 // TODO Update score

@@ -3,6 +3,7 @@ import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreHandlerWithState
 import com.kjipo.handler.ScoreOperation
 import com.kjipo.score.Duration
+import kotlinx.html.currentTimeMillis
 import kotlinx.serialization.UseSerializers
 
 class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreHandlerWithState {
@@ -13,6 +14,9 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
     override fun applyOperation(operation: ScoreOperation): String? {
         when (operation) {
             is InsertNote -> {
+
+                println("Insert note: $operation")
+
                 handleInsertNote(operation)
 
 
@@ -20,14 +24,23 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
             else -> {
                 // TODO
 
+//                println("Test23")
+
             }
 
             // TODO
 
+//            print("Test24")
+
 
         }
 
+        println("Test25")
+
         updateCurrentScoreAndGetDiff()
+
+        println("Test26: $currentDiff")
+
         return currentDiff
     }
 
@@ -59,11 +72,14 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
 
             val currentContextParsed = JSON.parse<Any>(tempCurrent)
             val updatedDataParsed = JSON.parse<Any>(scoreAsJson)
-            val patchOperations = rfc6902.createPatch(currentContextParsed, updatedDataParsed)
 
-//            println("Old score: $tempCurrent")
-//            println("Updated score: $scoreAsJson")
-//            println("Patch: $currentDiff")
+            val start = currentTimeMillis()
+            val patchOperations = rfc6902.createPatch(currentContextParsed, updatedDataParsed)
+            println("Time to create patch: ${(currentTimeMillis() - start) / 1000}")
+
+            println("Old score: $tempCurrent")
+            println("Updated score: $scoreAsJson")
+            println("Patch: $currentDiff")
 
             currentDiff = JSON.stringify(patchOperations)
         }

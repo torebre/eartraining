@@ -23,7 +23,7 @@ ext {
     assert4jVersion = '3.12.2'
     kotlinVersion = '1.4.0'
     serializationRuntime = '1.0.0-RC' // 0.20.0'
-    multiplatform = "$kotlinVersion"
+    multiplatform = '$kotlinVersion'
 
     libraries = [
             junit                         : "junit:junit:4.12",

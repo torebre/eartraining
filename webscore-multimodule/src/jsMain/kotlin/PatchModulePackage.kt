@@ -4,6 +4,7 @@
 //https://discuss.kotlinlang.org/t/how-to-configure-new-kotlinjs-plugin/14105
 
 @file:JsModule("rfc6902")
+@file:JsNonModule
 
 package rfc6902
 

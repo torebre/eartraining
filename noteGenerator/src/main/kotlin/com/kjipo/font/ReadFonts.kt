@@ -159,17 +159,10 @@ object ReadFonts {
                     .collect(Collectors.toList())
         }
 
-
         val rootElement = doc.documentElement
-
-
         glyphDataCollection.stream()
-                .filter { it ->
-                    if (glyphNames == null) {
-                        true
-                    } else {
-                        glyphNames.contains(it.name)
-                    }
+                .filter {
+                    glyphNames?.contains(it.name) ?: true
                 }
                 .forEach {
                     addElementsToDocument(doc, currentY, it.name, setOf(it))
@@ -304,8 +297,6 @@ object ReadFonts {
     fun extractGlyphFromFile(glyphName: String, inputStream: InputStream): List<CoordinatePair> {
         val inputFactory = XMLInputFactory.newFactory()
         val xmlEventReader = inputFactory.createXMLStreamReader(inputStream, StandardCharsets.UTF_8.name())
-        val namePathMapping = HashMap<String, String>()
-        val fontBoundingBox: DoubleArray? = null
 
         while (xmlEventReader.hasNext()) {
             xmlEventReader.next()
@@ -435,6 +426,28 @@ object ReadFonts {
     }
 
 
+    /**
+     * Used to get path data for vector graphics shown on the note selection buttons in the app
+     */
+    private fun writeGlyphDataToConsole() {
+        val glyphsToInclude = listOf("noteheads.s2", "noteheads.s1", "noteheads.s0")
+//        writeGlyphWithBoundingBoxToFile(glyphsToInclude, Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg"),
+//                Paths.get("temp_glyphs.xml"), 0.1)
+
+        FileInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg").toFile()).use { inputStream ->
+            extractGlyphPaths(inputStream).stream()
+                    .filter { it.name in glyphsToInclude }
+                    .map { invertYCoordinates(it) }
+                    .map { glyphData -> scaleGlyph(glyphData, 0.1) }
+                    .forEach {
+                        val pathString = transformToSquare2(it.pathElements, 0, 0)
+                        val boundingBox = findBoundingBox(it.pathElements)
+
+                        println("Name: ${it.name} Bounding box: $boundingBox Path: $pathString")
+                    }
+        }
+    }
+
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
@@ -466,13 +479,13 @@ object ReadFonts {
         //        Path svgFontFile = Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg");
 
 
-        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg")).use { inputData ->
-            OutputStreamWriter(System.out).use {
-                writeKotlinData(listOf("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0", "rests.M3", "rests.M2", "rests.M1", "rests.2",
-                        "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
-                        "rests.0", "rests.0o", "accidentals.sharp", "accidentals.flat", "flags.d3", "flags.u3"), inputData, it)
-            }
-        }
+//        Files.newInputStream(Paths.get("/home/student/Documents/gonville-r9313/lilyfonts/svg/emmentaler-11.svg")).use { inputData ->
+//            OutputStreamWriter(System.out).use {
+//                writeKotlinData(listOf("clefs.G", "noteheads.s2", "noteheads.s1", "noteheads.s0", "rests.M3", "rests.M2", "rests.M1", "rests.2",
+//                        "rests.2classical", "rests.5", "rests.6", "rests.7", "rests.1", "rests.3", "rests.4",
+//                        "rests.0", "rests.0o", "accidentals.sharp", "accidentals.flat", "flags.d3", "flags.u3"), inputData, it)
+//            }
+//        }
 
 //        val charactersToInclude = setOf(
 //                "zero",

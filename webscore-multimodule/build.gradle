@@ -8,9 +8,12 @@ repositories {
 kotlin {
     js {
         browser {
-            useCommonJs()
+//            useCommonJs()
             webpackTask {
                 sourceMaps = false
+//                moduleKind = "plain"
+                output.libraryTarget = "global"
+                output.library = "webscore"
             }
 
             testTask {

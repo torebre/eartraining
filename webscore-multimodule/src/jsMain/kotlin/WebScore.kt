@@ -10,8 +10,8 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
-import kotlin.browser.document
-import kotlin.dom.clear
+import kotlinx.browser.document
+import kotlinx.dom.clear
 
 
 class WebScore(private val scoreHandler: ScoreHandlerJavaScript,

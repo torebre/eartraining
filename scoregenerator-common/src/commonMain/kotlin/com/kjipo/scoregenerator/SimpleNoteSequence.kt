@@ -18,7 +18,15 @@ data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
             val durationInMilliseconds = getDurationInMilliseconds(element.duration)
 
             if (element is NoteSequenceElement.NoteElement) {
-                pitchSequence.add(Pitch(idCounter++.toString(), timeCounter, timeCounter + durationInMilliseconds, getPitch(element.note, element.octave), element.duration))
+                pitchSequence.add(
+                    Pitch(
+                        idCounter++.toString(),
+                        timeCounter,
+                        timeCounter + durationInMilliseconds,
+                        getPitch(element.note, element.octave),
+                        element.duration
+                    )
+                )
             }
             timeCounter += durationInMilliseconds
         }
@@ -32,11 +40,34 @@ data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
 
 sealed class NoteSequenceElement(val duration: Duration) {
 
-    class NoteElement(val note: NoteType,
-                      val octave: Int,
-                      duration: Duration) : NoteSequenceElement(duration)
+    class MultipleNotesElement(val elements: Collection<NoteElement>, duration: Duration) :
+        NoteSequenceElement(duration) {
 
-    class RestElement(duration: Duration) : NoteSequenceElement(duration)
+        override fun toString(): String {
+            return "MultipleNotesElement(elements=$elements) ${super.toString()}"
+        }
+    }
 
+    class NoteElement(
+        val note: NoteType,
+        val octave: Int,
+        duration: Duration
+    ) : NoteSequenceElement(duration) {
+
+        override fun toString(): String {
+            return "NoteElement(note=$note, octave=$octave) ${super.toString()}"
+        }
+    }
+
+    class RestElement(duration: Duration) : NoteSequenceElement(duration) {
+
+        override fun toString(): String {
+            return "RestElement() ${super.toString()}"
+        }
+    }
+
+    override fun toString(): String {
+        return "NoteSequenceElement(duration=$duration)"
+    }
 
 }

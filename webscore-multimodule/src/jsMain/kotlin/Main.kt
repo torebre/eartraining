@@ -1,3 +1,6 @@
+//import com.kjipo.handler.ScoreHandler
+//import com.kjipo.score.Duration
+
 // Uncommenting the following will set up an empty webscore automatically when the Javascript in the built module is run
 //val scoreHandler = ScoreHandlerJavaScript(ScoreHandler())
 //val intialWebscore = WebScore(scoreHandler)
