@@ -407,6 +407,9 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
         }
 
         renderingSequence.renderGroups.forEach { renderGroup ->
+
+            println("Render group elements: ${renderGroup.renderingElements.size }. Translation: ${renderGroup.transform}")
+
             val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
                 val translation = renderGroup.transform ?: Translation(0, 0)
                 svgElement.ownerDocument?.let {

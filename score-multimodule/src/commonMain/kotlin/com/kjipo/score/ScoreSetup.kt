@@ -20,6 +20,7 @@ class ScoreSetup : ScoreState {
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
 
+        // TODO Should also add glyphs from note groups
         bars.flatMap { it.scoreRenderingElements }
                 .filter { it is NoteElement }
                 .map { it as NoteElement }
@@ -136,7 +137,7 @@ class ScoreSetup : ScoreState {
         val definitions = mutableMapOf<String, GlyphData>()
         renderingSequences.flatMap { it.definitions.entries }.forEach {
             if (!definitions.containsKey(it.key)) {
-                definitions.put(it.key, it.value)
+                definitions[it.key] = it.value
             }
         }
 

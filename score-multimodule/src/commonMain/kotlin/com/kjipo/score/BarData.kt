@@ -42,18 +42,46 @@ class BarData(private val debug: Boolean = false) {
         var tickCounter = 0
 
         for (scoreRenderingElement in scoreRenderingElements) {
+
+            println("Test30: ${scoreRenderingElement::class}")
+
             when (scoreRenderingElement) {
                 is TemporalElement -> {
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     var yPosition = barYoffset
                     val elements = mutableListOf<PositionedRenderingElement>()
 
+
+                    println("Test29: ${scoreRenderingElement.id}, ${scoreRenderingElement::class}")
+
                     scoreRenderingElement.xPosition = 0
 
                     if (scoreRenderingElement is NoteElement) {
                         yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
 
+                        println("Test28: ${yPosition}, ${scoreRenderingElement.yPosition}")
+
                         if (scoreRenderingElement.requiresStem()) {
+                            scoreRenderingElement.stem = scoreState.stemUp(scoreRenderingElement.id)
+
+                            if (scoreRenderingElement.stem == Stem.UP) {
+                                // Use the bounding box for the note head of a half note to determine
+                                // how far to move the stem so that it is on the right side of the note head
+                                val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
+                                definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
+                            } else if (scoreRenderingElement.stem == Stem.DOWN) {
+                                val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
+                                definitions[Stem.DOWN.name] = GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
+                            }
+                        }
+                    }
+                    else if(scoreRenderingElement is NoteGroupElement) {
+                        yPosition += scoreRenderingElement.yPosition
+
+                        println("Test27: ${yPosition}, ${scoreRenderingElement.yPosition}")
+
+                        if (scoreRenderingElement.requiresStem()) {
+                            // TODO Update for note group handling
                             scoreRenderingElement.stem = scoreState.stemUp(scoreRenderingElement.id)
 
                             if (scoreRenderingElement.stem == Stem.UP) {
@@ -77,6 +105,11 @@ class BarData(private val debug: Boolean = false) {
 
 
                     val renderingElement = scoreRenderingElement.toRenderingElement()
+
+                    renderingElement.forEach {
+                        println("Test26: ${it.id}, ${it.typeId}, ${it.yPosition}, ${it.yTranslate}")
+                    }
+
                     elements.addAll(renderingElement)
 
                     val renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))
@@ -90,6 +123,9 @@ class BarData(private val debug: Boolean = false) {
 
             definitions.putAll(scoreRenderingElement.getGlyphs())
         }
+
+
+        println("Test25: $returnList")
 
         returnList.add(RenderGroup(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement(), null))
 

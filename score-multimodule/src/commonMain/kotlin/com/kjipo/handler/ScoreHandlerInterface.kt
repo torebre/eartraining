@@ -2,6 +2,7 @@ package com.kjipo.handler
 
 import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
+import com.kjipo.score.NoteType
 
 
 interface ScoreHandlerInterface {
@@ -29,5 +30,11 @@ interface ScoreHandlerInterface {
     fun deleteElement(id: String)
 
     fun toggleExtra(id: String, extra: Accidental)
+
+    // Add duration on note level
+    fun addNoteGroup(duration: Duration, pitches: List<GroupNote>): String?
+
+
+    class GroupNote(val noteType: NoteType, val octave: Int, val accidental: Accidental? = null)
 
 }

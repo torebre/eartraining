@@ -32,7 +32,7 @@ class NoteElement(var note: NoteType,
                 val positionedRenderingElement = PositionedRenderingElement.create(listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, id,
                         stemElement.xPosition,
                         stemElement.yPosition).apply {
-                    // TODO Need to think about is the stem is going up or down
+                    // TODO Need to think about if the stem is going up or down
                     typeId = flagGlyph.name
                     yTranslate = -DEFAULT_STEM_HEIGHT
                     xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
