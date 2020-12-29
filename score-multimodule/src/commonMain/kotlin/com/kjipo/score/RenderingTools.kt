@@ -14,15 +14,17 @@ fun addExtraBarLinesForGClef(note: NoteType, octave: Int, xPosition: Int, yPosit
     }
 }
 
-fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true): PathInterfaceImpl {
-    val yEnd = if (stemUp) -DEFAULT_STEM_HEIGHT.toDouble() else DEFAULT_STEM_HEIGHT.toDouble()
+fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true) = addStem(noteHeadBoundingBox.xMax.toInt(), 0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, stemUp)
+
+fun addStem(xTranslate: Int, yTranslate: Int, stemWidth: Int, stemHeight: Int = DEFAULT_STEM_HEIGHT, stemUp: Boolean = true): PathInterfaceImpl {
+    val yEnd = if (stemUp) -stemHeight.toDouble() else stemHeight.toDouble()
     return translateGlyph(PathInterfaceImpl(listOf(
             PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(0.0, 0.0)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(0.0, yEnd)),
-            PathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(-2.0, 0.0)),
+            PathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(-stemWidth.toDouble(), 0.0)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(0.0, -yEnd)),
             PathElement(PathCommand.CLOSE_PATH, listOf())), 1),
-            noteHeadBoundingBox.xMax.toInt(), 0)
+            xTranslate, yTranslate)
 }
 
 fun addBeam(xMin: Double, yMin: Double, xMax: Double, yMax: Double): PathInterfaceImpl {
