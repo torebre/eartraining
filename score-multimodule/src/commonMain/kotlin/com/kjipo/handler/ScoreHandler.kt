@@ -17,6 +17,8 @@ class ScoreHandler : ScoreHandlerInterface {
 
     private var trimEndBars = true
 
+    private var scoreSetup = ScoreSetup()
+
 
     override fun getScoreAsJson() = truncateNumbers(Json.encodeToString(RenderingSequence.serializer(), build()))
 
@@ -25,10 +27,15 @@ class ScoreHandler : ScoreHandlerInterface {
         idCounter = 0
         scoreHandlerElements.clear()
         beams.clear()
+        scoreSetup = ScoreSetup()
     }
 
+
     fun build(): RenderingSequence {
-        val scoreSetup = ScoreSetup()
+
+        // TODO Probably does not make sense to create a new one since the context inside it is used elsewhere
+        scoreSetup = ScoreSetup()
+
 
         // This is to make the IDs the same every time the score is rendered. It is needed to make tests for the diff-functionality pass
         NoteElement.noteElementIdCounter = 0
@@ -36,11 +43,10 @@ class ScoreHandler : ScoreHandlerInterface {
         BarData.stemCounter = 0
         ExtraBarLinesElement.idCounter = 0
 
-
         // TODO Not necessary to have this here. Beams should be computed automatically below
         scoreSetup.beams.addAll(beams)
         var remainingTicksInBar = ticksPerBar
-        var currentBar = BarData()
+        var currentBar = BarData(scoreSetup.context)
         currentBar.clef = Clef.G
         currentBar.timeSignature = TimeSignature(4, 4)
         val bars = mutableListOf(currentBar)
@@ -56,7 +62,7 @@ class ScoreHandler : ScoreHandlerInterface {
                     if (remainingTicksInBar == 0) {
                         // No more room in bar, start on a new one
                         remainingTicksInBar = ticksPerBar
-                        currentBar = BarData()
+                        currentBar = BarData(scoreSetup.context)
                         bars.add(currentBar)
                     }
 
@@ -69,7 +75,7 @@ class ScoreHandler : ScoreHandlerInterface {
                             val previous =
                                 addAndTie(element, durationsInCurrentBar, currentBar, scoreSetup = scoreSetup)
                             remainingTicksInBar += ticksPerBar - ticksNeededForElement
-                            currentBar = BarData()
+                            currentBar = BarData(scoreSetup.context)
                             bars.add(currentBar)
                             addAndTie(element, durationsInNextBar, currentBar, previous, scoreSetup = scoreSetup)
                         }
@@ -88,7 +94,7 @@ class ScoreHandler : ScoreHandlerInterface {
                     if (remainingTicksInBar == 0) {
                         // No more room in bar, start on a new one
                         remainingTicksInBar = ticksPerBar
-                        currentBar = BarData()
+                        currentBar = BarData(scoreSetup.context)
                         bars.add(currentBar)
                     }
 
@@ -217,9 +223,8 @@ class ScoreHandler : ScoreHandlerInterface {
             }
             is NoteGroup -> {
                 // TODO Handle duration on note level
-                return NoteGroupElement(element.notes, element.notes.first().duration, element.id)
+                return NoteGroupElement(element.notes, element.notes.first().duration, scoreSetup.context)
             }
-
 
         }
 
@@ -372,6 +377,16 @@ class ScoreHandler : ScoreHandlerInterface {
         )
         return scoreHandlerElements.last().id
     }
+
+    fun insertChord(duration: Duration, elements: Collection<NoteSequenceElement.NoteElement>) {
+        val noteGroupElement = NoteGroup((++idCounter).toString(), elements.map {
+            // TODO Need to handle accidentals here?
+            NoteSymbol((++idCounter).toString(), duration, it.octave, it.note, null)
+        }.toList())
+
+        scoreHandlerElements.add(noteGroupElement)
+    }
+
 
     override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
         scoreHandlerElements.find { it.id == idOfElementToReplace }?.let {

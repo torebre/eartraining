@@ -34,6 +34,21 @@ fun playGeneratedSequence() {
     })
 }
 
+fun showWebscore() {
+    val webscoreShow = WebscoreShow()
+    webscoreShow.createSequence()
+
+    document.querySelector("button")!!.addEventListener("click", {
+        GlobalScope.launch(Dispatchers.Default) {
+            webscoreShow.playSequence()
+        }
+    })
+
+}
+
 fun main() {
-    playGeneratedSequence()
+//    playGeneratedSequence()
+
+    showWebscore()
+
 }

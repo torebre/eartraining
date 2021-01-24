@@ -9,10 +9,21 @@ import kotlin.math.absoluteValue
 class NoteGroupElement(
     val notes: List<NoteSymbol>,
     override var duration: Duration,
-    override val id: String = "note-${noteElementIdCounter++}"
+    override val id: String,
+    val context: Context
 ) : ScoreRenderingElement(), TemporalElement {
+
+
+    constructor(
+        notes: List<NoteSymbol>,
+        duration: Duration,
+        context: Context
+    ) : this(
+        notes, duration,
+        "note-${noteElementIdCounter++}", context
+    )
+
     var stem = Stem.NONE
-    var partOfBeamGroup = false
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val result = mutableListOf<PositionedRenderingElement>()
@@ -23,18 +34,24 @@ class NoteGroupElement(
         for (note in notes) {
             yPosition = calculateVerticalOffset(note.noteType, note.octave)
 
-            if(yLowestPosition > yPosition) {
+            if (yLowestPosition > yPosition) {
                 yLowestPosition = yPosition
             }
 
-            if(yHighestPosition < yPosition) {
+            if (yHighestPosition < yPosition) {
                 yHighestPosition = yPosition
             }
 
-            addAccidentalIfNeeded(note.id, xPosition, yPosition, note.noteType)?.let {
-                result.add(it)
+            note.accidental?.let {
+                result.add(
+                    setupAccidental(
+                        id,
+                        xPosition,
+                        yPosition,
+                        it
+                    )
+                )
             }
-
 
             val glyphData = getNoteHeadGlyph(duration)
 
@@ -99,28 +116,28 @@ class NoteGroupElement(
         return result
     }
 
-    private fun addAccidentalIfNeeded(
-        id: String,
-        xPosition: Int,
-        yPosition: Int,
-        note: NoteType
-    ) = if (noteRequiresSharp(note)) {
-        setupAccidental(
-            id,
-            xPosition,
-            yPosition,
-            Accidental.SHARP
-        )
-    } else {
-        null
-    }
+//    private fun addAccidentalIfNeeded(
+//        id: String,
+//        xPosition: Int,
+//        yPosition: Int,
+//        note: NoteType
+//    ) = if (noteRequiresSharp(note)) {
+//        setupAccidental(
+//            id,
+//            xPosition,
+//            yPosition,
+//            Accidental.SHARP
+//        )
+//    } else {
+//        null
+//    }
 
-    private fun noteRequiresSharp(note: NoteType): Boolean {
-        return when (note) {
-            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
-            else -> false
-        }
-    }
+//    private fun noteRequiresSharp(note: NoteType): Boolean {
+//        return when (note) {
+//            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
+//            else -> false
+//        }
+//    }
 
     fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stem != Stem.DOWN)
@@ -164,9 +181,9 @@ class NoteGroupElement(
 
     private fun requiresStem() = notes.map { requiresStem(it) }.filter { it }.any()
 
-    private fun accidentalInUse() = notes.map {
-        noteRequiresSharp(it.noteType)
-    }.filter { it }.map { Accidental.SHARP }
+    private fun accidentalInUse() = notes.mapNotNull {
+        it.accidental
+    }.distinct()
 
     companion object {
         var noteElementIdCounter = 0

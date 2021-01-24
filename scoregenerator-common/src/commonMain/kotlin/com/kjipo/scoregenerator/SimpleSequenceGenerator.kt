@@ -1,6 +1,7 @@
 package com.kjipo.scoregenerator
 
 import com.kjipo.score.Duration
+import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
 import com.kjipo.score.TICKS_PER_QUARTER_NOTE
 import kotlin.random.Random

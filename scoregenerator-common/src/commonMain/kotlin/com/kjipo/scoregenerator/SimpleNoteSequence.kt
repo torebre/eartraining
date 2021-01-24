@@ -2,8 +2,7 @@ package com.kjipo.scoregenerator
 
 import com.kjipo.handler.ScoreHandlerUtilities.getDurationInMilliseconds
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
-import com.kjipo.score.Duration
-import com.kjipo.score.NoteType
+import com.kjipo.score.NoteSequenceElement
 
 
 data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
@@ -38,36 +37,3 @@ data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
 }
 
 
-sealed class NoteSequenceElement(val duration: Duration) {
-
-    class MultipleNotesElement(val elements: Collection<NoteElement>, duration: Duration) :
-        NoteSequenceElement(duration) {
-
-        override fun toString(): String {
-            return "MultipleNotesElement(elements=$elements) ${super.toString()}"
-        }
-    }
-
-    class NoteElement(
-        val note: NoteType,
-        val octave: Int,
-        duration: Duration
-    ) : NoteSequenceElement(duration) {
-
-        override fun toString(): String {
-            return "NoteElement(note=$note, octave=$octave) ${super.toString()}"
-        }
-    }
-
-    class RestElement(duration: Duration) : NoteSequenceElement(duration) {
-
-        override fun toString(): String {
-            return "RestElement() ${super.toString()}"
-        }
-    }
-
-    override fun toString(): String {
-        return "NoteSequenceElement(duration=$duration)"
-    }
-
-}

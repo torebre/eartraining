@@ -1,11 +1,10 @@
 package com.kjipo.scoregenerator
 
-import com.kjipo.handler.NoteOrRest
-import com.kjipo.handler.ScoreHandler
-import com.kjipo.handler.ScoreHandlerInterface
-import com.kjipo.handler.ScoreHandlerUtilities
+import com.kjipo.handler.*
 import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
+import com.kjipo.score.NoteSequenceElement
+import com.kjipo.score.NoteType
 
 
 /**
@@ -19,22 +18,21 @@ class SequenceGenerator : ScoreHandlerInterface {
 
     fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {
         scoreHandler.clear()
-//        var timeCounter = 0
-//        pitchSequence.clear()
 
         for (element in simpleNoteSequence.elements) {
-//            val durationInMilliseconds = ScoreHandlerUtilities.getDurationInMilliseconds(element.duration)
-
             when (element) {
                 is NoteSequenceElement.RestElement -> {
                     scoreHandler.insertRest(element.duration)
                 }
                 is NoteSequenceElement.NoteElement -> {
                     scoreHandler.insertNote(element.duration, element.octave, element.note)
-//                    pitchSequence.add(Pitch(id, timeCounter, timeCounter + durationInMilliseconds, ScoreHandlerUtilities.getPitch(element.note, element.octave), element.duration))
+                }
+                is NoteSequenceElement.MultipleNotesElement -> {
+                   scoreHandler.insertChord(element.duration, element.elements)
+
+
                 }
             }
-//            timeCounter += durationInMilliseconds
         }
         computePitchSequence()
     }
@@ -127,44 +125,71 @@ class SequenceGenerator : ScoreHandlerInterface {
         for (scoreHandlerElement in scoreHandler.getScoreHandlerElements()) {
             when (scoreHandlerElement) {
                 is NoteOrRest -> {
+                    val duration = scoreHandlerElement.duration
+                    val id = scoreHandlerElement.id
+                    val noteType = scoreHandlerElement.noteType
+                    val octave = scoreHandlerElement.octave
+                    val isNote = scoreHandlerElement.isNote
+
                     val durationInMilliseconds =
-                        ScoreHandlerUtilities.getDurationInMilliseconds(scoreHandlerElement.duration)
-                    val pitchOn = timeCounter
-                    val pitchOff = timeCounter + durationInMilliseconds
-
-                    if (scoreHandlerElement.isNote) {
-                        val pitch =
-                            ScoreHandlerUtilities.getPitch(scoreHandlerElement.noteType, scoreHandlerElement.octave)
-
-                        pitchSequence.add(
-                            Pitch(
-                                scoreHandlerElement.id,
-                                pitchOn,
-                                pitchOff,
-                                pitch,
-                                scoreHandlerElement.duration
-                            )
-                        )
-
-                        actionSequence.add(Action.PitchEvent(pitchOn, pitch, true))
-                        actionSequence.add(Action.PitchEvent(pitchOff, pitch, false))
-                        actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(scoreHandlerElement.id)))
-                        actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(scoreHandlerElement.id)))
-                    } else {
-                        // This is a rest
-                        actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(scoreHandlerElement.id)))
-                        actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(scoreHandlerElement.id)))
-                    }
-
-                    actionSequence.sortBy { it.time }
+                        ScoreHandlerUtilities.getDurationInMilliseconds(duration)
+                    handleNoteOrRest(timeCounter, durationInMilliseconds, isNote, noteType, octave, id, duration)
 
                     timeCounter += durationInMilliseconds
+                }
+                is NoteGroup -> {
+                    scoreHandlerElement.notes.forEach {
+                        // TODO
+
+
+                    }
+
+
                 }
                 // TODO Need to handle note groups here?
             }
 
 
         }
+    }
+
+    private fun handleNoteOrRest(
+        timeCounter: Int,
+        durationInMilliseconds: Int,
+        isNote: Boolean,
+        noteType: NoteType,
+        octave: Int,
+        id: String,
+        duration: Duration
+    ) {
+        val pitchOn = timeCounter
+        val pitchOff = timeCounter + durationInMilliseconds
+
+        if (isNote) {
+            val pitch =
+                ScoreHandlerUtilities.getPitch(noteType, octave)
+
+            pitchSequence.add(
+                Pitch(
+                    id,
+                    pitchOn,
+                    pitchOff,
+                    pitch,
+                    duration
+                )
+            )
+
+            actionSequence.add(Action.PitchEvent(pitchOn, pitch, true))
+            actionSequence.add(Action.PitchEvent(pitchOff, pitch, false))
+            actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(id)))
+            actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(id)))
+        } else {
+            // This is a rest
+            actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(id)))
+            actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(id)))
+        }
+
+        actionSequence.sortBy { it.time }
     }
 
     override fun deleteElement(id: String) =

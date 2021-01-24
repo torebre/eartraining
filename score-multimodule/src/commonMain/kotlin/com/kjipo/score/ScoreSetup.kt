@@ -13,6 +13,9 @@ class ScoreSetup : ScoreState {
     val beams = mutableListOf<BeamGroup>()
 
 
+    val context = Context()
+
+
     fun build(): RenderingSequence {
         // TODO Possible to use immutable lists here?
         // TODO The position will be wrong when there are multiple bars
@@ -34,7 +37,7 @@ class ScoreSetup : ScoreState {
         val barYspace = 250
 
         bars.forEach { barData ->
-            val currentBar = barData.build(barXoffset, barYoffset, this)
+            val currentBar = barData.build(barXoffset, barYoffset)
             currentBar.definitions.forEach {
                 if (!definitionMap.containsKey(it.key)) {
                     definitionMap[it.key] = it.value
@@ -146,7 +149,7 @@ class ScoreSetup : ScoreState {
     }
 
 
-    override fun stemUp(noteId: String): Stem {
+    fun stemUp(noteId: String): Stem {
         val noteElement = findNoteElement(noteId, bars)
 
         if (noteElement == null) {
@@ -157,7 +160,7 @@ class ScoreSetup : ScoreState {
         for (beamGroup in beams) {
             if (beamGroup.noteIds.contains(noteId)) {
                 findNoteElement(beamGroup.noteIds.first(), bars)?.let { firstNoteInBeamGroup ->
-                    return super.stemUp(ScoreHandlerUtilities.getPitch(firstNoteInBeamGroup.note, firstNoteInBeamGroup.octave))
+                    return context.stemUp(ScoreHandlerUtilities.getPitch(firstNoteInBeamGroup.note, firstNoteInBeamGroup.octave))
                 }
             }
         }

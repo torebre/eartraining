@@ -19,7 +19,8 @@ data class NoteOrRest(
 ) : ScoreHandlerElement()
 
 data class NoteSymbol(
-    val id: String, val duration: Duration,
+    val id: String,
+    val duration: Duration,
     val octave: Int,
     val noteType: NoteType,
     val accidental: Accidental?
