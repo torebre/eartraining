@@ -14,9 +14,11 @@ import kotlinx.browser.document
 import kotlinx.dom.clear
 
 
-class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
-               private val svgElementId: String = "score",
-               private val allowInput: Boolean = true) {
+class WebScore(
+    private val scoreHandler: ScoreHandlerJavaScript,
+    private val svgElementId: String = "score",
+    private val allowInput: Boolean = true
+) {
 
     var activeElement: String? = null
         set(value) {
@@ -63,11 +65,13 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
 
     @JsName("setVisible")
     fun setVisible(visible: Boolean) {
-        document.getElementById(svgElementId)?.setAttribute("visibility", if (visible) {
-            "visible"
-        } else {
-            "hidden"
-        })
+        document.getElementById(svgElementId)?.setAttribute(
+            "visibility", if (visible) {
+                "visible"
+            } else {
+                "hidden"
+            }
+        )
     }
 
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
@@ -82,8 +86,16 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
         highLightActiveElement()
     }
 
+    fun highlight(ids: Collection<String>) {
+        ids.forEach { idSvgElementMap[it]?.setAttribute("fill", "red") }
+    }
+
     fun highlight(id: String) {
         idSvgElementMap[id]?.setAttribute("fill", "red")
+    }
+
+    fun removeHighlight(ids: Collection<String>) {
+        ids.forEach { idSvgElementMap[it]?.setAttribute("fill", "black") }
     }
 
     fun removeHighlight(id: String) {
@@ -388,8 +400,10 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
         svgElement.clear()
-        svgElement.setAttribute("viewBox",
-                "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}")
+        svgElement.setAttribute(
+            "viewBox",
+            "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}"
+        )
 
         Napier.d("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
 
@@ -397,10 +411,12 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
 
             for (definition in renderingSequence.definitions) {
-                addPath(defsTag,
-                        transformToPathString(definition.value.pathElements),
-                        definition.value.strokeWidth,
-                        definition.key)
+                addPath(
+                    defsTag,
+                    transformToPathString(definition.value.pathElements),
+                    definition.value.strokeWidth,
+                    definition.key
+                )
             }
 
             svgElement.appendChild(defsTag)
@@ -408,7 +424,7 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
 
         renderingSequence.renderGroups.forEach { renderGroup ->
 
-            println("Render group elements: ${renderGroup.renderingElements.size }. Translation: ${renderGroup.transform}")
+            println("Render group elements: ${renderGroup.renderingElements.size}. Translation: ${renderGroup.transform}")
 
             val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
                 val translation = renderGroup.transform ?: Translation(0, 0)
@@ -432,7 +448,10 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
     }
 
 
-    private fun addPositionRenderingElements(renderingElements: Collection<PositionedRenderingElement>, element: Element) {
+    private fun addPositionRenderingElements(
+        renderingElements: Collection<PositionedRenderingElement>,
+        element: Element
+    ) {
         for (renderingElement in renderingElements) {
 
             val groupClass = renderingElement.groupClass
@@ -449,12 +468,20 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
                 }
             } else {
                 for (pathInterface in renderingElement.renderingPath) {
-                    addPath(element,
-                            transformToPathString(translateGlyph(pathInterface, renderingElement.xPosition, renderingElement.yPosition)),
-                            pathInterface.strokeWidth,
-                            renderingElement.id,
-                            pathInterface.fill,
-                            extraAttributes)?.let { pathElement ->
+                    addPath(
+                        element,
+                        transformToPathString(
+                            translateGlyph(
+                                pathInterface,
+                                renderingElement.xPosition,
+                                renderingElement.yPosition
+                            )
+                        ),
+                        pathInterface.strokeWidth,
+                        renderingElement.id,
+                        pathInterface.fill,
+                        extraAttributes
+                    )?.let { pathElement ->
                         idSvgElementMap.put(renderingElement.id, pathElement)
                     }
                 }
@@ -462,7 +489,14 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
         }
     }
 
-    private fun addPath(node: Node, path: String, strokeWidth: Int, id: String, fill: String? = null, extraAttributes: Map<String, String> = emptyMap()): Element? {
+    private fun addPath(
+        node: Node,
+        path: String,
+        strokeWidth: Int,
+        id: String,
+        fill: String? = null,
+        extraAttributes: Map<String, String> = emptyMap()
+    ): Element? {
         return node.ownerDocument?.let { ownerDocument ->
             val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
@@ -479,7 +513,12 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
         }
     }
 
-    private fun addPathUsingReference(node: Node, reference: String, positionedRenderingElement: PositionedRenderingElement, extraAttributes: Map<String, String> = emptyMap()) {
+    private fun addPathUsingReference(
+        node: Node,
+        reference: String,
+        positionedRenderingElement: PositionedRenderingElement,
+        extraAttributes: Map<String, String> = emptyMap()
+    ) {
         node.ownerDocument?.let { ownerDocument ->
             val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
             useTag.setAttribute("href", "#$reference")
@@ -490,9 +529,13 @@ class WebScore(private val scoreHandler: ScoreHandlerJavaScript,
             }
 
             if (positionedRenderingElement.xTranslate != 0
-                    || positionedRenderingElement.yTranslate != 0) {
+                || positionedRenderingElement.yTranslate != 0
+            ) {
                 val groupingElement = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "g")
-                groupingElement.setAttribute("transform", "translate(${positionedRenderingElement.xTranslate}, ${positionedRenderingElement.yTranslate})")
+                groupingElement.setAttribute(
+                    "transform",
+                    "translate(${positionedRenderingElement.xTranslate}, ${positionedRenderingElement.yTranslate})"
+                )
                 groupingElement.appendChild(useTag)
                 node.appendChild(groupingElement)
             } else {

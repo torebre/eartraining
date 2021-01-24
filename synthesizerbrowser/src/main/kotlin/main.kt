@@ -28,14 +28,15 @@ fun playGeneratedSequence() {
         GlobalScope.launch(Dispatchers.Default) {
             val noteSequence = sequenceGenerator.createSequence()
             val midiEventSequence = PolyphonicNoteSequenceGenerator.transformToSimplePitchEventSequence(noteSequence)
-            val midiScript = PolyphonicSequenceScript(midiEventSequence, synthesizer)
+            val midiScript = PolyphonicSequenceScript(midiEventSequence.pitches, synthesizer)
             midiScript.play()
         }
     })
 }
 
 fun showWebscore() {
-    val webscoreShow = WebscoreShow()
+    val synthesizer = SynthesizerScript()
+    val webscoreShow = WebscoreShow(synthesizer)
     webscoreShow.createSequence()
 
     document.querySelector("button")!!.addEventListener("click", {

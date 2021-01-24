@@ -17,7 +17,7 @@ class PolyphonicNoteSequenceGeneratorTest {
 
         val transformedSequence = PolyphonicNoteSequenceGenerator.transformToSimplePitchEventSequence(noteSequence)
 
-        for (pitchEvent in transformedSequence) {
+        for (pitchEvent in transformedSequence.pitches) {
             println("Pitch event: $pitchEvent")
         }
     }

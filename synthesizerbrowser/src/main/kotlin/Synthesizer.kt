@@ -65,9 +65,6 @@ external class Tone {
 
 
 fun playNote(sampler: Tone.Sampler) {
-
-    console.log("Test23. Loaded: ${sampler.loaded}. Volume: ${sampler.volume}")
-
     val now = Tone.Transport.now()
     sampler.triggerAttackRelease("C3", 0.5)
     sampler.triggerAttackRelease("C#3", 0.5, now + 0.5)
@@ -82,6 +79,5 @@ fun playNote(sampler: Tone.Sampler) {
     sampler.triggerAttackRelease("A#3", 0.5, now + 5.0)
     sampler.triggerAttackRelease("B3", 0.5, now + 5.5)
     sampler.triggerAttackRelease("C4", 0.5, now + 6.0)
-
 }
 

@@ -1,5 +1,6 @@
 package com.kjipo.scoregenerator
 
+import com.github.aakira.napier.Napier
 import com.kjipo.handler.*
 import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
@@ -28,7 +29,7 @@ class SequenceGenerator : ScoreHandlerInterface {
                     scoreHandler.insertNote(element.duration, element.octave, element.note)
                 }
                 is NoteSequenceElement.MultipleNotesElement -> {
-                   scoreHandler.insertChord(element.duration, element.elements)
+                    scoreHandler.insertChord(element.duration, element.elements)
 
 
                 }
@@ -83,29 +84,29 @@ class SequenceGenerator : ScoreHandlerInterface {
 
     override fun insertNote(activeElement: String, keyPressed: Int): String? {
         scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
-            pitchSequence
-                .find { it.id == activeElement }?.let { pitch ->
-                    scoreHandler.findScoreHandlerElement(idInsertedNote)?.let {
-                        when (it) {
-                            is NoteOrRest -> {
-                                if (it.isNote) {
-                                    pitchSequence.add(
-                                        pitchSequence.indexOf(pitch) + 1,
-                                        Pitch(
-                                            idInsertedNote,
-                                            0,
-                                            0,
-                                            ScoreHandlerUtilities.getPitch(it.noteType, it.octave),
-                                            it.duration
-                                        )
-                                    )
-                                }
-                            }
-                            // TODO Need to support note groups at this level?
-
-                        }
-                    }
-                }
+//            pitchSequence
+//                .find { it.id == activeElement }?.let { pitch ->
+//                    scoreHandler.findScoreHandlerElement(idInsertedNote)?.let {
+//                        when (it) {
+//                            is NoteOrRest -> {
+//                                if (it.isNote) {
+//                                    pitchSequence.add(
+//                                        pitchSequence.indexOf(pitch) + 1,
+//                                        Pitch(
+//                                            idInsertedNote,
+//                                            0,
+//                                            0,
+//                                            ScoreHandlerUtilities.getPitch(it.noteType, it.octave),
+//                                            it.duration
+//                                        )
+//                                    )
+//                                }
+//                            }
+//                            // TODO Need to support note groups at this level?
+//
+//                        }
+//                    }
+//                }
             computeOnOffPitches()
             return idInsertedNote
         }
@@ -122,7 +123,12 @@ class SequenceGenerator : ScoreHandlerInterface {
         pitchSequence.clear()
         actionSequence.clear()
 
+        println("Test26")
+
         for (scoreHandlerElement in scoreHandler.getScoreHandlerElements()) {
+
+            println("Test25")
+
             when (scoreHandlerElement) {
                 is NoteOrRest -> {
                     val duration = scoreHandlerElement.duration
@@ -138,19 +144,13 @@ class SequenceGenerator : ScoreHandlerInterface {
                     timeCounter += durationInMilliseconds
                 }
                 is NoteGroup -> {
-                    scoreHandlerElement.notes.forEach {
-                        // TODO
-
-
-                    }
-
-
+                    timeCounter = handleMultipleNotesElement(timeCounter, scoreHandlerElement)
                 }
-                // TODO Need to handle note groups here?
             }
-
-
         }
+
+
+        println("Test27: ${actionSequence.size}")
     }
 
     private fun handleNoteOrRest(
@@ -179,8 +179,8 @@ class SequenceGenerator : ScoreHandlerInterface {
                 )
             )
 
-            actionSequence.add(Action.PitchEvent(pitchOn, pitch, true))
-            actionSequence.add(Action.PitchEvent(pitchOff, pitch, false))
+            actionSequence.add(Action.PitchEvent(pitchOn, listOf(pitch), true))
+            actionSequence.add(Action.PitchEvent(pitchOff, listOf(pitch), false))
             actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(id)))
             actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(id)))
         } else {
@@ -190,6 +190,55 @@ class SequenceGenerator : ScoreHandlerInterface {
         }
 
         actionSequence.sortBy { it.time }
+    }
+
+    private fun handleMultipleNotesElement(
+        timeCounter: Int,
+        noteGroup: NoteGroup
+    ): Int {
+        val duration = noteGroup.notes.first().duration
+        val updatedTimeCounter = timeCounter + ScoreHandlerUtilities.getDurationInMilliseconds(duration)
+
+        val pitches = mutableListOf<Int>()
+        for (event in noteGroup.notes) {
+            if (duration != event.duration) {
+                throw UnsupportedOperationException("Only durations of same length handled for multiple notes elements so far")
+            }
+
+            val pitch = ScoreHandlerUtilities.getPitch(event.noteType, event.octave)
+            pitches.add(pitch)
+        }
+
+        actionSequence.add(Action.PitchEvent(timeCounter, pitches, true))
+        actionSequence.add(Action.PitchEvent(timeCounter, pitches, false))
+        actionSequence.add(Action.HighlightEvent(timeCounter, true, setOf(noteGroup.id)))
+        actionSequence.add(Action.HighlightEvent(timeCounter, false, setOf(noteGroup.id)))
+
+        return updatedTimeCounter
+    }
+
+
+    fun getActionSequenceScript(): ActionScript {
+        val timeEventMap = mutableMapOf<Int, MutableList<Action>>()
+        val eventTimes = mutableSetOf<Int>()
+
+        println("Test30: ${actionSequence.size}")
+
+        actionSequence.forEach {
+            val eventsAtTime = timeEventMap.getOrPut(it.time, { mutableListOf() })
+            eventsAtTime.add(it)
+            eventTimes.add(it.time)
+        }
+
+        var previousEventTime = 0
+        return ActionScript(eventTimes.distinct().sorted().mapNotNull {
+            val sleepTime = it - previousEventTime
+
+            val result = Pair(sleepTime, timeEventMap[it]!!)
+            previousEventTime = it
+
+            result
+        }.toList())
     }
 
     override fun deleteElement(id: String) =

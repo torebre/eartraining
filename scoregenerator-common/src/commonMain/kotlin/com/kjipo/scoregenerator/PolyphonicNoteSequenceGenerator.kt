@@ -104,7 +104,7 @@ class PolyphonicNoteSequenceGenerator {
 
     companion object {
 
-        fun transformToSimplePitchEventSequence(simpleNoteSequence: SimpleNoteSequence): List<Pair<Collection<SimplePitchEvent>, Int>> {
+        fun transformToSimplePitchEventSequence(simpleNoteSequence: SimpleNoteSequence): PolyphonicPitchScript {
             var timeCounter = 0
             val timePitchPoints = mutableListOf<Int>()
             val timePitchEventMap = mutableMapOf<Int, MutableCollection<SimplePitchEvent>>()
@@ -189,7 +189,7 @@ class PolyphonicNoteSequenceGenerator {
             }
 
             var previousEventTime = 0
-            return timePitchPoints.distinct().sorted().mapNotNull {
+            return PolyphonicPitchScript(timePitchPoints.distinct().sorted().mapNotNull {
                 val sleepTime = it - previousEventTime
                 val currentPitchEvent = if (!timePitchEventMap.containsKey(it)) {
                     null
@@ -198,7 +198,7 @@ class PolyphonicNoteSequenceGenerator {
                 }
                 previousEventTime = it
                 currentPitchEvent
-            }.toList()
+            }.toList())
         }
     }
 
