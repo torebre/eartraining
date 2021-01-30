@@ -1,6 +1,8 @@
 import com.github.aakira.napier.Napier
 import com.kjipo.score.Accidental
 import kotlinx.browser.document
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
@@ -75,26 +77,24 @@ class WebScore(
     }
 
     fun highlight(ids: Collection<String>) {
-
-        console.log("Map: ${webscoreSvgProvider.idSvgElementMap}")
-
         ids.forEach { highlight(it) }
     }
 
     fun highlight(id: String) {
-
         webscoreSvgProvider.getElement(id)?.let {
+            it.classList.add("highlight")
 
-            console.log("Highlighting: $id")
-
-            it.setAttribute("fill", "red")
+            // TODO For some reason an exception is thrown if the addClass-method is used
+//            it.addClass("highlight")
         }
     }
 
     fun removeHighlight(ids: Collection<String>) = ids.forEach { removeHighlight(it) }
 
     fun removeHighlight(id: String) {
-        webscoreSvgProvider.getElement(id)?.setAttribute("fill", "black")
+        webscoreSvgProvider.getElement(id)?.let {
+            it.classList.remove("highlight")
+        }
     }
 
     private fun highLightActiveElement() {
@@ -103,13 +103,13 @@ class WebScore(
         }
 
         activeElement?.let {
-            document.getElementById(it)?.setAttribute("fill", "red")
+            highlight(it)
         }
     }
 
     private fun deactivateActiveElement() {
         activeElement?.let {
-            document.getElementById(it)?.setAttribute("fill", "black")
+            removeHighlight(it)
         }
     }
 

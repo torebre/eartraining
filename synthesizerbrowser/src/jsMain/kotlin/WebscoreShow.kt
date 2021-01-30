@@ -1,21 +1,13 @@
 import com.github.aakira.napier.Napier
-import com.kjipo.midi.SimplePitchEvent
 import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.SequenceGenerator
-import com.kjipo.scoregenerator.SimpleNoteSequence
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 
 class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
-    //    private val synthesizer = SynthesizerScript()
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
-
-//    private var noteSequence: SimpleNoteSequence? = null
-//    private var midiEventSequence: List<Pair<Collection<SimplePitchEvent>, Int>>? = null
-//    private var midiScript: PolyphonicSequenceScript? = null
-
     private var sequenceGenerator = SequenceGenerator()
     private var webScore: WebScore? = null
 
@@ -25,31 +17,14 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
         sequenceGenerator = SequenceGenerator()
         sequenceGenerator.loadSimpleNoteSequence(tempNoteSequence)
 
-//        val tempMidiEventSequence =
-//            PolyphonicNoteSequenceGenerator.transformToSimplePitchEventSequence(tempNoteSequence)
-//        midiScript = PolyphonicSequenceScript(tempMidiEventSequence, synthesizer)
-
-
-//        noteSequence = tempNoteSequence
-//        midiEventSequence = tempMidiEventSequence
-
-        println("Test30")
-        Napier.i("Test31")
-        console.log("Test32")
-
-        WebScore(ScoreHandlerJavaScript(sequenceGenerator))
+        webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator))
     }
 
     suspend fun playSequence() {
-
-        console.log("Test23: ${sequenceGenerator.getActionSequenceScript().timeEventList.size}")
-
         sequenceGenerator.getActionSequenceScript().timeEventList.forEach {
             val sleepTime = it.first
             val events = it.second
             var activePitches = mutableSetOf<Int>()
-
-            console.log("Test24: $it")
 
             try {
                 delay(sleepTime.toLong())
@@ -70,10 +45,15 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
                             }
                         }
                         is Action.HighlightEvent -> {
-                            if (action.highlightOn) {
-                                webScore?.highlight(action.ids)
-                            } else {
-                                webScore?.removeHighlight(action.ids)
+
+                            println("Highlight: ${action.ids}. Action: ${action.highlightOn}")
+
+                            webScore?.let {
+                                if (action.highlightOn) {
+                                    it.highlight(action.ids)
+                                } else {
+                                    it.removeHighlight(action.ids)
+                                }
                             }
                         }
                     }
@@ -101,8 +81,6 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
         }
 
-
     }
-//        midiScript?.play()
 }
 

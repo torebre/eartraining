@@ -5,3 +5,7 @@
 bar-line {
     color: #555;
 }
+
+.highlight {
+    fill: red
+}

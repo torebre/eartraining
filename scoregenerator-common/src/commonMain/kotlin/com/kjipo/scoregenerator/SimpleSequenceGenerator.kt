@@ -10,6 +10,7 @@ class SimpleSequenceGenerator {
 
 
     companion object {
+
         fun createSequence(): SimpleNoteSequence {
             var timeRemaining = 4 * TICKS_PER_QUARTER_NOTE
 
