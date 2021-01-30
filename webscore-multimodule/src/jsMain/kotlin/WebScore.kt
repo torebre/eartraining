@@ -1,8 +1,6 @@
 import com.github.aakira.napier.Napier
 import com.kjipo.score.Accidental
-import com.kjipo.score.RenderingSequence
 import kotlinx.browser.document
-import kotlinx.serialization.json.Json
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
@@ -50,14 +48,12 @@ class WebScore(
             createdElement
         }
         setupEventHandling()
-        loadScore(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()))
+        loadScore()
     }
 
+    // TODO Is there no difference between load and reload?
     @JsName("reload")
-    fun reload() {
-        val score = scoreHandler.getScoreAsJson()
-        loadScore(transformJsonToRenderingSequence(score))
-    }
+    fun reload() = loadScore()
 
     @JsName("setVisible")
     fun setVisible(visible: Boolean) {
@@ -70,22 +66,29 @@ class WebScore(
         )
     }
 
-    private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
-        return Json.decodeFromString(RenderingSequence.serializer(), jsonData)
-    }
-
-    fun loadScore(renderingSequence: RenderingSequence) {
-        generateSvgData(renderingSequence, svgElement)
+    fun loadScore() {
+        generateSvgData(svgElement)
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
         highLightActiveElement()
     }
 
-    fun highlight(ids: Collection<String>) = ids.forEach { highlight(it) }
+    fun highlight(ids: Collection<String>) {
+
+        console.log("Map: ${webscoreSvgProvider.idSvgElementMap}")
+
+        ids.forEach { highlight(it) }
+    }
 
     fun highlight(id: String) {
-        webscoreSvgProvider.getElement(id)?.setAttribute("fill", "red")
+
+        webscoreSvgProvider.getElement(id)?.let {
+
+            console.log("Highlighting: $id")
+
+            it.setAttribute("fill", "red")
+        }
     }
 
     fun removeHighlight(ids: Collection<String>) = ids.forEach { removeHighlight(it) }
@@ -379,15 +382,12 @@ class WebScore(
         }
     }
 
-
-    private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
-        webscoreSvgProvider.generateSvgData(renderingSequence, svgElement)
+    private fun generateSvgData(svgElement: Element) {
+        webscoreSvgProvider.generateSvgData(svgElement)
         highLightActiveElement()
     }
 
-
     private fun regenerateSvg() {
-        generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
+        generateSvgData(svgElement)
     }
-
 }

@@ -5,16 +5,18 @@ import com.kjipo.score.Translation
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.dom.clear
+import kotlinx.serialization.json.Json
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 
 
 class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
 
-    private val idSvgElementMap = mutableMapOf<String, Element>()
+     val idSvgElementMap = mutableMapOf<String, Element>()
 
 
-    fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
+    fun generateSvgData(svgElement: Element) {
+        val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
         svgElement.clear()
         svgElement.setAttribute(
             "viewBox",
@@ -60,7 +62,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
             }
 
         }
-//        highLightActiveElement()
     }
 
 
@@ -69,7 +70,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
         element: Element
     ) {
         for (renderingElement in renderingElements) {
-
             val groupClass = renderingElement.groupClass
             val extraAttributes = if (groupClass != null) {
                 mapOf(Pair("class", groupClass))
@@ -162,5 +162,9 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
     }
 
     fun getElement(id: String) = idSvgElementMap[id]
+
+    private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
+        return Json.decodeFromString(RenderingSequence.serializer(), jsonData)
+    }
 
 }
