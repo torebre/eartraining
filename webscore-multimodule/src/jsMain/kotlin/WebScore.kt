@@ -1,17 +1,11 @@
 import com.github.aakira.napier.Napier
 import com.kjipo.score.Accidental
-import com.kjipo.score.PositionedRenderingElement
 import com.kjipo.score.RenderingSequence
-import com.kjipo.score.Translation
-import com.kjipo.svg.transformToPathString
-import com.kjipo.svg.translateGlyph
+import kotlinx.browser.document
 import kotlinx.serialization.json.Json
 import org.w3c.dom.Element
-import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
-import kotlinx.browser.document
-import kotlinx.dom.clear
 
 
 class WebScore(
@@ -19,6 +13,8 @@ class WebScore(
     private val svgElementId: String = "score",
     private val allowInput: Boolean = true
 ) {
+
+    private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(scoreHandler)
 
     var activeElement: String? = null
         set(value) {
@@ -32,7 +28,7 @@ class WebScore(
     private var direction: Boolean? = null
     private var movementActive = false
     private val svgElement: Element
-    private val idSvgElementMap = mutableMapOf<String, Element>()
+//    private val idSvgElementMap = mutableMapOf<String, Element>()
 
 
     companion object {
@@ -86,20 +82,16 @@ class WebScore(
         highLightActiveElement()
     }
 
-    fun highlight(ids: Collection<String>) {
-        ids.forEach { idSvgElementMap[it]?.setAttribute("fill", "red") }
-    }
+    fun highlight(ids: Collection<String>) = ids.forEach { highlight(it) }
 
     fun highlight(id: String) {
-        idSvgElementMap[id]?.setAttribute("fill", "red")
+        webscoreSvgProvider.getElement(id)?.setAttribute("fill", "red")
     }
 
-    fun removeHighlight(ids: Collection<String>) {
-        ids.forEach { idSvgElementMap[it]?.setAttribute("fill", "black") }
-    }
+    fun removeHighlight(ids: Collection<String>) = ids.forEach { removeHighlight(it) }
 
     fun removeHighlight(id: String) {
-        idSvgElementMap[id]?.setAttribute("fill", "black")
+        webscoreSvgProvider.getElement(id)?.setAttribute("fill", "black")
     }
 
     private fun highLightActiveElement() {
@@ -140,8 +132,6 @@ class WebScore(
             val mouseDownEvent: dynamic = event
             movementActive = true
 
-            console.log("Mouse down")
-
             xStart = mouseDownEvent.pageX
             yStart = mouseDownEvent.pageY
         })
@@ -154,8 +144,6 @@ class WebScore(
             val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
             movementActive = false
 
-            console.log("Mouse up")
-
             if (handleMotionUpdate(xDiff, yDiff, true)) {
                 val mouseDownEvent: dynamic = event
                 xStart = mouseDownEvent.pageX as Int
@@ -167,8 +155,6 @@ class WebScore(
             if (!movementActive) {
                 return@addEventListener
             }
-
-            console.log("Mouse move")
 
             val (xDiff, yDiff) = extractDiffs(event, xStart, yStart)
             if (handleMotionUpdate(xDiff, yDiff, false)) {
@@ -198,8 +184,6 @@ class WebScore(
                 return@addEventListener
             }
 
-            console.log("Touch end")
-
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
             movementActive = false
@@ -219,8 +203,6 @@ class WebScore(
             if (!movementActive) {
                 return@addEventListener
             }
-
-            console.log("Touch move")
 
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
@@ -399,151 +381,10 @@ class WebScore(
 
 
     private fun generateSvgData(renderingSequence: RenderingSequence, svgElement: Element) {
-        svgElement.clear()
-        svgElement.setAttribute(
-            "viewBox",
-            "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}"
-        )
-
-        Napier.d("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
-
-        svgElement.ownerDocument?.let {
-            val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
-
-            for (definition in renderingSequence.definitions) {
-                addPath(
-                    defsTag,
-                    transformToPathString(definition.value.pathElements),
-                    definition.value.strokeWidth,
-                    definition.key
-                )
-            }
-
-            svgElement.appendChild(defsTag)
-        }
-
-        renderingSequence.renderGroups.forEach { renderGroup ->
-
-            println("Render group elements: ${renderGroup.renderingElements.size}. Translation: ${renderGroup.transform}")
-
-            val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
-                val translation = renderGroup.transform ?: Translation(0, 0)
-                svgElement.ownerDocument?.let {
-                    val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
-                    groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
-
-                    svgElement.appendChild(groupingElement)
-                    groupingElement
-                }
-            } else {
-                svgElement
-            }
-
-            elementToAddRenderingElementsTo?.let {
-                addPositionRenderingElements(renderGroup.renderingElements, it)
-            }
-
-        }
+        webscoreSvgProvider.generateSvgData(renderingSequence, svgElement)
         highLightActiveElement()
     }
 
-
-    private fun addPositionRenderingElements(
-        renderingElements: Collection<PositionedRenderingElement>,
-        element: Element
-    ) {
-        for (renderingElement in renderingElements) {
-
-            val groupClass = renderingElement.groupClass
-            val extraAttributes = if (groupClass != null) {
-                mapOf(Pair("class", groupClass))
-            } else {
-                emptyMap()
-            }
-
-            if (renderingElement.typeId != null) {
-                renderingElement.typeId?.let { typeId ->
-                    addPathUsingReference(element, typeId, renderingElement, extraAttributes)
-                    idSvgElementMap.put(renderingElement.id, element)
-                }
-            } else {
-                for (pathInterface in renderingElement.renderingPath) {
-                    addPath(
-                        element,
-                        transformToPathString(
-                            translateGlyph(
-                                pathInterface,
-                                renderingElement.xPosition,
-                                renderingElement.yPosition
-                            )
-                        ),
-                        pathInterface.strokeWidth,
-                        renderingElement.id,
-                        pathInterface.fill,
-                        extraAttributes
-                    )?.let { pathElement ->
-                        idSvgElementMap.put(renderingElement.id, pathElement)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun addPath(
-        node: Node,
-        path: String,
-        strokeWidth: Int,
-        id: String,
-        fill: String? = null,
-        extraAttributes: Map<String, String> = emptyMap()
-    ): Element? {
-        return node.ownerDocument?.let { ownerDocument ->
-            val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
-            path1.setAttribute("d", path)
-            fill?.let { path1.setAttribute("fill", it) }
-            path1.setAttribute("id", id)
-            path1.setAttribute("stroke-width", strokeWidth.toString())
-
-            extraAttributes.forEach {
-                path1.setAttribute(it.key, it.value)
-            }
-
-            node.appendChild(path1)
-            path1
-        }
-    }
-
-    private fun addPathUsingReference(
-        node: Node,
-        reference: String,
-        positionedRenderingElement: PositionedRenderingElement,
-        extraAttributes: Map<String, String> = emptyMap()
-    ) {
-        node.ownerDocument?.let { ownerDocument ->
-            val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
-            useTag.setAttribute("href", "#$reference")
-            useTag.setAttribute("id", positionedRenderingElement.id)
-
-            extraAttributes.forEach {
-                useTag.setAttribute(it.key, it.value)
-            }
-
-            if (positionedRenderingElement.xTranslate != 0
-                || positionedRenderingElement.yTranslate != 0
-            ) {
-                val groupingElement = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "g")
-                groupingElement.setAttribute(
-                    "transform",
-                    "translate(${positionedRenderingElement.xTranslate}, ${positionedRenderingElement.yTranslate})"
-                )
-                groupingElement.appendChild(useTag)
-                node.appendChild(groupingElement)
-            } else {
-                node.appendChild(useTag)
-            }
-
-        }
-    }
 
     private fun regenerateSvg() {
         generateSvgData(transformJsonToRenderingSequence(scoreHandler.getScoreAsJson()), svgElement)
