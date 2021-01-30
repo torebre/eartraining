@@ -21,10 +21,12 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     }
 
     suspend fun playSequence() {
+        val activePitches = mutableSetOf<Int>()
         sequenceGenerator.getActionSequenceScript().timeEventList.forEach {
             val sleepTime = it.first
             val events = it.second
-            var activePitches = mutableSetOf<Int>()
+
+            console.log("Sleep time: ${sleepTime.toLong()}")
 
             try {
                 delay(sleepTime.toLong())
@@ -32,6 +34,9 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
                 events.forEach { action ->
                     when (action) {
                         is Action.PitchEvent -> {
+
+                            console.log("Notes: ${action.pitches}. Note on: ${action.noteOn}")
+
                             if (action.noteOn) {
                                 action.pitches.forEach {
                                     activePitches.add(it)
@@ -45,9 +50,6 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
                             }
                         }
                         is Action.HighlightEvent -> {
-
-                            println("Highlight: ${action.ids}. Action: ${action.highlightOn}")
-
                             webScore?.let {
                                 if (action.highlightOn) {
                                     it.highlight(action.ids)

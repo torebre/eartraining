@@ -1,3 +1,4 @@
+import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.kjipo.midi.SimplePitchEvent
 import kotlinx.coroutines.CancellationException
@@ -10,6 +11,8 @@ class PolyphonicSequenceScript(
 
     suspend fun play() {
         console.log("All pitch events: ${pitchEvents}") //, tag = "Midi")
+
+        Napier.base(DebugAntilog("test"))
 
         pitchEvents.forEach {
             val sleepTime = it.second

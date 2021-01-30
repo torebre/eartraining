@@ -123,12 +123,7 @@ class SequenceGenerator : ScoreHandlerInterface {
         pitchSequence.clear()
         actionSequence.clear()
 
-        println("Test26")
-
         for (scoreHandlerElement in scoreHandler.getScoreHandlerElements()) {
-
-            println("Test25")
-
             when (scoreHandlerElement) {
                 is NoteOrRest -> {
                     val duration = scoreHandlerElement.duration
@@ -148,9 +143,6 @@ class SequenceGenerator : ScoreHandlerInterface {
                 }
             }
         }
-
-
-        println("Test27: ${actionSequence.size}")
     }
 
     private fun handleNoteOrRest(
@@ -210,9 +202,9 @@ class SequenceGenerator : ScoreHandlerInterface {
         }
 
         actionSequence.add(Action.PitchEvent(timeCounter, pitches, true))
-        actionSequence.add(Action.PitchEvent(timeCounter, pitches, false))
+        actionSequence.add(Action.PitchEvent(updatedTimeCounter, pitches, false))
         actionSequence.add(Action.HighlightEvent(timeCounter, true, setOf(noteGroup.id)))
-        actionSequence.add(Action.HighlightEvent(timeCounter, false, setOf(noteGroup.id)))
+        actionSequence.add(Action.HighlightEvent(updatedTimeCounter, false, setOf(noteGroup.id)))
 
         return updatedTimeCounter
     }
@@ -221,8 +213,6 @@ class SequenceGenerator : ScoreHandlerInterface {
     fun getActionSequenceScript(): ActionScript {
         val timeEventMap = mutableMapOf<Int, MutableList<Action>>()
         val eventTimes = mutableSetOf<Int>()
-
-        println("Test30: ${actionSequence.size}")
 
         actionSequence.forEach {
             val eventsAtTime = timeEventMap.getOrPut(it.time, { mutableListOf() })
