@@ -77,6 +77,9 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
                 emptyMap()
             }
 
+
+            console.log("Adding: ${renderingElement.typeId}. ID: ${renderingElement.id}")
+
             if (renderingElement.typeId != null) {
                 renderingElement.typeId?.let { typeId ->
                     addPathUsingReference(element, typeId, renderingElement, extraAttributes)

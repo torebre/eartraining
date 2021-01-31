@@ -5,9 +5,9 @@ import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.svg.GlyphData
 
 /**
- * This class produces the rendering sequence that is used to render the score. It is responsible for the overall layout.
+ * This class produces the rendering sequence that is used to render the score
  */
-class ScoreSetup : ScoreState {
+class ScoreSetup {
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()

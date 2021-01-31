@@ -6,7 +6,7 @@ import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getNoteHeadGlyph
 import kotlin.math.ceil
 
-class BarData(val context: Context, private val debug: Boolean = false) {
+class BarData(private val context: Context, private val debug: Boolean = false) {
     var clef: Clef = Clef.NONE
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
@@ -23,105 +23,150 @@ class BarData(val context: Context, private val debug: Boolean = false) {
         val timeSignatureElement = if (timeSignature.nominator == 0) {
             null
         } else {
-            TimeSignatureElement(timeSignature.nominator, timeSignature.denominator, timeSignatureXOffset, timeSignatureYOffset, "time")
+            TimeSignatureElement(
+                timeSignature.nominator,
+                timeSignature.denominator,
+                timeSignatureXOffset,
+                timeSignatureYOffset,
+                "time"
+            )
         }
 
         widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
 
         val valTotalTicksInBar = scoreRenderingElements.filterIsInstance<TemporalElement>()
-                .map { it.duration.ticks }.sum()
+            .map { it.duration.ticks }.sum()
         val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
         val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
-        val returnList = mutableListOf<RenderGroup>()
+        val renderGroups = mutableListOf<RenderGroup>()
 
-        clefElement?.let { returnList.add(RenderGroup(clefElement.toRenderingElement(), null)) }
-        timeSignatureElement?.let { returnList.add(RenderGroup(timeSignatureElement.toRenderingElement(), null)) }
+        clefElement?.let { renderGroups.add(RenderGroup(clefElement.toRenderingElement(), null)) }
+        timeSignatureElement?.let { renderGroups.add(RenderGroup(timeSignatureElement.toRenderingElement(), null)) }
 
         var tickCounter = 0
 
+        // Put notes into x and y positions in the bar
         for (scoreRenderingElement in scoreRenderingElements) {
-
             when (scoreRenderingElement) {
                 is TemporalElement -> {
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     var yPosition = barYoffset
-                    val elements = mutableListOf<PositionedRenderingElement>()
+//                    val elements = mutableListOf<PositionedRenderingElement>()
 
                     scoreRenderingElement.xPosition = 0
 
                     if (scoreRenderingElement is NoteElement) {
                         yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
-
-                        if (scoreRenderingElement.requiresStem()) {
-                            scoreRenderingElement.stem = context.stemUp(scoreRenderingElement.id)
-
-                            addStem(scoreRenderingElement, definitions)
-                        }
-                    }
-                    else if(scoreRenderingElement is NoteGroupElement) {
+                        scoreRenderingElement.layoutNoteHeads()
+                    } else if (scoreRenderingElement is NoteGroupElement) {
                         yPosition += scoreRenderingElement.yPosition
-
-//                        if (scoreRenderingElement.requiresStem()) {
-//                            // TODO Update for note group handling
-//                            scoreRenderingElement.stem = scoreState.stemUp(scoreRenderingElement.id)
-//
-//                            if (scoreRenderingElement.stem == Stem.UP) {
-//                                // Use the bounding box for the note head of a half note to determine
-//                                // how far to move the stem so that it is on the right side of the note head
-//                                val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
-//                                definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
-//                            } else if (scoreRenderingElement.stem == Stem.DOWN) {
-//                                val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
-//                                definitions[Stem.DOWN.name] = GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
-//                            }
-//                        }
+                        scoreRenderingElement.layoutNoteHeads()
                     }
                     tickCounter += scoreRenderingElement.duration.ticks
 
                     if (debug) {
-                        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))).minus(scoreRenderingElement.xPosition).toInt()
-                        val debugBox = Box(scoreRenderingElement.xPosition, scoreRenderingElement.yPosition, width, scoreRenderingElement.yPosition, "debug")
-                        returnList.add(RenderGroup(debugBox.toRenderingElement(), null))
+                        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick))))
+                            .minus(scoreRenderingElement.xPosition).toInt()
+                        val debugBox = Box(
+                            scoreRenderingElement.xPosition,
+                            scoreRenderingElement.yPosition,
+                            width,
+                            scoreRenderingElement.yPosition,
+                            "debug"
+                        )
+                        renderGroups.add(RenderGroup(debugBox.toRenderingElement(), null))
                     }
 
-
-                    val renderingElement = scoreRenderingElement.toRenderingElement()
-                    elements.addAll(renderingElement)
-
-                    val renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))
-
-                    // TODO This is confusing. Try to fit in render groups differently
-                    scoreRenderingElement.renderGroup = renderGroup
-
-                    returnList.add(renderGroup)
+//                    val renderingElement = scoreRenderingElement.toRenderingElement()
+//                    elements.addAll(renderingElement)
+//                    scoreRenderingElement.renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))
+                    scoreRenderingElement.translation = Translation(xPosition, yPosition)
                 }
             }
 
-            definitions.putAll(scoreRenderingElement.getGlyphs())
+//            definitions.putAll(scoreRenderingElement.getGlyphs())
         }
 
-        returnList.add(RenderGroup(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement(), null))
+        // Add stems
+        for (scoreRenderingElement in scoreRenderingElements) {
+            when (scoreRenderingElement) {
+                is TemporalElement -> {
+                    if (scoreRenderingElement is NoteElement) {
+                        if (context.requiresStem(scoreRenderingElement)) {
+                            addStem(scoreRenderingElement, definitions)
+                        }
+                    } else if (scoreRenderingElement is NoteGroupElement) {
+                        if (context.requiresStem(scoreRenderingElement)) {
+                            addStem(scoreRenderingElement, definitions)
+                        }
+                    }
+                }
+            }
+        }
 
-        return RenderingSequence(returnList, determineViewBox(returnList.flatMap { it.renderingElements }), definitions)
+        for (scoreRenderingElement in scoreRenderingElements) {
+            definitions.putAll(scoreRenderingElement.getGlyphs())
+
+            // TODO Make more clear
+            scoreRenderingElement.translation?.let { translation ->
+                val renderGroup = RenderGroup(scoreRenderingElement.toRenderingElement(), translation)
+                renderGroups.add(renderGroup)
+                scoreRenderingElement.renderGroup = renderGroup
+            }
+        }
+
+        renderGroups.add(RenderGroup(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement(), null))
+
+        return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
     }
 
     private fun addStem(
         scoreRenderingElement: NoteElement,
         definitions: MutableMap<String, GlyphData>
     ) {
+        scoreRenderingElement.stem = context.stemUp(scoreRenderingElement.id)
+
         if (scoreRenderingElement.stem == Stem.UP) {
+            scoreRenderingElement.addStem()
+
             // Use the bounding box for the note head of a half note to determine
             // how far to move the stem so that it is on the right side of the note head
             val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
             definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
         } else if (scoreRenderingElement.stem == Stem.DOWN) {
+            scoreRenderingElement.addStem()
+
             val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
             definitions[Stem.DOWN.name] =
                 GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
         }
     }
 
-    private fun getClefElement(barXoffset: Int, barYoffset: Int, definitions: MutableMap<String, GlyphData>): ClefElement? {
+    private fun addStem(
+        scoreRenderingElement: NoteGroupElement,
+        definitions: MutableMap<String, GlyphData>
+    ) {
+        scoreRenderingElement.stem = context.stemUp(scoreRenderingElement.id)
+
+        if (scoreRenderingElement.stem == Stem.UP) {
+            scoreRenderingElement.addStem()
+            // Use the bounding box for the note head of a half note to determine
+            // how far to move the stem so that it is on the right side of the note head
+            val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
+            definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
+        } else if (scoreRenderingElement.stem == Stem.DOWN) {
+            scoreRenderingElement.addStem()
+            val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
+            definitions[Stem.DOWN.name] =
+                GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
+        }
+    }
+
+    private fun getClefElement(
+        barXoffset: Int,
+        barYoffset: Int,
+        definitions: MutableMap<String, GlyphData>
+    ): ClefElement? {
         return if (clef == Clef.NONE) {
             null
         } else {
@@ -133,15 +178,15 @@ class BarData(val context: Context, private val debug: Boolean = false) {
 
     private fun getWidthAvailable(clefElement: ClefElement?, timeSignatureElement: TimeSignatureElement?): Int {
         return DEFAULT_BAR_WIDTH
-                .minus(clefElement?.let {
-                    val renderingElement = it.toRenderingElement()
-                    renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
-                } ?: 0)
-                .minus(timeSignatureElement?.let {
-                    val renderingElement = it.toRenderingElement()
-                    renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
-                } ?: 0)
-                .minus(START_NOTE_ELEMENT_MARGIN)
+            .minus(clefElement?.let {
+                val renderingElement = it.toRenderingElement()
+                renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
+            } ?: 0)
+            .minus(timeSignatureElement?.let {
+                val renderingElement = it.toRenderingElement()
+                renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
+            } ?: 0)
+            .minus(START_NOTE_ELEMENT_MARGIN)
     }
 
     override fun toString(): String {
