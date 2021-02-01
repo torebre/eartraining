@@ -1,6 +1,7 @@
 package com.kjipo.score
 
 import com.kjipo.handler.NoteSymbol
+import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.score.BarData.Companion.stemCounter
 import com.kjipo.svg.*
 import kotlin.math.absoluteValue
@@ -27,27 +28,43 @@ class NoteGroupElement(
     )
 
 
-
     override fun toRenderingElement(): List<PositionedRenderingElement> {
-        // TODO Determine if extra bar lines are needed
-//        addExtraBarLinesForGClef(
-//            note.noteType, note.octave,
-//            0,
-//            -yPosition,
-//            glyphData.boundingBox.xMin.toInt(),
-//            glyphData.boundingBox.xMax.toInt()
-//        )?.let {
-//            result.addAll(it.toRenderingElement())
-//        }
+        notes.maxWithOrNull { a, b ->
+            getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
+        }?.let {
+            addExtraBarLines(it)?.let {
+                result.addAll(it.toRenderingElement())
+            }
+        }
+
+        notes.minWithOrNull { a, b ->
+            getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
+        }?.let {
+            addExtraBarLines(it)?.let {
+                result.addAll(it.toRenderingElement())
+            }
+        }
 
         return result
     }
+
+
+    private fun addExtraBarLines(noteSymbol: NoteSymbol) =
+        addExtraBarLinesForGClef(
+            noteSymbol.noteType, noteSymbol.octave,
+            0,
+            0,
+            -25,
+            35
+        )
+
 
     fun layoutNoteHeads() {
         var counter = 0
 
         for (note in notes) {
-            yPosition = calculateVerticalOffset(note.noteType, note.octave)
+//            yPosition = calculateverticaloffset(note.notetype, note.octave)
+            val noteYTranslate = calculateVerticalOffset(note.noteType, note.octave)
 
             if (yLowestPosition > yPosition) {
                 yLowestPosition = yPosition
@@ -64,7 +81,7 @@ class NoteGroupElement(
                         xPosition,
                         yPosition,
                         it
-                    )
+                    ).also { it.yTranslate = noteYTranslate }
                 )
             }
 
@@ -74,10 +91,12 @@ class NoteGroupElement(
                 listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, "$id-$counter",
                 xPosition,
                 yPosition
-            ).apply {
-                // TODO Add correct translation
-                yTranslate = -yPosition
-            }
+            )
+                .apply {
+                    // TODO Add correct translation
+//                yTranslate = -yPosition
+                    yTranslate = noteYTranslate
+                }
             positionedRenderingElement.typeId = duration.name
             result.add(positionedRenderingElement)
 

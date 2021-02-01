@@ -39,10 +39,9 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
                    yPosition: Int): PositionedRenderingElement {
             return PositionedRenderingElement(
                     renderingPath,
-                    boundingBox, id).let {
+                    boundingBox, id).also {
                 it.xPosition = xPosition
                 it.yPosition = yPosition
-                it
             }
         }
 

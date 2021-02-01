@@ -83,12 +83,6 @@ class NoteElement(
         )
     }
 
-    fun getClef(): Clef {
-        // TODO The clef can change withing a bar. This is not handled at present
-        // Defaulting to G
-        return Clef.G
-    }
-
     override fun getGlyphs(): Map<String, GlyphData> {
         val glyphsUsed = mutableMapOf<String, GlyphData>()
 

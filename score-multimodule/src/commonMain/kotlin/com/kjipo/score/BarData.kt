@@ -51,40 +51,32 @@ class BarData(private val context: Context, private val debug: Boolean = false) 
                 is TemporalElement -> {
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     var yPosition = barYoffset
-//                    val elements = mutableListOf<PositionedRenderingElement>()
-
                     scoreRenderingElement.xPosition = 0
 
                     if (scoreRenderingElement is NoteElement) {
+                        // This updating of the y-position is done because when references are used, the y-position is not used, the translate is used instead
                         yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
                         scoreRenderingElement.layoutNoteHeads()
                     } else if (scoreRenderingElement is NoteGroupElement) {
-                        yPosition += scoreRenderingElement.yPosition
+//                        yPosition += scoreRenderingElement.yPosition
                         scoreRenderingElement.layoutNoteHeads()
                     }
                     tickCounter += scoreRenderingElement.duration.ticks
 
                     if (debug) {
-                        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick))))
-                            .minus(scoreRenderingElement.xPosition).toInt()
-                        val debugBox = Box(
-                            scoreRenderingElement.xPosition,
-                            scoreRenderingElement.yPosition,
-                            width,
-                            scoreRenderingElement.yPosition,
-                            "debug"
+                        addDebugBox(
+                            barXoffset,
+                            xOffset,
+                            tickCounter,
+                            pixelsPerTick,
+                            scoreRenderingElement,
+                            renderGroups
                         )
-                        renderGroups.add(RenderGroup(debugBox.toRenderingElement(), null))
                     }
 
-//                    val renderingElement = scoreRenderingElement.toRenderingElement()
-//                    elements.addAll(renderingElement)
-//                    scoreRenderingElement.renderGroup = RenderGroup(elements, Translation(xPosition, yPosition))
                     scoreRenderingElement.translation = Translation(xPosition, yPosition)
                 }
             }
-
-//            definitions.putAll(scoreRenderingElement.getGlyphs())
         }
 
         // Add stems
@@ -117,7 +109,31 @@ class BarData(private val context: Context, private val debug: Boolean = false) 
 
         renderGroups.add(RenderGroup(BarLines(barXoffset, barYoffset, "bar-line").toRenderingElement(), null))
 
-        return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
+        return RenderingSequence(
+            renderGroups,
+            determineViewBox(renderGroups.flatMap { it.renderingElements }),
+            definitions
+        )
+    }
+
+    private fun addDebugBox(
+        barXoffset: Int,
+        xOffset: Int,
+        tickCounter: Int,
+        pixelsPerTick: Double,
+        scoreRenderingElement: ScoreRenderingElement,
+        renderGroups: MutableList<RenderGroup>
+    ) {
+        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick))))
+            .minus(scoreRenderingElement.xPosition).toInt()
+        val debugBox = Box(
+            scoreRenderingElement.xPosition,
+            scoreRenderingElement.yPosition,
+            width,
+            scoreRenderingElement.yPosition,
+            "debug"
+        )
+        renderGroups.add(RenderGroup(debugBox.toRenderingElement(), null))
     }
 
     private fun addStem(
