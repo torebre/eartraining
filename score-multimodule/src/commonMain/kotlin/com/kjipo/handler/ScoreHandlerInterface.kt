@@ -34,6 +34,9 @@ interface ScoreHandlerInterface {
     // Add duration on note level
     fun addNoteGroup(duration: Duration, pitches: List<GroupNote>): String?
 
+//    fun getClientContext(): ClientContext
+
+    fun getHighlightElementsMap(): Map<String, Collection<String>>
 
     class GroupNote(val noteType: NoteType, val octave: Int, val accidental: Accidental? = null)
 

@@ -6,7 +6,17 @@ import kotlinx.serialization.*
 
 
 @Serializable
-data class RenderingSequence(val renderGroups: List<RenderGroup>, val viewBox: ViewBox, val definitions: Map<String, GlyphData>)
+data class RenderingSequence(
+    val renderGroups: List<RenderGroup>,
+    val viewBox: ViewBox,
+    val definitions: Map<String, GlyphData>
+)
+
+@Serializable
+data class RenderingSequenceWithMetaData(
+    val renderingSequence: RenderingSequence,
+    val highlightElementsMap: Map<String, Collection<String>>
+)
 
 @Serializable
 data class ViewBox(val xMin: Int, val yMin: Int, val xMax: Int, val yMax: Int)
@@ -17,11 +27,14 @@ class RenderGroup {
     val renderGroup: RenderGroup?
     val transform: Translation?
 
-    constructor(renderingElements: List<PositionedRenderingElement>, transform: Translation? = null, renderGroup: RenderGroup? = null) {
+    constructor(
+        renderingElements: List<PositionedRenderingElement>,
+        transform: Translation? = null,
+        renderGroup: RenderGroup? = null
+    ) {
         this.renderingElements = renderingElements.toMutableList()
         this.transform = transform
         this.renderGroup = renderGroup
-//        renderingElements.forEach { it.renderGroup = this }
     }
 
     override fun equals(other: Any?): Boolean {

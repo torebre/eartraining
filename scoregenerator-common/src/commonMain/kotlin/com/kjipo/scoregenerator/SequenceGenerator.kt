@@ -1,6 +1,5 @@
 package com.kjipo.scoregenerator
 
-import com.github.aakira.napier.Napier
 import com.kjipo.handler.*
 import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
@@ -171,14 +170,18 @@ class SequenceGenerator : ScoreHandlerInterface {
                 )
             )
 
-            actionSequence.add(Action.PitchEvent(pitchOn, listOf(pitch), true))
-            actionSequence.add(Action.PitchEvent(pitchOff, listOf(pitch), false))
-            actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(id)))
-            actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(id)))
+            with(actionSequence) {
+                add(Action.PitchEvent(pitchOn, listOf(pitch), true))
+                add(Action.PitchEvent(pitchOff, listOf(pitch), false))
+                add(Action.HighlightEvent(pitchOn, true, setOf(id)))
+                add(Action.HighlightEvent(pitchOff, false, setOf(id)))
+            }
         } else {
             // This is a rest
-            actionSequence.add(Action.HighlightEvent(pitchOn, true, setOf(id)))
-            actionSequence.add(Action.HighlightEvent(pitchOff, false, setOf(id)))
+            with(actionSequence) {
+                add(Action.HighlightEvent(pitchOn, true, setOf(id)))
+                add(Action.HighlightEvent(pitchOff, false, setOf(id)))
+            }
         }
 
         actionSequence.sortBy { it.time }
@@ -208,7 +211,6 @@ class SequenceGenerator : ScoreHandlerInterface {
 
         return updatedTimeCounter
     }
-
 
     fun getActionSequenceScript(): ActionScript {
         val timeEventMap = mutableMapOf<Int, MutableList<Action>>()
@@ -254,8 +256,9 @@ class SequenceGenerator : ScoreHandlerInterface {
     override fun toggleExtra(id: String, extra: Accidental) =
         scoreHandler.toggleExtra(id, extra).also { computeOnOffPitches() }
 
-    override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>): String? {
-        TODO("Not yet implemented")
-    }
+    override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>) =
+        scoreHandler.addNoteGroup(duration, pitches)
+
+    override fun getHighlightElementsMap() = scoreHandler.getHighlightElementsMap()
 
 }

@@ -4,6 +4,8 @@ import com.kjipo.handler.NoteSymbol
 
 class Context {
 
+    private var idCounter = 0
+
     fun isAccidental(pitch: Int) {
         // TODO
 
@@ -35,6 +37,13 @@ class Context {
 
     fun requiresStem(noteGroupElement: NoteGroupElement): Boolean {
         return noteGroupElement.notes.map { requiresStem(it) }.filter { it }.any()
+    }
+
+    fun getAndIncrementIdCounter() = "context-${idCounter++}"
+
+    fun getClientContext(): ClientContext {
+        // TODO
+        return ClientContext(emptyMap())
     }
 
 }

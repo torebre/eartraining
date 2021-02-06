@@ -19,8 +19,16 @@ class ScoreHandler : ScoreHandlerInterface {
 
     private var scoreSetup = ScoreSetup()
 
+    private var cachedBuild: RenderingSequenceWithMetaData? = null
 
-    override fun getScoreAsJson() = truncateNumbers(Json.encodeToString(RenderingSequence.serializer(), build()))
+
+    override fun getScoreAsJson() =
+        truncateNumbers(
+            Json.encodeToString(
+                RenderingSequence.serializer(),
+                cachedBuild?.renderingSequence ?: build().renderingSequence
+            )
+        )
 
 
     fun clear() {
@@ -31,14 +39,13 @@ class ScoreHandler : ScoreHandlerInterface {
     }
 
 
-    fun build(): RenderingSequence {
+    fun build(): RenderingSequenceWithMetaData {
 
         // TODO Probably does not make sense to create a new one since the context inside it is used elsewhere
         scoreSetup = ScoreSetup()
 
 
         // This is to make the IDs the same every time the score is rendered. It is needed to make tests for the diff-functionality pass
-        NoteElement.noteElementIdCounter = 0
         BarData.barNumber = 0
         BarData.stemCounter = 0
         ExtraBarLinesElement.idCounter = 0
@@ -52,6 +59,8 @@ class ScoreHandler : ScoreHandlerInterface {
         val bars = mutableListOf(currentBar)
 
         Napier.d("Score handler elements: $scoreHandlerElements")
+
+        val highlightElementMap = mutableMapOf<String, Collection<String>>()
 
         for (element in scoreHandlerElements) {
 
@@ -81,8 +90,11 @@ class ScoreHandler : ScoreHandlerInterface {
                         }
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
-                            val temporalElement = createTemporalElement(element)
+                            val temporalElement = createTemporalElement(element, scoreSetup.context)
                             currentBar.scoreRenderingElements.add(temporalElement)
+                            if (temporalElement is HighlightableElement) {
+                                highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
+                            }
                         }
                     }
                 }
@@ -115,16 +127,16 @@ class ScoreHandler : ScoreHandlerInterface {
 //                        }
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
-                            val temporalElement = createTemporalElement(element)
+                            val temporalElement = createTemporalElement(element, scoreSetup.context)
                             currentBar.scoreRenderingElements.add(temporalElement)
+
+                            if (temporalElement is HighlightableElement) {
+                                highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
+                            }
                         }
                     }
-
                 }
-
-
             }
-
         }
 
         Napier.d("Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
@@ -139,7 +151,7 @@ class ScoreHandler : ScoreHandlerInterface {
         Napier.d("After trimming. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
 
         if (!lastBarTrimmed) {
-            fillInLastBar(bars, remainingTicksInBar)
+            fillInLastBar(bars, remainingTicksInBar, scoreSetup.context)
         }
 
         Napier.d("After fill in. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
@@ -150,7 +162,7 @@ class ScoreHandler : ScoreHandlerInterface {
         }
         scoreSetup.bars.addAll(bars)
 
-        return scoreSetup.build()
+        return RenderingSequenceWithMetaData(scoreSetup.build(), highlightElementMap)
     }
 
     private fun addBeams(barData: BarData): MutableList<BeamGroup> {
@@ -182,9 +194,9 @@ class ScoreHandler : ScoreHandlerInterface {
         var previousInternal = previous
         for (duration in durations) {
             val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                NoteElement(element.noteType, element.octave, duration, element.id)
+                NoteElement(element.noteType, element.octave, duration, scoreSetup.context)
             } else {
-                RestElement(duration, element.id)
+                RestElement(duration, scoreSetup.context)
             }
 
             barData.scoreRenderingElements.add(scoreRenderingElement)
@@ -207,17 +219,17 @@ class ScoreHandler : ScoreHandlerInterface {
         beams.add(BeamGroup(noteElementIds))
     }
 
-    private fun createTemporalElement(element: ScoreHandlerElement): ScoreRenderingElement {
+    private fun createTemporalElement(element: ScoreHandlerElement, context: Context): ScoreRenderingElement {
         when (element) {
             is NoteOrRest -> {
                 return if (element.isNote) {
-                    NoteElement(element.noteType, element.octave, element.duration, element.id).also {
+                    NoteElement(element.noteType, element.octave, element.duration, context).also {
                         if (element.accidental != null) {
                             it.accidental = element.accidental
                         }
                     }
                 } else {
-                    RestElement(element.duration, element.id)
+                    RestElement(element.duration, context)
                 }
 
             }
@@ -230,7 +242,7 @@ class ScoreHandler : ScoreHandlerInterface {
 
     }
 
-    private fun fillInLastBar(bars: MutableList<BarData>, ticksRemainingInBar: Int) {
+    private fun fillInLastBar(bars: MutableList<BarData>, ticksRemainingInBar: Int, context: Context) {
         if (bars.isEmpty() || ticksRemainingInBar == 0) {
             return
         }
@@ -240,7 +252,7 @@ class ScoreHandler : ScoreHandlerInterface {
                 val scoreHandlerElement =
                     NoteOrRest((++idCounter).toString(), it, false, 5, NoteType.C, accidental = null)
                 scoreHandlerElements.add(scoreHandlerElement)
-                lastBar.scoreRenderingElements.add(RestElement(it, scoreHandlerElement.id))
+                lastBar.scoreRenderingElements.add(RestElement(it, context))
             }
         }
     }
@@ -447,6 +459,10 @@ class ScoreHandler : ScoreHandlerInterface {
         }.toList()
         scoreHandlerElements.add(NoteGroup((++idCounter).toString(), groupNotes))
         return scoreHandlerElements.last().id
+    }
+
+    override fun getHighlightElementsMap(): Map<String, Collection<String>> {
+        return cachedBuild?.highlightElementsMap ?: build().highlightElementsMap
     }
 
     override fun insertRest(activeElement: String, duration: Duration): String? {

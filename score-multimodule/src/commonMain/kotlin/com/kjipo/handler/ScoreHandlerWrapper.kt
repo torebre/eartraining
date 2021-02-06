@@ -35,22 +35,28 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     override fun getIdOfFirstSelectableElement() = scoreHandler.getIdOfFirstSelectableElement()
 
-    override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) = scoreHandler.getNeighbouringElement(activeElement, lookLeft)
+    override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) =
+        scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
-    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int) = scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
+    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int) =
+        scoreHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
 
     override fun deleteElement(id: String) = scoreHandler.deleteElement(id)
 
-    override fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? = scoreHandler.insertNote(activeElement, duration, pitch)
+    override fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? =
+        scoreHandler.insertNote(activeElement, duration, pitch)
 
     override fun insertNote(keyPressed: Int) = scoreHandler.insertNote(keyPressed)
 
-    override fun insertRest(activeElement: String, duration: Duration): String? = scoreHandler.insertRest(activeElement, duration)
+    override fun insertRest(activeElement: String, duration: Duration): String? =
+        scoreHandler.insertRest(activeElement, duration)
 
     override fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
-    override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>): String? {
-        TODO("Not yet implemented")
-    }
+
+    override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>) =
+        scoreHandler.addNoteGroup(duration, pitches)
+
+    override fun getHighlightElementsMap() = scoreHandler.getHighlightElementsMap()
 
 }
 

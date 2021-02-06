@@ -12,7 +12,6 @@ class ScoreSetup {
     val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
 
-
     val context = Context()
 
 
@@ -23,13 +22,21 @@ class ScoreSetup {
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
 
+        val highlightElementsMap = mutableMapOf<String, Collection<String>>()
+
         // TODO Should also add glyphs from note groups
-        bars.flatMap { it.scoreRenderingElements }
-                .filter { it is NoteElement }
-                .map { it as NoteElement }
-                .forEach {
-                    definitionMap.putAll(it.getGlyphs())
-                }
+        val scoreRenderingElements = bars.flatMap { it.scoreRenderingElements }.toList()
+            scoreRenderingElements.filter { it is NoteElement }
+            .map { it as NoteElement }
+            .forEach {
+                definitionMap.putAll(it.getGlyphs())
+            }
+
+        scoreRenderingElements.filter { it is HighlightableElement }
+            .map { it as HighlightableElement }
+            .forEach {
+            highlightElementsMap[it.id] = it.getIdsOfHighlightElements()
+        }
 
         var barXoffset = 0
         var barYoffset = 0
@@ -82,9 +89,11 @@ class ScoreSetup {
                 }
             }
 
-            val beamElement = BeamElement("beam-${beamCounter++}",
-                    Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
-                    Pair(stopX - startX, stopY - startY), firstNote.renderGroup)
+            val beamElement = BeamElement(
+                "beam-${beamCounter++}",
+                Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
+                Pair(stopX - startX, stopY - startY), firstNote.renderGroup
+            )
 
             firstNote.renderGroup?.let {
                 it.renderingElements.addAll(beamElement.toRenderingElement())
@@ -123,16 +132,21 @@ class ScoreSetup {
             renderingElements.addAll(tieElement.toRenderingElement())
         }
 
-        renderingSequences.add(RenderingSequence(listOf(RenderGroup(renderingElements, null)), determineViewBox(renderingElements), definitionMap))
-
+        renderingSequences.add(
+            RenderingSequence(
+                listOf(RenderGroup(renderingElements, null)),
+                determineViewBox(renderingElements),
+                definitionMap
+            )
+        )
         return mergeRenderingSequences(renderingSequences)
     }
 
 
     private fun findNoteElement(noteId: String, bars: List<BarData>) = bars.flatMap { it.scoreRenderingElements }
-            .filter { it is NoteElement }
-            .map { it as NoteElement }
-            .find { it.id == noteId }
+        .filter { it is NoteElement }
+        .map { it as NoteElement }
+        .find { it.id == noteId }
 
 
     private fun mergeRenderingSequences(renderingSequences: Collection<RenderingSequence>): RenderingSequence {
@@ -145,7 +159,11 @@ class ScoreSetup {
         }
 
         // TODO Viewbox will be wrong since translations are not taken into account
-        return RenderingSequence(renderGroups, determineViewBox(renderGroups.flatMap { it.renderingElements }), definitions)
+        return RenderingSequence(
+            renderGroups,
+            determineViewBox(renderGroups.flatMap { it.renderingElements }),
+            definitions
+        )
     }
 
 
@@ -160,12 +178,18 @@ class ScoreSetup {
         for (beamGroup in beams) {
             if (beamGroup.noteIds.contains(noteId)) {
                 findNoteElement(beamGroup.noteIds.first(), bars)?.let { firstNoteInBeamGroup ->
-                    return context.stemUp(ScoreHandlerUtilities.getPitch(firstNoteInBeamGroup.note, firstNoteInBeamGroup.octave))
+                    return context.stemUp(
+                        ScoreHandlerUtilities.getPitch(
+                            firstNoteInBeamGroup.note,
+                            firstNoteInBeamGroup.octave
+                        )
+                    )
                 }
             }
         }
         return Stem.UP
     }
+
 
 
 }

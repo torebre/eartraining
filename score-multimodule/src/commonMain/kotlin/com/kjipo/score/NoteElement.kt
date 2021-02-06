@@ -8,12 +8,15 @@ class NoteElement(
     var note: NoteType,
     var octave: Int,
     override var duration: Duration,
-    override val id: String = "note-${noteElementIdCounter++}"
-) : ScoreRenderingElement(), TemporalElement {
+    val context: Context,
+    override val id: String = context.getAndIncrementIdCounter()
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     var accidental: Accidental? = null
     var stem = Stem.NONE
     var partOfBeamGroup = false
     val positionedRenderingElements = mutableListOf<PositionedRenderingElement>()
+
+    private val highlightElements = mutableSetOf<String>()
 
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -29,12 +32,15 @@ class NoteElement(
 
         val glyphData = getNoteHeadGlyph(duration)
         val positionedRenderingElement = PositionedRenderingElement.create(
-            listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, id,
+            listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
+            glyphData.boundingBox,
+            context.getAndIncrementIdCounter(),
             xPosition,
             yPosition
         )
         positionedRenderingElement.typeId = duration.name
         positionedRenderingElements.add(positionedRenderingElement)
+        highlightElements.add(positionedRenderingElement.id)
 
         addExtraBarLinesForGClef(
             note, octave,
@@ -146,13 +152,10 @@ class NoteElement(
         }
     }
 
+    override fun getIdsOfHighlightElements() = highlightElements
+
     override fun toString(): String {
         return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, id='$id')"
-    }
-
-
-    companion object {
-        var noteElementIdCounter = 0
     }
 
 }

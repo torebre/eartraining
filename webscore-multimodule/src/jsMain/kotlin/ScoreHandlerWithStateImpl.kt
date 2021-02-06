@@ -39,8 +39,6 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
 
         updateCurrentScoreAndGetDiff()
 
-        println("Test26: $currentDiff")
-
         return currentDiff
     }
 

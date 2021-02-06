@@ -20,9 +20,6 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
     var xPosition: Int = 0
     var yPosition: Int = 0
 
-//    @Transient
-//    var renderGroup: RenderGroup? = null
-
 
     companion object {
 

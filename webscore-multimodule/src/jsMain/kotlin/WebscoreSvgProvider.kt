@@ -12,7 +12,7 @@ import org.w3c.dom.Node
 
 class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
 
-     val idSvgElementMap = mutableMapOf<String, Element>()
+    val idSvgElementMap = mutableMapOf<String, Element>()
 
 
     fun generateSvgData(svgElement: Element) {
@@ -161,6 +161,10 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
             }
 
         }
+    }
+
+    fun getHighlightForId(id: String): Collection<String> {
+        return scoreHandler.getHighlightMap()[id] ?: emptySet()
     }
 
     fun getElement(id: String) = idSvgElementMap[id]

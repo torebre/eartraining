@@ -12,11 +12,13 @@ class NoteGroupElement(
     override var duration: Duration,
     override val id: String,
     val context: Context
-) : ScoreRenderingElement(), TemporalElement {
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     val result = mutableListOf<PositionedRenderingElement>()
     var yLowestPosition = Int.MAX_VALUE
     var yHighestPosition = Int.MIN_VALUE
     var stem = Stem.NONE
+
+    private val highlightElements = mutableSetOf<String>()
 
     constructor(
         notes: List<NoteSymbol>,
@@ -24,7 +26,7 @@ class NoteGroupElement(
         context: Context
     ) : this(
         notes, duration,
-        "note-${noteElementIdCounter++}", context
+        context.getAndIncrementIdCounter(), context
     )
 
 
@@ -66,14 +68,6 @@ class NoteGroupElement(
 //            yPosition = calculateverticaloffset(note.notetype, note.octave)
             val noteYTranslate = calculateVerticalOffset(note.noteType, note.octave)
 
-            if (yLowestPosition > yPosition) {
-                yLowestPosition = yPosition
-            }
-
-            if (yHighestPosition < yPosition) {
-                yHighestPosition = yPosition
-            }
-
             note.accidental?.let {
                 result.add(
                     setupAccidental(
@@ -88,7 +82,7 @@ class NoteGroupElement(
             val glyphData = getNoteHeadGlyph(duration)
 
             val positionedRenderingElement = PositionedRenderingElement.create(
-                listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, "$id-$counter",
+                listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, context.getAndIncrementIdCounter(),
                 xPosition,
                 yPosition
             )
@@ -100,9 +94,18 @@ class NoteGroupElement(
             positionedRenderingElement.typeId = duration.name
             result.add(positionedRenderingElement)
 
+            highlightElements.add(positionedRenderingElement.id)
+
+            if (yLowestPosition > noteYTranslate) {
+                yLowestPosition = noteYTranslate
+            }
+
+            if (yHighestPosition < noteYTranslate) {
+                yHighestPosition = noteYTranslate
+            }
+
             ++counter
         }
-
 
     }
 
@@ -174,37 +177,22 @@ class NoteGroupElement(
 
         // TODO Need to add more functionality to stems: Whether they are pointing up or down and more
 
-        val xCoordinate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+        val xCoordinate = getRightEdgeOfNoteHeadGlyph()
         // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
-
         val ySpanForNoteGroup = yHighestPosition.minus(yLowestPosition).absoluteValue
         val stemElement = getStem(xCoordinate, yHighestPosition, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT)
 //                stemElement.typeId = stem.name +"_" +noteElementIdCounter++
         result.add(stemElement)
+    }
 
-//            if (duration == Duration.EIGHT && !partOfBeamGroup) {
-//                // If the note is not part of a beam group, then it should have a flag if the duration requires that it does
-//                val stemDirection = stem == Stem.UP
-//                val flagGlyph = getFlagGlyph(duration, stemDirection)
-//                val positionedRenderingElement = PositionedRenderingElement.create(
-//                    listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, "$id-$counter",
-//                    stemElement.xPosition,
-//                    stemElement.yPosition
-//                ).apply {
-//                    // TODO Need to think about if the stem is going up or down
-//                    typeId = flagGlyph.name
-//                    yTranslate = -DEFAULT_STEM_HEIGHT
-//                    xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
-//                }
-//
-//                result.add(positionedRenderingElement)
-//            }
+    private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+
+    override fun getIdsOfHighlightElements(): Collection<String> {
+        return highlightElements
     }
 
 
     companion object {
-        var noteElementIdCounter = 0
-
 
         private fun setupAccidental(
             id: String,

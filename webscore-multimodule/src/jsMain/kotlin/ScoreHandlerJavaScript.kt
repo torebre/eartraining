@@ -13,7 +13,8 @@ class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
     fun getIdOfFirstSelectableElement() = scoreHandler.getIdOfFirstSelectableElement()
 
     @JsName("getNeighbouringElement")
-    fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) = scoreHandler.getNeighbouringElement(activeElement, lookLeft)
+    fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) =
+        scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
     @JsName("updateDuration")
     fun updateDuration(activeElement: String, keyPressed: Int) = scoreHandler.updateDuration(activeElement, keyPressed)
@@ -25,11 +26,18 @@ class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
     fun insertNote(keyPressed: Int) = scoreHandler.insertNote(keyPressed)
 
     @JsName("switchBetweenNoteAndRest")
-    fun switchBetweenNoteAndRest(activeElement: String, keyPressed: Int) = scoreHandler.switchBetweenNoteAndRest(activeElement, keyPressed)
+    fun switchBetweenNoteAndRest(activeElement: String, keyPressed: Int) =
+        scoreHandler.switchBetweenNoteAndRest(activeElement, keyPressed)
 
     @JsName("deleteElement")
     fun deleteElement(id: String) = scoreHandler.deleteElement(id)
 
     @JsName("toggleExtra")
     fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
+
+//    @JsName("getClientContext")
+//    fun getClientContext() = scoreHandler.getClientContext()
+
+    @JsName("getHighlightMap")
+    fun getHighlightMap() = scoreHandler.getHighlightElementsMap()
 }
