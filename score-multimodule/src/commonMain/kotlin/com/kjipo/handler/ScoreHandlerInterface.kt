@@ -29,8 +29,6 @@ interface ScoreHandlerInterface {
 
     fun deleteElement(id: String)
 
-    fun toggleExtra(id: String, extra: Accidental)
-
     // Add duration on note level
     fun addNoteGroup(duration: Duration, pitches: List<GroupNote>): String?
 

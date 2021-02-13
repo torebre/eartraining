@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
  *
+ *
  */
 class ScoreHandler : ScoreHandlerInterface {
     private val scoreHandlerElements = mutableListOf<ScoreHandlerElement>()
@@ -90,6 +91,8 @@ class ScoreHandler : ScoreHandlerInterface {
                         }
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
+
+
                             val temporalElement = createTemporalElement(element, scoreSetup.context)
                             currentBar.scoreRenderingElements.add(temporalElement)
                             if (temporalElement is HighlightableElement) {
@@ -194,7 +197,14 @@ class ScoreHandler : ScoreHandlerInterface {
         var previousInternal = previous
         for (duration in durations) {
             val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                NoteElement(element.noteType, element.octave, duration, scoreSetup.context)
+                transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+                    NoteElement(
+                        noteAndAccidental.first,
+                        element.octave,
+                        duration,
+                        scoreSetup.context
+                    ).also { it.accidental }
+                }
             } else {
                 RestElement(duration, scoreSetup.context)
             }
@@ -223,9 +233,9 @@ class ScoreHandler : ScoreHandlerInterface {
         when (element) {
             is NoteOrRest -> {
                 return if (element.isNote) {
-                    NoteElement(element.noteType, element.octave, element.duration, context).also {
-                        if (element.accidental != null) {
-                            it.accidental = element.accidental
+                    transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+                        NoteElement(noteAndAccidental.first, element.octave, element.duration, context).also {
+                            it.accidental = noteAndAccidental.second
                         }
                     }
                 } else {
@@ -250,7 +260,7 @@ class ScoreHandler : ScoreHandlerInterface {
         bars.last().let { lastBar ->
             ScoreHandlerUtilities.splitIntoDurations(ticksRemainingInBar).forEach {
                 val scoreHandlerElement =
-                    NoteOrRest((++idCounter).toString(), it, false, 5, NoteType.C, accidental = null)
+                    NoteOrRest((++idCounter).toString(), it, false, 5, NoteType.C)
                 scoreHandlerElements.add(scoreHandlerElement)
                 lastBar.scoreRenderingElements.add(RestElement(it, context))
             }
@@ -348,7 +358,7 @@ class ScoreHandler : ScoreHandlerInterface {
             val insertIndex = scoreHandlerElements.indexOf(element) + 1
             scoreHandlerElements.add(
                 insertIndex,
-                NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null)
+                NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C)
             )
             return scoreHandlerElements[insertIndex].id
         }
@@ -358,7 +368,7 @@ class ScoreHandler : ScoreHandlerInterface {
     override fun insertNote(keyPressed: Int) = insertNote(ScoreHandlerUtilities.getDuration(keyPressed))
 
     fun insertNote(duration: Duration): String {
-        scoreHandlerElements.add(NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null))
+        scoreHandlerElements.add(NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C))
         return scoreHandlerElements.last().id
     }
 
@@ -369,8 +379,7 @@ class ScoreHandler : ScoreHandlerInterface {
                 duration,
                 true,
                 octave,
-                noteType,
-                accidental = null
+                noteType
             )
         )
         return scoreHandlerElements.last().id
@@ -383,8 +392,7 @@ class ScoreHandler : ScoreHandlerInterface {
                 duration,
                 false,
                 5,
-                NoteType.C,
-                accidental = null
+                NoteType.C
             )
         )
         return scoreHandlerElements.last().id
@@ -393,7 +401,7 @@ class ScoreHandler : ScoreHandlerInterface {
     fun insertChord(duration: Duration, elements: Collection<NoteSequenceElement.NoteElement>) {
         val noteGroupElement = NoteGroup((++idCounter).toString(), elements.map {
             // TODO Need to handle accidentals here?
-            NoteSymbol((++idCounter).toString(), duration, it.octave, it.note, null)
+            NoteSymbol((++idCounter).toString(), duration, it.octave, it.note)
         }.toList())
 
         scoreHandlerElements.add(noteGroupElement)
@@ -446,7 +454,7 @@ class ScoreHandler : ScoreHandlerInterface {
             val insertIndex = scoreHandlerElements.indexOf(element) + 1
             scoreHandlerElements.add(
                 insertIndex,
-                NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C, accidental = null)
+                NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C)
             )
             return scoreHandlerElements[insertIndex].id
         }
@@ -455,7 +463,7 @@ class ScoreHandler : ScoreHandlerInterface {
 
     override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>): String {
         val groupNotes = pitches.map {
-            NoteSymbol((++idCounter).toString(), duration, it.octave, it.noteType, it.accidental)
+            NoteSymbol((++idCounter).toString(), duration, it.octave, it.noteType)
         }.toList()
         scoreHandlerElements.add(NoteGroup((++idCounter).toString(), groupNotes))
         return scoreHandlerElements.last().id
@@ -473,29 +481,27 @@ class ScoreHandler : ScoreHandlerInterface {
                 false,
                 5,
                 NoteType.C,
-                accidental = null
             )
         )
         return scoreHandlerElements.last().id
     }
 
-    override fun toggleExtra(id: String, extra: Accidental) {
-        scoreHandlerElements.find { it.id == id }?.let {
-            when (it) {
-                is NoteOrRest -> {
-                    if (it.isNote) {
-                        if (it.accidental == extra) {
-                            it.accidental = null
-                        } else {
-                            it.accidental = extra
-                        }
-                    }
-                }
-                // TODO Need to handle notes in note group
-
-            }
+    private fun transformToNoteAndAccidental(noteType: NoteType): Pair<GClefNoteLine, Accidental?> {
+        return when (noteType) {
+            NoteType.A -> Pair(GClefNoteLine.A, null)
+            NoteType.A_SHARP -> Pair(GClefNoteLine.A, Accidental.SHARP)
+            NoteType.H -> Pair(GClefNoteLine.H, null)
+            NoteType.C -> Pair(GClefNoteLine.C, null)
+            NoteType.C_SHARP -> Pair(GClefNoteLine.C, Accidental.SHARP)
+            NoteType.D -> Pair(GClefNoteLine.D, null)
+            NoteType.D_SHARP -> Pair(GClefNoteLine.D, Accidental.SHARP)
+            NoteType.E -> Pair(GClefNoteLine.E, null)
+            NoteType.F -> Pair(GClefNoteLine.F, null)
+            NoteType.F_SHARP -> Pair(GClefNoteLine.F, Accidental.SHARP)
+            NoteType.G -> Pair(GClefNoteLine.G, Accidental.SHARP)
+            NoteType.G_SHARP -> Pair(GClefNoteLine.G, Accidental.SHARP)
         }
-    }
 
+    }
 
 }

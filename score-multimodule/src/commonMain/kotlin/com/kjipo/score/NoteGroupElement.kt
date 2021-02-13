@@ -53,7 +53,7 @@ class NoteGroupElement(
 
     private fun addExtraBarLines(noteSymbol: NoteSymbol) =
         addExtraBarLinesForGClef(
-            noteSymbol.noteType, noteSymbol.octave,
+            getNoteWithoutAccidental(noteSymbol.noteType), noteSymbol.octave,
             0,
             0,
             -25,
@@ -66,15 +66,15 @@ class NoteGroupElement(
 
         for (note in notes) {
 //            yPosition = calculateverticaloffset(note.notetype, note.octave)
-            val noteYTranslate = calculateVerticalOffset(note.noteType, note.octave)
+            val noteYTranslate = calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
 
-            note.accidental?.let {
+            if (noteRequiresSharp(note.noteType)) {
                 result.add(
                     setupAccidental(
                         id,
                         xPosition,
                         yPosition,
-                        it
+                        Accidental.SHARP
                     ).also { it.yTranslate = noteYTranslate }
                 )
             }
@@ -82,7 +82,9 @@ class NoteGroupElement(
             val glyphData = getNoteHeadGlyph(duration)
 
             val positionedRenderingElement = PositionedRenderingElement.create(
-                listOf(PathInterfaceImpl(glyphData.pathElements, 1)), glyphData.boundingBox, context.getAndIncrementIdCounter(),
+                listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
+                glyphData.boundingBox,
+                context.getAndIncrementIdCounter(),
                 xPosition,
                 yPosition
             )
@@ -154,7 +156,10 @@ class NoteGroupElement(
 //            glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
 //        }
 
-        accidentalInUse().forEach { glyphsUsed.put(it.name, getAccidentalGlyph(it)) }
+        if (sharpInUse()) {
+            glyphsUsed.put(Accidental.SHARP.name, getAccidentalGlyph(Accidental.SHARP))
+        }
+
 
         if (duration == Duration.EIGHT) {
             getFlagGlyph(Duration.EIGHT, stem == Stem.UP).let {
@@ -168,9 +173,9 @@ class NoteGroupElement(
     }
 
 
-    private fun accidentalInUse() = notes.mapNotNull {
-        it.accidental
-    }.distinct()
+    private fun sharpInUse() = notes.map {
+        noteRequiresSharp(it.noteType)
+    }.any { it }
 
 
     fun addStem() {
@@ -209,6 +214,31 @@ class NoteGroupElement(
                 typeId = accidental.name
                 xTranslate = -30
             }
+        }
+    }
+
+    fun getNoteWithoutAccidental(noteType: NoteType): GClefNoteLine {
+        return when (noteType) {
+            NoteType.A_SHARP -> GClefNoteLine.A
+            NoteType.A -> GClefNoteLine.A
+            NoteType.H -> GClefNoteLine.H
+            NoteType.C -> GClefNoteLine.C
+            NoteType.C_SHARP -> GClefNoteLine.C
+            NoteType.D -> GClefNoteLine.D
+            NoteType.D_SHARP -> GClefNoteLine.D
+            NoteType.E -> GClefNoteLine.E
+            NoteType.F -> GClefNoteLine.F
+            NoteType.F_SHARP -> GClefNoteLine.F
+            NoteType.G -> GClefNoteLine.G
+            NoteType.G_SHARP -> GClefNoteLine.G
+        }
+
+    }
+
+    fun noteRequiresSharp(noteType: NoteType): Boolean {
+        return when (noteType) {
+            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
+            else -> false
         }
     }
 

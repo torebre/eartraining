@@ -3,7 +3,7 @@ package com.kjipo.score
 import com.kjipo.svg.*
 
 
-fun addExtraBarLinesForGClef(note: NoteType, octave: Int, xPosition: Int, yPosition: Int, boundingBoxMin: Int, boundingBoxMax: Int): ScoreRenderingElement? {
+fun addExtraBarLinesForGClef(note: GClefNoteLine, octave: Int, xPosition: Int, yPosition: Int, boundingBoxMin: Int, boundingBoxMax: Int): ScoreRenderingElement? {
     getExtraBarlines(note, octave).let {
         if (it.isEmpty()) {
             return null

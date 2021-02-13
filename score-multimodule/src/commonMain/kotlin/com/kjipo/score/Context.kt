@@ -46,4 +46,19 @@ class Context {
         return ClientContext(emptyMap())
     }
 
+
+//    private fun addAccidentalIfNeeded(note: NoteType): PositionedRenderingElement? {
+//        if (noteRequiresSharp(note)) {
+//            return setupAccidental(Accidental.SHARP)
+//        }
+//        return null
+//    }
+
+    fun noteRequiresSharp(note: NoteType): Boolean {
+        return when (note) {
+            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
+            else -> false
+        }
+    }
+
 }

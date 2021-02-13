@@ -363,21 +363,21 @@ class WebScore(
                 }
             }
 
-            "KeyF" -> {
-                if (activeElement == null) {
-                    return
-                }
-                scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
-                regenerateSvg()
-            }
-
-            "KeyS" -> {
-                if (activeElement == null) {
-                    return
-                }
-                scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
-                regenerateSvg()
-            }
+//            "KeyF" -> {
+//                if (activeElement == null) {
+//                    return
+//                }
+//                scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
+//                regenerateSvg()
+//            }
+//
+//            "KeyS" -> {
+//                if (activeElement == null) {
+//                    return
+//                }
+//                scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
+//                regenerateSvg()
+//            }
         }
     }
 

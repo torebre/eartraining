@@ -167,28 +167,28 @@ class ScoreSetup {
     }
 
 
-    fun stemUp(noteId: String): Stem {
-        val noteElement = findNoteElement(noteId, bars)
-
-        if (noteElement == null) {
-            return Stem.UP
-        }
-
-        // If the note is part of a beam group, set it to have the stem in the same direction as the first note in the group
-        for (beamGroup in beams) {
-            if (beamGroup.noteIds.contains(noteId)) {
-                findNoteElement(beamGroup.noteIds.first(), bars)?.let { firstNoteInBeamGroup ->
-                    return context.stemUp(
-                        ScoreHandlerUtilities.getPitch(
-                            firstNoteInBeamGroup.note,
-                            firstNoteInBeamGroup.octave
-                        )
-                    )
-                }
-            }
-        }
-        return Stem.UP
-    }
+//    fun stemUp(noteId: String): Stem {
+//        val noteElement = findNoteElement(noteId, bars)
+//
+//        if (noteElement == null) {
+//            return Stem.UP
+//        }
+//
+//        // If the note is part of a beam group, set it to have the stem in the same direction as the first note in the group
+//        for (beamGroup in beams) {
+//            if (beamGroup.noteIds.contains(noteId)) {
+//                findNoteElement(beamGroup.noteIds.first(), bars)?.let { firstNoteInBeamGroup ->
+//                    return context.stemUp(
+//                        ScoreHandlerUtilities.getPitch(
+//                            firstNoteInBeamGroup.note,
+//                            firstNoteInBeamGroup.octave
+//                        )
+//                    )
+//                }
+//            }
+//        }
+//        return Stem.UP
+//    }
 
 
 

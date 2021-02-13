@@ -51,8 +51,6 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
     override fun insertRest(activeElement: String, duration: Duration): String? =
         scoreHandler.insertRest(activeElement, duration)
 
-    override fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
-
     override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>) =
         scoreHandler.addNoteGroup(duration, pitches)
 

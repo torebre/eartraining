@@ -5,7 +5,7 @@ import com.kjipo.svg.*
 
 
 class NoteElement(
-    var note: NoteType,
+    var note: GClefNoteLine,
     var octave: Int,
     override var duration: Duration,
     val context: Context,
@@ -26,8 +26,8 @@ class NoteElement(
     fun layoutNoteHeads() {
         yPosition = calculateVerticalOffset(note, octave)
 
-        addAccidentalIfNeeded(note)?.let {
-            positionedRenderingElements.add(it)
+        accidental?.run {
+            positionedRenderingElements.add(setupAccidental(this))
         }
 
         val glyphData = getNoteHeadGlyph(duration)
@@ -53,19 +53,6 @@ class NoteElement(
         }
     }
 
-    private fun addAccidentalIfNeeded(note: NoteType): PositionedRenderingElement? {
-        if (noteRequiresSharp(note)) {
-            return setupAccidental(Accidental.SHARP)
-        }
-        return null
-    }
-
-    private fun noteRequiresSharp(note: NoteType): Boolean {
-        return when (note) {
-            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
-            else -> false
-        }
-    }
 
     private fun setupAccidental(accidental: Accidental): PositionedRenderingElement {
         val accidentalGlyph = getAccidentalGlyph(accidental)
@@ -99,7 +86,7 @@ class NoteElement(
 //            glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
 //        }
 
-        accidentalInUse()?.let {
+        accidental?.let {
             glyphsUsed.put(it.name, getAccidentalGlyph(it))
         }
 
@@ -138,19 +125,19 @@ class NoteElement(
         }
     }
 
-    private fun accidentalInUse(): Accidental? {
-        return when {
-            accidental != null -> {
-                accidental
-            }
-            noteRequiresSharp(note) -> {
-                Accidental.SHARP
-            }
-            else -> {
-                null
-            }
-        }
-    }
+//    private fun accidentalInUse(): Accidental? {
+//        return when {
+//            accidental != null -> {
+//                accidental
+//            }
+//            noteRequiresSharp(note) -> {
+//                Accidental.SHARP
+//            }
+//            else -> {
+//                null
+//            }
+//        }
+//    }
 
     override fun getIdsOfHighlightElements() = highlightElements
 

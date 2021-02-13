@@ -1,7 +1,6 @@
 package com.kjipo.scoregenerator
 
 import com.kjipo.handler.*
-import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
@@ -252,9 +251,6 @@ class SequenceGenerator : ScoreHandlerInterface {
         scoreHandler.insertRest(activeElement, duration).also {
             computeOnOffPitches()
         }
-
-    override fun toggleExtra(id: String, extra: Accidental) =
-        scoreHandler.toggleExtra(id, extra).also { computeOnOffPitches() }
 
     override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>) =
         scoreHandler.addNoteGroup(duration, pitches)

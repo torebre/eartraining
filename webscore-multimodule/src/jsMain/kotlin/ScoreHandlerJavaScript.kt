@@ -32,8 +32,8 @@ class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
     @JsName("deleteElement")
     fun deleteElement(id: String) = scoreHandler.deleteElement(id)
 
-    @JsName("toggleExtra")
-    fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
+//    @JsName("toggleExtra")
+//    fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
 
 //    @JsName("getClientContext")
 //    fun getClientContext() = scoreHandler.getClientContext()

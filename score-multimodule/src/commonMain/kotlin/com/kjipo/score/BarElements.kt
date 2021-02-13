@@ -30,6 +30,16 @@ enum class NoteType {
     G_SHARP
 }
 
+enum class GClefNoteLine {
+    A,
+    H,
+    C,
+    D,
+    E,
+    F,
+    G,
+}
+
 enum class Duration(val ticks: Int) {
     ZERO(0),
     EIGHT(TICKS_PER_QUARTER_NOTE / 2),
