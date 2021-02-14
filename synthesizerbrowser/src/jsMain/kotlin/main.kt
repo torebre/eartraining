@@ -39,7 +39,15 @@ fun showWebscore() {
     val webscoreShow = WebscoreShow(synthesizer)
     webscoreShow.createSequence()
 
-    document.querySelector("button")!!.addEventListener("click", {
+    document.querySelector("#playTarget")!!.addEventListener("click", {
+        GlobalScope.launch(Dispatchers.Default) {
+            webscoreShow.playSequence()
+        }
+    })
+
+    webscoreShow.createInputScore()
+
+    document.querySelector("#playInput")!!.addEventListener("click", {
         GlobalScope.launch(Dispatchers.Default) {
             webscoreShow.playSequence()
         }

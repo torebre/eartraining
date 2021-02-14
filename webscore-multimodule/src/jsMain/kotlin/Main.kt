@@ -36,5 +36,5 @@ fun main() {
 
 //    WebScore(ScoreHandlerJavaScript(scoreHandler))
 
-    addNoteGroup()
+//    addNoteGroup()
 }

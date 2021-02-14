@@ -1,5 +1,8 @@
 import com.github.aakira.napier.Napier
+import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerWrapper
 import com.kjipo.scoregenerator.Action
+import com.kjipo.scoregenerator.ActionScript
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.SequenceGenerator
 import kotlinx.coroutines.CancellationException
@@ -8,21 +11,36 @@ import kotlinx.coroutines.delay
 class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
-    private var sequenceGenerator = SequenceGenerator()
+    private var targetSequenceGenerator = SequenceGenerator()
     private var webScore: WebScore? = null
+    private var inputScore: WebScore? = null
 
     fun createSequence() {
         val tempNoteSequence = polyphonicNoteSequenceGenerator.createSequence()
 
-        sequenceGenerator = SequenceGenerator()
-        sequenceGenerator.loadSimpleNoteSequence(tempNoteSequence)
+        targetSequenceGenerator = SequenceGenerator()
+        targetSequenceGenerator.loadSimpleNoteSequence(tempNoteSequence)
 
-        webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator))
+        webScore = WebScore(ScoreHandlerJavaScript(targetSequenceGenerator), "targetScore", false)
+    }
+
+    fun createInputScore() {
+        val scoreHandler = ScoreHandler()
+        val scoreHandlerWrapper = ScoreHandlerWrapper(scoreHandler)
+
+        inputScore = WebScore(ScoreHandlerJavaScript(scoreHandlerWrapper), "inputScore")
+
+
     }
 
     suspend fun playSequence() {
+        playSequenceInternal(targetSequenceGenerator.getActionSequenceScript())
+    }
+
+
+    private suspend fun playSequenceInternal(actionScript: ActionScript) {
         val activePitches = mutableSetOf<Int>()
-        sequenceGenerator.getActionSequenceScript().timeEventList.forEach {
+        actionScript.timeEventList.forEach {
             val sleepTime = it.first
             val events = it.second
 
@@ -82,7 +100,6 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
             }
 
         }
-
     }
 }
 

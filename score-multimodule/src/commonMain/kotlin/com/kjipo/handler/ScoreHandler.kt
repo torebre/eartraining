@@ -6,8 +6,6 @@ import kotlinx.serialization.json.Json
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
- *
- *
  */
 class ScoreHandler : ScoreHandlerInterface {
     private val scoreHandlerElements = mutableListOf<ScoreHandlerElement>()

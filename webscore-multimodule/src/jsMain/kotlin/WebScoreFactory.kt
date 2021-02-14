@@ -1,7 +1,5 @@
-import com.kjipo.handler.InsertNote
 import com.kjipo.handler.ScoreHandler
 import com.kjipo.handler.ScoreHandlerWithState
-import com.kjipo.score.Duration
 
 object WebScoreFactory {
 
@@ -9,7 +7,7 @@ object WebScoreFactory {
     fun createScoreHandler() = ScoreHandlerJavaScript(ScoreHandler())
 
     @JsName("createWebScore")
-    fun createWebScore(scoreHandlerJavaScript: ScoreHandlerJavaScript) = WebScore(scoreHandlerJavaScript)
+    fun createWebScore(scoreHandlerJavaScript: ScoreHandlerJavaScript, svgElementName: String = "score") = WebScore(scoreHandlerJavaScript, svgElementName)
 
     @JsName("createScoreHandlerWithState")
     fun createWebscoreHandlerWithState() = ScoreHandlerWithStateImpl(ScoreHandler())
