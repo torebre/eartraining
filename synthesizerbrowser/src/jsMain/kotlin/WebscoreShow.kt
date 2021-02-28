@@ -1,5 +1,5 @@
 import com.github.aakira.napier.Napier
-import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerListener
 import com.kjipo.handler.ScoreHandlerWrapper
 import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.ActionScript
@@ -12,6 +12,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
     private var targetSequenceGenerator = SequenceGenerator()
+    private var inputSequenceGenerator = SequenceGenerator()
     private var webScore: WebScore? = null
     private var inputScore: WebScore? = null
 
@@ -25,18 +26,29 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     }
 
     fun createInputScore() {
-        val scoreHandler = ScoreHandler()
-        val scoreHandlerWrapper = ScoreHandlerWrapper(scoreHandler)
+        inputSequenceGenerator = SequenceGenerator()
+        val scoreHandlerWrapper = ScoreHandlerWrapper(inputSequenceGenerator)
+
+        scoreHandlerWrapper.addListener(object : ScoreHandlerListener {
+            override fun pitchSequenceChanged() {
+               console.log("Test24")
+            }
+        })
 
         inputScore = WebScore(ScoreHandlerJavaScript(scoreHandlerWrapper), "inputScore")
-
-
     }
 
     suspend fun playSequence() {
         playSequenceInternal(targetSequenceGenerator.getActionSequenceScript())
     }
 
+    suspend fun playInputSequence() {
+        val actionScript = inputSequenceGenerator.getActionSequenceScript()
+
+        console.log("Test23: ${actionScript.timeEventList.size}")
+
+        playSequenceInternal(actionScript)
+    }
 
     private suspend fun playSequenceInternal(actionScript: ActionScript) {
         val activePitches = mutableSetOf<Int>()
@@ -68,11 +80,11 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
                             }
                         }
                         is Action.HighlightEvent -> {
-                            webScore?.let {
+                            webScore?.apply {
                                 if (action.highlightOn) {
-                                    it.highlight(action.ids)
+                                    highlight(action.ids)
                                 } else {
-                                    it.removeHighlight(action.ids)
+                                    removeHighlight(action.ids)
                                 }
                             }
                         }

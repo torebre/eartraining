@@ -81,7 +81,9 @@ class SequenceGenerator : ScoreHandlerInterface {
         scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
     override fun insertNote(activeElement: String, keyPressed: Int): String? {
-        scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
+        println("Test29")
+
+        val idInsertedNote = scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
 //            pitchSequence
 //                .find { it.id == activeElement }?.let { pitch ->
 //                    scoreHandler.findScoreHandlerElement(idInsertedNote)?.let {
@@ -105,10 +107,14 @@ class SequenceGenerator : ScoreHandlerInterface {
 //                        }
 //                    }
 //                }
-            computeOnOffPitches()
-            return idInsertedNote
+//            computeOnOffPitches()
+            computePitchSequence()
+            idInsertedNote
         }
-        return null
+
+        println("Test27: $idInsertedNote")
+
+        return idInsertedNote
     }
 
     override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int) =
@@ -239,6 +245,9 @@ class SequenceGenerator : ScoreHandlerInterface {
 
     override fun insertNote(keyPressed: Int) =
         scoreHandler.insertNote(keyPressed).also {
+
+            println("Test26: $keyPressed")
+
             computePitchSequence()
         }
 

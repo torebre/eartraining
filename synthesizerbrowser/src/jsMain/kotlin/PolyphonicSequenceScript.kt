@@ -17,7 +17,6 @@ class PolyphonicSequenceScript(
         pitchEvents.forEach {
             val sleepTime = it.second
 
-
             console.log("Current pitch events: ${it.first}") //, tag = "Midi")
             Napier.i("Sleeping for $sleepTime milliseconds", tag = "Midi")
 
@@ -35,7 +34,6 @@ class PolyphonicSequenceScript(
                         Napier.d("Off-message sent", tag = "Midi")
                     }
                 }
-
             } catch (e: CancellationException) {
                 for (pitchEvent in it.first) {
                     midiPlayer.noteOff(pitchEvent.pitch)

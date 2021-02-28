@@ -47,7 +47,10 @@ class WebScore(
             document.body?.appendChild(createdElement)
             createdElement
         }
-        setupEventHandling()
+
+        if (allowInput) {
+            setupEventHandling()
+        }
         loadScore()
     }
 
@@ -113,10 +116,6 @@ class WebScore(
     }
 
     private fun setupEventHandling() {
-        if (!allowInput) {
-            return
-        }
-
         setupTouchEvents()
         setupMouseEvent()
 

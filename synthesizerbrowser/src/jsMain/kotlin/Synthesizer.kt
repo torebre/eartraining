@@ -7,12 +7,10 @@ external class AudioContext {
 
 external open class AudioNode {
     fun connect(destination: AudioNode, output: Int = definedExternally, input: Int = definedExternally): AudioNode
-
 }
 
 external class OscillatorNode : AudioNode {
     fun start(time: Double = definedExternally)
-
 }
 
 

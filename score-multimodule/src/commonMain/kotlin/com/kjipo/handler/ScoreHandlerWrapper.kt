@@ -13,6 +13,9 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
     }
 
     override fun insertNote(activeElement: String, keyPressed: Int): String? {
+
+        println("Test28: $keyPressed, ${scoreHandler}")
+
         return scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
             listeners.forEach { it.pitchSequenceChanged() }
             idInsertedNote
@@ -55,6 +58,10 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
         scoreHandler.addNoteGroup(duration, pitches)
 
     override fun getHighlightElementsMap() = scoreHandler.getHighlightElementsMap()
+
+    fun addListener(scoreHandlerListener: ScoreHandlerListener) = listeners.add(scoreHandlerListener)
+
+    fun removeListener(scoreHandlerListener: ScoreHandlerListener) = listeners.remove(scoreHandlerListener)
 
 }
 

@@ -12,11 +12,14 @@ import org.w3c.dom.Node
 
 class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
 
-    val idSvgElementMap = mutableMapOf<String, Element>()
+    private val idSvgElementMap = mutableMapOf<String, Element>()
 
 
     fun generateSvgData(svgElement: Element) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
+
+        console.log("Test25: ${renderingSequence.renderGroups.size}")
+
         svgElement.clear()
         svgElement.setAttribute(
             "viewBox",
@@ -60,10 +63,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
             elementToAddRenderingElementsTo?.let {
                 addPositionRenderingElements(renderGroup.renderingElements, it)
             }
-
         }
     }
-
 
     private fun addPositionRenderingElements(
         renderingElements: Collection<PositionedRenderingElement>,
@@ -159,7 +160,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
             } else {
                 node.appendChild(useTag)
             }
-
         }
     }
 

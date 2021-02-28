@@ -349,7 +349,7 @@ class ScoreHandler : ScoreHandlerInterface {
         insertNote(activeElement, ScoreHandlerUtilities.getDuration(keyPressed))
 
     fun insertNote(activeElement: String, duration: Duration): String? {
-        scoreHandlerElements.find { it.id == activeElement }?.let { element ->
+        return scoreHandlerElements.find { it.id == activeElement }?.let { element ->
 
             // TODO Only hardcoded note type and octave for testing
 
@@ -360,7 +360,6 @@ class ScoreHandler : ScoreHandlerInterface {
             )
             return scoreHandlerElements[insertIndex].id
         }
-        return null
     }
 
     override fun insertNote(keyPressed: Int) = insertNote(ScoreHandlerUtilities.getDuration(keyPressed))
