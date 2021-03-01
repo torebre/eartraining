@@ -1,4 +1,3 @@
-import com.github.aakira.napier.Napier
 import com.kjipo.handler.ScoreHandlerListener
 import com.kjipo.handler.ScoreHandlerWrapper
 import com.kjipo.scoregenerator.Action
@@ -7,6 +6,7 @@ import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.SequenceGenerator
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import mu.KotlinLogging
 
 class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
@@ -15,6 +15,8 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     private var inputSequenceGenerator = SequenceGenerator()
     private var webScore: WebScore? = null
     private var inputScore: WebScore? = null
+
+    private val logger = KotlinLogging.logger {}
 
     fun createSequence() {
         val tempNoteSequence = polyphonicNoteSequenceGenerator.createSequence()
@@ -31,7 +33,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
         scoreHandlerWrapper.addListener(object : ScoreHandlerListener {
             override fun pitchSequenceChanged() {
-               console.log("Test24")
+                console.log("Test24")
             }
         })
 
@@ -107,7 +109,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
                 for (pitch in activePitches) {
                     midiInterface.noteOff(pitch)
                 }
-                Napier.d("Off-messages sent", tag = "Midi")
+                logger.debug { "Off-messages sent" }
                 throw e
             }
 

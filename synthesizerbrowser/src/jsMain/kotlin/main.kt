@@ -2,6 +2,8 @@ import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import mu.KotlinLoggingConfiguration
+import mu.KotlinLoggingLevel
 
 
 fun showWebscore() {
@@ -25,5 +27,7 @@ fun showWebscore() {
 }
 
 fun main() {
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
     showWebscore()
 }

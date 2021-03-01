@@ -31,15 +31,13 @@ kotlin {
                 implementation project(':webscore-multimodule')
                 implementation project(':scoregenerator-common')
                 implementation project(':score-multimodule')
-
-//                implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
-
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.2'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
 
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
-                implementation "com.github.aakira:napier-js:$napierVersion"
+
+                implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
             }
         }
         jsTest {

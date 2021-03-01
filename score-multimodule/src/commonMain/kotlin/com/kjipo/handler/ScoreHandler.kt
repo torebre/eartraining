@@ -1,8 +1,8 @@
 package com.kjipo.handler
 
-import com.github.aakira.napier.Napier
 import com.kjipo.score.*
 import kotlinx.serialization.json.Json
+import mu.KotlinLogging
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
@@ -11,6 +11,8 @@ class ScoreHandler : ScoreHandlerInterface {
     private val scoreHandlerElements = mutableListOf<ScoreHandlerElement>()
     private var idCounter = 0
     private val ticksPerBar = 4 * TICKS_PER_QUARTER_NOTE
+
+    private val logger = KotlinLogging.logger {}
 
     private val beams = mutableListOf<BeamGroup>()
 
@@ -57,7 +59,7 @@ class ScoreHandler : ScoreHandlerInterface {
         currentBar.timeSignature = TimeSignature(4, 4)
         val bars = mutableListOf(currentBar)
 
-        Napier.d("Score handler elements: $scoreHandlerElements")
+        logger.debug { "Score handler elements: $scoreHandlerElements" }
 
         val highlightElementMap = mutableMapOf<String, Collection<String>>()
 
@@ -140,7 +142,7 @@ class ScoreHandler : ScoreHandlerInterface {
             }
         }
 
-        Napier.d("Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+        logger.debug { "Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
 
         var lastBarTrimmed = false
         if (trimEndBars && bars.size > 1) {
@@ -149,17 +151,17 @@ class ScoreHandler : ScoreHandlerInterface {
             lastBarTrimmed = barsBeforeTrimming != bars.size
         }
 
-        Napier.d("After trimming. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+        logger.debug { "After trimming. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
 
         if (!lastBarTrimmed) {
             fillInLastBar(bars, remainingTicksInBar, scoreSetup.context)
         }
 
-        Napier.d("After fill in. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar")
+        logger.debug { "After fill in. Number of bars: ${bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
 
         bars.forEach {
             scoreSetup.beams.addAll(addBeams(it))
-            Napier.d("Bar data: $it")
+            logger.debug { "Bar data: $it" }
         }
         scoreSetup.bars.addAll(bars)
 

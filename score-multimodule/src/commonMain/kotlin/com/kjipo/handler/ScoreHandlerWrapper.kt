@@ -1,10 +1,11 @@
 package com.kjipo.handler
 
-import com.github.aakira.napier.Napier
-import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
+import mu.KotlinLogging
 
 class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandlerInterface {
+    private val logger = KotlinLogging.logger {}
+
     private val listeners = mutableListOf<ScoreHandlerListener>()
 
     override fun updateDuration(id: String, keyPressed: Int) {
@@ -14,7 +15,7 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     override fun insertNote(activeElement: String, keyPressed: Int): String? {
 
-        println("Test28: $keyPressed, ${scoreHandler}")
+        logger.debug { "Test91: $keyPressed, ${scoreHandler}" }
 
         return scoreHandler.insertNote(activeElement, keyPressed)?.let { idInsertedNote ->
             listeners.forEach { it.pitchSequenceChanged() }
@@ -25,7 +26,7 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     override fun getScoreAsJson(): String {
         val score = scoreHandler.getScoreAsJson()
-        Napier.d("Returning score: $score", tag = "Webscore")
+        logger.debug { "Returning score: $score" }
         return score
     }
 

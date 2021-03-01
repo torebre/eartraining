@@ -1,11 +1,12 @@
-import com.github.aakira.napier.Napier
 import com.kjipo.scoregenerator.Pitch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlin.jvm.Volatile
+import mu.KotlinLogging
 
 class MidiScript(pitchSequence: List<Pitch>, private val midiPlayer: MidiPlayerInterface) {
     private val pitchEvents = mutableListOf<PitchEvent>()
+
+    private val logger = KotlinLogging.logger {}
 
     init {
         for (note in pitchSequence) {
@@ -18,29 +19,29 @@ class MidiScript(pitchSequence: List<Pitch>, private val midiPlayer: MidiPlayerI
     suspend fun play() {
         var timeCounter = 0
 
-        Napier.d("Pitch events: ${pitchEvents}", tag = "Midi")
+        logger.debug { "Pitch events: ${pitchEvents}" }
 
         pitchEvents.forEach {
             val time = it.time
             val pitchEvent = it
 
-            Napier.d("Pitch event: $it", tag = "Midi")
-            Napier.d("Sleeping for " + time.minus(timeCounter).toLong() + " milliseconds", tag = "Midi")
+            logger.debug { "Pitch event: $it" }
+            logger.debug { "Sleeping for " + time.minus(timeCounter).toLong() + " milliseconds" }
 
             try {
                 delay(time.minus(timeCounter).toLong())
                 if (pitchEvent.on) {
-                    Napier.d("Pitch on: ${pitchEvent.pitch}", tag = "Midi")
+                    logger.debug { "Pitch on: ${pitchEvent.pitch}" }
                     midiPlayer.noteOn(pitchEvent.pitch)
-                    Napier.d("On-message sent", tag = "Midi")
+                    logger.debug { "On-message sent" }
                 } else {
-                    Napier.d("Pitch off: ${pitchEvent.pitch}", tag = "Midi")
+                    logger.debug { "Pitch off: ${pitchEvent.pitch}" }
                     midiPlayer.noteOff(pitchEvent.pitch)
-                    Napier.d("Off-message sent", tag = "Midi")
+                    logger.debug { "Off-message sent" }
                 }
             } catch (e: CancellationException) {
                 midiPlayer.noteOff(pitchEvent.pitch)
-                Napier.d("Off-message sent", tag = "Midi")
+                logger.debug { "Off-message sent" }
                 throw e
             }
             timeCounter = time
@@ -48,7 +49,8 @@ class MidiScript(pitchSequence: List<Pitch>, private val midiPlayer: MidiPlayerI
         }
     }
 
-    private data class PitchEvent(val id: String, val time: Int, val on: Boolean, val pitch: Int) : Comparable<PitchEvent> {
+    private data class PitchEvent(val id: String, val time: Int, val on: Boolean, val pitch: Int) :
+        Comparable<PitchEvent> {
         override fun compareTo(other: PitchEvent) = time.compareTo(other.time)
     }
 }

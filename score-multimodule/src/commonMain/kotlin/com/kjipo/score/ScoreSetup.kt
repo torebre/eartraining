@@ -1,8 +1,7 @@
 package com.kjipo.score
 
-import com.github.aakira.napier.Napier
-import com.kjipo.handler.ScoreHandlerUtilities
 import com.kjipo.svg.GlyphData
+import mu.KotlinLogging
 
 /**
  * This class produces the rendering sequence that is used to render the score
@@ -13,6 +12,8 @@ class ScoreSetup {
     val beams = mutableListOf<BeamGroup>()
 
     val context = Context()
+
+    private val logger = KotlinLogging.logger {}
 
 
     fun build(): RenderingSequence {
@@ -26,7 +27,7 @@ class ScoreSetup {
 
         // TODO Should also add glyphs from note groups
         val scoreRenderingElements = bars.flatMap { it.scoreRenderingElements }.toList()
-            scoreRenderingElements.filter { it is NoteElement }
+        scoreRenderingElements.filter { it is NoteElement }
             .map { it as NoteElement }
             .forEach {
                 definitionMap.putAll(it.getGlyphs())
@@ -35,8 +36,8 @@ class ScoreSetup {
         scoreRenderingElements.filter { it is HighlightableElement }
             .map { it as HighlightableElement }
             .forEach {
-            highlightElementsMap[it.id] = it.getIdsOfHighlightElements()
-        }
+                highlightElementsMap[it.id] = it.getIdsOfHighlightElements()
+            }
 
         var barXoffset = 0
         var barYoffset = 0
@@ -63,7 +64,7 @@ class ScoreSetup {
             val lastNote = findNoteElement(beam.noteIds.last(), bars)
 
             if (firstNote == null || lastNote == null) {
-                Napier.e("Notes not found. First note: $firstNote. Second note: $lastNote")
+                logger.error { "Notes not found. First note: $firstNote. Second note: $lastNote" }
                 return@map
             }
 
@@ -189,7 +190,6 @@ class ScoreSetup {
 //        }
 //        return Stem.UP
 //    }
-
 
 
 }

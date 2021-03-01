@@ -19,11 +19,11 @@ buildscript {
 ext {
     nodeVersion = '8.11.1'
     qunitVersion = '2.6.0'
-    napierVersion = "0.0.3"
     assert4jVersion = '3.12.2'
     kotlinVersion = '1.4.0'
-    serializationRuntime = '1.0.0-RC' // 0.20.0'
+    serializationRuntime = '1.0.0-RC'
     multiplatform = '$kotlinVersion'
+    kotlinLogging = '2.0.2'
 
     libraries = [
             junit                         : "junit:junit:4.12",

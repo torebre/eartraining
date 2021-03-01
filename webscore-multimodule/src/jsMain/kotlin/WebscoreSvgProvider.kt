@@ -1,4 +1,3 @@
-import com.github.aakira.napier.Napier
 import com.kjipo.score.PositionedRenderingElement
 import com.kjipo.score.RenderingSequence
 import com.kjipo.score.Translation
@@ -6,6 +5,7 @@ import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.dom.clear
 import kotlinx.serialization.json.Json
+import mu.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 
@@ -14,11 +14,12 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
 
     private val idSvgElementMap = mutableMapOf<String, Element>()
 
+    private val logger = KotlinLogging.logger {}
 
     fun generateSvgData(svgElement: Element) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
 
-        console.log("Test25: ${renderingSequence.renderGroups.size}")
+        logger.debug { "Test25: ${renderingSequence.renderGroups.size}" }
 
         svgElement.clear()
         svgElement.setAttribute(
@@ -26,7 +27,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
             "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}"
         )
 
-        Napier.d("Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}")
+        logger.debug { "Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}" }
 
         svgElement.ownerDocument?.let {
             val defsTag = it.createElementNS(WebScore.SVG_NAMESPACE_URI, "defs")

@@ -1,6 +1,5 @@
-import com.github.aakira.napier.Napier
-import com.kjipo.score.Accidental
 import kotlinx.browser.document
+import mu.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
@@ -28,6 +27,7 @@ class WebScore(
     private val svgElement: Element
 //    private val idSvgElementMap = mutableMapOf<String, Element>()
 
+    private val logger = KotlinLogging.logger {}
 
     companion object {
         private const val VERTICAL_STEP = 10
@@ -122,7 +122,7 @@ class WebScore(
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
-            Napier.d("Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}")
+            logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}" }
 
             handleKeyEvent(keyboardEvent.code, keyboardEvent.keyCode)
         })

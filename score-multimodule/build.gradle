@@ -40,7 +40,7 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
-                implementation "com.github.aakira:napier:$napierVersion"
+                implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
             }
         }
         commonTest {
@@ -54,7 +54,6 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-jdk8')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
-                implementation "com.github.aakira:napier-jvm:$napierVersion"
                 implementation "com.flipkart.zjsonpatch:zjsonpatch:0.4.10"
             }
         }
@@ -68,7 +67,6 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
-                implementation "com.github.aakira:napier-js:$napierVersion"
             }
         }
         jsTest {

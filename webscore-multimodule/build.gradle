@@ -35,12 +35,12 @@ kotlin {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
-                implementation "com.github.aakira:napier:$napierVersion"
-                implementation "com.github.aakira:napier-js:$napierVersion"
                 implementation project(':scoregenerator-common')
                 implementation project(':score-multimodule')
 
                 implementation(npm("rfc6902", "4.0.0"))
+
+                implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
             }
         }
         jsTest {

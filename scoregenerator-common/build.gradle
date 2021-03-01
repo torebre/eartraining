@@ -29,7 +29,6 @@ kotlin {
             dependencies {
                 implementation project(":score-multimodule")
                 implementation kotlin('stdlib-common')
-                implementation "com.github.aakira:napier:1.4.1"
             }
         }
         commonTest {

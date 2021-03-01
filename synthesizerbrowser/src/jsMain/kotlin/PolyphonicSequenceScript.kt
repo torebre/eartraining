@@ -1,44 +1,43 @@
-import com.github.aakira.napier.DebugAntilog
-import com.github.aakira.napier.Napier
 import com.kjipo.midi.SimplePitchEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import mu.KotlinLogging
 
 class PolyphonicSequenceScript(
     private val pitchEvents: List<Pair<Collection<SimplePitchEvent>, Int>>,
     private val midiPlayer: MidiPlayerInterface
 ) {
 
+    private val logger = KotlinLogging.logger {}
+
     suspend fun play() {
         console.log("All pitch events: ${pitchEvents}") //, tag = "Midi")
-
-        Napier.base(DebugAntilog("test"))
 
         pitchEvents.forEach {
             val sleepTime = it.second
 
             console.log("Current pitch events: ${it.first}") //, tag = "Midi")
-            Napier.i("Sleeping for $sleepTime milliseconds", tag = "Midi")
+            logger.debug { "Sleeping for $sleepTime milliseconds" }
 
             try {
                 delay(sleepTime.toLong())
 
                 for (pitchEvent in it.first) {
                     if (pitchEvent.on) {
-                        Napier.d("Pitch on: ${pitchEvent.pitch}", tag = "Midi")
+                        logger.debug { "Pitch on: ${pitchEvent.pitch}" }
                         midiPlayer.noteOn(pitchEvent.pitch)
-                        Napier.d("On-message sent", tag = "Midi")
+                        logger.debug { "On-message sent" }
                     } else {
-                        Napier.d("Pitch off: ${pitchEvent.pitch}", tag = "Midi")
+                        logger.debug { "Pitch off: ${pitchEvent.pitch}" }
                         midiPlayer.noteOff(pitchEvent.pitch)
-                        Napier.d("Off-message sent", tag = "Midi")
+                        logger.debug { "Off-message sent" }
                     }
                 }
             } catch (e: CancellationException) {
                 for (pitchEvent in it.first) {
                     midiPlayer.noteOff(pitchEvent.pitch)
                 }
-                Napier.d("Off-messages sent", tag = "Midi")
+                logger.debug { "Off-messages sent" }
                 throw e
             }
         }
