@@ -23,19 +23,12 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
         }
     }
 
-
-    override fun getScoreAsJson(): String {
-        val score = scoreHandler.getScoreAsJson()
-        logger.debug { "Returning score: $score" }
-        return score
-    }
-
+    override fun getScoreAsJson() = scoreHandler.getScoreAsJson()
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
         scoreHandler.moveNoteOneStep(id, up)
         listeners.forEach { it.pitchSequenceChanged() }
     }
-
 
     override fun getIdOfFirstSelectableElement() = scoreHandler.getIdOfFirstSelectableElement()
 

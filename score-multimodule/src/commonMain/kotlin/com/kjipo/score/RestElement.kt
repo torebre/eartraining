@@ -11,6 +11,8 @@ class RestElement(
     override val id: String = context.getAndIncrementIdCounter()
 ) : ScoreRenderingElement(0, 0), TemporalElement, HighlightableElement {
 
+    private val typeName = "rest_${duration.name}"
+
     private val highlightElements = mutableSetOf<String>()
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -19,14 +21,19 @@ class RestElement(
             listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
             glyphData.boundingBox,
             id
-        )
-        positionedRenderingElement.yTranslate = -30
-        positionedRenderingElement.typeId = context.getAndIncrementIdCounter()
+        ).apply {
+            yTranslate = -30
+            typeId = typeName
+        }
         return listOf(positionedRenderingElement)
     }
 
-    override fun getGlyphs(): Map<String, GlyphData> = mapOf(Pair("rest_${duration.name}", getRestGlyph(duration)))
+    override fun getGlyphs(): Map<String, GlyphData> = mapOf(Pair(typeName, getRestGlyph(duration)))
 
     override fun getIdsOfHighlightElements() = highlightElements
+
+    override fun toString(): String {
+        return "RestElement(duration=$duration, id='$id')"
+    }
 
 }

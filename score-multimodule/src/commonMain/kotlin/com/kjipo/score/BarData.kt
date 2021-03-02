@@ -20,17 +20,7 @@ class BarData(private val context: Context, private val debug: Boolean = false) 
 
         val clefElement = getClefElement(barXoffset, barYoffset, definitions)
 
-        val timeSignatureElement = if (timeSignature.nominator == 0) {
-            null
-        } else {
-            TimeSignatureElement(
-                timeSignature.nominator,
-                timeSignature.denominator,
-                timeSignatureXOffset,
-                timeSignatureYOffset,
-                "time"
-            )
-        }
+        val timeSignatureElement = getTimeSignatureElement()
 
         widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
 
@@ -113,6 +103,18 @@ class BarData(private val context: Context, private val debug: Boolean = false) 
             renderGroups,
             determineViewBox(renderGroups.flatMap { it.renderingElements }),
             definitions
+        )
+    }
+
+    private fun getTimeSignatureElement() = if (timeSignature.nominator == 0) {
+        null
+    } else {
+        TimeSignatureElement(
+            timeSignature.nominator,
+            timeSignature.denominator,
+            timeSignatureXOffset,
+            timeSignatureYOffset,
+            "time"
         )
     }
 
@@ -209,11 +211,9 @@ class BarData(private val context: Context, private val debug: Boolean = false) 
         return "BarData(scoreRenderingElements=$scoreRenderingElements)"
     }
 
-
     companion object {
         var barNumber = 0
         var stemCounter = 0
     }
-
 
 }
