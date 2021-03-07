@@ -6,7 +6,7 @@ import com.flipkart.zjsonpatch.JsonDiff
 import com.kjipo.score.Duration
 
 
-class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreHandlerWithState {
+class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandlerWithReducedLogic) : ScoreHandlerWithState {
     private val objectMapper = ObjectMapper()
 
     private var currentRenderingTree: JsonNode? = null

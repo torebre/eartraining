@@ -1,4 +1,5 @@
 import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.handler.ScoreHandlerWithState
 
 object WebScoreFactory {

@@ -1,4 +1,5 @@
 import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType

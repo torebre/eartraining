@@ -1,23 +1,9 @@
 //@file:UseSerializers(ScoreHandlerWithStateImplTest.DoubleDecimalPointsSerializer::class)
 
 import com.kjipo.handler.InsertNote
-import com.kjipo.handler.ScoreHandler
-import com.kjipo.handler.ScoreOperation
+import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.score.Duration
-import com.kjipo.svg.processCurveToRelative
-import kotlinx.html.currentTimeMillis
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.UseSerializers
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.Json
 import rfc6902.Operation
-import kotlin.coroutines.coroutineContext
-import kotlin.math.nextDown
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -27,7 +13,7 @@ class ScoreHandlerWithStateImplTest {
 
     @Test
     fun scoreHandlerDiffTest() {
-        val scoreHandler = ScoreHandler()
+        val scoreHandler = ScoreHandlerWithReducedLogic()
 
         scoreHandler.insertNote(Duration.QUARTER)
         val renderingSequence1 = scoreHandler.build()
@@ -60,7 +46,7 @@ class ScoreHandlerWithStateImplTest {
 
     @Test
     fun scoreHandlerStateDiffTest() {
-        val scoreHandler = ScoreHandler()
+        val scoreHandler = ScoreHandlerWithReducedLogic()
         val scoreHandlerState = ScoreHandlerWithStateImpl(scoreHandler)
 
         val stateDiff = scoreHandlerState.applyOperation(InsertNote(duration = Duration.QUARTER))
@@ -118,7 +104,7 @@ class ScoreHandlerWithStateImplTest {
 
     @Test
     fun serializationTest() {
-        val scoreHandler = ScoreHandler()
+        val scoreHandler = ScoreHandlerWithReducedLogic()
         val scoreHandlerState = ScoreHandlerWithStateImpl(scoreHandler)
 
         val stateDiff = scoreHandlerState.applyOperation(InsertNote(duration = Duration.QUARTER))

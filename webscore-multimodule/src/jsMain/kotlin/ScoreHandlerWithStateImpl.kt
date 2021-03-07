@@ -1,10 +1,6 @@
-import com.kjipo.handler.InsertNote
-import com.kjipo.handler.ScoreHandler
-import com.kjipo.handler.ScoreHandlerWithState
-import com.kjipo.handler.ScoreOperation
+import com.kjipo.handler.*
 import com.kjipo.score.Duration
 import kotlinx.html.currentTimeMillis
-import kotlinx.serialization.UseSerializers
 
 class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreHandlerWithState {
     private var currentRenderingTree: String? = null

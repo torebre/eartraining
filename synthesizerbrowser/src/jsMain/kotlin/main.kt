@@ -1,3 +1,6 @@
+import com.kjipo.handler.NoteOrRest
+import com.kjipo.handler.ScoreHandlerElement
+import com.kjipo.handler.ScoreHandlerSplit
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
@@ -30,22 +33,33 @@ fun showWebscore() {
     })
 }
 
+//fun showScaleTest() {
+//    val synthesizer = SynthesizerScript()
+//    val noteSequence =
+//        SimpleNoteSequence(NoteType.values().leftShift(3).map { NoteSequenceElement.NoteElement(it, 5, Duration.QUARTER) }.toList())
+//    val sequenceGenerator = SequenceGenerator()
+//
+//    sequenceGenerator.loadSimpleNoteSequence(noteSequence)
+//    val webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator), "scaleTest", false)
+//
+//    document.querySelector("#playScaleTest")!!.addEventListener("click", {
+//        GlobalScope.launch(Dispatchers.Default) {
+//            playSequenceInternal(sequenceGenerator.getActionSequenceScript(), webScore, synthesizer)
+//        }
+//    })
+//
+//}
+
 fun showScaleTest() {
-    val synthesizer = SynthesizerScript()
-    val noteSequence =
-        SimpleNoteSequence(NoteType.values().leftShift(3).map { NoteSequenceElement.NoteElement(it, 5, Duration.QUARTER) }.toList())
-    val sequenceGenerator = SequenceGenerator()
+    var idCounter = 0
+    val noteSequence: MutableList<ScoreHandlerElement> =
+        NoteType.values().leftShift(3).map { NoteOrRest("${idCounter++}", Duration.QUARTER, true, 5, it) }
+            .toMutableList()
 
-    sequenceGenerator.loadSimpleNoteSequence(noteSequence)
-    val webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator), "scaleTest", false)
-
-    document.querySelector("#playScaleTest")!!.addEventListener("click", {
-        GlobalScope.launch(Dispatchers.Default) {
-            playSequenceInternal(sequenceGenerator.getActionSequenceScript(), webScore, synthesizer)
-        }
-    })
-
+    val splitScoreHandler = ScoreHandlerSplit(noteSequence)
+    val webScore = WebScore(ScoreHandlerJavaScript(splitScoreHandler), "scaleTest", false)
 }
+
 
 fun <T> Array<T>.leftShift(positionsToShift: Int): Array<T> {
     val newList = this.copyOf()

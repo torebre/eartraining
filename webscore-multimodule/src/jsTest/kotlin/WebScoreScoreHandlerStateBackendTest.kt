@@ -1,16 +1,14 @@
 import com.kjipo.handler.InsertNote
-import com.kjipo.handler.ScoreHandler
+import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.score.Duration
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 
 class DiffTests {
 
     @Test
     fun testDiff() {
-        val scoreHandler = ScoreHandler()
+        val scoreHandler = ScoreHandlerWithReducedLogic()
         val scoreHandlerWithState = ScoreHandlerWithStateImpl(scoreHandler)
 
         val scoreHandlerState = ScoreHandlerWithStateImpl(scoreHandler)

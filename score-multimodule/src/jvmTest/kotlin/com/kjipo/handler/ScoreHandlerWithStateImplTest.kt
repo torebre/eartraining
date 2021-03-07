@@ -1,10 +1,6 @@
 package com.kjipo.handler
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.flipkart.zjsonpatch.JsonPatch
 import com.kjipo.score.Duration
-import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -12,7 +8,7 @@ class ScoreHandlerWithStateImplTest {
 
     @Test
     fun `Insert note operation generates score diff`() {
-        val scoreHandler = ScoreHandler()
+        val scoreHandler = ScoreHandlerWithReducedLogic()
 
         val scoreHandlerWithState = ScoreHandlerWithStateImpl(scoreHandler)
 
