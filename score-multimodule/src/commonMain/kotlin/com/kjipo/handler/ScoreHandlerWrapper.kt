@@ -53,6 +53,8 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     override fun getHighlightElementsMap() = scoreHandler.getHighlightElementsMap()
 
+    override fun applyOperation(operation: ScoreOperation) = scoreHandler.applyOperation(operation)
+
     fun addListener(scoreHandlerListener: ScoreHandlerListener) = listeners.add(scoreHandlerListener)
 
     fun removeListener(scoreHandlerListener: ScoreHandlerListener) = listeners.remove(scoreHandlerListener)

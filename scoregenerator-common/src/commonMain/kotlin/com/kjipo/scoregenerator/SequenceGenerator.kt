@@ -261,4 +261,8 @@ class SequenceGenerator : ScoreHandlerInterface {
 
     override fun getHighlightElementsMap() = scoreHandler.getHighlightElementsMap()
 
+    override fun applyOperation(operation: ScoreOperation): String? {
+        TODO("Not yet implemented")
+    }
+
 }

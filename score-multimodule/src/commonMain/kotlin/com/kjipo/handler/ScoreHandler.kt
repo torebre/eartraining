@@ -485,6 +485,37 @@ class ScoreHandler : ScoreHandlerInterface {
         return scoreHandlerElements.last().id
     }
 
+
+    override fun applyOperation(operation: ScoreOperation): String? {
+        when (operation) {
+            is InsertNote -> {
+                handleInsertNote(operation)
+
+
+            }
+            else -> {
+                // TODO
+
+            }
+
+            // TODO
+
+
+        }
+
+        // TODO
+        return null
+    }
+
+        private fun handleInsertNote(insertNote: InsertNote) {
+            // Default to quarter if nothing is set
+            val duration = insertNote.duration ?: Duration.QUARTER
+            if (insertNote.id != null) {
+                insertNote(insertNote.id, duration)
+            }
+            insertNote(duration)
+        }
+
     private fun transformToNoteAndAccidental(noteType: NoteType): Pair<GClefNoteLine, Accidental?> {
         return when (noteType) {
             NoteType.A -> Pair(GClefNoteLine.A, null)
@@ -497,7 +528,7 @@ class ScoreHandler : ScoreHandlerInterface {
             NoteType.E -> Pair(GClefNoteLine.E, null)
             NoteType.F -> Pair(GClefNoteLine.F, null)
             NoteType.F_SHARP -> Pair(GClefNoteLine.F, Accidental.SHARP)
-            NoteType.G -> Pair(GClefNoteLine.G, Accidental.SHARP)
+            NoteType.G -> Pair(GClefNoteLine.G, null)
             NoteType.G_SHARP -> Pair(GClefNoteLine.G, Accidental.SHARP)
         }
 

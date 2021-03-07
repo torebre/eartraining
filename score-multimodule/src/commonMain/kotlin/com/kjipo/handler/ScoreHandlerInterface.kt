@@ -36,6 +36,7 @@ interface ScoreHandlerInterface {
 
     fun getHighlightElementsMap(): Map<String, Collection<String>>
 
-    class GroupNote(val noteType: NoteType, val octave: Int, val accidental: Accidental? = null)
+    fun applyOperation(operation: ScoreOperation): String?
 
+    class GroupNote(val noteType: NoteType, val octave: Int, val accidental: Accidental? = null)
 }
