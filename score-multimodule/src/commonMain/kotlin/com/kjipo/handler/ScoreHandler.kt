@@ -59,6 +59,9 @@ class ScoreHandler : ScoreHandlerInterface {
         currentBar.timeSignature = TimeSignature(4, 4)
         val bars = mutableListOf(currentBar)
 
+        // TODO Handle ties
+        val ties = mutableListOf<Pair<String, String>>()
+
         logger.debug { "Score handler elements: $scoreHandlerElements" }
 
         val highlightElementMap = mutableMapOf<String, Collection<String>>()
@@ -82,22 +85,58 @@ class ScoreHandler : ScoreHandlerInterface {
                             val durationsInNextBar =
                                 ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
 
-                            val previous =
-                                addAndTie(element, durationsInCurrentBar, currentBar, scoreSetup = scoreSetup)
-                            remainingTicksInBar += ticksPerBar - ticksNeededForElement
+                            var previous: TemporalElement? = null
+                            for (duration in durationsInCurrentBar) {
+                                val scoreRenderingElement = if (element.isNote) {
+                                    transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+                                        NoteElement(
+                                            noteAndAccidental.first,
+                                            element.octave,
+                                            duration,
+                                            scoreSetup.context
+                                        ).also { it.accidental }
+                                    }
+                                } else {
+                                    RestElement(duration, scoreSetup.context)
+                                }
+                                addTemporalElement(element, currentBar, highlightElementMap)
+
+                                if (previous != null) {
+                                    ties.add(Pair(previous.id, scoreRenderingElement.id))
+                                }
+                                previous = scoreRenderingElement
+                            }
+
+                            // Start new bar
                             currentBar = BarData(scoreSetup.context)
                             bars.add(currentBar)
-                            addAndTie(element, durationsInNextBar, currentBar, previous, scoreSetup = scoreSetup)
+
+                            for (duration in durationsInNextBar) {
+                                val scoreRenderingElement = if(element.isNote) {
+                                    transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+                                        NoteElement(
+                                            noteAndAccidental.first,
+                                            element.octave,
+                                            duration,
+                                            scoreSetup.context
+                                        ).also { it.accidental }
+                                    }
+                                }
+                                else {
+                                    RestElement(duration, scoreSetup.context)
+                                }
+                                addTemporalElement(element, currentBar, highlightElementMap)
+
+                                if (previous != null) {
+                                    ties.add(Pair(previous.id, scoreRenderingElement.id))
+                                }
+                                previous = scoreRenderingElement
+                            }
                         }
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
 
-
-                            val temporalElement = createTemporalElement(element, scoreSetup.context)
-                            currentBar.scoreRenderingElements.add(temporalElement)
-                            if (temporalElement is HighlightableElement) {
-                                highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
-                            }
+                            addTemporalElement(element, currentBar, highlightElementMap)
                         }
                     }
                 }
@@ -165,7 +204,22 @@ class ScoreHandler : ScoreHandlerInterface {
         }
         scoreSetup.bars.addAll(bars)
 
+        logger.debug { "Highlight map in score handler: $highlightElementMap" }
+
         return RenderingSequenceWithMetaData(scoreSetup.build(), highlightElementMap)
+    }
+
+    private fun addTemporalElement(
+        element: ScoreHandlerElement,
+        currentBar: BarData,
+        highlightElementMap: MutableMap<String, Collection<String>>
+    ) {
+        val temporalElement = createTemporalElement(element, scoreSetup.context)
+        currentBar.scoreRenderingElements.add(temporalElement)
+        if (temporalElement is HighlightableElement) {
+            highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
+        }
+
     }
 
     private fun addBeams(barData: BarData): MutableList<BeamGroup> {
@@ -187,38 +241,38 @@ class ScoreHandler : ScoreHandlerInterface {
         return beamGroups
     }
 
-    private fun addAndTie(
-        element: NoteOrRest,
-        durations: List<Duration>,
-        barData: BarData,
-        previous: ScoreRenderingElement? = null,
-        scoreSetup: ScoreSetup
-    ): ScoreRenderingElement? {
-        var previousInternal = previous
-        for (duration in durations) {
-            val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-                transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
-                    NoteElement(
-                        noteAndAccidental.first,
-                        element.octave,
-                        duration,
-                        scoreSetup.context
-                    ).also { it.accidental }
-                }
-            } else {
-                RestElement(duration, scoreSetup.context)
-            }
-
-            barData.scoreRenderingElements.add(scoreRenderingElement)
-
-            if (previous != null && scoreRenderingElement is NoteElement) {
-                scoreSetup.ties.add(TiePair(previous as NoteElement, scoreRenderingElement))
-            }
-            previousInternal = scoreRenderingElement
-        }
-
-        return previousInternal
-    }
+//    private fun addAndTie(
+//        element: NoteOrRest,
+//        durations: List<Duration>,
+//        barData: BarData,
+//        previous: ScoreRenderingElement? = null,
+//        scoreSetup: ScoreSetup
+//    ): ScoreRenderingElement? {
+//        var previousInternal = previous
+//        for (duration in durations) {
+//            val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
+//                transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+//                    NoteElement(
+//                        noteAndAccidental.first,
+//                        element.octave,
+//                        duration,
+//                        scoreSetup.context
+//                    ).also { it.accidental }
+//                }
+//            } else {
+//                RestElement(duration, scoreSetup.context)
+//            }
+//
+//            barData.scoreRenderingElements.add(scoreRenderingElement)
+//
+//            if (previous != null && scoreRenderingElement is NoteElement) {
+//                scoreSetup.ties.add(TiePair(previous as NoteElement, scoreRenderingElement))
+//            }
+//            previousInternal = scoreRenderingElement
+//        }
+//
+//        return previousInternal
+//    }
 
     fun addBeams(noteElementIds: List<String>) {
         val noteElementsToTie = noteElementIds.map { findScoreHandlerElement(it) }
@@ -493,13 +547,15 @@ class ScoreHandler : ScoreHandlerInterface {
 
 
             }
-            else -> {
+            is MoveElement -> {
                 // TODO
-
             }
-
-            // TODO
-
+            is DeleteElement -> {
+                // TODO
+            }
+            is UpdateElement -> {
+                // TODO
+            }
 
         }
 
@@ -507,14 +563,14 @@ class ScoreHandler : ScoreHandlerInterface {
         return null
     }
 
-        private fun handleInsertNote(insertNote: InsertNote) {
-            // Default to quarter if nothing is set
-            val duration = insertNote.duration ?: Duration.QUARTER
-            if (insertNote.id != null) {
-                insertNote(insertNote.id, duration)
-            }
-            insertNote(duration)
+    private fun handleInsertNote(insertNote: InsertNote) {
+        // Default to quarter if nothing is set
+        val duration = insertNote.duration ?: Duration.QUARTER
+        if (insertNote.id != null) {
+            insertNote(insertNote.id, duration)
         }
+        insertNote(duration)
+    }
 
     private fun transformToNoteAndAccidental(noteType: NoteType): Pair<GClefNoteLine, Accidental?> {
         return when (noteType) {

@@ -1,6 +1,5 @@
 package com.kjipo.handler
 
-import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 
@@ -15,7 +14,6 @@ data class NoteOrRest(
     var isNote: Boolean,
     var octave: Int,
     var noteType: NoteType
-//    var accidental: Accidental?
 ) : ScoreHandlerElement()
 
 data class NoteSymbol(

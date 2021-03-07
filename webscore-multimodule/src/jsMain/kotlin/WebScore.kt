@@ -100,6 +100,8 @@ class WebScore(
     }
 
     private fun highLightActiveElement() {
+        logger.debug { "Highlighting active element: $activeElement" }
+
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }

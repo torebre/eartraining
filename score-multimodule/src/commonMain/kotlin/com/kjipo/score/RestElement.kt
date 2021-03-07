@@ -25,6 +25,7 @@ class RestElement(
             yTranslate = -30
             typeId = typeName
         }
+        highlightElements.add(positionedRenderingElement.id)
         return listOf(positionedRenderingElement)
     }
 

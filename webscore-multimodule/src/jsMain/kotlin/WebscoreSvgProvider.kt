@@ -165,6 +165,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
     }
 
     fun getHighlightForId(id: String): Collection<String> {
+        logger.debug { "Highlight map: ${scoreHandler.getHighlightMap()}" }
+
         return scoreHandler.getHighlightMap()[id] ?: emptySet()
     }
 
