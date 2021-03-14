@@ -10,17 +10,12 @@ internal suspend fun playSequenceInternal(actionScript: ActionScript, webScore: 
         val sleepTime = it.first
         val events = it.second
 
-        console.log("Sleep time: ${sleepTime.toLong()}")
-
         try {
             delay(sleepTime.toLong())
 
             events.forEach { action ->
                 when (action) {
                     is Action.PitchEvent -> {
-
-                        console.log("Notes: ${action.pitches}. Note on: ${action.noteOn}")
-
                         if (action.noteOn) {
                             action.pitches.forEach {
                                 activePitches.add(it)

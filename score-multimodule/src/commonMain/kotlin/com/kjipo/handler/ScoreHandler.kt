@@ -7,6 +7,7 @@ import mu.KotlinLogging
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
  */
+@Deprecated("Has been split into several classes")
 class ScoreHandler : ScoreHandlerInterface {
     private val scoreHandlerElements = mutableListOf<ScoreHandlerElement>()
     private var idCounter = 0

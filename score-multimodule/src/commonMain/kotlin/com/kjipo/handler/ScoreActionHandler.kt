@@ -4,15 +4,20 @@ import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
 
-class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>, val initialId: Int) {
+class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>, private val initialId: Int) {
 
-    var scoreHandlerElements: MutableList<ScoreHandlerElement> = scoreHandlerElements
+    private var scoreHandlerElements: MutableList<ScoreHandlerElement> = scoreHandlerElements
         set(value) {
             field = value
             idCounter = initialId
         }
 
     private var idCounter = initialId
+
+
+    fun clear() {
+        scoreHandlerElements = mutableListOf()
+    }
 
     fun moveNoteOneStep(id: String, up: Boolean) {
         scoreHandlerElements.find { it.id == id }?.let {
@@ -110,6 +115,20 @@ class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>,
         return scoreHandlerElements.last().id
     }
 
+    fun insertNote(duration: Duration, pitch: Int): String {
+        val noteAndOctave = ScoreHandlerUtilities.pitchToNoteAndOctave(pitch)
+        scoreHandlerElements.add(
+            NoteOrRest(
+                (++idCounter).toString(),
+                duration,
+                true,
+                noteAndOctave.second,
+                noteAndOctave.first
+            )
+        )
+        return scoreHandlerElements.last().id
+    }
+
     fun insertNote(duration: Duration, octave: Int, noteType: NoteType): String {
         scoreHandlerElements.add(
             NoteOrRest(
@@ -184,15 +203,17 @@ class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>,
 
     fun getScoreHandlerElements() = scoreHandlerElements
 
-    fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? {
+    fun insertNote(activeElement: String, duration: Duration, pitch: Int = 60): String? {
         scoreHandlerElements.find { it.id == activeElement }?.let { element ->
 
             // TODO Only hardcoded note type and octave for testing
 
             val insertIndex = scoreHandlerElements.indexOf(element) + 1
+
+            val noteAndOctave = ScoreHandlerUtilities.pitchToNoteAndOctave(pitch)
             scoreHandlerElements.add(
                 insertIndex,
-                NoteOrRest((++idCounter).toString(), duration, true, 5, NoteType.C)
+                NoteOrRest((++idCounter).toString(), duration, true, noteAndOctave.second, noteAndOctave.first)
             )
             return scoreHandlerElements[insertIndex].id
         }
@@ -211,7 +232,7 @@ class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>,
 //        return cachedBuild?.highlightElementsMap ?: build().highlightElementsMap
 //    }
 
-    fun insertRest(activeElement: String, duration: Duration): String? {
+    fun insertRest(activeElement: String, duration: Duration): String {
         scoreHandlerElements.add(
             NoteOrRest(
                 (++idCounter).toString(),
@@ -233,19 +254,31 @@ class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>,
 
             }
             is MoveElement -> {
-                // TODO
+                handleMoveElement(operation)
             }
             is DeleteElement -> {
-                // TODO
+                handleDeleteElement(operation)
             }
             is UpdateElement -> {
-                // TODO
+                handleUpdateElement(operation)
             }
 
         }
 
         // TODO
         return null
+    }
+
+    private fun handleUpdateElement(operation: UpdateElement) {
+       // TODO
+    }
+
+    private fun handleDeleteElement(operation: DeleteElement) {
+        deleteElement(operation.id)
+    }
+
+    private fun handleMoveElement(operation: MoveElement) {
+        moveNoteOneStep(operation.id, operation.up)
     }
 
     private fun handleInsertNote(insertNote: InsertNote) {

@@ -31,7 +31,9 @@ class ScoreHandlerWithReducedLogic(score: Score) {
             )
         )
 
-    private fun build(): RenderingSequenceWithMetaData {
+    fun build(): RenderingSequenceWithMetaData {
+//        cachedBuild?.let { return it }
+
         val scoreSetup = ScoreSetup()
 
         for (bar in score.bars) {

@@ -16,7 +16,7 @@ class WebScore(
     var activeElement: String? = null
         set(value) {
             field = value
-            reload()
+            // reload()
         }
 
     private var xStart = 0
@@ -25,7 +25,6 @@ class WebScore(
     private var direction: Boolean? = null
     private var movementActive = false
     private val svgElement: Element
-//    private val idSvgElementMap = mutableMapOf<String, Element>()
 
     private val logger = KotlinLogging.logger {}
 
@@ -69,7 +68,7 @@ class WebScore(
         )
     }
 
-    fun loadScore() {
+    private fun loadScore() {
         generateSvgData(svgElement)
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
@@ -319,8 +318,12 @@ class WebScore(
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                activeElement?.let {
-                    scoreHandler.insertNote(it, keyCode - 48)
+                activeElement.let {
+                    if (it == null) {
+                        scoreHandler.insertNote(keyCode - 48)
+                    } else {
+                        scoreHandler.insertNote(it, keyCode - 48)
+                    }
                     regenerateSvg()
                     highLightActiveElement()
                 }
@@ -363,22 +366,6 @@ class WebScore(
 
                 }
             }
-
-//            "KeyF" -> {
-//                if (activeElement == null) {
-//                    return
-//                }
-//                scoreHandler.toggleExtra(activeElement!!, Accidental.FLAT)
-//                regenerateSvg()
-//            }
-//
-//            "KeyS" -> {
-//                if (activeElement == null) {
-//                    return
-//                }
-//                scoreHandler.toggleExtra(activeElement!!, Accidental.SHARP)
-//                regenerateSvg()
-//            }
         }
     }
 
@@ -388,6 +375,9 @@ class WebScore(
     }
 
     private fun regenerateSvg() {
+
+        logger.debug { "Regenerating SVG" }
+
         generateSvgData(svgElement)
     }
 }

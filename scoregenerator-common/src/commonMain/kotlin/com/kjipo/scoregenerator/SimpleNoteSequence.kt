@@ -1,11 +1,13 @@
 package com.kjipo.scoregenerator
 
+import com.kjipo.handler.InsertNote
 import com.kjipo.handler.ScoreHandlerUtilities.getDurationInMilliseconds
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
+import com.kjipo.handler.ScoreOperation
 import com.kjipo.score.NoteSequenceElement
 
 
-data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
+class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
 
 
     fun transformToPitchSequence(): List<Pitch> {
@@ -33,6 +35,23 @@ data class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
         return pitchSequence
     }
 
+
+    companion object {
+
+        fun applyOperationToNoteSequence(operation: ScoreOperation, noteSequence: SimpleNoteSequence) {
+            when (operation) {
+                is InsertNote -> {
+                    // TODO
+                }
+
+                else -> {
+                    // TODO
+                }
+            }
+
+
+        }
+    }
 
 }
 

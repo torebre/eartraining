@@ -1,9 +1,12 @@
 package com.kjipo.handler
 
 import com.kjipo.score.Duration
+import com.kjipo.score.NoteSequenceElement
+import com.kjipo.score.NoteType
 import mu.KotlinLogging
 
-class ScoreHandlerSplit(val scoreHandlerElements: MutableList<ScoreHandlerElement>) : ScoreHandlerInterface {
+class ScoreHandlerSplit(scoreHandlerElements: MutableList<ScoreHandlerElement> = mutableListOf()) :
+    ScoreHandlerInterface {
     private val scoreGenerator: ScoreHandlerWithReducedLogic
     private val scoreActionHandler: ScoreActionHandler
 
@@ -18,9 +21,14 @@ class ScoreHandlerSplit(val scoreHandlerElements: MutableList<ScoreHandlerElemen
         scoreActionHandler = ScoreActionHandler(scoreHandlerElements, 0)
     }
 
+    fun clear() {
+        scoreActionHandler.clear()
+        dirty = true
+    }
 
     override fun getScoreAsJson(): String {
         if (dirty) {
+            val scoreHandlerElements = scoreActionHandler.getScoreHandlerElements()
             val score = ScoreElementsTranslator.createRenderingData(scoreHandlerElements)
             scoreGenerator.score = score
             dirty = false
@@ -51,34 +59,64 @@ class ScoreHandlerSplit(val scoreHandlerElements: MutableList<ScoreHandlerElemen
         return scoreActionHandler.insertNote(activeElement, keyPressed)
     }
 
-    override fun insertNote(keyPressed: Int): String? {
+    override fun insertNote(keyPressed: Int): String {
         dirty = true
-        return insertNote(keyPressed)
+        return scoreActionHandler.insertNote(keyPressed)
+    }
+
+    fun insertNote(activeElement: String, duration: Duration): String? {
+        dirty = true
+        return scoreActionHandler.insertNote(activeElement, duration)
+    }
+
+    fun insertNote(duration: Duration): String {
+        dirty = true
+        return scoreActionHandler.insertNote(duration)
+    }
+
+    fun insertNote(duration: Duration, pitch: Int): String {
+        dirty = true
+        return scoreActionHandler.insertNote(duration, pitch)
     }
 
     override fun insertNote(activeElement: String, duration: Duration, pitch: Int): String? {
         dirty = true
-        return insertNote(activeElement, duration, pitch)
+        return scoreActionHandler.insertNote(activeElement, duration, pitch)
     }
 
-    override fun insertRest(activeElement: String, duration: Duration): String? {
+    fun insertChord(duration: Duration, elements: Collection<NoteSequenceElement.NoteElement>) {
         dirty = true
-        return insertRest(activeElement, duration)
+        scoreActionHandler.insertChord(duration, elements)
+    }
+
+    fun insertNote(duration: Duration, octave: Int, noteType: NoteType): String {
+        dirty = true
+        return scoreActionHandler.insertNote(duration, octave, noteType)
+    }
+
+    fun insertRest(duration: Duration): String {
+        dirty = true
+        return scoreActionHandler.insertRest(duration)
+    }
+
+    override fun insertRest(activeElement: String, duration: Duration): String {
+        dirty = true
+        return scoreActionHandler.insertRest(activeElement, duration)
     }
 
     override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
         dirty = true
-        return switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
+        return scoreActionHandler.switchBetweenNoteAndRest(idOfElementToReplace, keyPressed)
     }
 
     override fun deleteElement(id: String) {
         dirty = true
-        deleteElement(id)
+        scoreActionHandler.deleteElement(id)
     }
 
     override fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>): String? {
         dirty = true
-        return addNoteGroup(duration, pitches)
+        return scoreActionHandler.addNoteGroup(duration, pitches)
     }
 
     override fun getHighlightElementsMap() = scoreGenerator.highlightElementMap
@@ -87,4 +125,11 @@ class ScoreHandlerSplit(val scoreHandlerElements: MutableList<ScoreHandlerElemen
         dirty = true
         return scoreActionHandler.applyOperation(operation)
     }
+
+    fun findNoteType(id: String) = scoreActionHandler.findNoteType(id)
+
+    fun getScoreHandlerElements() = scoreActionHandler.getScoreHandlerElements()
+
+    fun build() = scoreGenerator.build()
+
 }

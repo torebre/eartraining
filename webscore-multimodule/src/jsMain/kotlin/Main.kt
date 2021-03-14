@@ -1,6 +1,5 @@
-import com.kjipo.handler.ScoreHandler
-import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.handler.ScoreHandlerInterface
+import com.kjipo.handler.ScoreHandlerSplit
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 
@@ -10,7 +9,7 @@ import com.kjipo.score.NoteType
 
 
 fun addNoteGroup() {
-    val scoreHandler = ScoreHandler()
+    val scoreHandler = ScoreHandlerSplit()
     scoreHandler.addNoteGroup(
         Duration.QUARTER,
         listOf(

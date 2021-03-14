@@ -1,7 +1,9 @@
 import com.kjipo.handler.ScoreHandlerListener
 import com.kjipo.handler.ScoreHandlerWrapper
+import com.kjipo.score.NoteSequenceElement
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.SequenceGenerator
+import com.kjipo.submithandling.SubmitHandler
 import mu.KotlinLogging
 
 class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
@@ -12,13 +14,16 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     private var webScore: WebScore? = null
     private var inputScore: WebScore? = null
 
+    private val submitHandler = SubmitHandler()
+
     private val logger = KotlinLogging.logger {}
 
     fun createSequence() {
-        val tempNoteSequence = polyphonicNoteSequenceGenerator.createSequence()
-
         targetSequenceGenerator = SequenceGenerator()
-        targetSequenceGenerator.loadSimpleNoteSequence(tempNoteSequence)
+        polyphonicNoteSequenceGenerator.createSequence().apply {
+            targetSequenceGenerator.loadSimpleNoteSequence(this)
+            submitHandler.setupExercise(elements)
+        }
 
         webScore = WebScore(ScoreHandlerJavaScript(targetSequenceGenerator), "targetScore", false)
     }
@@ -34,6 +39,18 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
         })
 
         inputScore = WebScore(ScoreHandlerJavaScript(scoreHandlerWrapper), "inputScore")
+    }
+
+    fun submit() {
+
+        // TODO
+
+//        inputSequenceGenerator.scoreHandler
+//        submitHandler.getCurrentExercise()?.submit(attempt)
+    }
+
+    fun submit(attempt: List<NoteSequenceElement>) {
+       submitHandler.getCurrentExercise()?.submit(attempt)
     }
 
     suspend fun playSequence() {

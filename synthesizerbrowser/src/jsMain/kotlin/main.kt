@@ -2,10 +2,7 @@ import com.kjipo.handler.NoteOrRest
 import com.kjipo.handler.ScoreHandlerElement
 import com.kjipo.handler.ScoreHandlerSplit
 import com.kjipo.score.Duration
-import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
-import com.kjipo.scoregenerator.SequenceGenerator
-import com.kjipo.scoregenerator.SimpleNoteSequence
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -30,6 +27,10 @@ fun showWebscore() {
         GlobalScope.launch(Dispatchers.Default) {
             webscoreShow.playInputSequence()
         }
+    })
+
+    document.querySelector("btnSubmit")?.addEventListener("click", {
+        webscoreShow.submit()
     })
 }
 
@@ -76,5 +77,5 @@ fun main() {
     KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
 
     showWebscore()
-    showScaleTest()
+//    showScaleTest()
 }

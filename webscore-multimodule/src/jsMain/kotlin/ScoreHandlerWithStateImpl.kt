@@ -2,7 +2,7 @@ import com.kjipo.handler.*
 import com.kjipo.score.Duration
 import kotlinx.html.currentTimeMillis
 
-class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreHandlerWithState {
+class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandlerSplit) : ScoreHandlerWithState {
     private var currentRenderingTree: String? = null
     private var currentDiff: String? = null
 
@@ -31,7 +31,6 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
 
         }
 
-        println("Test25")
 
         updateCurrentScoreAndGetDiff()
 
@@ -51,7 +50,9 @@ class ScoreHandlerWithStateImpl(private val scoreHandler: ScoreHandler) : ScoreH
         if (insertNote.id != null) {
             scoreHandler.insertNote(insertNote.id as String, duration)
         }
-        scoreHandler.insertNote(duration)
+        else {
+            scoreHandler.insertNote(duration)
+        }
     }
 
     private fun updateCurrentScoreAndGetDiff(): String? {

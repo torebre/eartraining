@@ -8,7 +8,7 @@ class ScoreHandlerWithStateImplTest {
 
     @Test
     fun `Insert note operation generates score diff`() {
-        val scoreHandler = ScoreHandlerWithReducedLogic()
+        val scoreHandler = ScoreHandlerSplit()
 
         val scoreHandlerWithState = ScoreHandlerWithStateImpl(scoreHandler)
 

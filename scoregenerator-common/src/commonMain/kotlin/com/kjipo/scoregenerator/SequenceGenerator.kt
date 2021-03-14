@@ -4,19 +4,26 @@ import com.kjipo.handler.*
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
+import mu.KotlinLogging
 
 
 /**
  * Stores a sequence of pitches, and wraps a score handler that can create a score based on the pitch sequence.
  */
 class SequenceGenerator : ScoreHandlerInterface {
-    var scoreHandler: ScoreHandler = ScoreHandler()
+    var scoreHandler = ScoreHandlerSplit()
     val pitchSequence = mutableListOf<Pitch>()
     val actionSequence = mutableListOf<Action>()
+    val noteSequence = mutableListOf<NoteSequenceElement>()
 
+    private val logger = KotlinLogging.logger {}
 
     fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {
         scoreHandler.clear()
+        noteSequence.clear()
+        noteSequence.addAll(simpleNoteSequence.elements)
+
+        logger.debug { "Number of elements in sequence ${simpleNoteSequence.elements.size}" }
 
         for (element in simpleNoteSequence.elements) {
             when (element) {
@@ -28,8 +35,6 @@ class SequenceGenerator : ScoreHandlerInterface {
                 }
                 is NoteSequenceElement.MultipleNotesElement -> {
                     scoreHandler.insertChord(element.duration, element.elements)
-
-
                 }
             }
         }
@@ -207,10 +212,12 @@ class SequenceGenerator : ScoreHandlerInterface {
             pitches.add(pitch)
         }
 
-        actionSequence.add(Action.PitchEvent(timeCounter, pitches, true))
-        actionSequence.add(Action.PitchEvent(updatedTimeCounter, pitches, false))
-        actionSequence.add(Action.HighlightEvent(timeCounter, true, setOf(noteGroup.id)))
-        actionSequence.add(Action.HighlightEvent(updatedTimeCounter, false, setOf(noteGroup.id)))
+        with(actionSequence) {
+            add(Action.PitchEvent(timeCounter, pitches, true))
+            add(Action.PitchEvent(updatedTimeCounter, pitches, false))
+            add(Action.HighlightEvent(timeCounter, true, setOf(noteGroup.id)))
+            add(Action.HighlightEvent(updatedTimeCounter, false, setOf(noteGroup.id)))
+        }
 
         return updatedTimeCounter
     }
@@ -264,5 +271,7 @@ class SequenceGenerator : ScoreHandlerInterface {
     override fun applyOperation(operation: ScoreOperation): String? {
         TODO("Not yet implemented")
     }
+
+
 
 }

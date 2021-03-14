@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.flipkart.zjsonpatch.JsonDiff
 import com.flipkart.zjsonpatch.JsonPatch
+import com.kjipo.handler.ScoreHandlerSplit
 import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.score.Duration
 import com.kjipo.score.RenderingSequenceWithMetaData
@@ -14,7 +15,7 @@ class RenderingSequenceJsonDiffTest {
 
     @Test
     fun `Diff is created based on rendering sequences`() {
-        val scoreHandler = ScoreHandlerWithReducedLogic()
+        val scoreHandler = ScoreHandlerSplit()
 
         scoreHandler.insertNote(Duration.QUARTER)
         val renderingSequence1 = scoreHandler.build()

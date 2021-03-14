@@ -19,8 +19,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
     fun generateSvgData(svgElement: Element) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
 
-        logger.debug { "Test25: ${renderingSequence.renderGroups.size}" }
-
         svgElement.clear()
         svgElement.setAttribute(
             "viewBox",
