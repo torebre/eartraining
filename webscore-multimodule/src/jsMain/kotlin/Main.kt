@@ -8,20 +8,6 @@ import com.kjipo.score.NoteType
 //val intialWebscore = WebScore(scoreHandler)
 
 
-fun addNoteGroup() {
-    val scoreHandler = ScoreHandlerSplit()
-    scoreHandler.addNoteGroup(
-        Duration.QUARTER,
-        listOf(
-            ScoreHandlerInterface.GroupNote(NoteType.A, 5),
-            ScoreHandlerInterface.GroupNote(NoteType.C_SHARP, 5),
-            ScoreHandlerInterface.GroupNote(NoteType.D, 6)
-        )
-    )
-    scoreHandler.insertNote(Duration.QUARTER)
-
-    WebScore(ScoreHandlerJavaScript(scoreHandler))
-}
 
 fun main() {
     // Do nothing as default now

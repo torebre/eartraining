@@ -1,3 +1,5 @@
+import com.kjipo.handler.InsertNote
+import com.kjipo.handler.ScoreHandlerUtilities
 import kotlinx.browser.document
 import mu.KotlinLogging
 import org.w3c.dom.Element
@@ -318,15 +320,9 @@ class WebScore(
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                activeElement.let {
-                    if (it == null) {
-                        scoreHandler.insertNote(keyCode - 48)
-                    } else {
-                        scoreHandler.insertNote(it, keyCode - 48)
-                    }
+                scoreHandler.applyOperation(InsertNote(activeElement, null, ScoreHandlerUtilities.getDuration(keyCode - 48)))
                     regenerateSvg()
                     highLightActiveElement()
-                }
             }
 
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {

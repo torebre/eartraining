@@ -19,6 +19,8 @@ class SimpleSequenceGenerator {
 
             val result = mutableListOf<NoteSequenceElement>()
 
+            var idCounter = 0
+
             while (true) {
                 val stepUp = Random.nextBoolean()
 
@@ -34,7 +36,8 @@ class SimpleSequenceGenerator {
                         currentNote = NoteType.H
                         --currentOctave
                     } else {
-                        currentNote = NoteType.values()[(NoteType.values().size + currentNote.ordinal - 1) % NoteType.values().size]
+                        currentNote =
+                            NoteType.values()[(NoteType.values().size + currentNote.ordinal - 1) % NoteType.values().size]
                     }
                 }
 
@@ -42,12 +45,18 @@ class SimpleSequenceGenerator {
                 if (timeRemaining - duration.ticks < 0) {
                     duration = ticksToDuration(timeRemaining)
                     timeRemaining = 0
-                }
-                else {
+                } else {
                     timeRemaining -= duration.ticks
                 }
 
-                result.add(NoteSequenceElement.NoteElement(currentNote, currentOctave, duration))
+                result.add(
+                    NoteSequenceElement.NoteElement(
+                        (++idCounter).toString(),
+                        currentNote,
+                        currentOctave,
+                        duration
+                    )
+                )
 
                 if (timeRemaining == 0) {
                     break

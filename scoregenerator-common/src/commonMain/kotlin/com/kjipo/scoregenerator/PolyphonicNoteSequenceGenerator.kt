@@ -24,6 +24,8 @@ class PolyphonicNoteSequenceGenerator {
 
         val result = mutableListOf<NoteSequenceElement>()
 
+        var idCounter = 0
+
         while (true) {
             val stepUp = Random.nextBoolean()
 
@@ -57,14 +59,32 @@ class PolyphonicNoteSequenceGenerator {
                 val intervalNote = addInterval(currentPitch)
                 result.add(
                     NoteSequenceElement.MultipleNotesElement(
+                        (++idCounter).toString(),
                         listOf(
-                            NoteSequenceElement.NoteElement(currentNote, currentOctave, duration),
-                            NoteSequenceElement.NoteElement(intervalNote.first, intervalNote.second, duration)
+                            NoteSequenceElement.NoteElement(
+                                (++idCounter).toString(),
+                                currentNote,
+                                currentOctave,
+                                duration
+                            ),
+                            NoteSequenceElement.NoteElement(
+                                (++idCounter).toString(),
+                                intervalNote.first,
+                                intervalNote.second,
+                                duration
+                            )
                         ), duration
                     )
                 )
             } else {
-                result.add(NoteSequenceElement.NoteElement(currentNote, currentOctave, duration))
+                result.add(
+                    NoteSequenceElement.NoteElement(
+                        (++idCounter).toString(),
+                        currentNote,
+                        currentOctave,
+                        duration
+                    )
+                )
             }
 
             if (timeRemaining == 0) {

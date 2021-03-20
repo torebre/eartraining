@@ -2,7 +2,10 @@ import com.kjipo.handler.NoteOrRest
 import com.kjipo.handler.ScoreHandlerElement
 import com.kjipo.handler.ScoreHandlerSplit
 import com.kjipo.score.Duration
+import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
+import com.kjipo.scoregenerator.ReducedScore
+import com.kjipo.scoregenerator.SimpleNoteSequence
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -53,11 +56,12 @@ fun showWebscore() {
 
 fun showScaleTest() {
     var idCounter = 0
-    val noteSequence: MutableList<ScoreHandlerElement> =
-        NoteType.values().leftShift(3).map { NoteOrRest("${idCounter++}", Duration.QUARTER, true, 5, it) }
+    val noteSequence: MutableList<NoteSequenceElement> =
+        NoteType.values().leftShift(3)
+            .map { NoteSequenceElement.NoteElement((++idCounter).toString(), it, 5, Duration.QUARTER) }
             .toMutableList()
 
-    val splitScoreHandler = ScoreHandlerSplit(noteSequence)
+    val splitScoreHandler = ReducedScore().also { it.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence)) }
     val webScore = WebScore(ScoreHandlerJavaScript(splitScoreHandler), "scaleTest", false)
 }
 

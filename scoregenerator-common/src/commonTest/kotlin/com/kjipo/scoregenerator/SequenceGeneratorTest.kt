@@ -13,7 +13,7 @@ class SequenceGeneratorTest {
     @Test
     fun `Elements are added to underlying score`() {
         val simpleNoteSequence = SimpleSequenceGenerator.createSequence()
-        val sequenceGenerator = SequenceGenerator()
+        val sequenceGenerator = ReducedScore()
         sequenceGenerator.loadSimpleNoteSequence(simpleNoteSequence)
         val notes =
             sequenceGenerator.scoreHandler.getScoreHandlerElements().filter { it is NoteOrRest && it.isNote }.toList()
@@ -25,7 +25,7 @@ class SequenceGeneratorTest {
 
     @Test
     fun `Elements show up in score output`() {
-        val sequenceGenerator = SequenceGenerator()
+        val sequenceGenerator = ReducedScore()
         val noteSequence = listOf<NoteSequenceElement>(NoteSequenceElement.NoteElement(NoteType.C, 5, Duration.QUARTER))
         sequenceGenerator.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence))
         val scoreAsJson = sequenceGenerator.scoreHandler.getScoreAsJson()

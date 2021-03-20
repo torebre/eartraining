@@ -1,21 +1,11 @@
-import com.kjipo.handler.ScoreHandlerSplit
-import com.kjipo.handler.ScoreHandlerWithState
+import com.kjipo.scoregenerator.ReducedScore
 
 object WebScoreFactory {
 
     @JsName("createScoreHandler")
-    fun createScoreHandler() = ScoreHandlerJavaScript(ScoreHandlerSplit())
+    fun createScoreHandler() = ScoreHandlerJavaScript(ReducedScore())
 
     @JsName("createWebScore")
     fun createWebScore(scoreHandlerJavaScript: ScoreHandlerJavaScript, svgElementName: String = "score") = WebScore(scoreHandlerJavaScript, svgElementName)
-
-    @JsName("createScoreHandlerWithState")
-    fun createWebscoreHandlerWithState() = ScoreHandlerWithStateImpl(ScoreHandlerSplit())
-
-    @JsName("createWebscoreHandlerStateBackend")
-    fun createWebscoreHandlerStateBackend(scoreHandlerWithState: ScoreHandlerWithState) = WebScoreScoreHandlerStateBackend(scoreHandlerWithState)
-
-    @JsName("createScoreManipulationInterface")
-    fun createScoreManipulationInterface(scoreHandlerWithState: ScoreHandlerWithState) = ScoreHandlerWithStateJavaScript(scoreHandlerWithState)
 
 }

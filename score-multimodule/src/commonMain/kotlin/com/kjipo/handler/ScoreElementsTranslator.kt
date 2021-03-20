@@ -12,7 +12,7 @@ object ScoreElementsTranslator {
     private val logger = KotlinLogging.logger {}
 
 
-    fun createRenderingData(scoreHandlerElements: List<ScoreHandlerElement>): Score {
+    fun createRenderingData(noteSequenceElements: List<NoteSequenceElement>): Score {
         val score = Score()
 
         var remainingTicksInBar = ticksPerBar
@@ -21,11 +21,17 @@ object ScoreElementsTranslator {
         currentBar.timeSignature = TimeSignature(4, 4)
         score.bars.add(currentBar)
 
-        for (element in scoreHandlerElements) {
+        for (element in noteSequenceElements) {
 
             when (element) {
-                is NoteOrRest -> {
+                is NoteSequenceElement.NoteElement, is NoteSequenceElement.RestElement -> {
                     val ticksNeededForElement = element.duration.ticks
+
+                    val (octave, note, isNote) = if (element is NoteSequenceElement.NoteElement) {
+                        Triple(element.octave, element.note, true)
+                    } else {
+                        Triple(5, NoteType.C, false)
+                    }
 
                     if (remainingTicksInBar == 0) {
                         // No more room in bar, start on a new one
@@ -42,7 +48,8 @@ object ScoreElementsTranslator {
 
                             var previous: ScoreHandlerElement? = null
                             for (duration in durationsInCurrentBar) {
-                                val splitScoreElement = NoteOrRest(score.getAndIncrementIdCounter(), duration, element.isNote, element.octave, element.noteType)
+                                val splitScoreElement =
+                                    NoteOrRest(score.getAndIncrementIdCounter(), duration, isNote, octave, note)
 
                                 if (previous != null) {
                                     score.ties.add(Pair(previous, splitScoreElement))
@@ -55,7 +62,8 @@ object ScoreElementsTranslator {
                             score.bars.add(currentBar)
 
                             for (duration in durationsInNextBar) {
-                                val splitScoreElement = NoteOrRest(score.getAndIncrementIdCounter(), duration, element.isNote, element.octave, element.noteType)
+                                val splitScoreElement =
+                                    NoteOrRest(score.getAndIncrementIdCounter(), duration, isNote, octave, note)
 
                                 if (previous != null) {
                                     score.ties.add(Pair(previous, splitScoreElement))
@@ -66,13 +74,20 @@ object ScoreElementsTranslator {
                         }
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
-                            currentBar.scoreHandlerElements.add(element)
+                            val scoreHandlerElement = NoteOrRest(
+                                score.getAndIncrementIdCounter(),
+                                element.duration,
+                                isNote,
+                                octave,
+                                note
+                            )
+                            currentBar.scoreHandlerElements.add(scoreHandlerElement)
                         }
                     }
                 }
-                is NoteGroup -> {
+                is NoteSequenceElement.MultipleNotesElement -> {
                     // TODO For now assuming that all notes in the group have the same duration
-                    val duration = element.notes.first().duration
+                    val duration = element.elements.first().duration
                     val ticksNeededForElement = duration.ticks
 
                     if (remainingTicksInBar == 0) {
@@ -99,8 +114,17 @@ object ScoreElementsTranslator {
 //                        }
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
-                            currentBar.scoreHandlerElements.add(element)
-
+                            val noteGroupElement = NoteGroup(
+                                score.getAndIncrementIdCounter(),
+                                element.elements.map {
+                                    NoteSymbol(
+                                        score.getAndIncrementIdCounter(),
+                                        it.duration,
+                                        it.octave,
+                                        it.note
+                                    )
+                                })
+                            currentBar.scoreHandlerElements.add(noteGroupElement)
                         }
                     }
                 }
@@ -145,7 +169,9 @@ object ScoreElementsTranslator {
         if (bars.isEmpty()) {
             return
         }
-        bars.takeLastWhile { bar -> bar.scoreHandlerElements.all { it is NoteOrRest && !it.isNote } }.forEach { bars.remove(it) }
+        bars.takeLastWhile { bar -> bar.scoreHandlerElements.all { it is NoteOrRest && !it.isNote } }
+            .forEach { bars.remove(it) }
+
     }
 
 

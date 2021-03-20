@@ -220,7 +220,7 @@ class ScoreActionHandler(scoreHandlerElements: MutableList<ScoreHandlerElement>,
         return null
     }
 
-    fun addNoteGroup(duration: Duration, pitches: List<ScoreHandlerInterface.GroupNote>): String {
+    fun addNoteGroup(duration: Duration, pitches: List<GroupNote>): String {
         val groupNotes = pitches.map {
             NoteSymbol((++idCounter).toString(), duration, it.octave, it.noteType)
         }.toList()

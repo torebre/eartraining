@@ -2,8 +2,7 @@ package com.kjipo.handler
 
 import com.kjipo.score.Duration
 
-
-interface ScoreHandlerInterface {
+interface ReducedScoreInterface {
 
     fun getScoreAsJson(): String
 
@@ -14,12 +13,6 @@ interface ScoreHandlerInterface {
     fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String?
 
     fun updateDuration(id: String, keyPressed: Int)
-
-//    fun insertNote(activeElement: String, keyPressed: Int): String?
-
-//    fun insertNote(keyPressed: Int): String?
-
-//    fun insertNote(activeElement: String, duration: Duration, pitch: Int): String?
 
     fun insertRest(activeElement: String, duration: Duration): String?
 
@@ -35,5 +28,4 @@ interface ScoreHandlerInterface {
     fun getHighlightElementsMap(): Map<String, Collection<String>>
 
     fun applyOperation(operation: ScoreOperation): String?
-
 }

@@ -1,7 +1,9 @@
+import com.kjipo.handler.ReducedScoreInterface
 import com.kjipo.handler.ScoreHandlerInterface
+import com.kjipo.handler.ScoreOperation
 import com.kjipo.score.Accidental
 
-class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
+class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
 
     @JsName("getScoreAsJson")
     fun getScoreAsJson() = scoreHandler.getScoreAsJson()
@@ -19,12 +21,6 @@ class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
     @JsName("updateDuration")
     fun updateDuration(activeElement: String, keyPressed: Int) = scoreHandler.updateDuration(activeElement, keyPressed)
 
-    @JsName("insertNote")
-    fun insertNote(activeElement: String, keyPressed: Int) = scoreHandler.insertNote(activeElement, keyPressed)
-
-    @JsName("insertNoteLast")
-    fun insertNote(keyPressed: Int) = scoreHandler.insertNote(keyPressed)
-
     @JsName("switchBetweenNoteAndRest")
     fun switchBetweenNoteAndRest(activeElement: String, keyPressed: Int) =
         scoreHandler.switchBetweenNoteAndRest(activeElement, keyPressed)
@@ -32,12 +28,9 @@ class ScoreHandlerJavaScript(private val scoreHandler: ScoreHandlerInterface) {
     @JsName("deleteElement")
     fun deleteElement(id: String) = scoreHandler.deleteElement(id)
 
-//    @JsName("toggleExtra")
-//    fun toggleExtra(id: String, extra: Accidental) = scoreHandler.toggleExtra(id, extra)
-
-//    @JsName("getClientContext")
-//    fun getClientContext() = scoreHandler.getClientContext()
-
     @JsName("getHighlightMap")
     fun getHighlightMap() = scoreHandler.getHighlightElementsMap()
+
+    @JsName("applyOperation")
+    fun applyOperation(scoreOperation: ScoreOperation) = scoreHandler.applyOperation(scoreOperation)
 }
