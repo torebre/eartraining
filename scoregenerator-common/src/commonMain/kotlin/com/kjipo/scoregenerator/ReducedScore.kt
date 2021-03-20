@@ -11,13 +11,11 @@ import mu.KotlinLogging
  * Stores a sequence of pitches, and wraps a score handler that can create a score based on the pitch sequence.
  */
 class ReducedScore : ReducedScoreInterface {
-    //    var scoreHandler = ScoreHandlerSplit()
     private val pitchSequence = mutableListOf<Pitch>()
     private val actionSequence = mutableListOf<Action>()
     val noteSequence = mutableListOf<NoteSequenceElement>()
 
-    private var score = Score()
-    private var scoreHandler = ScoreHandlerWithReducedLogic(score)
+    private var scoreHandler = ScoreHandlerWithReducedLogic(Score())
 
     var idCounter = 0
 
@@ -26,24 +24,13 @@ class ReducedScore : ReducedScoreInterface {
     private val logger = KotlinLogging.logger {}
 
     fun loadSimpleNoteSequence(simpleNoteSequence: SimpleNoteSequence) {
-//        scoreHandler.clear()
         noteSequence.clear()
         noteSequence.addAll(simpleNoteSequence.elements)
 
         logger.debug { "Number of elements in sequence ${simpleNoteSequence.elements.size}" }
 
-
         isDirty = true
     }
-
-//    private fun computeOnOffPitches() {
-//        var timeCounter = 0
-//        pitchSequence.forEach {
-//            it.timeOn = timeCounter
-//            it.timeOff = timeCounter + ScoreHandlerUtilities.getDurationInMilliseconds(it.duration)
-//            timeCounter = it.timeOff
-//        }
-//    }
 
     override fun updateDuration(id: String, keyPressed: Int) {
         val element = noteSequence.find { id == it.id } ?: return
@@ -82,12 +69,17 @@ class ReducedScore : ReducedScoreInterface {
 
     override fun getHighlightElementsMap(): Map<String, Collection<String>> {
         updateIfDirty()
-        return scoreHandler.highlightElementMap
+        return scoreHandler.getHighlightElementsMap()
+    }
+
+    internal fun getScore(): Score {
+        updateIfDirty()
+        return scoreHandler.score
     }
 
     private fun updateIfDirty() {
         if (isDirty) {
-            score = ScoreElementsTranslator.createRenderingData(noteSequence)
+            val score = ScoreElementsTranslator.createRenderingData(noteSequence)
 
             // TODO If the score does not have to be rebuilt the whole time it will be more efficient
             scoreHandler = ScoreHandlerWithReducedLogic(score)
@@ -142,7 +134,7 @@ class ReducedScore : ReducedScoreInterface {
                     timeCounter += durationInMilliseconds
                 }
                 is NoteSequenceElement.MultipleNotesElement -> {
-                    timeCounter = handleMultipleNotesElement(timeCounter, noteSequenceElement)
+                    timeCounter = handleMultipleNotesElement(timeCounter, noteSequenceElement, newActionSequence, newPitchSequence)
                 }
             }
         }
@@ -196,7 +188,9 @@ class ReducedScore : ReducedScoreInterface {
 
     private fun handleMultipleNotesElement(
         timeCounter: Int,
-        noteGroup: NoteSequenceElement.MultipleNotesElement
+        noteGroup: NoteSequenceElement.MultipleNotesElement,
+        newActionSequence: MutableList<Action>,
+        newPitchSequence: MutableList<Pitch>
     ): Int {
         val duration = noteGroup.elements.first().duration
         val updatedTimeCounter = timeCounter + ScoreHandlerUtilities.getDurationInMilliseconds(duration)
@@ -209,14 +203,25 @@ class ReducedScore : ReducedScoreInterface {
 
             val pitch = ScoreHandlerUtilities.getPitch(event.note, event.octave)
             pitches.add(pitch)
+
+            newPitchSequence.add(
+                Pitch(
+                    event.id,
+                    timeCounter,
+                    updatedTimeCounter,
+                    pitch,
+                    duration
+                )
+            )
         }
 
-        with(actionSequence) {
+        with(newActionSequence) {
             add(Action.PitchEvent(timeCounter, pitches, true))
             add(Action.PitchEvent(updatedTimeCounter, pitches, false))
             add(Action.HighlightEvent(timeCounter, true, setOf(noteGroup.id)))
             add(Action.HighlightEvent(updatedTimeCounter, false, setOf(noteGroup.id)))
         }
+
 
         return updatedTimeCounter
     }
@@ -226,6 +231,8 @@ class ReducedScore : ReducedScoreInterface {
 
         val timeEventMap = mutableMapOf<Int, MutableList<Action>>()
         val eventTimes = mutableSetOf<Int>()
+
+        logger.debug { "Action sequence pitch length: ${actionSequence.filter { it is Action.PitchEvent }.count()}" }
 
         actionSequence.forEach {
             val eventsAtTime = timeEventMap.getOrPut(it.time, { mutableListOf() })
@@ -315,7 +322,14 @@ class ReducedScore : ReducedScoreInterface {
 
     override fun getIdOfFirstSelectableElement() = noteSequence.firstOrNull()?.id
 
-    override fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String? {
+    override fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean): String? {
+        if(activeElement == null) {
+            if(lookLeft) {
+                return noteSequence.lastOrNull()?.id
+            }
+            return getIdOfFirstSelectableElement()
+        }
+
         return noteSequence.find { it.id == activeElement }?.let { noteSequenceElement ->
             val indexOfElement = noteSequence.indexOf(noteSequenceElement)
             if (lookLeft) {

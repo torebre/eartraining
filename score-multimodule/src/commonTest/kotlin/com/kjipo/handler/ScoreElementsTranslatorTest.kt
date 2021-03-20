@@ -1,6 +1,7 @@
 package com.kjipo.handler
 
 import com.kjipo.score.Duration
+import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
 import kotlin.test.Test
 
@@ -10,16 +11,13 @@ class ScoreElementsTranslatorTest {
     @Test
     fun testTranslation() {
         val scoreHandlerElements = listOf(
-            NoteOrRest("1", Duration.QUARTER, true, 5, NoteType.C),
-            NoteOrRest("2", Duration.QUARTER, true, 5, NoteType.C)
+            NoteSequenceElement.NoteElement("1", NoteType.C, 5, Duration.QUARTER),
+            NoteSequenceElement.NoteElement("2", NoteType.C, 5, Duration.QUARTER)
         )
 
         val score = ScoreElementsTranslator.createRenderingData(scoreHandlerElements)
 
         println("Score: $score")
-
-
     }
-
 
 }

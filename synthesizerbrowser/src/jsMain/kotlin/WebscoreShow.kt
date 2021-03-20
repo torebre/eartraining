@@ -28,7 +28,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
     fun createInputScore() {
         inputSequenceGenerator = ReducedScore()
-        inputScore = WebScore(ScoreHandlerJavaScript(inputSequenceGenerator), "inputScore")
+        inputScore = WebScore(ScoreHandlerJavaScript(inputSequenceGenerator), "inputScore", true, "debug")
     }
 
     fun submit() {

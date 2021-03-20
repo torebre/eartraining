@@ -1,8 +1,3 @@
-import com.kjipo.handler.ScoreHandlerInterface
-import com.kjipo.handler.ScoreHandlerSplit
-import com.kjipo.score.Duration
-import com.kjipo.score.NoteType
-
 // Uncommenting the following will set up an empty webscore automatically when the Javascript in the built module is run
 //val scoreHandler = ScoreHandlerJavaScript(ScoreHandler())
 //val intialWebscore = WebScore(scoreHandler)

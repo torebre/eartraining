@@ -16,6 +16,21 @@ class ScoreSetup {
     private val logger = KotlinLogging.logger {}
 
 
+    fun buildWithMetaData(): RenderingSequenceWithMetaData {
+        val renderingSequence = build()
+        val highlightElementMap = mutableMapOf<String, Collection<String>>()
+
+        bars.flatMap { it.scoreRenderingElements }.forEach {
+            if(it is HighlightableElement) {
+                highlightElementMap[it.id] = it.getIdsOfHighlightElements()
+            }
+        }
+
+        logger.debug { "Bars in score: ${bars.size}. Bars in score setup: ${bars.size}" }
+
+        return RenderingSequenceWithMetaData(renderingSequence, highlightElementMap)
+    }
+
     fun build(): RenderingSequence {
         // TODO Possible to use immutable lists here?
         // TODO The position will be wrong when there are multiple bars

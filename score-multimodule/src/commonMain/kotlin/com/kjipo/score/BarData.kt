@@ -1,21 +1,31 @@
 package com.kjipo.score
 
+import com.kjipo.handler.Bar
+import com.kjipo.handler.ScoreHelperFunctions.createTemporalElement
 import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getNoteHeadGlyph
 import kotlin.math.ceil
 
-class BarData(private val context: Context, private val debug: Boolean = false) {
-    var clef: Clef = Clef.NONE
+class BarData(private val context: Context, private val bar: Bar, private val debug: Boolean = false) {
+    private var clef: Clef = Clef.NONE
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
     var widthAvailableForTemporalElements = DEFAULT_BAR_WIDTH
 
-    var timeSignature = TimeSignature(0, 0)
+    private var timeSignature = TimeSignature(0, 0)
 
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
+        clef = bar.clef
+        bar.timeSignature?.run {
+           timeSignature = this
+        }
+        for (element in bar.scoreHandlerElements) {
+            scoreRenderingElements.add(createTemporalElement(element, context))
+        }
+
         val definitions = mutableMapOf<String, GlyphData>()
 
         val clefElement = getClefElement(barXoffset, barYoffset, definitions)
@@ -205,6 +215,13 @@ class BarData(private val context: Context, private val debug: Boolean = false) 
                 renderingElement[0].boundingBox.xMax.minus(renderingElement[0].boundingBox.xMin).toInt()
             } ?: 0)
             .minus(START_NOTE_ELEMENT_MARGIN)
+    }
+
+    /**
+     * Should be called after build
+     */
+    fun getHighlightElements(): List<ScoreRenderingElement> {
+        return scoreRenderingElements.filter { it is HighlightableElement }
     }
 
     override fun toString(): String {

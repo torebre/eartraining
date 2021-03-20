@@ -13,13 +13,11 @@ class ScoreHandlerWithReducedLogic(score: Score) {
         set(value) {
             field = value
             cachedBuild = null
-            highlightElementMap.clear()
             build()
         }
 
     private var cachedBuild: RenderingSequenceWithMetaData? = null
 
-    val highlightElementMap = mutableMapOf<String, Collection<String>>()
 
     private val logger = KotlinLogging.logger {}
 
@@ -31,41 +29,31 @@ class ScoreHandlerWithReducedLogic(score: Score) {
             )
         )
 
-    fun build(): RenderingSequenceWithMetaData {
-//        cachedBuild?.let { return it }
+    fun getHighlightElementsMap() = cachedBuild?.highlightElementsMap ?: build().highlightElementsMap
 
+    fun build(): RenderingSequenceWithMetaData {
         val scoreSetup = ScoreSetup()
 
         for (bar in score.bars) {
-            val barData = BarData(scoreSetup.context)
+            val barData = BarData(scoreSetup.context, bar)
             scoreSetup.bars.add(barData)
-
-            for (element in bar.scoreHandlerElements) {
-                addTemporalElement(element, barData, highlightElementMap, scoreSetup)
-            }
-
-            logger.debug { "Highlight map in score handler: $highlightElementMap" }
         }
 
-        val renderingSequence = scoreSetup.build()
-
-        logger.debug { "Bars in score: ${score.bars.size}. Bars in score setup: ${scoreSetup.bars.size}" }
-
-        return RenderingSequenceWithMetaData(renderingSequence, highlightElementMap)
+        return scoreSetup.buildWithMetaData().also { cachedBuild = it }
     }
 
-    private fun addTemporalElement(
-        element: ScoreHandlerElement,
-        currentBar: BarData,
-        highlightElementMap: MutableMap<String, Collection<String>>,
-        scoreSetup: ScoreSetup
-    ) {
-        val temporalElement = createTemporalElement(element, scoreSetup.context)
-        currentBar.scoreRenderingElements.add(temporalElement)
-        if (temporalElement is HighlightableElement) {
-            highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
-        }
-    }
+//    private fun addTemporalElement(
+//        element: ScoreHandlerElement,
+//        currentBar: BarData,
+//        highlightElementMap: MutableMap<String, Collection<String>>,
+//        scoreSetup: ScoreSetup
+//    ) {
+//        val temporalElement = createTemporalElement(element, scoreSetup.context)
+//        currentBar.scoreRenderingElements.add(temporalElement)
+//        if (temporalElement is HighlightableElement) {
+//            highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
+//        }
+//    }
 
     private fun addBeams(barData: BarData): MutableList<BeamGroup> {
         val beamGroups = mutableListOf<BeamGroup>()
@@ -128,34 +116,6 @@ class ScoreHandlerWithReducedLogic(score: Score) {
 //        beams.add(BeamGroup(noteElementIds))
 //    }
 
-    private fun createTemporalElement(element: ScoreHandlerElement, context: Context): ScoreRenderingElement {
-        when (element) {
-            is NoteOrRest -> {
-                return if (element.isNote) {
-                    ScoreHelperFunctions.transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
-                        NoteElement(
-                            noteAndAccidental.first,
-                            element.octave,
-                            element.duration,
-                            context,
-                            id = element.id
-                        ).also {
-                            it.accidental = noteAndAccidental.second
-                        }
-                    }
-                } else {
-                    RestElement(element.duration, context, id = element.id)
-                }
-
-            }
-            is NoteGroup -> {
-                // TODO Handle duration on note level
-                return NoteGroupElement(element.notes, element.notes.first().duration, element.id, context)
-            }
-
-        }
-
-    }
 
 
 }

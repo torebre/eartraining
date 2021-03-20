@@ -21,8 +21,8 @@ object ScoreElementsTranslator {
         currentBar.timeSignature = TimeSignature(4, 4)
         score.bars.add(currentBar)
 
+        // TODO The highlights do not work properly, one note sequence elements should be able to light up several elements in the score
         for (element in noteSequenceElements) {
-
             when (element) {
                 is NoteSequenceElement.NoteElement, is NoteSequenceElement.RestElement -> {
                     val ticksNeededForElement = element.duration.ticks
@@ -49,7 +49,7 @@ object ScoreElementsTranslator {
                             var previous: ScoreHandlerElement? = null
                             for (duration in durationsInCurrentBar) {
                                 val splitScoreElement =
-                                    NoteOrRest(score.getAndIncrementIdCounter(), duration, isNote, octave, note)
+                                    NoteOrRest(element.id, duration, isNote, octave, note)
 
                                 if (previous != null) {
                                     score.ties.add(Pair(previous, splitScoreElement))
@@ -75,7 +75,7 @@ object ScoreElementsTranslator {
                         else -> {
                             remainingTicksInBar -= ticksNeededForElement
                             val scoreHandlerElement = NoteOrRest(
-                                score.getAndIncrementIdCounter(),
+                                element.id,
                                 element.duration,
                                 isNote,
                                 octave,
@@ -118,7 +118,7 @@ object ScoreElementsTranslator {
                                 score.getAndIncrementIdCounter(),
                                 element.elements.map {
                                     NoteSymbol(
-                                        score.getAndIncrementIdCounter(),
+                                        element.id,
                                         it.duration,
                                         it.octave,
                                         it.note

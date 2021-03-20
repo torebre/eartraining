@@ -1,6 +1,3 @@
-import com.kjipo.handler.NoteOrRest
-import com.kjipo.handler.ScoreHandlerElement
-import com.kjipo.handler.ScoreHandlerSplit
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType

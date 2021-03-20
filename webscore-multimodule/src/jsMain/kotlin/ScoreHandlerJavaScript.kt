@@ -15,7 +15,7 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
     fun getIdOfFirstSelectableElement() = scoreHandler.getIdOfFirstSelectableElement()
 
     @JsName("getNeighbouringElement")
-    fun getNeighbouringElement(activeElement: String, lookLeft: Boolean) =
+    fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean) =
         scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
     @JsName("updateDuration")

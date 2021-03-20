@@ -1,8 +1,6 @@
 package com.kjipo.handler
 
-import com.kjipo.score.Accidental
-import com.kjipo.score.GClefNoteLine
-import com.kjipo.score.NoteType
+import com.kjipo.score.*
 
 object ScoreHelperFunctions {
 
@@ -24,4 +22,32 @@ object ScoreHelperFunctions {
 
     }
 
+    internal fun createTemporalElement(element: ScoreHandlerElement, context: Context): ScoreRenderingElement {
+        when (element) {
+            is NoteOrRest -> {
+                return if (element.isNote) {
+                    transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+                        NoteElement(
+                            noteAndAccidental.first,
+                            element.octave,
+                            element.duration,
+                            context,
+                            id = element.id
+                        ).also {
+                            it.accidental = noteAndAccidental.second
+                        }
+                    }
+                } else {
+                    RestElement(element.duration, context, id = element.id)
+                }
+
+            }
+            is NoteGroup -> {
+                // TODO Handle duration on note level
+                return NoteGroupElement(element.notes, element.notes.first().duration, element.id, context)
+            }
+
+        }
+
+    }
 }

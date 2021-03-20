@@ -1,6 +1,7 @@
 import com.kjipo.handler.InsertNote
 import com.kjipo.handler.ScoreHandlerUtilities
 import kotlinx.browser.document
+import kotlinx.dom.appendText
 import mu.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
@@ -10,7 +11,8 @@ import org.w3c.dom.events.KeyboardEvent
 class WebScore(
     private val scoreHandler: ScoreHandlerJavaScript,
     private val svgElementId: String = "score",
-    private val allowInput: Boolean = true
+    allowInput: Boolean = true,
+    private val debugLabelId: String? = null
 ) {
 
     private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(scoreHandler)
@@ -18,6 +20,9 @@ class WebScore(
     var activeElement: String? = null
         set(value) {
             field = value
+
+            writeDebug("Active element", value)
+
             // reload()
         }
 
@@ -371,9 +376,12 @@ class WebScore(
     }
 
     private fun regenerateSvg() {
-
-        logger.debug { "Regenerating SVG" }
-
         generateSvgData(svgElement)
+    }
+
+    private fun writeDebug(tag: String, message: String?) {
+        debugLabelId?.let {
+            document.getElementById(it)?.appendText("$tag: $message")
+        }
     }
 }
