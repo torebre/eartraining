@@ -7,7 +7,7 @@ import mu.KotlinLogging
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
  */
-class ScoreHandlerWithReducedLogic(score: Score) {
+class ScoreHandlerWithReducedLogic(score: Score): ScoreProviderInterface {
 
     var score: Score = score
         set(value) {
@@ -21,7 +21,7 @@ class ScoreHandlerWithReducedLogic(score: Score) {
 
     private val logger = KotlinLogging.logger {}
 
-    fun getScoreAsJson() =
+    override fun getScoreAsJson() =
         truncateNumbers(
             Json.encodeToString(
                 RenderingSequence.serializer(),
@@ -29,7 +29,7 @@ class ScoreHandlerWithReducedLogic(score: Score) {
             )
         )
 
-    fun getHighlightElementsMap() = cachedBuild?.highlightElementsMap ?: build().highlightElementsMap
+    override fun getHighlightMap() = cachedBuild?.highlightElementsMap ?: build().highlightElementsMap
 
     fun build(): RenderingSequenceWithMetaData {
         val scoreSetup = ScoreSetup()

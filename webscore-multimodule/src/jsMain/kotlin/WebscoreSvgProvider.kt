@@ -1,3 +1,4 @@
+import com.kjipo.handler.ScoreProviderInterface
 import com.kjipo.score.PositionedRenderingElement
 import com.kjipo.score.RenderingSequence
 import com.kjipo.score.Translation
@@ -10,7 +11,7 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 
 
-class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
+class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
 
     private val idSvgElementMap = mutableMapOf<String, Element>()
 
@@ -76,8 +77,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreHandlerJavaScript) {
             } else {
                 emptyMap()
             }
-
-//            console.log("Adding: ${renderingElement.typeId}. ID: ${renderingElement.id}")
 
             if (renderingElement.typeId != null) {
                 renderingElement.typeId?.let { typeId ->

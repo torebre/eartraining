@@ -15,7 +15,7 @@ class WebScore(
     private val debugLabelId: String? = null
 ) {
 
-    private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(scoreHandler)
+    private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(ScoreProvider(scoreHandler))
 
     var activeElement: String? = null
         set(value) {

@@ -69,7 +69,7 @@ class ReducedScore : ReducedScoreInterface {
 
     override fun getHighlightElementsMap(): Map<String, Collection<String>> {
         updateIfDirty()
-        return scoreHandler.getHighlightElementsMap()
+        return scoreHandler.getHighlightMap()
     }
 
     internal fun getScore(): Score {

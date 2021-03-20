@@ -1,7 +1,5 @@
 import com.kjipo.handler.ReducedScoreInterface
-import com.kjipo.handler.ScoreHandlerInterface
 import com.kjipo.handler.ScoreOperation
-import com.kjipo.score.Accidental
 
 class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
 
