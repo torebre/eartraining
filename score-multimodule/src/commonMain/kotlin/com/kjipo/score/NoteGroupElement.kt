@@ -11,7 +11,8 @@ class NoteGroupElement(
     val notes: List<NoteSymbol>,
     override var duration: Duration,
     override val id: String,
-    val context: Context
+    val context: Context,
+    override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     val result = mutableListOf<PositionedRenderingElement>()
     var yLowestPosition = Int.MAX_VALUE

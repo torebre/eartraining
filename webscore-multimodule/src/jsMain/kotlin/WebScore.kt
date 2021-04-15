@@ -88,6 +88,10 @@ class WebScore(
     }
 
     fun highlight(id: String) {
+
+        logger.debug { "Activating highlighting: $id" }
+
+
         webscoreSvgProvider.getHighlightForId(id).forEach {
             webscoreSvgProvider.getElement(it)?.classList?.add("highlight")
         }
@@ -108,9 +112,9 @@ class WebScore(
     private fun highLightActiveElement() {
         logger.debug { "Highlighting active element: $activeElement" }
 
-        if (activeElement == null) {
-            activeElement = scoreHandler.getIdOfFirstSelectableElement()
-        }
+//        if (activeElement != null) {
+//            activeElement = scoreHandler.getIdOfFirstSelectableElement()
+//        }
 
         activeElement?.let {
             highlight(it)
@@ -309,25 +313,25 @@ class WebScore(
             }
 
             "ArrowLeft" -> {
-                deactivateActiveElement()
-                activeElement = activeElement?.let {
-                    scoreHandler.getNeighbouringElement(it, true)
-                }
+                activeElement = scoreHandler.getNeighbouringElement(activeElement, true)
                 highLightActiveElement()
             }
 
             "ArrowRight" -> {
-                deactivateActiveElement()
-                activeElement = activeElement?.let {
-                    scoreHandler.getNeighbouringElement(it, false)
-                }
+                activeElement = scoreHandler.getNeighbouringElement(activeElement, false)
                 highLightActiveElement()
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                scoreHandler.applyOperation(InsertNote(activeElement, null, ScoreHandlerUtilities.getDuration(keyCode - 48)))
-                    regenerateSvg()
-                    highLightActiveElement()
+                scoreHandler.applyOperation(
+                    InsertNote(
+                        activeElement,
+                        null,
+                        ScoreHandlerUtilities.getDuration(keyCode - 48)
+                    )
+                )
+                regenerateSvg()
+                highLightActiveElement()
             }
 
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {

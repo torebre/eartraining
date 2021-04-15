@@ -57,32 +57,41 @@ class PolyphonicNoteSequenceGenerator {
             if (Random.nextDouble() < probabilityOfAddingInterval) {
                 val currentPitch = getPitch(currentNote, currentOctave)
                 val intervalNote = addInterval(currentPitch)
+                val multipleNotesElementId = (++idCounter).toString()
+                val noteElementId1 = (++idCounter).toString()
+                val noteElementId2 = (++idCounter).toString()
+
                 result.add(
                     NoteSequenceElement.MultipleNotesElement(
-                        (++idCounter).toString(),
+                        multipleNotesElementId,
                         listOf(
                             NoteSequenceElement.NoteElement(
-                                (++idCounter).toString(),
+                                noteElementId1,
                                 currentNote,
                                 currentOctave,
-                                duration
+                                duration,
+                                mapOf(Pair(ELEMENT_ID, noteElementId1))
                             ),
                             NoteSequenceElement.NoteElement(
-                                (++idCounter).toString(),
+                                noteElementId2,
                                 intervalNote.first,
                                 intervalNote.second,
-                                duration
+                                duration,
+                                mapOf(Pair(ELEMENT_ID, noteElementId2))
                             )
-                        ), duration
+                        ), duration,
+                        mapOf(Pair(ELEMENT_ID, noteElementId1))
                     )
                 )
             } else {
+                val noteElementId = (++idCounter).toString()
                 result.add(
                     NoteSequenceElement.NoteElement(
-                        (++idCounter).toString(),
+                        noteElementId,
                         currentNote,
                         currentOctave,
-                        duration
+                        duration,
+                        mapOf(Pair(ELEMENT_ID, noteElementId))
                     )
                 )
             }

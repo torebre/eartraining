@@ -49,12 +49,14 @@ class SimpleSequenceGenerator {
                     timeRemaining -= duration.ticks
                 }
 
+                val elementId = (++idCounter).toString()
                 result.add(
                     NoteSequenceElement.NoteElement(
-                        (++idCounter).toString(),
+                        elementId,
                         currentNote,
                         currentOctave,
-                        duration
+                        duration,
+                        mapOf(Pair(ELEMENT_ID, elementId))
                     )
                 )
 

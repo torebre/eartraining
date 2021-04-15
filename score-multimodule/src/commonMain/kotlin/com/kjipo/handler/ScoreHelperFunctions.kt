@@ -26,25 +26,34 @@ object ScoreHelperFunctions {
         when (element) {
             is NoteOrRest -> {
                 return if (element.isNote) {
-                    transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
+                    transformToNoteAndAccidental(element.noteType).let { (note, accidental) ->
                         NoteElement(
-                            noteAndAccidental.first,
+                            note,
                             element.octave,
                             element.duration,
                             context,
-                            id = element.id
+                            id = element.id,
+                            properties = element.properties
                         ).also {
-                            it.accidental = noteAndAccidental.second
+                            it.accidental = accidental
                         }
                     }
                 } else {
-                    RestElement(element.duration, context, id = element.id)
+                    RestElement(
+                        element.duration, context, id = element.id,
+                        properties = element.properties
+                    )
                 }
-
             }
             is NoteGroup -> {
                 // TODO Handle duration on note level
-                return NoteGroupElement(element.notes, element.notes.first().duration, element.id, context)
+                return NoteGroupElement(
+                    element.notes,
+                    element.notes.first().duration,
+                    element.id,
+                    context,
+                    properties = element.properties
+                )
             }
 
         }

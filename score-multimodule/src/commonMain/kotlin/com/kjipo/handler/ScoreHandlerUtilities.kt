@@ -3,10 +3,13 @@ package com.kjipo.handler
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import com.kjipo.score.TICKS_PER_QUARTER_NOTE
+import mu.KotlinLogging
 import kotlin.math.absoluteValue
 
 object ScoreHandlerUtilities {
     const val DEFAULT_TEMPO_MILLISECONDS_PER_QUARTER_NOTE = 1000
+
+    private val logger = KotlinLogging.logger {}
 
     fun getDuration(keyPressed: Int): Duration =
             when (keyPressed) {
@@ -52,6 +55,9 @@ object ScoreHandlerUtilities {
 
 
     fun getPitch(noteType: NoteType, octave: Int): Int {
+
+        logger.debug { "Note type: $noteType" }
+
         return 12 * octave + when (noteType) {
             NoteType.A -> 9
             NoteType.A_SHARP -> 10

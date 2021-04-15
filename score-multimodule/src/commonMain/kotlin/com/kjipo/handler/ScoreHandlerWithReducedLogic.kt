@@ -7,7 +7,7 @@ import mu.KotlinLogging
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.
  */
-class ScoreHandlerWithReducedLogic(score: Score): ScoreProviderInterface {
+class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
 
     var score: Score = score
         set(value) {
@@ -16,8 +16,9 @@ class ScoreHandlerWithReducedLogic(score: Score): ScoreProviderInterface {
             build()
         }
 
-    private var cachedBuild: RenderingSequenceWithMetaData? = null
+    private var scoreSetup = ScoreSetup()
 
+    private var cachedBuild: RenderingSequenceWithMetaData? = null
 
     private val logger = KotlinLogging.logger {}
 
@@ -31,8 +32,21 @@ class ScoreHandlerWithReducedLogic(score: Score): ScoreProviderInterface {
 
     override fun getHighlightMap() = cachedBuild?.highlightElementsMap ?: build().highlightElementsMap
 
+    fun getHighlightableElements() = filterHighlightableElements(
+        if (cachedBuild != null) {
+            scoreSetup
+        } else {
+            build()
+            scoreSetup
+        }
+    )
+
+    private fun filterHighlightableElements(scoreSetup: ScoreSetup) =
+        scoreSetup.scoreRenderingElements.filter { it is HighlightableElement }.toList()
+
+
     fun build(): RenderingSequenceWithMetaData {
-        val scoreSetup = ScoreSetup()
+        scoreSetup = ScoreSetup()
 
         for (bar in score.bars) {
             val barData = BarData(scoreSetup.context, bar)
@@ -41,19 +55,6 @@ class ScoreHandlerWithReducedLogic(score: Score): ScoreProviderInterface {
 
         return scoreSetup.buildWithMetaData().also { cachedBuild = it }
     }
-
-//    private fun addTemporalElement(
-//        element: ScoreHandlerElement,
-//        currentBar: BarData,
-//        highlightElementMap: MutableMap<String, Collection<String>>,
-//        scoreSetup: ScoreSetup
-//    ) {
-//        val temporalElement = createTemporalElement(element, scoreSetup.context)
-//        currentBar.scoreRenderingElements.add(temporalElement)
-//        if (temporalElement is HighlightableElement) {
-//            highlightElementMap[element.id] = temporalElement.getIdsOfHighlightElements()
-//        }
-//    }
 
     private fun addBeams(barData: BarData): MutableList<BeamGroup> {
         val beamGroups = mutableListOf<BeamGroup>()
@@ -73,49 +74,5 @@ class ScoreHandlerWithReducedLogic(score: Score): ScoreProviderInterface {
         }
         return beamGroups
     }
-
-//    private fun addAndTie(
-//        element: NoteOrRest,
-//        durations: List<Duration>,
-//        barData: BarData,
-//        previous: ScoreRenderingElement? = null,
-//        scoreSetup: ScoreSetup
-//    ): ScoreRenderingElement? {
-//        var previousInternal = previous
-//        for (duration in durations) {
-//            val scoreRenderingElement: ScoreRenderingElement = if (element.isNote) {
-//                transformToNoteAndAccidental(element.noteType).let { noteAndAccidental ->
-//                    NoteElement(
-//                        noteAndAccidental.first,
-//                        element.octave,
-//                        duration,
-//                        scoreSetup.context
-//                    ).also { it.accidental }
-//                }
-//            } else {
-//                RestElement(duration, scoreSetup.context)
-//            }
-//
-//            barData.scoreRenderingElements.add(scoreRenderingElement)
-//
-//            if (previous != null && scoreRenderingElement is NoteElement) {
-//                scoreSetup.ties.add(TiePair(previous as NoteElement, scoreRenderingElement))
-//            }
-//            previousInternal = scoreRenderingElement
-//        }
-//
-//        return previousInternal
-//    }
-
-//    fun addBeams(noteElementIds: List<String>) {
-//        val noteElementsToTie = noteElementIds.map { findScoreHandlerElement(it) }
-//            .toList()
-//        if (noteElementsToTie.any { it == null }) {
-//            throw IllegalArgumentException("Not all note elements found. Element IDs: ${noteElementIds}")
-//        }
-//        beams.add(BeamGroup(noteElementIds))
-//    }
-
-
 
 }

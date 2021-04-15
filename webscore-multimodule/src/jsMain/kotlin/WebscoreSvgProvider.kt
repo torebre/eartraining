@@ -164,10 +164,19 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     fun getHighlightForId(id: String): Collection<String> {
         logger.debug { "Highlight map: ${scoreHandler.getHighlightMap()}" }
 
-        return scoreHandler.getHighlightMap()[id] ?: emptySet()
+        val elementsToHighlight = scoreHandler.getHighlightMap()[id] ?: emptySet()
+
+        logger.debug { "Elements to highlight: ${elementsToHighlight}" }
+
+        return elementsToHighlight
     }
 
-    fun getElement(id: String) = idSvgElementMap[id]
+    fun getElement(id: String): Element? {
+
+        logger.debug { "ID SVG element map: $idSvgElementMap" }
+
+        return idSvgElementMap[id]
+    }
 
     private fun transformJsonToRenderingSequence(jsonData: String): RenderingSequence {
         return Json.decodeFromString(RenderingSequence.serializer(), jsonData)

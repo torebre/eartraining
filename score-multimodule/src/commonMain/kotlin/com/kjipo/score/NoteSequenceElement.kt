@@ -1,10 +1,11 @@
 package com.kjipo.score
 
 
-sealed class NoteSequenceElement(val id: String, val duration: Duration) {
+sealed class NoteSequenceElement(val id: String, val duration: Duration, val properties: Map<String, String>) {
 
-    class MultipleNotesElement(id: String, val elements: Collection<NoteElement>, duration: Duration) :
-        NoteSequenceElement(id, duration) {
+
+    class MultipleNotesElement(id: String, val elements: Collection<NoteElement>, duration: Duration, properties: Map<String, String>) :
+        NoteSequenceElement(id, duration, properties) {
 
         override fun toString(): String {
             return "MultipleNotesElement(elements=$elements) ${super.toString()}"
@@ -15,15 +16,18 @@ sealed class NoteSequenceElement(val id: String, val duration: Duration) {
         id: String,
         val note: NoteType,
         val octave: Int,
-        duration: Duration
-    ) : NoteSequenceElement(id, duration) {
+        duration: Duration,
+        properties: Map<String, String>
+    ) : NoteSequenceElement(id, duration, properties) {
 
         override fun toString(): String {
             return "NoteElement(note=$note, octave=$octave) ${super.toString()}"
         }
     }
 
-    class RestElement(id: String, duration: Duration) : NoteSequenceElement(id, duration) {
+    class RestElement(id: String,
+                      duration: Duration,
+                      properties: Map<String, String>) : NoteSequenceElement(id, duration, properties) {
 
         override fun toString(): String {
             return "RestElement() ${super.toString()}"

@@ -8,7 +8,8 @@ import com.kjipo.svg.getRestGlyph
 class RestElement(
     override var duration: Duration,
     val context: Context,
-    override val id: String = context.getAndIncrementIdCounter()
+    override val id: String = context.getAndIncrementIdCounter(),
+    override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(0, 0), TemporalElement, HighlightableElement {
 
     private val typeName = "rest_${duration.name}"

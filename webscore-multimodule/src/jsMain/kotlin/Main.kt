@@ -4,6 +4,7 @@ import com.kjipo.handler.ScoreHandlerWithReducedLogic
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
+import com.kjipo.scoregenerator.ELEMENT_ID
 import com.kjipo.scoregenerator.ReducedScore
 
 // Uncommenting the following will set up an empty webscore automatically when the Javascript in the built module is run
@@ -11,9 +12,17 @@ import com.kjipo.scoregenerator.ReducedScore
 //val intialWebscore = WebScore(scoreHandler)
 
 
-
 fun main() {
-    val noteSequence = listOf(NoteSequenceElement.NoteElement("test1", NoteType.G, 5, Duration.QUARTER))
+    val elementId = "test1"
+    val noteSequence = listOf(
+        NoteSequenceElement.NoteElement(
+            elementId, NoteType.G, 5, Duration.QUARTER, mapOf(
+                Pair(
+                    ELEMENT_ID, elementId
+                )
+            )
+        )
+    )
     val score = ScoreElementsTranslator.createRenderingData(noteSequence)
     val scoreHandler = ScoreHandlerWithReducedLogic(score)
 

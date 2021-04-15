@@ -21,7 +21,6 @@ object ScoreElementsTranslator {
         currentBar.timeSignature = TimeSignature(4, 4)
         score.bars.add(currentBar)
 
-        // TODO The highlights do not work properly, one note sequence elements should be able to light up several elements in the score
         for (element in noteSequenceElements) {
             when (element) {
                 is NoteSequenceElement.NoteElement, is NoteSequenceElement.RestElement -> {
@@ -49,7 +48,7 @@ object ScoreElementsTranslator {
                             var previous: ScoreHandlerElement? = null
                             for (duration in durationsInCurrentBar) {
                                 val splitScoreElement =
-                                    NoteOrRest(element.id, duration, isNote, octave, note)
+                                    NoteOrRest(element.id, duration, isNote, octave, note, element.properties)
 
                                 if (previous != null) {
                                     score.ties.add(Pair(previous, splitScoreElement))
@@ -63,7 +62,7 @@ object ScoreElementsTranslator {
 
                             for (duration in durationsInNextBar) {
                                 val splitScoreElement =
-                                    NoteOrRest(score.getAndIncrementIdCounter(), duration, isNote, octave, note)
+                                    NoteOrRest(score.getAndIncrementIdCounter(), duration, isNote, octave, note, element.properties)
 
                                 if (previous != null) {
                                     score.ties.add(Pair(previous, splitScoreElement))
@@ -79,7 +78,8 @@ object ScoreElementsTranslator {
                                 element.duration,
                                 isNote,
                                 octave,
-                                note
+                                note,
+                                element.properties
                             )
                             currentBar.scoreHandlerElements.add(scoreHandlerElement)
                         }
@@ -173,6 +173,5 @@ object ScoreElementsTranslator {
             .forEach { bars.remove(it) }
 
     }
-
 
 }

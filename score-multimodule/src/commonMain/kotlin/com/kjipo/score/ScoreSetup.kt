@@ -10,8 +10,8 @@ class ScoreSetup {
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
-
     val context = Context()
+    val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
     private val logger = KotlinLogging.logger {}
 
@@ -22,8 +22,13 @@ class ScoreSetup {
 
         bars.flatMap { it.scoreRenderingElements }.forEach {
             if(it is HighlightableElement) {
+
+                logger.debug { "Highlight: ${it.getIdsOfHighlightElements()}" }
+
                 highlightElementMap[it.id] = it.getIdsOfHighlightElements()
             }
+
+            scoreRenderingElements.add(it)
         }
 
         logger.debug { "Bars in score: ${bars.size}. Bars in score setup: ${bars.size}" }

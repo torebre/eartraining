@@ -1,6 +1,7 @@
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
+import com.kjipo.scoregenerator.ELEMENT_ID
 import com.kjipo.scoregenerator.ReducedScore
 import com.kjipo.scoregenerator.SimpleNoteSequence
 import kotlinx.browser.document
@@ -55,7 +56,10 @@ fun showScaleTest() {
     var idCounter = 0
     val noteSequence: MutableList<NoteSequenceElement> =
         NoteType.values().leftShift(3)
-            .map { NoteSequenceElement.NoteElement((++idCounter).toString(), it, 5, Duration.QUARTER) }
+            .map {
+                val elementId = (++idCounter).toString()
+                NoteSequenceElement.NoteElement(elementId, it, 5, Duration.QUARTER, mapOf(Pair(ELEMENT_ID, elementId)))
+            }
             .toMutableList()
 
     val splitScoreHandler = ReducedScore().also { it.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence)) }

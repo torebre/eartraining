@@ -5,7 +5,7 @@ import com.kjipo.score.NoteType
 
 sealed class ScoreHandlerElement {
     abstract val id: String
-
+    abstract val properties: Map<String, String>
 }
 
 data class NoteOrRest(
@@ -13,14 +13,21 @@ data class NoteOrRest(
     var duration: Duration,
     var isNote: Boolean,
     var octave: Int,
-    var noteType: NoteType
+    var noteType: NoteType,
+    override val properties: Map<String, String> = emptyMap()
 ) : ScoreHandlerElement()
+
+
+data class NoteGroup(
+    override val id: String,
+    val notes: List<NoteSymbol>,
+    override val properties: Map<String, String> = emptyMap()
+) : ScoreHandlerElement()
+
 
 data class NoteSymbol(
     val id: String,
     val duration: Duration,
     val octave: Int,
-    val noteType: NoteType
+    val noteType: NoteType,
 )
-
-data class NoteGroup(override val id: String, val notes: List<NoteSymbol>) : ScoreHandlerElement()

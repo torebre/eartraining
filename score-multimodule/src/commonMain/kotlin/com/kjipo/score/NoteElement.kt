@@ -9,7 +9,8 @@ class NoteElement(
     var octave: Int,
     override var duration: Duration,
     val context: Context,
-    override val id: String = context.getAndIncrementIdCounter()
+    override val id: String = context.getAndIncrementIdCounter(),
+    override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     var accidental: Accidental? = null
     var stem = Stem.NONE
