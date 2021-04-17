@@ -6,7 +6,6 @@ import com.kjipo.score.HighlightableElement
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
 import mu.KotlinLogging
-import kotlin.math.log
 
 
 /**
@@ -124,7 +123,8 @@ class ReducedScore : ReducedScoreInterface {
 
                         logger.debug { "Test23: ${it.properties}" }
 
-                        it.properties[ELEMENT_ID] == scoreElementId }
+                        it.properties[ELEMENT_ID] == scoreElementId
+                    }
                     .flatMap { it.getIdsOfHighlightElements() }
             }
         }
@@ -136,6 +136,8 @@ class ReducedScore : ReducedScoreInterface {
         var timeCounter = 0
         val newPitchSequence = mutableListOf<Pitch>()
         val newActionSequence = mutableListOf<Action>()
+
+        logger.debug { "Note sequence: ${noteSequence}" }
 
         for (noteSequenceElement in noteSequence) {
             when (noteSequenceElement) {
@@ -305,11 +307,7 @@ class ReducedScore : ReducedScoreInterface {
                 }
                 // TODO Need to handle notes inside note group
 
-
             }
-
-            logger.debug { "Note moved" }
-
         }
         isDirty = true
     }
@@ -323,49 +321,48 @@ class ReducedScore : ReducedScoreInterface {
     }
 
     private fun moveNoteDown(noteElement: NoteSequenceElement.NoteElement) {
+        // The ID of the new element is set to the same as the old
         if (noteElement.note == NoteType.C) {
-            val elementId = (idCounter++).toString()
             replaceElement(
                 NoteSequenceElement.NoteElement(
-                    elementId,
+                    noteElement.id,
                     NoteType.H, noteElement.octave - 1, noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, elementId))
+                    mapOf(Pair(ELEMENT_ID, noteElement.id))
                 ), noteElement
             )
         } else {
-            val elementId = (idCounter++).toString()
             replaceElement(
                 NoteSequenceElement.NoteElement(
-                    elementId,
+                    noteElement.id,
                     NoteType.values()[(noteElement.note.ordinal - 1) % NoteType.values().size],
                     noteElement.octave,
                     noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, elementId))
+                    mapOf(Pair(ELEMENT_ID, noteElement.id))
                 ), noteElement
             )
         }
     }
 
     private fun moveNoteUp(noteElement: NoteSequenceElement.NoteElement) {
-        val elementId = (idCounter++).toString()
+        // The ID of the new element is set to the same as the old
         if (noteElement.note == NoteType.H) {
             replaceElement(
                 NoteSequenceElement.NoteElement(
-                    elementId,
+                    noteElement.id,
                     NoteType.C,
                     noteElement.octave + 1,
                     noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, elementId))
+                    mapOf(Pair(ELEMENT_ID, noteElement.id))
                 ), noteElement
             )
         } else {
             replaceElement(
                 NoteSequenceElement.NoteElement(
-                    elementId,
+                    noteElement.id,
                     NoteType.values()[(noteElement.note.ordinal + 1) % NoteType.values().size],
                     noteElement.octave,
                     noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, elementId))
+                    mapOf(Pair(ELEMENT_ID, noteElement.id))
                 ), noteElement
             )
         }
@@ -390,9 +387,9 @@ class ReducedScore : ReducedScoreInterface {
     override fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean): String? {
         if (activeElement == null) {
             return if (lookLeft) {
-                noteSequence.lastOrNull()?.id
-            } else {
                 getIdOfFirstSelectableElement()
+            } else {
+                noteSequence.lastOrNull()?.id
             }
         } else {
             noteSequence.find { it.id == activeElement }?.let {
@@ -406,13 +403,13 @@ class ReducedScore : ReducedScoreInterface {
         return noteSequence.indexOf(activeElement).let {
             if (lookLeft) {
                 if (it == 0) {
-                    activeElement.id
+                    noteSequence.last().id
                 } else {
                     noteSequence[it - 1].id
                 }
             } else {
                 if (it == noteSequence.size - 1) {
-                    activeElement.id
+                    noteSequence.first().id
                 } else {
                     noteSequence[it + 1].id
                 }
@@ -422,7 +419,7 @@ class ReducedScore : ReducedScoreInterface {
 
     private fun insertNote(duration: Duration, pitch: Int): String {
         val (note, octave) = ScoreHandlerUtilities.pitchToNoteAndOctave(pitch)
-        val elementId = (++idCounter).toString()
+        val elementId = "note_${++idCounter}"
         noteSequence.add(
             NoteSequenceElement.NoteElement(
                 elementId,
@@ -438,43 +435,43 @@ class ReducedScore : ReducedScoreInterface {
 
     fun insertRest(duration: Duration) =
         with(noteSequence) {
-            val elementId = (++idCounter).toString()
+            val elementId = "rest_${++idCounter}"
             add(NoteSequenceElement.RestElement(elementId, duration, mapOf(Pair(ELEMENT_ID, elementId))))
             isDirty = true
             last().id
         }
 
-    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
-        val element = noteSequence.find { it.id == idOfElementToReplace } ?: return idOfElementToReplace
-        val elementId = (++idCounter).toString()
-
-        when (element) {
-            is NoteSequenceElement.NoteElement -> {
-                replaceElement(
-                    NoteSequenceElement.RestElement(
-                        elementId,
-                        element.duration,
-                        mapOf(Pair(ELEMENT_ID, elementId))
-                    ), element
-                )
-            }
-            is NoteSequenceElement.RestElement -> {
-                replaceElement(
-                    NoteSequenceElement.NoteElement(
-                        elementId,
-                        NoteType.C,
-                        5,
-                        element.duration,
-                        mapOf(Pair(ELEMENT_ID, elementId))
-                    ), element
-                )
-            }
-            // TODO Also handle note groups
-
-        }
-        isDirty = true
-        return idOfElementToReplace
-    }
+//    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
+//        val element = noteSequence.find { it.id == idOfElementToReplace } ?: return idOfElementToReplace
+//        val elementId = (++idCounter).toString()
+//
+//        when (element) {
+//            is NoteSequenceElement.NoteElement -> {
+//                replaceElement(
+//                    NoteSequenceElement.RestElement(
+//                        elementId,
+//                        element.duration,
+//                        mapOf(Pair(ELEMENT_ID, elementId))
+//                    ), element
+//                )
+//            }
+//            is NoteSequenceElement.RestElement -> {
+//                replaceElement(
+//                    NoteSequenceElement.NoteElement(
+//                        elementId,
+//                        NoteType.C,
+//                        5,
+//                        element.duration,
+//                        mapOf(Pair(ELEMENT_ID, elementId))
+//                    ), element
+//                )
+//            }
+//            // TODO Also handle note groups
+//
+//        }
+//        isDirty = true
+//        return idOfElementToReplace
+//    }
 
     override fun deleteElement(id: String) {
         noteSequence.find { it.id == id }?.let {
@@ -489,7 +486,7 @@ class ReducedScore : ReducedScoreInterface {
             // TODO Only hardcoded note type and octave for testing
 
             val insertIndex = noteSequence.indexOf(element) + 1
-            val elementId = (++idCounter).toString()
+            val elementId = "note_${++idCounter}"
 
             val (note, octave) = ScoreHandlerUtilities.pitchToNoteAndOctave(pitch)
             noteSequence.add(
@@ -504,7 +501,7 @@ class ReducedScore : ReducedScoreInterface {
 
     override fun addNoteGroup(duration: Duration, pitches: List<GroupNote>): String {
         val groupNotes = pitches.map {
-            val elementId = (++idCounter).toString()
+            val elementId = "note_${++idCounter}"
             NoteSequenceElement.NoteElement(
                 elementId,
                 it.noteType,
@@ -513,7 +510,7 @@ class ReducedScore : ReducedScoreInterface {
                 mapOf(Pair(ELEMENT_ID, elementId))
             )
         }.toList()
-        val elementId = (++idCounter).toString()
+        val elementId = "notegroup_${++idCounter}"
         noteSequence.add(
             NoteSequenceElement.MultipleNotesElement(
                 elementId,
@@ -526,19 +523,27 @@ class ReducedScore : ReducedScoreInterface {
         return noteSequence.last().id
     }
 
-    override fun insertRest(activeElement: String, duration: Duration): String {
-        noteSequence.find { it.id == activeElement }?.let { element ->
-            val insertIndex = noteSequence.indexOf(element) + 1
-            val elementId = (++idCounter).toString()
+    private fun insertRest(activeElement: String?, duration: Duration): String {
+        val elementId = "rest_${++idCounter}"
 
-            noteSequence.add(
-                insertIndex,
-                NoteSequenceElement.RestElement(elementId, duration, mapOf(Pair(ELEMENT_ID, elementId)))
-            )
-            isDirty = true
-            return noteSequence[insertIndex].id
+        return if (activeElement == null) {
+            with(noteSequence) {
+                add(NoteSequenceElement.RestElement(elementId, duration, mapOf(Pair(ELEMENT_ID, elementId))))
+                isDirty = true
+                last().id
+            }
+        } else {
+            noteSequence.find { it.id == activeElement }?.let { element ->
+                val insertIndex = noteSequence.indexOf(element) + 1
+                noteSequence.add(
+                    insertIndex,
+                    NoteSequenceElement.RestElement(elementId, duration, mapOf(Pair(ELEMENT_ID, elementId)))
+                )
+                isDirty = true
+                return noteSequence[insertIndex].id
+            }
+            return noteSequence.last().id
         }
-        return noteSequence.last().id
     }
 
 
@@ -546,8 +551,6 @@ class ReducedScore : ReducedScoreInterface {
         when (operation) {
             is InsertNote -> {
                 handleInsertNote(operation)
-
-
             }
             is MoveElement -> {
                 handleMoveElement(operation)
@@ -558,11 +561,18 @@ class ReducedScore : ReducedScoreInterface {
             is UpdateElement -> {
                 handleUpdateElement(operation)
             }
+            is InsertRest -> {
+                handleInsertRest(operation)
+            }
 
         }
 
         // TODO
         return null
+    }
+
+    private fun handleInsertRest(operation: InsertRest) {
+        insertRest(operation.id, operation.duration)
     }
 
     private fun handleUpdateElement(operation: UpdateElement) {
@@ -579,15 +589,14 @@ class ReducedScore : ReducedScoreInterface {
 
     private fun handleInsertNote(insertNote: InsertNote) {
         // Default to quarter if nothing is set
-        val duration = insertNote.duration ?: Duration.QUARTER
+        val duration = insertNote.duration
         val id = insertNote.id
 
         if (id != null) {
-            insertNote(id, duration, insertNote.pitch ?: 60)
+            insertNote(id, duration, insertNote.pitch)
         } else {
-            insertNote(duration, insertNote.pitch ?: 60)
+            insertNote(duration, insertNote.pitch)
         }
     }
-
 
 }

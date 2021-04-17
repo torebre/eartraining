@@ -42,16 +42,7 @@ class ScoreSetup {
         val renderingSequences = mutableListOf<RenderingSequence>()
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
-
         val highlightElementsMap = mutableMapOf<String, Collection<String>>()
-
-        // TODO Should also add glyphs from note groups
-        val scoreRenderingElements = bars.flatMap { it.scoreRenderingElements }.toList()
-        scoreRenderingElements.filter { it is NoteElement }
-            .map { it as NoteElement }
-            .forEach {
-                definitionMap.putAll(it.getGlyphs())
-            }
 
         scoreRenderingElements.filter { it is HighlightableElement }
             .map { it as HighlightableElement }
@@ -185,6 +176,12 @@ class ScoreSetup {
             determineViewBox(renderGroups.flatMap { it.renderingElements }),
             definitions
         )
+    }
+
+
+    companion object {
+
+
     }
 
 

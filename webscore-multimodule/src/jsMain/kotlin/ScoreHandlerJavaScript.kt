@@ -19,10 +19,6 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
     @JsName("updateDuration")
     fun updateDuration(activeElement: String, keyPressed: Int) = scoreHandler.updateDuration(activeElement, keyPressed)
 
-    @JsName("switchBetweenNoteAndRest")
-    fun switchBetweenNoteAndRest(activeElement: String, keyPressed: Int) =
-        scoreHandler.switchBetweenNoteAndRest(activeElement, keyPressed)
-
     @JsName("deleteElement")
     fun deleteElement(id: String) = scoreHandler.deleteElement(id)
 

@@ -34,8 +34,7 @@ class BarData(private val context: Context, private val bar: Bar, private val de
 
         widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
 
-        val valTotalTicksInBar = scoreRenderingElements.filterIsInstance<TemporalElement>()
-            .map { it.duration.ticks }.sum()
+        val valTotalTicksInBar = scoreRenderingElements.filterIsInstance<TemporalElement>().sumOf { it.duration.ticks }
         val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
         val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
         val renderGroups = mutableListOf<RenderGroup>()

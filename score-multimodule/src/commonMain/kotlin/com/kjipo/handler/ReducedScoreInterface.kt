@@ -14,16 +14,10 @@ interface ReducedScoreInterface {
 
     fun updateDuration(id: String, keyPressed: Int)
 
-    fun insertRest(activeElement: String, duration: Duration): String?
-
-    fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String
-
     fun deleteElement(id: String)
 
     // Add duration on note level
     fun addNoteGroup(duration: Duration, pitches: List<GroupNote>): String?
-
-//    fun getClientContext(): ClientContext
 
     fun getHighlightElementsMap(): Map<String, Collection<String>>
 

@@ -1,4 +1,5 @@
 import com.kjipo.handler.InsertNote
+import com.kjipo.handler.InsertRest
 import com.kjipo.handler.ScoreHandlerUtilities
 import kotlinx.browser.document
 import kotlinx.dom.appendText
@@ -32,6 +33,11 @@ class WebScore(
     private var direction: Boolean? = null
     private var movementActive = false
     private val svgElement: Element
+
+    private var currentlyHighlightedElement: String? = null
+
+    private var noteModeOn = true
+        get() = field
 
     private val logger = KotlinLogging.logger {}
 
@@ -80,7 +86,7 @@ class WebScore(
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
-        highLightActiveElement()
+        highlightElement(activeElement)
     }
 
     fun highlight(ids: Collection<String>) {
@@ -109,15 +115,19 @@ class WebScore(
         }
     }
 
-    private fun highLightActiveElement() {
-        logger.debug { "Highlighting active element: $activeElement" }
 
-//        if (activeElement != null) {
-//            activeElement = scoreHandler.getIdOfFirstSelectableElement()
-//        }
-
-        activeElement?.let {
-            highlight(it)
+    private fun highlightElement(elementId: String?) {
+        if (elementId != null) {
+            currentlyHighlightedElement?.let {
+                removeHighlight(it)
+            }
+            highlight(elementId)
+            currentlyHighlightedElement = elementId
+        } else {
+            currentlyHighlightedElement?.let {
+                removeHighlight(it)
+            }
+            currentlyHighlightedElement = null
         }
     }
 
@@ -262,14 +272,14 @@ class WebScore(
                     activeElement = activeElement?.let {
                         scoreHandler.getNeighbouringElement(it, true)
                     }
-                    highLightActiveElement()
+                    highlightElement(activeElement)
                     return true
                 } else if (xDiff > HORIZONTAL_STEP) {
                     deactivateActiveElement()
                     activeElement = activeElement?.let {
                         scoreHandler.getNeighbouringElement(it, false)
                     }
-                    highLightActiveElement()
+                    highlightElement(activeElement)
                     return true
                 }
             } else {
@@ -278,7 +288,7 @@ class WebScore(
                         // Up
                         scoreHandler.moveNoteOneStep(it, true)
                         regenerateSvg()
-                        highLightActiveElement()
+                        highlightElement(activeElement)
                     }
                     return true
                 } else if (yDiff > VERTICAL_STEP) {
@@ -286,7 +296,7 @@ class WebScore(
                         // Down
                         scoreHandler.moveNoteOneStep(it, false)
                         regenerateSvg()
-                        highLightActiveElement()
+                        highlightElement(activeElement)
                     }
                     return true
                 }
@@ -302,51 +312,48 @@ class WebScore(
                 // Up
                 scoreHandler.moveNoteOneStep(it, true)
                 regenerateSvg()
-                highLightActiveElement()
+                highlightElement(activeElement)
             }
 
             "ArrowDown" -> activeElement?.let {
                 // Down
                 scoreHandler.moveNoteOneStep(it, false)
                 regenerateSvg()
-                highLightActiveElement()
+                highlightElement(activeElement)
             }
 
             "ArrowLeft" -> {
                 activeElement = scoreHandler.getNeighbouringElement(activeElement, true)
-                highLightActiveElement()
+                highlightElement(activeElement)
             }
 
             "ArrowRight" -> {
                 activeElement = scoreHandler.getNeighbouringElement(activeElement, false)
-                highLightActiveElement()
+                highlightElement(activeElement)
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                scoreHandler.applyOperation(
-                    InsertNote(
-                        activeElement,
-                        null,
-                        ScoreHandlerUtilities.getDuration(keyCode - 48)
+                val duration = ScoreHandlerUtilities.getDuration(keyCode - 48)
+                if (noteModeOn) {
+                    scoreHandler.applyOperation(
+                        InsertNote(
+                            activeElement,
+                            60,
+                            duration
+                        )
                     )
-                )
+                } else {
+                    scoreHandler.applyOperation(InsertRest(activeElement, duration))
+                }
                 regenerateSvg()
-                highLightActiveElement()
+                highlightElement(activeElement)
             }
 
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
                 activeElement?.let {
                     scoreHandler.updateDuration(it, keyCode - 96)
                     regenerateSvg()
-                    highLightActiveElement()
-                }
-            }
-
-            "KeyN" -> {
-                activeElement?.let {
-                    activeElement = scoreHandler.switchBetweenNoteAndRest(it, keyCode)
-                    regenerateSvg()
-                    highLightActiveElement()
+                    highlightElement(activeElement)
                 }
             }
 
@@ -364,19 +371,23 @@ class WebScore(
 
                     if (neighbouringElement != null) {
                         activeElement = neighbouringElement
-                        highLightActiveElement()
+                        highlightElement(activeElement)
                     } else {
                         scoreHandler.getIdOfFirstSelectableElement()
                     }
-
                 }
             }
+
+            "M" -> {
+                noteModeOn != noteModeOn
+            }
+
         }
     }
 
     private fun generateSvgData(svgElement: Element) {
         webscoreSvgProvider.generateSvgData(svgElement)
-        highLightActiveElement()
+        highlightElement(activeElement)
     }
 
     private fun regenerateSvg() {

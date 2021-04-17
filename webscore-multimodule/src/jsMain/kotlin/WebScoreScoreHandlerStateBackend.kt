@@ -1,4 +1,5 @@
 import com.kjipo.handler.*
+import com.kjipo.score.Duration
 import com.kjipo.score.PositionedRenderingElement
 import com.kjipo.score.RenderingSequence
 import com.kjipo.score.Translation
@@ -332,7 +333,7 @@ class WebScoreScoreHandlerStateBackend(
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
                 activeElement?.let {
-                    scoreHandler.applyOperation(InsertNote(it, pitch = keyCode - 48))
+                    scoreHandler.applyOperation(InsertNote(it, pitch = keyCode - 48, Duration.QUARTER))
                     highLightActiveElement()
                 }
             }

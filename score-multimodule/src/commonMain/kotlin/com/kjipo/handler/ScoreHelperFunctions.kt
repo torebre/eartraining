@@ -40,7 +40,9 @@ object ScoreHelperFunctions {
                     }
                 } else {
                     RestElement(
-                        element.duration, context, id = element.id,
+                        element.duration,
+                        context,
+                        id = element.id,
                         properties = element.properties
                     )
                 }

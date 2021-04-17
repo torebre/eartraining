@@ -35,7 +35,7 @@ class NoteElement(
         val positionedRenderingElement = PositionedRenderingElement.create(
             listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
             glyphData.boundingBox,
-            context.getAndIncrementIdCounter(),
+            id,
             xPosition,
             yPosition
         )

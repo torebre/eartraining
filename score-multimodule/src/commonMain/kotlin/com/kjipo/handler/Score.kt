@@ -8,7 +8,7 @@ class Score {
     private var idCounter = 0
 
 
-    fun getAndIncrementIdCounter() = "context-${idCounter++}"
+    fun getAndIncrementIdCounter() = "score-${idCounter++}"
 
     override fun toString(): String {
         return "Score(bars=$bars, ties=$ties, idCounter=$idCounter)"

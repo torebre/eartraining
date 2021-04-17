@@ -62,7 +62,14 @@ object ScoreElementsTranslator {
 
                             for (duration in durationsInNextBar) {
                                 val splitScoreElement =
-                                    NoteOrRest(score.getAndIncrementIdCounter(), duration, isNote, octave, note, element.properties)
+                                    NoteOrRest(
+                                        score.getAndIncrementIdCounter(),
+                                        duration,
+                                        isNote,
+                                        octave,
+                                        note,
+                                        element.properties
+                                    )
 
                                 if (previous != null) {
                                     score.ties.add(Pair(previous, splitScoreElement))
@@ -118,7 +125,7 @@ object ScoreElementsTranslator {
                                 score.getAndIncrementIdCounter(),
                                 element.elements.map {
                                     NoteSymbol(
-                                        element.id,
+                                        it.id,
                                         it.duration,
                                         it.octave,
                                         it.note
