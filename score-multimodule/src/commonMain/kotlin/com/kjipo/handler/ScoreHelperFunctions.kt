@@ -23,29 +23,28 @@ object ScoreHelperFunctions {
     }
 
     internal fun createTemporalElement(element: ScoreHandlerElement, context: Context): ScoreRenderingElement {
-        when (element) {
-            is NoteOrRest -> {
-                return if (element.isNote) {
-                    transformToNoteAndAccidental(element.noteType).let { (note, accidental) ->
-                        NoteElement(
-                            note,
-                            element.octave,
-                            element.duration,
-                            context,
-                            id = element.id,
-                            properties = element.properties
-                        ).also {
-                            it.accidental = accidental
-                        }
-                    }
-                } else {
-                    RestElement(
+        return when (element) {
+            is Note -> {
+                transformToNoteAndAccidental(element.noteType).let { (note, accidental) ->
+                    NoteElement(
+                        note,
+                        element.octave,
                         element.duration,
                         context,
                         id = element.id,
                         properties = element.properties
-                    )
+                    ).also {
+                        it.accidental = accidental
+                    }
                 }
+            }
+            is Rest -> {
+                RestElement(
+                    element.duration,
+                    context,
+                    id = element.id,
+                    properties = element.properties
+                )
             }
             is NoteGroup -> {
                 // TODO Handle duration on note level

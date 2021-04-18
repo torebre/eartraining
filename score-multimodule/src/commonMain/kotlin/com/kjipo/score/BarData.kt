@@ -6,6 +6,7 @@ import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
 import com.kjipo.svg.findBoundingBox
 import com.kjipo.svg.getNoteHeadGlyph
+import mu.KotlinLogging
 import kotlin.math.ceil
 
 class BarData(private val context: Context, private val bar: Bar, private val debug: Boolean = false) {
@@ -16,11 +17,12 @@ class BarData(private val context: Context, private val bar: Bar, private val de
 
     private var timeSignature = TimeSignature(0, 0)
 
+    private val logger = KotlinLogging.logger {}
 
     fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
         clef = bar.clef
         bar.timeSignature?.run {
-           timeSignature = this
+            timeSignature = this
         }
         for (element in bar.scoreHandlerElements) {
             scoreRenderingElements.add(createTemporalElement(element, context))

@@ -1,6 +1,6 @@
 package com.kjipo.scoregenerator
 
-import com.kjipo.handler.NoteOrRest
+import com.kjipo.handler.Note
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
@@ -18,7 +18,7 @@ class ReducedScoreTest {
         sequenceGenerator.getActionSequenceScript()
         val notes = sequenceGenerator.getScore()
         val noteElements =
-            notes.bars.flatMap { it.scoreHandlerElements }.filter { it is NoteOrRest && it.isNote }.toList()
+            notes.bars.flatMap { it.scoreHandlerElements }.filter { it is Note && it.isNote }.toList()
 
         assertFalse { noteElements.isEmpty() }
     }

@@ -12,7 +12,7 @@ interface ReducedScoreInterface {
 
     fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean): String?
 
-    fun updateDuration(id: String, keyPressed: Int)
+    fun updateDuration(id: String, duration: Duration)
 
     fun deleteElement(id: String)
 

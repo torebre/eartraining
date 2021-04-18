@@ -9,12 +9,6 @@ enum class Clef {
 data class TimeSignature(val nominator: Int, val denominator: Int)
 
 
-enum class Key {
-    C,
-    NONE
-}
-
-
 enum class NoteType {
     A,
     A_SHARP,

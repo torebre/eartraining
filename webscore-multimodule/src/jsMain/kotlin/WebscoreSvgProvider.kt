@@ -172,9 +172,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     }
 
     fun getElement(id: String): Element? {
-
-        logger.debug { "ID SVG element map: $idSvgElementMap" }
-
         return idSvgElementMap[id]
     }
 

@@ -34,7 +34,7 @@ class ReducedScore : ReducedScoreInterface {
         isDirty = true
     }
 
-    override fun updateDuration(id: String, keyPressed: Int) {
+    override fun updateDuration(id: String, duration: Duration) {
         val element = noteSequence.find { id == it.id } ?: return
         val elementId = (++idCounter).toString()
 
@@ -45,7 +45,7 @@ class ReducedScore : ReducedScoreInterface {
                         elementId,
                         element.note,
                         element.octave,
-                        ScoreHandlerUtilities.getDuration(keyPressed),
+                        duration,
                         mapOf(Pair(ELEMENT_ID, elementId))
                     ), element
                 )
@@ -54,7 +54,7 @@ class ReducedScore : ReducedScoreInterface {
                 replaceElement(
                     NoteSequenceElement.RestElement(
                         (++idCounter).toString(),
-                        ScoreHandlerUtilities.getDuration(keyPressed),
+                        duration,
                         mapOf(Pair(ELEMENT_ID, elementId))
                     ), element
                 )
@@ -432,46 +432,6 @@ class ReducedScore : ReducedScoreInterface {
         isDirty = true
         return noteSequence.last().id
     }
-
-    fun insertRest(duration: Duration) =
-        with(noteSequence) {
-            val elementId = "rest_${++idCounter}"
-            add(NoteSequenceElement.RestElement(elementId, duration, mapOf(Pair(ELEMENT_ID, elementId))))
-            isDirty = true
-            last().id
-        }
-
-//    override fun switchBetweenNoteAndRest(idOfElementToReplace: String, keyPressed: Int): String {
-//        val element = noteSequence.find { it.id == idOfElementToReplace } ?: return idOfElementToReplace
-//        val elementId = (++idCounter).toString()
-//
-//        when (element) {
-//            is NoteSequenceElement.NoteElement -> {
-//                replaceElement(
-//                    NoteSequenceElement.RestElement(
-//                        elementId,
-//                        element.duration,
-//                        mapOf(Pair(ELEMENT_ID, elementId))
-//                    ), element
-//                )
-//            }
-//            is NoteSequenceElement.RestElement -> {
-//                replaceElement(
-//                    NoteSequenceElement.NoteElement(
-//                        elementId,
-//                        NoteType.C,
-//                        5,
-//                        element.duration,
-//                        mapOf(Pair(ELEMENT_ID, elementId))
-//                    ), element
-//                )
-//            }
-//            // TODO Also handle note groups
-//
-//        }
-//        isDirty = true
-//        return idOfElementToReplace
-//    }
 
     override fun deleteElement(id: String) {
         noteSequence.find { it.id == id }?.let {

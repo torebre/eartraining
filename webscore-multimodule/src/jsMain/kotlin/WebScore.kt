@@ -333,7 +333,7 @@ class WebScore(
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                val duration = ScoreHandlerUtilities.getDuration(keyCode - 48)
+                val duration = getDuration(keyCode - 48)
                 if (noteModeOn) {
                     scoreHandler.applyOperation(
                         InsertNote(
@@ -351,7 +351,7 @@ class WebScore(
 
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
                 activeElement?.let {
-                    scoreHandler.updateDuration(it, keyCode - 96)
+                    scoreHandler.updateDuration(it, getDuration(keyCode - 96))
                     regenerateSvg()
                     highlightElement(activeElement)
                 }

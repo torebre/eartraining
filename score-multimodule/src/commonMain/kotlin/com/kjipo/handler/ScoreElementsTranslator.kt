@@ -23,117 +23,20 @@ object ScoreElementsTranslator {
 
         for (element in noteSequenceElements) {
             when (element) {
-                is NoteSequenceElement.NoteElement, is NoteSequenceElement.RestElement -> {
-                    val ticksNeededForElement = element.duration.ticks
-
-                    val (octave, note, isNote) = if (element is NoteSequenceElement.NoteElement) {
-                        Triple(element.octave, element.note, true)
-                    } else {
-                        Triple(5, NoteType.C, false)
-                    }
-
-                    if (remainingTicksInBar == 0) {
-                        // No more room in bar, start on a new one
-                        remainingTicksInBar = ticksPerBar
-                        currentBar = Bar(score)
-                        score.bars.add(currentBar)
-                    }
-
-                    when {
-                        remainingTicksInBar < ticksNeededForElement -> {
-                            val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
-                            val durationsInNextBar =
-                                ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
-
-                            var previous: ScoreHandlerElement? = null
-                            for (duration in durationsInCurrentBar) {
-                                val splitScoreElement =
-                                    NoteOrRest(element.id, duration, isNote, octave, note, element.properties)
-
-                                if (previous != null) {
-                                    score.ties.add(Pair(previous, splitScoreElement))
-                                }
-                                previous = splitScoreElement
-                            }
-
-                            // Start new bar
-                            currentBar = Bar(score)
-                            score.bars.add(currentBar)
-
-                            for (duration in durationsInNextBar) {
-                                val splitScoreElement =
-                                    NoteOrRest(
-                                        score.getAndIncrementIdCounter(),
-                                        duration,
-                                        isNote,
-                                        octave,
-                                        note,
-                                        element.properties
-                                    )
-
-                                if (previous != null) {
-                                    score.ties.add(Pair(previous, splitScoreElement))
-                                }
-
-                                previous = splitScoreElement
-                            }
-                        }
-                        else -> {
-                            remainingTicksInBar -= ticksNeededForElement
-                            val scoreHandlerElement = NoteOrRest(
-                                element.id,
-                                element.duration,
-                                isNote,
-                                octave,
-                                note,
-                                element.properties
-                            )
-                            currentBar.scoreHandlerElements.add(scoreHandlerElement)
-                        }
-                    }
+                is NoteSequenceElement.NoteElement -> {
+                    val pair = handleNoteElement(element, remainingTicksInBar, currentBar, score)
+                    currentBar = pair.first
+                    remainingTicksInBar = pair.second
+                }
+                is NoteSequenceElement.RestElement -> {
+                    val pair = handleRestElement(element, remainingTicksInBar, currentBar, score)
+                    currentBar = pair.first
+                    remainingTicksInBar = pair.second
                 }
                 is NoteSequenceElement.MultipleNotesElement -> {
-                    // TODO For now assuming that all notes in the group have the same duration
-                    val duration = element.elements.first().duration
-                    val ticksNeededForElement = duration.ticks
-
-                    if (remainingTicksInBar == 0) {
-                        // No more room in bar, start on a new one
-                        remainingTicksInBar = ticksPerBar
-                        currentBar = Bar(score)
-                        score.bars.add(currentBar)
-                    }
-
-                    when {
-                        // TODO Handle situation when element crosses bar lines
-
-//                        remainingTicksInBar < ticksNeededForElement -> {
-//                            val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
-//                            val durationsInNextBar =
-//                                ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
-//
-//                            val previous =
-//                                addAndTie(element, durationsInCurrentBar, currentBar, scoreSetup = scoreSetup)
-//                            remainingTicksInBar += ticksPerBar - ticksNeededForElement
-//                            currentBar = BarData()
-//                            bars.add(currentBar)
-//                            addAndTie(element, durationsInNextBar, currentBar, previous, scoreSetup = scoreSetup)
-//                        }
-                        else -> {
-                            remainingTicksInBar -= ticksNeededForElement
-                            val noteGroupElement = NoteGroup(
-                                score.getAndIncrementIdCounter(),
-                                element.elements.map {
-                                    NoteSymbol(
-                                        it.id,
-                                        it.duration,
-                                        it.octave,
-                                        it.note
-                                    )
-                                })
-                            currentBar.scoreHandlerElements.add(noteGroupElement)
-                        }
-                    }
+                    val pair = handleMultipleNotesElement(element, remainingTicksInBar, currentBar, score)
+                    currentBar = pair.first
+                    remainingTicksInBar = pair.second
                 }
             }
         }
@@ -158,6 +61,198 @@ object ScoreElementsTranslator {
         return score
     }
 
+    private fun handleNoteElement(
+        element: NoteSequenceElement.NoteElement,
+        remainingTicksInBar: Int,
+        currentBar: Bar,
+        score: Score
+    ): Pair<Bar, Int> {
+        var remainingTicksInBar1 = remainingTicksInBar
+        var currentBar1 = currentBar
+        val ticksNeededForElement = element.duration.ticks
+
+        if (remainingTicksInBar1 == 0) {
+            // No more room in bar, start on a new one
+            remainingTicksInBar1 = ticksPerBar
+            currentBar1 = Bar(score)
+            score.bars.add(currentBar1)
+        }
+
+        when {
+            remainingTicksInBar1 < ticksNeededForElement -> {
+                val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar1)
+                val durationsInNextBar =
+                    ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar1)
+
+                var previous: ScoreHandlerElement? = null
+                for (duration in durationsInCurrentBar) {
+                    val splitScoreElement =
+                        Note(element.id, duration, element.octave, element.note, element.properties)
+                    currentBar.scoreHandlerElements.add(splitScoreElement)
+
+                    if (previous != null) {
+                        score.ties.add(Pair(previous, splitScoreElement))
+                    }
+                    previous = splitScoreElement
+                }
+
+                // Start new bar
+                currentBar1 = Bar(score)
+                score.bars.add(currentBar1)
+
+                for (duration in durationsInNextBar) {
+                    val splitScoreElement =
+                        Note(
+                            score.getAndIncrementIdCounter(),
+                            duration,
+                            element.octave,
+                            element.note,
+                            element.properties
+                        )
+
+                    if (previous != null) {
+                        score.ties.add(Pair(previous, splitScoreElement))
+                    }
+                    currentBar1.scoreHandlerElements.add(splitScoreElement)
+                    previous = splitScoreElement
+                }
+            }
+            else -> {
+                remainingTicksInBar1 -= ticksNeededForElement
+                val scoreHandlerElement = Note(
+                    element.id,
+                    element.duration,
+                    element.octave,
+                    element.note,
+                    element.properties
+                )
+                currentBar1.scoreHandlerElements.add(scoreHandlerElement)
+            }
+        }
+        return Pair(currentBar1, remainingTicksInBar1)
+    }
+
+
+    private fun handleRestElement(
+        element: NoteSequenceElement.RestElement,
+        remainingTicksInBar: Int,
+        currentBar: Bar,
+        score: Score
+    ): Pair<Bar, Int> {
+        var remainingTicksInBar1 = remainingTicksInBar
+        var currentBar1 = currentBar
+        val ticksNeededForElement = element.duration.ticks
+
+        if (remainingTicksInBar1 == 0) {
+            // No more room in bar, start on a new one
+            remainingTicksInBar1 = ticksPerBar
+            currentBar1 = Bar(score)
+            score.bars.add(currentBar1)
+        }
+
+        when {
+            remainingTicksInBar1 < ticksNeededForElement -> {
+                val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar1)
+                val durationsInNextBar =
+                    ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar1)
+
+                var previous: ScoreHandlerElement? = null
+                for (duration in durationsInCurrentBar) {
+                    val splitScoreElement =
+                        Rest(element.id, duration, element.properties)
+                    currentBar1.scoreHandlerElements.add(splitScoreElement)
+
+                    if (previous != null) {
+                        score.ties.add(Pair(previous, splitScoreElement))
+                    }
+                    previous = splitScoreElement
+                }
+
+                // Start new bar
+                currentBar1 = Bar(score)
+                score.bars.add(currentBar1)
+
+                for (duration in durationsInNextBar) {
+                    val splitScoreElement =
+                        Rest(
+                            score.getAndIncrementIdCounter(),
+                            duration,
+                            element.properties
+                        )
+                    currentBar1.scoreHandlerElements.add(splitScoreElement)
+
+                    if (previous != null) {
+                        score.ties.add(Pair(previous, splitScoreElement))
+                    }
+
+                    previous = splitScoreElement
+                }
+            }
+            else -> {
+                remainingTicksInBar1 -= ticksNeededForElement
+                val scoreHandlerElement = Rest(
+                    element.id,
+                    element.duration,
+                    element.properties
+                )
+                currentBar1.scoreHandlerElements.add(scoreHandlerElement)
+            }
+        }
+        return Pair(currentBar1, remainingTicksInBar1)
+    }
+
+    private fun handleMultipleNotesElement(
+        element: NoteSequenceElement.MultipleNotesElement,
+        remainingTicksInBar: Int,
+        currentBar: Bar,
+        score: Score
+    ): Pair<Bar, Int> {
+        // TODO For now assuming that all notes in the group have the same duration
+        var remainingTicksInBar1 = remainingTicksInBar
+        var currentBar1 = currentBar
+        val duration = element.elements.first().duration
+        val ticksNeededForElement = duration.ticks
+
+        if (remainingTicksInBar1 == 0) {
+            // No more room in bar, start on a new one
+            remainingTicksInBar1 = ticksPerBar
+            currentBar1 = Bar(score)
+            score.bars.add(currentBar1)
+        }
+
+        when {
+            // TODO Handle situation when element crosses bar lines
+
+            //                        remainingTicksInBar < ticksNeededForElement -> {
+            //                            val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar)
+            //                            val durationsInNextBar =
+            //                                ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar)
+            //
+            //                            val previous =
+            //                                addAndTie(element, durationsInCurrentBar, currentBar, scoreSetup = scoreSetup)
+            //                            remainingTicksInBar += ticksPerBar - ticksNeededForElement
+            //                            currentBar = BarData()
+            //                            bars.add(currentBar)
+            //                            addAndTie(element, durationsInNextBar, currentBar, previous, scoreSetup = scoreSetup)
+            //                        }
+            else -> {
+                remainingTicksInBar1 -= ticksNeededForElement
+                val noteGroupElement = NoteGroup(
+                    score.getAndIncrementIdCounter(),
+                    element.elements.map {
+                        NoteSymbol(
+                            it.id,
+                            it.duration,
+                            it.octave,
+                            it.note
+                        )
+                    })
+                currentBar1.scoreHandlerElements.add(noteGroupElement)
+            }
+        }
+        return Pair(currentBar1, remainingTicksInBar1)
+    }
+
     private fun fillInLastBar(bars: MutableList<Bar>, ticksRemainingInBar: Int, score: Score) {
         if (bars.isEmpty() || ticksRemainingInBar == 0) {
             return
@@ -166,7 +261,7 @@ object ScoreElementsTranslator {
         bars.last().let { lastBar ->
             ScoreHandlerUtilities.splitIntoDurations(ticksRemainingInBar).forEach {
                 val scoreHandlerElement =
-                    NoteOrRest((score.getAndIncrementIdCounter()), it, false, 5, NoteType.C)
+                    Rest(score.getAndIncrementIdCounter(), it, emptyMap())
                 lastBar.scoreHandlerElements.add(scoreHandlerElement)
             }
         }
@@ -176,7 +271,7 @@ object ScoreElementsTranslator {
         if (bars.isEmpty()) {
             return
         }
-        bars.takeLastWhile { bar -> bar.scoreHandlerElements.all { it is NoteOrRest && !it.isNote } }
+        bars.takeLastWhile { bar -> bar.scoreHandlerElements.all { it is Rest } }
             .forEach { bars.remove(it) }
 
     }

@@ -1,5 +1,6 @@
 import com.kjipo.handler.ReducedScoreInterface
 import com.kjipo.handler.ScoreOperation
+import com.kjipo.score.Duration
 
 class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
 
@@ -17,7 +18,7 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
         scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
     @JsName("updateDuration")
-    fun updateDuration(activeElement: String, keyPressed: Int) = scoreHandler.updateDuration(activeElement, keyPressed)
+    fun updateDuration(activeElement: String, duration: Duration) = scoreHandler.updateDuration(activeElement, duration)
 
     @JsName("deleteElement")
     fun deleteElement(id: String) = scoreHandler.deleteElement(id)
