@@ -2,7 +2,6 @@ package com.kjipo.score
 
 import com.kjipo.handler.NoteSymbol
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
-import com.kjipo.score.BarData.Companion.stemCounter
 import com.kjipo.svg.*
 import kotlin.math.absoluteValue
 
@@ -20,15 +19,6 @@ class NoteGroupElement(
     var stem = Stem.NONE
 
     private val highlightElements = mutableSetOf<String>()
-
-    constructor(
-        notes: List<NoteSymbol>,
-        duration: Duration,
-        context: Context
-    ) : this(
-        notes, duration,
-        context.getAndIncrementIdCounter(), context
-    )
 
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -142,7 +132,7 @@ class NoteGroupElement(
         return PositionedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements),
-            "stem-${BarData.barNumber++}-${stemCounter++}"
+            context.getAndIncrementStemCounter()
         )
     }
 

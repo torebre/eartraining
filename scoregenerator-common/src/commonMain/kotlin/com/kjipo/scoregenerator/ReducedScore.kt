@@ -331,10 +331,17 @@ class ReducedScore : ReducedScoreInterface {
                 ), noteElement
             )
         } else {
+            val noteTypeValue = (noteElement.note.ordinal - 1).let {
+                if (it < 0) {
+                    it + NoteType.values().size
+                } else {
+                    it
+                }
+            }
             replaceElement(
                 NoteSequenceElement.NoteElement(
                     noteElement.id,
-                    NoteType.values()[(noteElement.note.ordinal - 1) % NoteType.values().size],
+                    NoteType.values()[noteTypeValue],
                     noteElement.octave,
                     noteElement.duration,
                     mapOf(Pair(ELEMENT_ID, noteElement.id))

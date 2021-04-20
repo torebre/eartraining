@@ -5,12 +5,7 @@ import com.kjipo.handler.NoteSymbol
 class Context {
 
     private var idCounter = 0
-
-    fun isAccidental(pitch: Int) {
-        // TODO
-
-
-    }
+    private var stemCounter = 0
 
 
     // TODO Make proper computation
@@ -41,10 +36,8 @@ class Context {
 
     fun getAndIncrementIdCounter() = "context-${idCounter++}"
 
-    fun getClientContext(): ClientContext {
-        // TODO
-        return ClientContext(emptyMap())
-    }
+
+    fun getAndIncrementStemCounter() = "stem-${stemCounter++}"
 
 
 //    private fun addAccidentalIfNeeded(note: NoteType): PositionedRenderingElement? {
@@ -53,12 +46,5 @@ class Context {
 //        }
 //        return null
 //    }
-
-    fun noteRequiresSharp(note: NoteType): Boolean {
-        return when (note) {
-            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
-            else -> false
-        }
-    }
 
 }

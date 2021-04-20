@@ -44,8 +44,6 @@ class WebScore(
     companion object {
         private const val VERTICAL_STEP = 10
         private const val HORIZONTAL_STEP = 30
-
-        const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
     }
 
     init {

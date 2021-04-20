@@ -29,7 +29,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         logger.debug { "Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}" }
 
         svgElement.ownerDocument?.let {
-            val defsTag = it.createElementNS(WebScore.SVG_NAMESPACE_URI, "defs")
+            val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
 
             for (definition in renderingSequence.definitions) {
                 addPath(
@@ -44,13 +44,10 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         }
 
         renderingSequence.renderGroups.forEach { renderGroup ->
-
-//            println("Render group elements: ${renderGroup.renderingElements.size}. Translation: ${renderGroup.transform}")
-
             val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
                 val translation = renderGroup.transform ?: Translation(0, 0)
                 svgElement.ownerDocument?.let {
-                    val groupingElement = it.createElementNS(WebScore.SVG_NAMESPACE_URI, "g")
+                    val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
                     groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
 
                     svgElement.appendChild(groupingElement)
@@ -115,7 +112,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         extraAttributes: Map<String, String> = emptyMap()
     ): Element? {
         return node.ownerDocument?.let { ownerDocument ->
-            val path1 = ownerDocument.createElementNS(WebScore.SVG_NAMESPACE_URI, "path")
+            val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
             fill?.let { path1.setAttribute("fill", it) }
             path1.setAttribute("id", id)
@@ -137,7 +134,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         extraAttributes: Map<String, String> = emptyMap()
     ) {
         node.ownerDocument?.let { ownerDocument ->
-            val useTag = ownerDocument.createElementNS(WebScore.SVG_NAMESPACE_URI, "use")
+            val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
             useTag.setAttribute("href", "#$reference")
             useTag.setAttribute("id", positionedRenderingElement.id)
 
@@ -148,7 +145,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
             if (positionedRenderingElement.xTranslate != 0
                 || positionedRenderingElement.yTranslate != 0
             ) {
-                val groupingElement = ownerDocument.createElementNS(WebScore.SVG_NAMESPACE_URI, "g")
+                val groupingElement = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "g")
                 groupingElement.setAttribute(
                     "transform",
                     "translate(${positionedRenderingElement.xTranslate}, ${positionedRenderingElement.yTranslate})"

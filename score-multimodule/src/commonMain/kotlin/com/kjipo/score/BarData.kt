@@ -9,7 +9,16 @@ import com.kjipo.svg.getNoteHeadGlyph
 import mu.KotlinLogging
 import kotlin.math.ceil
 
-class BarData(private val context: Context, private val bar: Bar, private val debug: Boolean = false) {
+/**
+ * Contains data for rendering a bar and the elements it contains.
+ */
+class BarData(
+    private val context: Context,
+    private val bar: Bar,
+    val barXoffset: Int = 0,
+    val barYoffset: Int = 0,
+    private val debug: Boolean = false
+) {
     private var clef: Clef = Clef.NONE
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
@@ -19,7 +28,7 @@ class BarData(private val context: Context, private val bar: Bar, private val de
 
     private val logger = KotlinLogging.logger {}
 
-    fun build(barXoffset: Int = 0, barYoffset: Int = 0): RenderingSequence {
+    fun build(): RenderingSequence {
         clef = bar.clef
         bar.timeSignature?.run {
             timeSignature = this

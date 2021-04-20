@@ -16,7 +16,7 @@ class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
             build()
         }
 
-    private var scoreSetup = ScoreSetup()
+    private var scoreSetup = ScoreSetup(Score())
 
     private var cachedBuild: RenderingSequenceWithMetaData? = null
 
@@ -46,12 +46,7 @@ class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
 
 
     fun build(): RenderingSequenceWithMetaData {
-        scoreSetup = ScoreSetup()
-
-        for (bar in score.bars) {
-            val barData = BarData(scoreSetup.context, bar)
-            scoreSetup.bars.add(barData)
-        }
+        scoreSetup = ScoreSetup(score)
 
         return scoreSetup.buildWithMetaData().also { cachedBuild = it }
     }

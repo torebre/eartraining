@@ -1,12 +1,13 @@
 package com.kjipo.score
 
+import com.kjipo.handler.Score
 import com.kjipo.svg.GlyphData
 import mu.KotlinLogging
 
 /**
  * This class produces the rendering sequence that is used to render the score
  */
-class ScoreSetup {
+class ScoreSetup(private val score: Score) {
     val bars = mutableListOf<BarData>()
     val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
@@ -17,11 +18,16 @@ class ScoreSetup {
 
 
     fun buildWithMetaData(): RenderingSequenceWithMetaData {
+        for (bar in score.bars) {
+            val barData = BarData(context, bar)
+            bars.add(barData)
+        }
+
         val renderingSequence = build()
         val highlightElementMap = mutableMapOf<String, Collection<String>>()
 
         bars.flatMap { it.scoreRenderingElements }.forEach {
-            if(it is HighlightableElement) {
+            if (it is HighlightableElement) {
 
                 logger.debug { "Highlight: ${it.getIdsOfHighlightElements()}" }
 
@@ -55,8 +61,8 @@ class ScoreSetup {
         val barXspace = 0
         val barYspace = 250
 
-        bars.forEach { barData ->
-            val currentBar = barData.build(barXoffset, barYoffset)
+        score.bars.forEach { bar ->
+            val currentBar = BarData(context, bar, barXoffset, barXoffset).also { bars.add(it) }.build()
             currentBar.definitions.forEach {
                 if (!definitionMap.containsKey(it.key)) {
                     definitionMap[it.key] = it.value
@@ -68,6 +74,55 @@ class ScoreSetup {
             barYoffset += barYspace
         }
 
+        handleBeams()
+
+
+        handleTies(renderingElements)
+
+        renderingSequences.add(
+            RenderingSequence(
+                listOf(RenderGroup(renderingElements, null)),
+                determineViewBox(renderingElements),
+                definitionMap
+            )
+        )
+        return mergeRenderingSequences(renderingSequences)
+    }
+
+    private fun handleTies(renderingElements: MutableList<PositionedRenderingElement>) {
+        for ((tieElementCounter, tie) in ties.withIndex()) {
+            val firstStem = tie.startNote.getStem()
+            val lastStem = tie.endNote.getStem()
+
+            var startX = 0.0
+            var startY = 0.0
+
+            tie.startNote.renderGroup?.let { renderGroup ->
+                renderGroup.transform?.let {
+                    startX = firstStem.boundingBox.xMax + it.xShift
+                    startY = firstStem.boundingBox.yMin + it.yShift
+                }
+            }
+
+            var stopX = 0.0
+            var stopY = 0.0
+            tie.endNote.renderGroup?.let { renderGroup ->
+                renderGroup.transform?.let {
+                    stopX = lastStem.boundingBox.xMax + it.xShift
+                    stopY = lastStem.boundingBox.yMin + it.yShift
+                }
+            }
+
+            val tieElement = TieElement("tie-element-$tieElementCounter", stopX, stopY)
+
+            tieElement.xPosition = startX.toInt()
+            tieElement.yPosition = startY.toInt()
+
+            renderingElements.addAll(tieElement.toRenderingElement())
+        }
+    }
+
+    private fun handleBeams() {
         var beamCounter = 0
 
         beams.map { beam ->
@@ -111,47 +166,6 @@ class ScoreSetup {
                 it.renderingElements.addAll(beamElement.toRenderingElement())
             }
         }
-
-
-        for ((tieElementCounter, tie) in ties.withIndex()) {
-            val firstStem = tie.startNote.getStem()
-            val lastStem = tie.endNote.getStem()
-
-            var startX = 0.0
-            var startY = 0.0
-
-            tie.startNote.renderGroup?.let { renderGroup ->
-                renderGroup.transform?.let {
-                    startX = firstStem.boundingBox.xMax + it.xShift
-                    startY = firstStem.boundingBox.yMin + it.yShift
-                }
-            }
-
-            var stopX = 0.0
-            var stopY = 0.0
-            tie.endNote.renderGroup?.let { renderGroup ->
-                renderGroup.transform?.let {
-                    stopX = lastStem.boundingBox.xMax + it.xShift
-                    stopY = lastStem.boundingBox.yMin + it.yShift
-                }
-            }
-
-            val tieElement = TieElement("tie-element-$tieElementCounter", stopX, stopY)
-
-            tieElement.xPosition = startX.toInt()
-            tieElement.yPosition = startY.toInt()
-
-            renderingElements.addAll(tieElement.toRenderingElement())
-        }
-
-        renderingSequences.add(
-            RenderingSequence(
-                listOf(RenderGroup(renderingElements, null)),
-                determineViewBox(renderingElements),
-                definitionMap
-            )
-        )
-        return mergeRenderingSequences(renderingSequences)
     }
 
 

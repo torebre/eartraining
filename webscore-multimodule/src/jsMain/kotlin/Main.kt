@@ -1,17 +1,11 @@
-import com.kjipo.handler.Score
-import com.kjipo.handler.ScoreElementsTranslator
-import com.kjipo.handler.ScoreHandlerWithReducedLogic
-import com.kjipo.score.Duration
-import com.kjipo.score.NoteSequenceElement
-import com.kjipo.score.NoteType
-import com.kjipo.scoregenerator.ELEMENT_ID
-import com.kjipo.scoregenerator.ReducedScore
-
 // Uncommenting the following will set up an empty webscore automatically when the Javascript in the built module is run
 //val scoreHandler = ScoreHandlerJavaScript(ScoreHandler())
 //val intialWebscore = WebScore(scoreHandler)
 
 
+// If this is commented in it will run when the webscore-multimodule module is included in other modules
+
+/*
 fun main() {
     val elementId = "test1"
     val noteSequence = listOf(
@@ -26,7 +20,7 @@ fun main() {
     val score = ScoreElementsTranslator.createRenderingData(noteSequence)
     val scoreHandler = ScoreHandlerWithReducedLogic(score)
 
-    val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
+//    val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
 
     // Do nothing as default now
 
@@ -42,3 +36,4 @@ fun main() {
 
 //    addNoteGroup()
 }
+*/
