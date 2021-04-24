@@ -7,7 +7,6 @@ import com.kjipo.svg.findBoundingBox
 
 class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRenderingElement() {
 
-
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val xDiff = xStop - xPosition
         val xPoint1 = xDiff.div(3.0)
@@ -22,7 +21,7 @@ class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRe
                 PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
                 PathElement(PathCommand.CURVE_TO_RELATIVE, listOf(xPoint1, yPoint1, xPoint2, yPoint2, xDiff, yDiff))
             ),
-            2, fill = "transparent"
+            2
         )
 
         return listOf(

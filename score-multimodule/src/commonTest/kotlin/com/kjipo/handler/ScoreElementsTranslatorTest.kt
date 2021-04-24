@@ -11,8 +11,8 @@ class ScoreElementsTranslatorTest {
     @Test
     fun testTranslation() {
         val scoreHandlerElements = listOf(
-            NoteSequenceElement.NoteElement("1", NoteType.C, 5, Duration.QUARTER),
-            NoteSequenceElement.NoteElement("2", NoteType.C, 5, Duration.QUARTER)
+            NoteSequenceElement.NoteElement("1", NoteType.C, 5, Duration.QUARTER, emptyMap()),
+            NoteSequenceElement.NoteElement("2", NoteType.C, 5, Duration.QUARTER, emptyMap())
         )
 
         val score = ScoreElementsTranslator.createRenderingData(scoreHandlerElements)

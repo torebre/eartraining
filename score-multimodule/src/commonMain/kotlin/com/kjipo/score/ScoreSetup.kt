@@ -9,10 +9,13 @@ import mu.KotlinLogging
  */
 class ScoreSetup(private val score: Score) {
     val bars = mutableListOf<BarData>()
-    val ties = mutableListOf<TiePair>()
+
+    //    val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
     val context = Context()
     val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
+
+    private var tieElementCounter = 0
 
     private val logger = KotlinLogging.logger {}
 
@@ -25,16 +28,10 @@ class ScoreSetup(private val score: Score) {
 
         val renderingSequence = build()
         val highlightElementMap = mutableMapOf<String, Collection<String>>()
-
-        bars.flatMap { it.scoreRenderingElements }.forEach {
+        scoreRenderingElements.forEach {
             if (it is HighlightableElement) {
-
-                logger.debug { "Highlight: ${it.getIdsOfHighlightElements()}" }
-
                 highlightElementMap[it.id] = it.getIdsOfHighlightElements()
             }
-
-            scoreRenderingElements.add(it)
         }
 
         logger.debug { "Bars in score: ${bars.size}. Bars in score setup: ${bars.size}" }
@@ -42,19 +39,11 @@ class ScoreSetup(private val score: Score) {
         return RenderingSequenceWithMetaData(renderingSequence, highlightElementMap)
     }
 
-    fun build(): RenderingSequence {
-        // TODO Possible to use immutable lists here?
+    private fun build(): RenderingSequence {
         // TODO The position will be wrong when there are multiple bars
         val renderingSequences = mutableListOf<RenderingSequence>()
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
-        val highlightElementsMap = mutableMapOf<String, Collection<String>>()
-
-        scoreRenderingElements.filter { it is HighlightableElement }
-            .map { it as HighlightableElement }
-            .forEach {
-                highlightElementsMap[it.id] = it.getIdsOfHighlightElements()
-            }
 
         var barXoffset = 0
         var barYoffset = 0
@@ -74,9 +63,11 @@ class ScoreSetup(private val score: Score) {
             barYoffset += barYspace
         }
 
+        bars.flatMap { it.scoreRenderingElements }.forEach {
+            scoreRenderingElements.add(it)
+        }
+
         handleBeams()
-
-
         handleTies(renderingElements)
 
         renderingSequences.add(
@@ -90,37 +81,57 @@ class ScoreSetup(private val score: Score) {
     }
 
     private fun handleTies(renderingElements: MutableList<PositionedRenderingElement>) {
-        for ((tieElementCounter, tie) in ties.withIndex()) {
-            val firstStem = tie.startNote.getStem()
-            val lastStem = tie.endNote.getStem()
+        // TODO Note group elements can also have ties
+        score.ties.map { tie ->
+            val firstNote =
+                scoreRenderingElements.find { it is NoteElement && it.id == tie.first.id }
+                    ?.let { (it as NoteElement).getStem() }
+            val secondNote =
+                scoreRenderingElements.find { it is NoteElement && it.id == tie.second.id }
+                    ?.let { (it as NoteElement).getStem() }
 
-            var startX = 0.0
-            var startY = 0.0
-
-            tie.startNote.renderGroup?.let { renderGroup ->
-                renderGroup.transform?.let {
-                    startX = firstStem.boundingBox.xMax + it.xShift
-                    startY = firstStem.boundingBox.yMin + it.yShift
-                }
+            if (firstNote == null || secondNote == null) {
+                logger.error { "Did not find all elements in tie. First element: $firstNote. Second element: $secondNote" }
+                null
+            } else {
+                setupTie(firstNote, secondNote)
             }
-
-            var stopX = 0.0
-            var stopY = 0.0
-            tie.endNote.renderGroup?.let { renderGroup ->
-                renderGroup.transform?.let {
-                    stopX = lastStem.boundingBox.xMax + it.xShift
-                    stopY = lastStem.boundingBox.yMin + it.yShift
-                }
+        }.filterNotNull()
+            .forEach {
+                it.toRenderingElement()
+                    .forEach { positionedRenderingElement -> renderingElements.add(positionedRenderingElement) }
             }
-
-            val tieElement = TieElement("tie-element-$tieElementCounter", stopX, stopY)
-
-            tieElement.xPosition = startX.toInt()
-            tieElement.yPosition = startY.toInt()
-
-            renderingElements.addAll(tieElement.toRenderingElement())
-        }
     }
+
+    private fun setupTie(firstStem: PositionedRenderingElement, lastStem: PositionedRenderingElement): TieElement {
+//            var startX = 0.0
+//            var startY = 0.0
+
+//            tie.startNote.renderGroup?.let { renderGroup ->
+//                renderGroup.transform?.let {
+//                    startX = firstStem.boundingBox.xMax //+ it.xShift
+//                    startY = firstStem.boundingBox.yMin //+ it.yShift
+//                }
+//            }
+
+//            var stopX = 0.0
+//            var stopY = 0.0
+//            tie.endNote.renderGroup?.let { renderGroup ->
+//                renderGroup.transform?.let {
+//                    stopX = lastStem.boundingBox.xMax //+ it.xShift
+//                    stopY = lastStem.boundingBox.yMin //+ it.yShift
+//                }
+//            }
+
+        val tieElement =
+            TieElement("tie-element-$tieElementCounter", lastStem.xPosition.toDouble(), lastStem.yPosition.toDouble())
+
+        tieElement.xPosition = firstStem.xPosition
+        tieElement.yPosition = firstStem.yPosition
+
+        return tieElement
+    }
+
 
     private fun handleBeams() {
         var beamCounter = 0

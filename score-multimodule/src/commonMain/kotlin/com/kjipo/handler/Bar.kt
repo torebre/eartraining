@@ -3,7 +3,7 @@ package com.kjipo.handler
 import com.kjipo.score.Clef
 import com.kjipo.score.TimeSignature
 
-class Bar(val score: Score) {
+class Bar {
     var clef: Clef = Clef.NONE
     var timeSignature: TimeSignature? = null
     var scoreHandlerElements: MutableList<ScoreHandlerElement> = mutableListOf()

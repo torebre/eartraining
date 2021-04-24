@@ -20,6 +20,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     fun generateSvgData(svgElement: Element) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
 
+        logger.debug { "Generating data" }
+
         svgElement.clear()
         svgElement.setAttribute(
             "viewBox",

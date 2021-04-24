@@ -5,7 +5,8 @@ import org.w3c.dom.Element
 
 class WebScoreView(
     private val webscoreSvgProvider: WebscoreSvgProvider,
-    private val svgElementId: String = "score") {
+    svgElementId: String = "score"
+) {
 
 
     private var xStart = 0

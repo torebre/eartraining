@@ -45,7 +45,7 @@ class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
         scoreSetup.scoreRenderingElements.filter { it is HighlightableElement }.toList()
 
 
-    fun build(): RenderingSequenceWithMetaData {
+    private fun build(): RenderingSequenceWithMetaData {
         scoreSetup = ScoreSetup(score)
 
         return scoreSetup.buildWithMetaData().also { cachedBuild = it }

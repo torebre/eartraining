@@ -1,6 +1,5 @@
 import com.kjipo.handler.InsertNote
 import com.kjipo.handler.InsertRest
-import com.kjipo.handler.ScoreHandlerUtilities
 import kotlinx.browser.document
 import kotlinx.dom.appendText
 import mu.KotlinLogging

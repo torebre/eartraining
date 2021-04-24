@@ -16,7 +16,7 @@ object ScoreElementsTranslator {
         val score = Score()
 
         var remainingTicksInBar = ticksPerBar
-        var currentBar = Bar(score)
+        var currentBar = Bar()
         currentBar.clef = Clef.G
         currentBar.timeSignature = TimeSignature(4, 4)
         score.bars.add(currentBar)
@@ -74,7 +74,7 @@ object ScoreElementsTranslator {
         if (remainingTicksInBar1 == 0) {
             // No more room in bar, start on a new one
             remainingTicksInBar1 = ticksPerBar
-            currentBar1 = Bar(score)
+            currentBar1 = Bar()
             score.bars.add(currentBar1)
         }
 
@@ -97,7 +97,7 @@ object ScoreElementsTranslator {
                 }
 
                 // Start new bar
-                currentBar1 = Bar(score)
+                currentBar1 = Bar()
                 score.bars.add(currentBar1)
 
                 for (duration in durationsInNextBar) {
@@ -146,7 +146,7 @@ object ScoreElementsTranslator {
         if (remainingTicksInBar1 == 0) {
             // No more room in bar, start on a new one
             remainingTicksInBar1 = ticksPerBar
-            currentBar1 = Bar(score)
+            currentBar1 = Bar()
             score.bars.add(currentBar1)
         }
 
@@ -169,7 +169,7 @@ object ScoreElementsTranslator {
                 }
 
                 // Start new bar
-                currentBar1 = Bar(score)
+                currentBar1 = Bar()
                 score.bars.add(currentBar1)
 
                 for (duration in durationsInNextBar) {
@@ -216,7 +216,7 @@ object ScoreElementsTranslator {
         if (remainingTicksInBar1 == 0) {
             // No more room in bar, start on a new one
             remainingTicksInBar1 = ticksPerBar
-            currentBar1 = Bar(score)
+            currentBar1 = Bar()
             score.bars.add(currentBar1)
         }
 
