@@ -67,12 +67,12 @@ class ScoreSetup(private val score: Score) {
             scoreRenderingElements.add(it)
         }
 
-        handleBeams()
+        handleBeams(renderingElements)
         handleTies(renderingElements)
 
         renderingSequences.add(
             RenderingSequence(
-                listOf(RenderGroup(renderingElements, null)),
+                renderingElements,
                 determineViewBox(renderingElements),
                 definitionMap
             )
@@ -133,7 +133,7 @@ class ScoreSetup(private val score: Score) {
     }
 
 
-    private fun handleBeams() {
+    private fun handleBeams(renderingElements: MutableList<PositionedRenderingElement>) {
         var beamCounter = 0
 
         beams.map { beam ->
@@ -148,41 +148,33 @@ class ScoreSetup(private val score: Score) {
             val firstStem = firstNote.getStem()
             val lastStem = lastNote.getStem()
 
-            var startX = 0.0
-            var startY = 0.0
+            var startX: Double
+            var startY: Double
 
-            firstNote.renderGroup?.let { renderGroup ->
-                renderGroup.transform?.let {
-                    startX = firstStem.boundingBox.xMax + it.xShift
-                    startY = firstStem.boundingBox.yMin + it.yShift
-                }
+            firstNote.let {
+                startX = firstStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
+                startY = firstStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
             }
 
-            var stopX = 0.0
-            var stopY = 0.0
-            lastNote.renderGroup?.let { renderGroup ->
-                renderGroup.transform?.let {
-                    stopX = lastStem.boundingBox.xMax + it.xShift
-                    stopY = lastStem.boundingBox.yMin + it.yShift
-                }
+            var stopX: Double
+            var stopY: Double
+            lastNote.let {
+                stopX = lastStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
+                stopY = lastStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
             }
 
             val beamElement = BeamElement(
                 "beam-${beamCounter++}",
                 Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
-                Pair(stopX - startX, stopY - startY), firstNote.renderGroup
+                Pair(stopX - startX, stopY - startY)
             )
 
-            firstNote.renderGroup?.let {
-                it.renderingElements.addAll(beamElement.toRenderingElement())
-            }
+            renderingElements.addAll(beamElement.toRenderingElement())
         }
     }
 
-
     private fun findNoteElement(noteId: String, bars: List<BarData>) = bars.flatMap { it.scoreRenderingElements }
-        .filter { it is NoteElement }
-        .map { it as NoteElement }
+        .filterIsInstance<NoteElement>()
         .find { it.id == noteId }
 
 
@@ -198,40 +190,9 @@ class ScoreSetup(private val score: Score) {
         // TODO Viewbox will be wrong since translations are not taken into account
         return RenderingSequence(
             renderGroups,
-            determineViewBox(renderGroups.flatMap { it.renderingElements }),
+            determineViewBox(renderGroups),
             definitions
         )
     }
-
-
-    companion object {
-
-
-    }
-
-
-//    fun stemUp(noteId: String): Stem {
-//        val noteElement = findNoteElement(noteId, bars)
-//
-//        if (noteElement == null) {
-//            return Stem.UP
-//        }
-//
-//        // If the note is part of a beam group, set it to have the stem in the same direction as the first note in the group
-//        for (beamGroup in beams) {
-//            if (beamGroup.noteIds.contains(noteId)) {
-//                findNoteElement(beamGroup.noteIds.first(), bars)?.let { firstNoteInBeamGroup ->
-//                    return context.stemUp(
-//                        ScoreHandlerUtilities.getPitch(
-//                            firstNoteInBeamGroup.note,
-//                            firstNoteInBeamGroup.octave
-//                        )
-//                    )
-//                }
-//            }
-//        }
-//        return Stem.UP
-//    }
-
 
 }

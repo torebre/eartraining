@@ -21,7 +21,8 @@ class RestElement(
         val positionedRenderingElement = PositionedRenderingElement(
             listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
             glyphData.boundingBox,
-            id
+            id,
+            translation = translation
         ).apply {
             yTranslate = -30
             typeId = typeName

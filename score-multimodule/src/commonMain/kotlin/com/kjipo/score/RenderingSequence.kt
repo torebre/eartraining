@@ -7,7 +7,7 @@ import kotlinx.serialization.*
 
 @Serializable
 data class RenderingSequence(
-    val renderGroups: List<RenderGroup>,
+    val renderGroups: List<PositionedRenderingElement>,
     val viewBox: ViewBox,
     val definitions: Map<String, GlyphData>
 )

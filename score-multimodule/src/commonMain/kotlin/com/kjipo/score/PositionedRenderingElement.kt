@@ -7,10 +7,13 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
-                                 val boundingBox: BoundingBox,
-                                 var id: String,
-                                 val groupClass: String? = null) {
+class PositionedRenderingElement(
+    val renderingPath: List<PathInterfaceImpl>,
+    val boundingBox: BoundingBox,
+    var id: String,
+    val groupClass: String? = null,
+    val translation: Translation? = null
+) {
 
     var glyphData: GlyphData? = null
     var typeId: String? = null
@@ -25,18 +28,23 @@ class PositionedRenderingElement(val renderingPath: List<PathInterfaceImpl>,
 
         fun create(glyphData: GlyphData, id: String): PositionedRenderingElement {
             return PositionedRenderingElement(
-                    listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
-                    glyphData.boundingBox, id)
+                listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
+                glyphData.boundingBox, id
+            )
         }
 
-        fun create(renderingPath: List<PathInterfaceImpl>,
-                   boundingBox: BoundingBox,
-                   id: String,
-                   xPosition: Int,
-                   yPosition: Int): PositionedRenderingElement {
+        fun create(
+            renderingPath: List<PathInterfaceImpl>,
+            boundingBox: BoundingBox,
+            id: String,
+            xPosition: Int,
+            yPosition: Int,
+            translation: Translation?
+        ): PositionedRenderingElement {
             return PositionedRenderingElement(
-                    renderingPath,
-                    boundingBox, id).also {
+                renderingPath,
+                boundingBox, id, translation = translation
+            ).also {
                 it.xPosition = xPosition
                 it.yPosition = yPosition
             }

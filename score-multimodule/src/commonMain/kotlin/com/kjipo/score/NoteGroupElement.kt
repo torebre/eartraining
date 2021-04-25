@@ -65,7 +65,8 @@ class NoteGroupElement(
                         id,
                         xPosition,
                         yPosition,
-                        Accidental.SHARP
+                        Accidental.SHARP,
+                        translation
                     ).also { it.yTranslate = noteYTranslate }
                 )
             }
@@ -77,7 +78,8 @@ class NoteGroupElement(
                 glyphData.boundingBox,
                 context.getAndIncrementIdCounter(),
                 xPosition,
-                yPosition
+                yPosition,
+                translation
             )
                 .apply {
                     // TODO Add correct translation
@@ -132,7 +134,7 @@ class NoteGroupElement(
         return PositionedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements),
-            context.getAndIncrementStemCounter()
+            context.getAndIncrementStemCounter(), translation = translation
         )
     }
 
@@ -194,13 +196,15 @@ class NoteGroupElement(
             id: String,
             xPosition: Int,
             yPosition: Int,
-            accidental: Accidental
+            accidental: Accidental,
+            translation: Translation?
         ): PositionedRenderingElement {
             val accidentalGlyph = getAccidentalGlyph(accidental)
             return PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
                 xPosition,
-                yPosition
+                yPosition,
+                translation
             ).apply {
                 typeId = accidental.name
                 xTranslate = -30

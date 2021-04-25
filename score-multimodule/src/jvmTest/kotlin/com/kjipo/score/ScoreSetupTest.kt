@@ -27,6 +27,9 @@ class ScoreSetupTest {
         score.ties.add(Pair(note1, note2))
 
         val scoreHandler = ScoreHandlerWithReducedLogic(score)
+
+        println(scoreHandler.getScoreAsJson())
+
     }
 
 }

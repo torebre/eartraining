@@ -2,6 +2,7 @@ package com.kjipo.score
 
 import com.kjipo.score.BarData.Companion.stemCounter
 import com.kjipo.svg.*
+import mu.KotlinLogging
 
 
 class NoteElement(
@@ -18,6 +19,8 @@ class NoteElement(
     val positionedRenderingElements = mutableListOf<PositionedRenderingElement>()
 
     private val highlightElements = mutableSetOf<String>()
+
+    private val logger = KotlinLogging.logger {}
 
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -37,7 +40,8 @@ class NoteElement(
             glyphData.boundingBox,
             id,
             xPosition,
-            yPosition
+            yPosition,
+            translation
         )
         positionedRenderingElement.typeId = duration.name
         positionedRenderingElements.add(positionedRenderingElement)
@@ -45,12 +49,13 @@ class NoteElement(
 
         addExtraBarLinesForGClef(
             note, octave,
+            xPosition,
             0,
-            -yPosition,
             glyphData.boundingBox.xMin.toInt(),
             glyphData.boundingBox.xMax.toInt()
-        )?.let {
-            positionedRenderingElements.addAll(it.toRenderingElement())
+        )?.let { extraBarLinesElement ->
+            extraBarLinesElement.translation = Translation(translation?.xShift ?: 0, 0)
+            positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
         }
     }
 
@@ -60,7 +65,8 @@ class NoteElement(
         return PositionedRenderingElement.create(
             listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
             xPosition,
-            yPosition
+            yPosition,
+            translation
         ).apply {
             typeId = accidental.name
             xTranslate = -30
@@ -73,7 +79,7 @@ class NoteElement(
         return PositionedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements),
-            "stem-${BarData.barNumber++}-${stemCounter++}"
+            "stem-${BarData.barNumber++}-${stemCounter++}", translation = translation
         )
     }
 
@@ -114,7 +120,8 @@ class NoteElement(
             val positionedRenderingElement = PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, id,
                 stemElement.xPosition,
-                stemElement.yPosition
+                stemElement.yPosition,
+                translation
             ).apply {
                 // TODO Need to think about if the stem is going up or down
                 typeId = flagGlyph.name
@@ -125,20 +132,6 @@ class NoteElement(
             positionedRenderingElements.add(positionedRenderingElement)
         }
     }
-
-//    private fun accidentalInUse(): Accidental? {
-//        return when {
-//            accidental != null -> {
-//                accidental
-//            }
-//            noteRequiresSharp(note) -> {
-//                Accidental.SHARP
-//            }
-//            else -> {
-//                null
-//            }
-//        }
-//    }
 
     override fun getIdsOfHighlightElements() = highlightElements
 

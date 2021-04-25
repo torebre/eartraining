@@ -27,9 +27,29 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
             "viewBox",
             "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}"
         )
+        setupDefinitionTag(svgElement, renderingSequence)
 
-        logger.debug { "Generating SVG. Number of render groups: ${renderingSequence.renderGroups.size}" }
+        renderingSequence.renderGroups.forEach { positionedRenderingElement ->
+            val elementToAddRenderingElementsTo = if (positionedRenderingElement.translation != null) {
+                val translation = positionedRenderingElement.translation ?: Translation(0, 0)
+                svgElement.ownerDocument?.let {
+                    val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
+                    groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
 
+                    svgElement.appendChild(groupingElement)
+                    groupingElement
+                }
+            } else {
+                svgElement
+            }
+
+            elementToAddRenderingElementsTo?.let {
+                addPositionRenderingElements(listOf(positionedRenderingElement), it)
+            }
+        }
+    }
+
+    private fun setupDefinitionTag(svgElement: Element, renderingSequence: RenderingSequence) {
         svgElement.ownerDocument?.let {
             val defsTag = it.createElementNS(SVG_NAMESPACE_URI, "defs")
 
@@ -43,25 +63,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
             }
 
             svgElement.appendChild(defsTag)
-        }
-
-        renderingSequence.renderGroups.forEach { renderGroup ->
-            val elementToAddRenderingElementsTo = if (renderGroup.transform != null) {
-                val translation = renderGroup.transform ?: Translation(0, 0)
-                svgElement.ownerDocument?.let {
-                    val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
-                    groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
-
-                    svgElement.appendChild(groupingElement)
-                    groupingElement
-                }
-            } else {
-                svgElement
-            }
-
-            elementToAddRenderingElementsTo?.let {
-                addPositionRenderingElements(renderGroup.renderingElements, it)
-            }
         }
     }
 
