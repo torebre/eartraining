@@ -41,10 +41,14 @@ class ExtraBarLinesElement(
             ),
             "bar-${idCounter++}",
             "bar", translation
-        ).let {
-            it.xTranslate = xPosition
-            it.yTranslate = 0
-            it
+        ).also { positionedRenderingElement ->
+            if (positionedRenderingElement.translation == null) {
+                positionedRenderingElement.translation = Translation(xPosition, 0)
+            } else {
+                positionedRenderingElement.translation = positionedRenderingElement.translation?.let {
+                    Translation(it.xShift + xPosition, it.yShift)
+                }
+            }
         })
     }
 

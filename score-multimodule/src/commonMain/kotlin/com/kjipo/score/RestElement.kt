@@ -24,7 +24,13 @@ class RestElement(
             id,
             translation = translation
         ).apply {
-            yTranslate = -30
+            if (translation == null) {
+                translation = Translation(0, -30)
+            } else {
+                translation = translation?.let {
+                    Translation(it.xShift, it.yShift - 30)
+                }
+            }
             typeId = typeName
         }
         highlightElements.add(positionedRenderingElement.id)

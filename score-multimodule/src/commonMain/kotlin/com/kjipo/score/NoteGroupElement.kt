@@ -67,7 +67,15 @@ class NoteGroupElement(
                         yPosition,
                         Accidental.SHARP,
                         translation
-                    ).also { it.yTranslate = noteYTranslate }
+                    ).also {
+                        if (translation == null) {
+                            translation = Translation(0, noteYTranslate)
+                        } else {
+                            translation = translation?.let {
+                                Translation(it.xShift, it.yShift - noteYTranslate)
+                            }
+                        }
+                    }
                 )
             }
 
@@ -84,7 +92,15 @@ class NoteGroupElement(
                 .apply {
                     // TODO Add correct translation
 //                yTranslate = -yPosition
-                    yTranslate = noteYTranslate
+
+                    if (translation == null) {
+                        translation = Translation(0, noteYTranslate)
+                    } else {
+                        translation = translation?.let {
+                            Translation(it.xShift, it.yShift - noteYTranslate)
+                        }
+                    }
+
                 }
             positionedRenderingElement.typeId = duration.name
             result.add(positionedRenderingElement)
@@ -197,17 +213,24 @@ class NoteGroupElement(
             xPosition: Int,
             yPosition: Int,
             accidental: Accidental,
-            translation: Translation?
+            inputTranslation: Translation?
         ): PositionedRenderingElement {
             val accidentalGlyph = getAccidentalGlyph(accidental)
             return PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
                 xPosition,
                 yPosition,
-                translation
+                inputTranslation
             ).apply {
                 typeId = accidental.name
-                xTranslate = -30
+                val xTranslate = -30
+                if (translation == null) {
+                    translation = Translation(xTranslate, 0)
+                } else {
+                    translation = translation?.let {
+                        Translation(it.xShift, it.yShift)
+                    }
+                }
             }
         }
     }

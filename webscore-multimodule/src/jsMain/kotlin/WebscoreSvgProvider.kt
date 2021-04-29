@@ -144,20 +144,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
             extraAttributes.forEach {
                 useTag.setAttribute(it.key, it.value)
             }
-
-            if (positionedRenderingElement.xTranslate != 0
-                || positionedRenderingElement.yTranslate != 0
-            ) {
-                val groupingElement = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "g")
-                groupingElement.setAttribute(
-                    "transform",
-                    "translate(${positionedRenderingElement.xTranslate}, ${positionedRenderingElement.yTranslate})"
-                )
-                groupingElement.appendChild(useTag)
-                node.appendChild(groupingElement)
-            } else {
-                node.appendChild(useTag)
-            }
+            node.appendChild(useTag)
         }
     }
 

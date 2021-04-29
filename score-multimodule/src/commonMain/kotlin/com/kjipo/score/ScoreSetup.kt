@@ -104,30 +104,15 @@ class ScoreSetup(private val score: Score) {
     }
 
     private fun setupTie(firstStem: PositionedRenderingElement, lastStem: PositionedRenderingElement): TieElement {
-//            var startX = 0.0
-//            var startY = 0.0
-
-//            tie.startNote.renderGroup?.let { renderGroup ->
-//                renderGroup.transform?.let {
-//                    startX = firstStem.boundingBox.xMax //+ it.xShift
-//                    startY = firstStem.boundingBox.yMin //+ it.yShift
-//                }
-//            }
-
-//            var stopX = 0.0
-//            var stopY = 0.0
-//            tie.endNote.renderGroup?.let { renderGroup ->
-//                renderGroup.transform?.let {
-//                    stopX = lastStem.boundingBox.xMax //+ it.xShift
-//                    stopY = lastStem.boundingBox.yMin //+ it.yShift
-//                }
-//            }
-
         val tieElement =
-            TieElement("tie-element-$tieElementCounter", lastStem.xPosition.toDouble(), lastStem.yPosition.toDouble())
+            TieElement(
+                "tie-element-$tieElementCounter",
+                (lastStem.xPosition + (lastStem.translation?.xShift ?: 0)).toDouble(),
+                (lastStem.yPosition + (lastStem.translation?.yShift ?: 0)).toDouble()
+            )
 
-        tieElement.xPosition = firstStem.xPosition
-        tieElement.yPosition = firstStem.yPosition
+        tieElement.xPosition = firstStem.xPosition + (firstStem.translation?.xShift ?: 0)
+        tieElement.yPosition = firstStem.yPosition + (firstStem.translation?.yShift ?: 0)
 
         return tieElement
     }

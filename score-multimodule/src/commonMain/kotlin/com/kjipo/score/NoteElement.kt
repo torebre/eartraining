@@ -69,7 +69,14 @@ class NoteElement(
             translation
         ).apply {
             typeId = accidental.name
-            xTranslate = -30
+
+            if (translation == null) {
+                translation = Translation(-30, 0)
+            } else {
+                translation = translation?.let {
+                    Translation(it.xShift - 30, it.yShift)
+                }
+            }
         }
     }
 
@@ -125,8 +132,15 @@ class NoteElement(
             ).apply {
                 // TODO Need to think about if the stem is going up or down
                 typeId = flagGlyph.name
-                yTranslate = -DEFAULT_STEM_HEIGHT
-                xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+                val yTranslate = -DEFAULT_STEM_HEIGHT
+                val xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+                if (translation == null) {
+                    translation = Translation(xTranslate,yTranslate)
+                } else {
+                    translation = translation?.let {
+                        Translation(it.xShift + xTranslate, it.yShift - yTranslate)
+                    }
+                }
             }
 
             positionedRenderingElements.add(positionedRenderingElement)

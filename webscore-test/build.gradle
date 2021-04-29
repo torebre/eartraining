@@ -1,0 +1,46 @@
+plugins {
+    id 'org.jetbrains.kotlin.js'
+}
+
+group 'com.kjipo'
+version '0.4-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':webscore-multimodule')
+    implementation project(':scoregenerator-common')
+    implementation project(':score-multimodule')
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
+
+//                implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
+
+    implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
+
+    testImplementation "org.jetbrains.kotlin:kotlin-test-js"
+}
+
+kotlin {
+    js {
+        browser {
+            webpackTask {
+                cssSupport.enabled = true
+            }
+
+            runTask {
+                cssSupport.enabled = true
+            }
+
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+        binaries.executable()
+    }
+}
