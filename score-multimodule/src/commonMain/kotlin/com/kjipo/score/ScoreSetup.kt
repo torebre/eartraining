@@ -9,8 +9,6 @@ import mu.KotlinLogging
  */
 class ScoreSetup(private val score: Score) {
     val bars = mutableListOf<BarData>()
-
-    //    val ties = mutableListOf<TiePair>()
     val beams = mutableListOf<BeamGroup>()
     val context = Context()
     val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()

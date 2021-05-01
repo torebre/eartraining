@@ -107,22 +107,14 @@ class ReducedScore : ReducedScoreInterface {
     private fun generateHighlightMap(): MutableMap<String, Collection<String>> {
         val elementToScoreHighlightMap = mutableMapOf<String, Collection<String>>()
 
+        logger.debug { "Note sequence elements: ${noteSequence}" }
+
         for (noteSequenceElement in noteSequence) {
-
-            logger.debug { "Test25: ${noteSequenceElement.id}" }
-            logger.debug { "Test26: ${noteSequenceElement.properties}" }
-
             noteSequenceElement.properties[ELEMENT_ID]?.let { scoreElementId ->
                 elementToScoreHighlightMap[scoreElementId] = scoreHandler.getHighlightableElements()
                     .filter {
-
-                        logger.debug { "Test24" }
-
                         it is HighlightableElement
                     }.map { it as HighlightableElement }.filter {
-
-                        logger.debug { "Test23: ${it.properties}" }
-
                         it.properties[ELEMENT_ID] == scoreElementId
                     }
                     .flatMap { it.getIdsOfHighlightElements() }
@@ -136,8 +128,6 @@ class ReducedScore : ReducedScoreInterface {
         var timeCounter = 0
         val newPitchSequence = mutableListOf<Pitch>()
         val newActionSequence = mutableListOf<Action>()
-
-        logger.debug { "Note sequence: ${noteSequence}" }
 
         for (noteSequenceElement in noteSequence) {
             when (noteSequenceElement) {

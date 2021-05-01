@@ -246,7 +246,7 @@ object ScoreElementsTranslator {
                             it.octave,
                             it.note
                         )
-                    })
+                    }, element.properties)
                 currentBar1.scoreHandlerElements.add(noteGroupElement)
             }
         }

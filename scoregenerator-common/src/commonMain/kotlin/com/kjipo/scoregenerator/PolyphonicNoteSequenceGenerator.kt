@@ -61,6 +61,9 @@ class PolyphonicNoteSequenceGenerator {
                 val noteElementId1 = (++idCounter).toString()
                 val noteElementId2 = (++idCounter).toString()
 
+                // The ELEMENT_ID property for each of the note in the note group
+                // should be set to be the same as for the multiple note element
+                // to make the highlighting work
                 result.add(
                     NoteSequenceElement.MultipleNotesElement(
                         multipleNotesElementId,
@@ -70,17 +73,17 @@ class PolyphonicNoteSequenceGenerator {
                                 currentNote,
                                 currentOctave,
                                 duration,
-                                mapOf(Pair(ELEMENT_ID, noteElementId1))
+                                mapOf(Pair(ELEMENT_ID, multipleNotesElementId))
                             ),
                             NoteSequenceElement.NoteElement(
                                 noteElementId2,
                                 intervalNote.first,
                                 intervalNote.second,
                                 duration,
-                                mapOf(Pair(ELEMENT_ID, noteElementId2))
+                                mapOf(Pair(ELEMENT_ID, multipleNotesElementId))
                             )
                         ), duration,
-                        mapOf(Pair(ELEMENT_ID, noteElementId1))
+                        mapOf(Pair(ELEMENT_ID, multipleNotesElementId))
                     )
                 )
             } else {

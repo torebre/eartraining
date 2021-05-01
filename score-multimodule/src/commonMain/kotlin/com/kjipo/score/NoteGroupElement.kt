@@ -22,21 +22,7 @@ class NoteGroupElement(
 
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
-        notes.maxWithOrNull { a, b ->
-            getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
-        }?.let {
-            addExtraBarLines(it)?.let {
-                result.addAll(it.toRenderingElement())
-            }
-        }
-
-        notes.minWithOrNull { a, b ->
-            getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
-        }?.let {
-            addExtraBarLines(it)?.let {
-                result.addAll(it.toRenderingElement())
-            }
-        }
+//        layoutNoteHeads()
 
         return result
     }
@@ -49,7 +35,7 @@ class NoteGroupElement(
             0,
             -25,
             35
-        )
+        )?.also { scoreRenderingElement -> scoreRenderingElement.translation = translation }
 
 
     fun layoutNoteHeads() {
@@ -93,10 +79,10 @@ class NoteGroupElement(
                     // TODO Add correct translation
 //                yTranslate = -yPosition
 
-                    if (translation == null) {
-                        translation = Translation(0, noteYTranslate)
+                    translation = if (translation == null) {
+                        Translation(0, noteYTranslate)
                     } else {
-                        translation = translation?.let {
+                        translation?.let {
                             Translation(it.xShift, it.yShift - noteYTranslate)
                         }
                     }
@@ -118,31 +104,24 @@ class NoteGroupElement(
             ++counter
         }
 
+        notes.maxWithOrNull { a, b ->
+            getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
+        }?.let { noteSymbol ->
+            addExtraBarLines(noteSymbol)?.let {
+                result.addAll(it.toRenderingElement())
+            }
+        }
+
+        notes.minWithOrNull { a, b ->
+            getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
+        }?.let { noteSymbol ->
+            addExtraBarLines(noteSymbol)?.let {
+                result.addAll(it.toRenderingElement())
+            }
+        }
+
     }
 
-
-//    private fun addAccidentalIfNeeded(
-//        id: String,
-//        xPosition: Int,
-//        yPosition: Int,
-//        note: NoteType
-//    ) = if (noteRequiresSharp(note)) {
-//        setupAccidental(
-//            id,
-//            xPosition,
-//            yPosition,
-//            Accidental.SHARP
-//        )
-//    } else {
-//        null
-//    }
-
-//    private fun noteRequiresSharp(note: NoteType): Boolean {
-//        return when (note) {
-//            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
-//            else -> false
-//        }
-//    }
 
     fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stem != Stem.DOWN)
