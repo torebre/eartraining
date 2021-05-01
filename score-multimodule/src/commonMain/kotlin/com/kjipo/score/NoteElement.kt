@@ -14,7 +14,7 @@ class NoteElement(
     override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     var accidental: Accidental? = null
-    var stem = Stem.NONE
+    private var stem = Stem.NONE
     var partOfBeamGroup = false
     val positionedRenderingElements = mutableListOf<PositionedRenderingElement>()
 
@@ -115,36 +115,9 @@ class NoteElement(
         return glyphsUsed
     }
 
-    fun addStem() {
-        val stemElement = getStem()
-        stemElement.typeId = stem.name
-        positionedRenderingElements.add(stemElement)
-
-        if (duration == Duration.EIGHT && !partOfBeamGroup) {
-            // If the note is not part of a beam group, then it should have a flag if the duration requires that it does
-            val stemDirection = stem == Stem.UP
-            val flagGlyph = getFlagGlyph(duration, stemDirection)
-            val positionedRenderingElement = PositionedRenderingElement.create(
-                listOf(PathInterfaceImpl(flagGlyph.pathElements, 1)), flagGlyph.boundingBox, id,
-                stemElement.xPosition,
-                stemElement.yPosition,
-                translation
-            ).apply {
-                // TODO Need to think about if the stem is going up or down
-                typeId = flagGlyph.name
-                val yTranslate = -DEFAULT_STEM_HEIGHT
-                val xTranslate = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
-                if (translation == null) {
-                    translation = Translation(xTranslate,yTranslate)
-                } else {
-                    translation = translation?.let {
-                        Translation(it.xShift + xTranslate, it.yShift - yTranslate)
-                    }
-                }
-            }
-
-            positionedRenderingElements.add(positionedRenderingElement)
-        }
+    fun addStem(stem: Stem) {
+        this.stem = stem
+        positionedRenderingElements.add(getStem())
     }
 
     override fun getIdsOfHighlightElements() = highlightElements

@@ -2,10 +2,7 @@ package com.kjipo.score
 
 import com.kjipo.handler.Bar
 import com.kjipo.handler.ScoreHelperFunctions.createTemporalElement
-import com.kjipo.svg.BoundingBox
 import com.kjipo.svg.GlyphData
-import com.kjipo.svg.findBoundingBox
-import com.kjipo.svg.getNoteHeadGlyph
 import mu.KotlinLogging
 import kotlin.math.ceil
 
@@ -47,7 +44,6 @@ class BarData(
         val valTotalTicksInBar = scoreRenderingElements.filterIsInstance<TemporalElement>().sumOf { it.duration.ticks }
         val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
         val xOffset = DEFAULT_BAR_WIDTH - widthAvailableForTemporalElements
-//        val renderGroups = mutableListOf<RenderGroup>()
 
         clefElement?.let { scoreRenderingElements.add(clefElement) }
         timeSignatureElement?.let { scoreRenderingElements.add(timeSignatureElement) }
@@ -66,13 +62,10 @@ class BarData(
                         yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
                         scoreRenderingElement.translation = Translation(xPosition, yPosition)
                         scoreRenderingElement.layoutNoteHeads()
-                    }
-                    else if (scoreRenderingElement is NoteGroupElement) {
-//                        yPosition += scoreRenderingElement.yPosition
+                    } else if (scoreRenderingElement is NoteGroupElement) {
                         scoreRenderingElement.translation = Translation(xPosition, yPosition)
                         scoreRenderingElement.layoutNoteHeads()
-                    }
-                    else {
+                    } else {
                         scoreRenderingElement.translation = Translation(xPosition, yPosition)
                     }
                     tickCounter += scoreRenderingElement.duration.ticks
@@ -99,11 +92,11 @@ class BarData(
                 is TemporalElement -> {
                     if (scoreRenderingElement is NoteElement) {
                         if (context.requiresStem(scoreRenderingElement)) {
-                            addStem(scoreRenderingElement, definitions)
+                            addStem(scoreRenderingElement)
                         }
                     } else if (scoreRenderingElement is NoteGroupElement) {
                         if (context.requiresStem(scoreRenderingElement)) {
-                            addStem(scoreRenderingElement, definitions)
+                            addStem(scoreRenderingElement)
                         }
                     }
                 }
@@ -112,13 +105,6 @@ class BarData(
 
         for (scoreRenderingElement in scoreRenderingElements) {
             definitions.putAll(scoreRenderingElement.getGlyphs())
-
-            // TODO Make more clear
-//            scoreRenderingElement.translation?.let { translation ->
-//                val renderGroup = RenderGroup(scoreRenderingElement.toRenderingElement(), translation)
-//                renderGroups.add(renderGroup)
-//                scoreRenderingElement.renderGroup = renderGroup
-//            }
         }
 
         scoreRenderingElements.add(BarLines(barXoffset, barYoffset, "bar-line"))
@@ -126,7 +112,6 @@ class BarData(
 
         return RenderingSequence(
             positionedRenderingElements,
-//            renderGroups,
             determineViewBox(positionedRenderingElements),
             definitions
         )
@@ -163,46 +148,12 @@ class BarData(
         return debugBox
     }
 
-    private fun addStem(
-        scoreRenderingElement: NoteElement,
-        definitions: MutableMap<String, GlyphData>
-    ) {
-        scoreRenderingElement.stem = context.stemUp(scoreRenderingElement.id)
-
-        if (scoreRenderingElement.stem == Stem.UP) {
-            scoreRenderingElement.addStem()
-
-            // Use the bounding box for the note head of a half note to determine
-            // how far to move the stem so that it is on the right side of the note head
-            val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
-            definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
-        } else if (scoreRenderingElement.stem == Stem.DOWN) {
-            scoreRenderingElement.addStem()
-
-            val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
-            definitions[Stem.DOWN.name] =
-                GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
-        }
+    private fun addStem(scoreRenderingElement: NoteElement) {
+        scoreRenderingElement.addStem(context.stemUp(scoreRenderingElement.id))
     }
 
-    private fun addStem(
-        scoreRenderingElement: NoteGroupElement,
-        definitions: MutableMap<String, GlyphData>
-    ) {
-        scoreRenderingElement.stem = context.stemUp(scoreRenderingElement.id)
-
-        if (scoreRenderingElement.stem == Stem.UP) {
-            scoreRenderingElement.addStem()
-            // Use the bounding box for the note head of a half note to determine
-            // how far to move the stem so that it is on the right side of the note head
-            val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
-            definitions[Stem.UP.name] = GlyphData(Stem.UP.name, stem.pathElements, findBoundingBox(stem.pathElements))
-        } else if (scoreRenderingElement.stem == Stem.DOWN) {
-            scoreRenderingElement.addStem()
-            val stem = addStem(BoundingBox(0.0, 0.0, 2.0, 0.0), false)
-            definitions[Stem.DOWN.name] =
-                GlyphData(Stem.DOWN.name, stem.pathElements, findBoundingBox(stem.pathElements))
-        }
+    private fun addStem(scoreRenderingElement: NoteGroupElement) {
+        scoreRenderingElement.addStem(context.stemUp(scoreRenderingElement.id))
     }
 
     private fun getClefElement(

@@ -16,7 +16,7 @@ class NoteGroupElement(
     val result = mutableListOf<PositionedRenderingElement>()
     var yLowestPosition = Int.MAX_VALUE
     var yHighestPosition = Int.MIN_VALUE
-    var stem = Stem.NONE
+    private var stem = Stem.NONE
 
     private val highlightElements = mutableSetOf<String>()
 
@@ -39,69 +39,49 @@ class NoteGroupElement(
 
 
     fun layoutNoteHeads() {
-        var counter = 0
-
         for (note in notes) {
-//            yPosition = calculateverticaloffset(note.notetype, note.octave)
-            val noteYTranslate = calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
+            val yPositionForNoteHead = calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
+            val noteHeadTranslation =
+                translation?.let { Translation(it.xShift, it.yShift + yPositionForNoteHead) } ?: Translation(
+                    0,
+                    yPositionForNoteHead
+                )
 
             if (noteRequiresSharp(note.noteType)) {
                 result.add(
                     setupAccidental(
                         id,
                         xPosition,
-                        yPosition,
+                        yPositionForNoteHead,
                         Accidental.SHARP,
                         translation
-                    ).also {
-                        if (translation == null) {
-                            translation = Translation(0, noteYTranslate)
-                        } else {
-                            translation = translation?.let {
-                                Translation(it.xShift, it.yShift - noteYTranslate)
-                            }
-                        }
-                    }
+                    )
                 )
             }
 
             val glyphData = getNoteHeadGlyph(duration)
-
-            val positionedRenderingElement = PositionedRenderingElement.create(
+            // The x and y positions are not used since references are used for note head elements, so
+            // they can be set to 0 without it having any effect
+            PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
                 glyphData.boundingBox,
                 context.getAndIncrementIdCounter(),
-                xPosition,
-                yPosition,
-                translation
-            )
-                .apply {
-                    // TODO Add correct translation
-//                yTranslate = -yPosition
-
-                    translation = if (translation == null) {
-                        Translation(0, noteYTranslate)
-                    } else {
-                        translation?.let {
-                            Translation(it.xShift, it.yShift - noteYTranslate)
-                        }
-                    }
-
-                }
-            positionedRenderingElement.typeId = duration.name
-            result.add(positionedRenderingElement)
-
-            highlightElements.add(positionedRenderingElement.id)
-
-            if (yLowestPosition > noteYTranslate) {
-                yLowestPosition = noteYTranslate
+                0,
+                0,
+                noteHeadTranslation
+            ).also {
+                it.typeId = duration.name
+                result.add(it)
+                highlightElements.add(it.id)
             }
 
-            if (yHighestPosition < noteYTranslate) {
-                yHighestPosition = noteYTranslate
+            if (yLowestPosition > yPositionForNoteHead) {
+                yLowestPosition = yPositionForNoteHead
             }
 
-            ++counter
+            if (yHighestPosition < yPositionForNoteHead) {
+                yHighestPosition = yPositionForNoteHead
+            }
         }
 
         notes.maxWithOrNull { a, b ->
@@ -119,11 +99,10 @@ class NoteGroupElement(
                 result.addAll(it.toRenderingElement())
             }
         }
-
     }
 
 
-    fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
+    private fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stem != Stem.DOWN)
 
         return PositionedRenderingElement(
@@ -166,15 +145,12 @@ class NoteGroupElement(
     }.any { it }
 
 
-    fun addStem() {
-
-        // TODO Need to add more functionality to stems: Whether they are pointing up or down and more
-
+    fun addStem(stem: Stem) {
+        this.stem = stem
         val xCoordinate = getRightEdgeOfNoteHeadGlyph()
         // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
         val ySpanForNoteGroup = yHighestPosition.minus(yLowestPosition).absoluteValue
         val stemElement = getStem(xCoordinate, yHighestPosition, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT)
-//                stemElement.typeId = stem.name +"_" +noteElementIdCounter++
         result.add(stemElement)
     }
 
@@ -197,24 +173,14 @@ class NoteGroupElement(
             val accidentalGlyph = getAccidentalGlyph(accidental)
             return PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
-                xPosition,
+                xPosition - 30,
                 yPosition,
                 inputTranslation
-            ).apply {
-                typeId = accidental.name
-                val xTranslate = -30
-                if (translation == null) {
-                    translation = Translation(xTranslate, 0)
-                } else {
-                    translation = translation?.let {
-                        Translation(it.xShift, it.yShift)
-                    }
-                }
-            }
+            )
         }
     }
 
-    fun getNoteWithoutAccidental(noteType: NoteType): GClefNoteLine {
+    private fun getNoteWithoutAccidental(noteType: NoteType): GClefNoteLine {
         return when (noteType) {
             NoteType.A_SHARP -> GClefNoteLine.A
             NoteType.A -> GClefNoteLine.A
