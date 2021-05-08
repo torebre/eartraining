@@ -1,7 +1,5 @@
 import com.kjipo.handler.ScoreProviderInterface
-import com.kjipo.score.PositionedRenderingElement
-import com.kjipo.score.RenderingSequence
-import com.kjipo.score.Translation
+import com.kjipo.score.*
 import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.dom.clear
@@ -30,8 +28,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         setupDefinitionTag(svgElement, renderingSequence)
 
         renderingSequence.renderGroups.forEach { positionedRenderingElement ->
-            val elementToAddRenderingElementsTo = if (positionedRenderingElement.translation != null) {
-                val translation = positionedRenderingElement.translation ?: Translation(0, 0)
+            val elementToAddRenderingElementsTo = if (positionedRenderingElement is TranslatedRenderingElement) {
+                val translation = positionedRenderingElement.translation
                 svgElement.ownerDocument?.let {
                     val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
                     groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
@@ -78,12 +76,24 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                 emptyMap()
             }
 
-            if (renderingElement.typeId != null) {
-                renderingElement.typeId?.let { typeId ->
+            if (renderingElement is TranslatedRenderingElement) {
+                val typeId = renderingElement.typeId
+                if (typeId != null) {
                     addPathUsingReference(element, typeId, renderingElement, extraAttributes)
                     idSvgElementMap.put(renderingElement.id, element)
+                } else {
+                    renderingElement.renderingPath.forEach { pathInterface ->
+                        addPath(
+                            element,
+                            transformToPathString(translateGlyph(pathInterface, 0, 0)),
+                            pathInterface.strokeWidth,
+                            renderingElement.id,
+                            pathInterface.fill,
+                            extraAttributes
+                        )
+                    }
                 }
-            } else {
+            } else if (renderingElement is AbsolutelyPositionedRenderingElement) {
                 for (pathInterface in renderingElement.renderingPath) {
                     addPath(
                         element,
@@ -102,6 +112,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                         idSvgElementMap.put(renderingElement.id, pathElement)
                     }
                 }
+            } else {
+                logger.error { "Unknown rendering elements type: $renderingElement" }
             }
         }
     }

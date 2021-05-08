@@ -31,25 +31,19 @@ class ExtraBarLinesElement(
         val yMin = yPositions.minOrNull() ?: 0
         val yMax = yPositions.maxOrNull() ?: yMin
 
-        return listOf(PositionedRenderingElement(
-            listOf(PathInterfaceImpl(pathElements, 1)),
-            BoundingBox(
-                leftStart.times(-1).toDouble(),
-                yMin.toDouble(),
-                leftStart.plus(rightEnd).toDouble(),
-                yMax.toDouble()
-            ),
-            "bar-${idCounter++}",
-            "bar", translation
-        ).also { positionedRenderingElement ->
-            if (positionedRenderingElement.translation == null) {
-                positionedRenderingElement.translation = Translation(xPosition, 0)
-            } else {
-                positionedRenderingElement.translation = positionedRenderingElement.translation?.let {
-                    Translation(it.xShift + xPosition, it.yShift)
-                }
-            }
-        })
+        return listOf(
+            AbsolutelyPositionedRenderingElement(
+                listOf(PathInterfaceImpl(pathElements, 1)),
+                BoundingBox(
+                    leftStart.times(-1).toDouble(),
+                    yMin.toDouble(),
+                    leftStart.plus(rightEnd).toDouble(),
+                    yMax.toDouble()
+                ),
+                "bar-${idCounter++}",
+                "bar"
+            )
+        )
     }
 
 }
@@ -81,7 +75,8 @@ class BarLines(xPosition: Int, yPosition: Int, val id: String) : ScoreRenderingE
             y += spaceBetweenLines
         }
 
-        val renderingElement = PositionedRenderingElement(
+        // TODO
+        val renderingElement = AbsolutelyPositionedRenderingElement(
             listOf(PathInterfaceImpl(pathElements, 1)),
             findBoundingBox(pathElements), id, "bar"
         )
@@ -96,20 +91,20 @@ class Box(xPosition: Int, yPosition: Int, val width: Int, val height: Int, val i
     ScoreRenderingElement(xPosition, yPosition) {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
-        val pathElements = listOf(
+        return listOf(
             PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), yPosition.toDouble())),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(height.toDouble())),
             PathElement(PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(width.toDouble())),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(height.times(-1).toDouble()))
-        )
-
-        return listOf(
-            PositionedRenderingElement(
-                listOf(PathInterfaceImpl(pathElements, 1)),
-                findBoundingBox(pathElements),
-                id
+        ).let { pathElements ->
+            listOf(
+                AbsolutelyPositionedRenderingElement(
+                    listOf(PathInterfaceImpl(pathElements, 1)),
+                    findBoundingBox(pathElements),
+                    id
+                )
             )
-        )
+        }
     }
 
 }

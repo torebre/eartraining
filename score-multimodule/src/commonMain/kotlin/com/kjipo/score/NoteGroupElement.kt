@@ -54,7 +54,7 @@ class NoteGroupElement(
                         xPosition,
                         yPositionForNoteHead,
                         Accidental.SHARP,
-                        translation
+                        translation ?: Translation(0, 0)
                     )
                 )
             }
@@ -66,11 +66,12 @@ class NoteGroupElement(
                 listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
                 glyphData.boundingBox,
                 context.getAndIncrementIdCounter(),
-                0,
-                0,
-                noteHeadTranslation
+//                0,
+//                0,
+                noteHeadTranslation,
+                duration.name
             ).also {
-                it.typeId = duration.name
+//                it.typeId = duration.name
                 result.add(it)
                 highlightElements.add(it.id)
             }
@@ -105,10 +106,12 @@ class NoteGroupElement(
     private fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stem != Stem.DOWN)
 
-        return PositionedRenderingElement(
+        return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements),
-            context.getAndIncrementStemCounter(), translation = translation
+            context.getAndIncrementStemCounter(),
+            null,
+            translation ?: Translation(0, 0)
         )
     }
 
@@ -168,14 +171,17 @@ class NoteGroupElement(
             xPosition: Int,
             yPosition: Int,
             accidental: Accidental,
-            inputTranslation: Translation?
+            inputTranslation: Translation
         ): PositionedRenderingElement {
             val accidentalGlyph = getAccidentalGlyph(accidental)
+
+            // TODO Need to update translation with position cooridnates
             return PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
-                xPosition - 30,
-                yPosition,
-                inputTranslation
+//                xPosition - 30,
+//                yPosition,
+                inputTranslation,
+                null
             )
         }
     }

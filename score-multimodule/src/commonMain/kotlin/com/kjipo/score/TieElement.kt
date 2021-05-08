@@ -24,8 +24,9 @@ class TieElement(val id: String, var xStop: Double, var yStop: Double) : ScoreRe
             2
         )
 
+        // TODO Should this be a translated or absolutely positioned element?
         return listOf(
-            PositionedRenderingElement(
+            AbsolutelyPositionedRenderingElement(
                 listOf(tieElement),
                 findBoundingBox(tieElement.pathElements), id
             )

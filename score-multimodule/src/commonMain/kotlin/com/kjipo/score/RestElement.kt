@@ -18,19 +18,19 @@ class RestElement(
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val glyphData = getRestGlyph(duration)
-        val positionedRenderingElement = PositionedRenderingElement(
+        val positionedRenderingElement = TranslatedRenderingElement(
             listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
             glyphData.boundingBox,
             id,
-            translation = translation
+            translation = translation ?: Translation(0, 0)
         ).apply {
-            if (translation == null) {
-                translation = Translation(0, -30)
-            } else {
-                translation = translation?.let {
+//            if (translation == null) {
+//                translation = Translation(0, -30)
+//            } else {
+                translation = translation.let {
                     Translation(it.xShift, it.yShift - 30)
                 }
-            }
+//            }
             typeId = typeName
         }
         highlightElements.add(positionedRenderingElement.id)

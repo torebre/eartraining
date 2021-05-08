@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.kjipo.handler.BeamGroup
 import com.kjipo.handler.Score
 import com.kjipo.svg.GlyphData
 import mu.KotlinLogging
@@ -8,8 +9,7 @@ import mu.KotlinLogging
  * This class produces the rendering sequence that is used to render the score
  */
 class ScoreSetup(private val score: Score) {
-    val bars = mutableListOf<BarData>()
-    val beams = mutableListOf<BeamGroup>()
+    private val bars = mutableListOf<BarData>()
     val context = Context()
     val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
@@ -92,7 +92,12 @@ class ScoreSetup(private val score: Score) {
                 logger.error { "Did not find all elements in tie. First element: $firstNote. Second element: $secondNote" }
                 null
             } else {
-                setupTie(firstNote, secondNote)
+                if (firstNote is TranslatedRenderingElement && secondNote is TranslatedRenderingElement) {
+                    setupTie(firstNote, secondNote)
+                } else {
+                    logger.error { "Unexpected rendering element type" }
+                    null
+                }
             }
         }.filterNotNull()
             .forEach {
@@ -101,16 +106,16 @@ class ScoreSetup(private val score: Score) {
             }
     }
 
-    private fun setupTie(firstStem: PositionedRenderingElement, lastStem: PositionedRenderingElement): TieElement {
+    private fun setupTie(firstStem: TranslatedRenderingElement, lastStem: TranslatedRenderingElement): TieElement {
         val tieElement =
             TieElement(
                 "tie-element-$tieElementCounter",
-                (lastStem.xPosition + (lastStem.translation?.xShift ?: 0)).toDouble(),
-                (lastStem.yPosition + (lastStem.translation?.yShift ?: 0)).toDouble()
+                lastStem.translation.xShift.toDouble(),
+                lastStem.translation.yShift.toDouble()
             )
 
-        tieElement.xPosition = firstStem.xPosition + (firstStem.translation?.xShift ?: 0)
-        tieElement.yPosition = firstStem.yPosition + (firstStem.translation?.yShift ?: 0)
+        tieElement.xPosition = firstStem.translation.xShift
+        tieElement.yPosition = firstStem.translation.yShift
 
         return tieElement
     }
@@ -119,41 +124,48 @@ class ScoreSetup(private val score: Score) {
     private fun handleBeams(renderingElements: MutableList<PositionedRenderingElement>) {
         var beamCounter = 0
 
-        beams.map { beam ->
-            val firstNote = findNoteElement(beam.noteIds.first(), bars)
-            val lastNote = findNoteElement(beam.noteIds.last(), bars)
-
-            if (firstNote == null || lastNote == null) {
-                logger.error { "Notes not found. First note: $firstNote. Second note: $lastNote" }
-                return@map
+        score.beamGroups.map { beam ->
+            val beamId = "beam-${beamCounter++}"
+            setupBeamElement(beam, beamId)?.let {
+                renderingElements.addAll(it.toRenderingElement())
             }
-
-            val firstStem = firstNote.getStem()
-            val lastStem = lastNote.getStem()
-
-            var startX: Double
-            var startY: Double
-
-            firstNote.let {
-                startX = firstStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
-                startY = firstStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
-            }
-
-            var stopX: Double
-            var stopY: Double
-            lastNote.let {
-                stopX = lastStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
-                stopY = lastStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
-            }
-
-            val beamElement = BeamElement(
-                "beam-${beamCounter++}",
-                Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
-                Pair(stopX - startX, stopY - startY)
-            )
-
-            renderingElements.addAll(beamElement.toRenderingElement())
         }
+    }
+
+
+    private fun setupBeamElement(beamGroup: BeamGroup, beamId: String): BeamElement? {
+        // TODO This will not create a proper looking bar in many cases
+        val firstNote = findNoteElement(beamGroup.notes.first().id, bars)
+        val lastNote = findNoteElement(beamGroup.notes.last().id, bars)
+
+        if (firstNote == null || lastNote == null) {
+            logger.error { "Notes not found. First note: $firstNote. Second note: $lastNote" }
+            return null
+        }
+
+        val firstStem = firstNote.getStem()
+        val lastStem = lastNote.getStem()
+
+        var startX: Double
+        var startY: Double
+
+        firstNote.let {
+            startX = firstStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
+            startY = firstStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
+        }
+
+        var stopX: Double
+        var stopY: Double
+        lastNote.let {
+            stopX = lastStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
+            stopY = lastStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
+        }
+
+        return BeamElement(
+            beamId,
+            Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
+            Pair(stopX - startX, stopY - startY)
+        )
     }
 
     private fun findNoteElement(noteId: String, bars: List<BarData>) = bars.flatMap { it.scoreRenderingElements }

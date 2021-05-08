@@ -6,7 +6,6 @@ class BeamElement(
     val id: String,
     private val start: Pair<Double, Double>,
     private val stop: Pair<Double, Double>
-//    renderGroup: RenderGroup?
 ) : ScoreRenderingElement(0, 0) {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -15,11 +14,14 @@ class BeamElement(
             stop.first, stop.second
         )
 
+        // TODO Should this be a translated or absolutely positioned element?
         return listOf(
-            PositionedRenderingElement(
+            TranslatedRenderingElement(
                 listOf(beamElement),
                 findBoundingBox(beamElement.pathElements),
-                id
+                id,
+                null,
+                Translation(0, 0)
             )
         )
     }

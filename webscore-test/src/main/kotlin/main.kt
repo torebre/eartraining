@@ -1,4 +1,5 @@
 import com.kjipo.handler.*
+import com.kjipo.handler.BeamGroup
 import com.kjipo.score.*
 import com.kjipo.scoregenerator.ELEMENT_ID
 import mu.KotlinLogging
@@ -12,7 +13,8 @@ import mu.KotlinLoggingLevel
 
 private val logger = KotlinLogging.logger {}
 
-fun main() {
+
+private fun showTie() {
     KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
 
     val bar = Bar().also {
@@ -34,4 +36,35 @@ fun main() {
     val scoreHandler = ScoreHandlerWithReducedLogic(score)
 
     val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
+
+}
+
+private fun showBeam() {
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
+    val bar = Bar().also {
+        it.clef = Clef.G
+        it.timeSignature = TimeSignature(4, 4)
+    }
+
+    val note1 = Note("test1", Duration.QUARTER, 5, NoteType.A_SHARP)
+    val note2 = Note("test2", Duration.QUARTER, 5, NoteType.A)
+    val notes = listOf(note1, note2)
+
+    bar.scoreHandlerElements.addAll(notes)
+
+    val score = Score()
+    score.bars.add(bar)
+
+    val beamGroup = BeamGroup(listOf(note1, note2))
+    score.beamGroups.add(beamGroup)
+
+    val scoreHandler = ScoreHandlerWithReducedLogic(score)
+
+    val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
+}
+
+fun main() {
+//showTie()
+    showBeam()
 }

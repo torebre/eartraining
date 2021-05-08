@@ -51,23 +51,4 @@ class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
         return scoreSetup.buildWithMetaData().also { cachedBuild = it }
     }
 
-    private fun addBeams(barData: BarData): MutableList<BeamGroup> {
-        val beamGroups = mutableListOf<BeamGroup>()
-        val notesInBeamGroup = mutableListOf<NoteElement>()
-
-        for (scoreRenderingElement in barData.scoreRenderingElements) {
-            if (scoreRenderingElement is NoteElement && scoreRenderingElement.duration == Duration.EIGHT) {
-                notesInBeamGroup.add(scoreRenderingElement)
-            } else if (scoreRenderingElement is RestElement) {
-                // Some other note element or a rest
-                if (notesInBeamGroup.size > 1) {
-                    notesInBeamGroup.forEach { it.partOfBeamGroup = true }
-                    beamGroups.add(BeamGroup(notesInBeamGroup.map { it.id }))
-                }
-                notesInBeamGroup.clear()
-            }
-        }
-        return beamGroups
-    }
-
 }

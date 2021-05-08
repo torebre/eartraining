@@ -19,7 +19,7 @@ data class Note(
     val octave: Int,
     val noteType: NoteType,
     override val properties: Map<String, String> = emptyMap()
-) : ScoreHandlerElement()
+) : ScoreHandlerElement(), IsNote
 
 data class Rest(
     override val id: String,
@@ -33,7 +33,7 @@ data class NoteGroup(
     override val id: String,
     val notes: List<NoteSymbol>,
     override val properties: Map<String, String> = emptyMap()
-) : ScoreHandlerElement()
+) : ScoreHandlerElement(), IsNote
 
 
 data class NoteSymbol(
@@ -42,3 +42,8 @@ data class NoteSymbol(
     val octave: Int,
     val noteType: NoteType,
 )
+
+
+interface IsNote {
+    val id: String
+}

@@ -15,7 +15,6 @@ class NoteElement(
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     var accidental: Accidental? = null
     private var stem = Stem.NONE
-    var partOfBeamGroup = false
     val positionedRenderingElements = mutableListOf<PositionedRenderingElement>()
 
     private val highlightElements = mutableSetOf<String>()
@@ -39,11 +38,9 @@ class NoteElement(
             listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
             glyphData.boundingBox,
             id,
-            xPosition,
-            yPosition,
-            translation
+            translation ?: Translation(0, 0),
+            duration.name
         )
-        positionedRenderingElement.typeId = duration.name
         positionedRenderingElements.add(positionedRenderingElement)
         highlightElements.add(positionedRenderingElement.id)
 
@@ -64,18 +61,11 @@ class NoteElement(
         val accidentalGlyph = getAccidentalGlyph(accidental)
         return PositionedRenderingElement.create(
             listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
-            xPosition,
-            yPosition,
-            translation
+            translation ?: Translation(0, 0),
+            accidental.name
         ).apply {
-            typeId = accidental.name
-
-            if (translation == null) {
-                translation = Translation(-30, 0)
-            } else {
-                translation = translation?.let {
-                    Translation(it.xShift - 30, it.yShift)
-                }
+            translation = translation.let {
+                Translation(it.xShift - 30, it.yShift)
             }
         }
     }
@@ -83,10 +73,10 @@ class NoteElement(
     fun getStem(): PositionedRenderingElement {
         val stem = addStem(getNoteHeadGlyph(duration).boundingBox, stem != Stem.DOWN)
 
-        return PositionedRenderingElement(
+        return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements),
-            "stem-${BarData.barNumber++}-${stemCounter++}", translation = translation
+            "stem-${BarData.barNumber++}-${stemCounter++}", null, translation ?: Translation(0, 0)
         )
     }
 
