@@ -6,7 +6,7 @@ class BeamElement(
     val id: String,
     private val start: Pair<Double, Double>,
     private val stop: Pair<Double, Double>
-) : ScoreRenderingElement(0, 0) {
+) : ScoreRenderingElement(null) {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val beamElement = addBeam(

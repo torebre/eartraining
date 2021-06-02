@@ -18,8 +18,6 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     fun generateSvgData(svgElement: Element) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
 
-        logger.debug { "Generating data" }
-
         svgElement.clear()
         svgElement.setAttribute(
             "viewBox",
@@ -97,13 +95,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                 for (pathInterface in renderingElement.renderingPath) {
                     addPath(
                         element,
-                        transformToPathString(
-                            translateGlyph(
-                                pathInterface,
-                                renderingElement.xPosition,
-                                renderingElement.yPosition
-                            )
-                        ),
+                        transformToPathString(pathInterface),
                         pathInterface.strokeWidth,
                         renderingElement.id,
                         pathInterface.fill,

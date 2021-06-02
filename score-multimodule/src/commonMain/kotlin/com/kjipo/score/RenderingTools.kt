@@ -9,8 +9,9 @@ fun addExtraBarLinesForGClef(
     xPosition: Int,
     yPosition: Int,
     boundingBoxMin: Int,
-    boundingBoxMax: Int
-): ScoreRenderingElement? {
+    boundingBoxMax: Int,
+    id: String
+): ExtraBarLinesElement? {
     getExtraBarlines(note, octave).let {
         if (it.isEmpty()) {
             return null
@@ -18,7 +19,8 @@ fun addExtraBarLinesForGClef(
         return ExtraBarLinesElement(
             xPosition, yPosition, it,
             boundingBoxMin.plus(EXTRA_BAR_LINE_LEFT_PADDING),
-            boundingBoxMax.plus(EXTRA_BAR_LINE_RIGHT_PADDING)
+            boundingBoxMax.plus(EXTRA_BAR_LINE_RIGHT_PADDING),
+           id
         )
     }
 }

@@ -7,17 +7,12 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-sealed class PositionedRenderingElement()
-{
+sealed class PositionedRenderingElement {
     abstract val renderingPath: List<PathInterfaceImpl>
     abstract val boundingBox: BoundingBox
     abstract val id: String
     abstract val groupClass: String?
     abstract var glyphData: GlyphData?
-//    var typeId: String? = null
-
-//    var xPosition: Int = 0
-//    var yPosition: Int = 0
 
 
     companion object {
@@ -34,8 +29,6 @@ sealed class PositionedRenderingElement()
             renderingPath: List<PathInterfaceImpl>,
             boundingBox: BoundingBox,
             id: String,
-//            xPosition: Int,
-//            yPosition: Int,
             translation: Translation,
             typeId: String?
         ): TranslatedRenderingElement {
@@ -47,8 +40,6 @@ sealed class PositionedRenderingElement()
                 translation
             )
                 .also {
-//                it.xPosition = xPosition
-//                it.yPosition = yPosition
                     it.typeId = typeId
             }
         }
@@ -70,8 +61,6 @@ class AbsolutelyPositionedRenderingElement(
 ) : PositionedRenderingElement()
 {
     override var glyphData: GlyphData? = null
-    var xPosition: Int = 0
-    var yPosition: Int = 0
 }
 
 

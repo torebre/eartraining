@@ -12,8 +12,8 @@ import kotlin.math.ceil
 class BarData(
     private val context: Context,
     private val bar: Bar,
-    val barXoffset: Int = 0,
-    val barYoffset: Int = 0,
+    private val barXoffset: Int = 0,
+    private val barYoffset: Int = 0,
     private val debug: Boolean = false
 ) {
     private var clef: Clef = Clef.NONE
@@ -136,13 +136,16 @@ class BarData(
         pixelsPerTick: Double,
         scoreRenderingElement: ScoreRenderingElement
     ): Box {
+
+        // TODO Fix positioning
+
         val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick))))
-            .minus(scoreRenderingElement.xPosition).toInt()
+            .minus(0).toInt()
         val debugBox = Box(
-            scoreRenderingElement.xPosition,
-            scoreRenderingElement.yPosition,
+            0,
+            0,
             width,
-            scoreRenderingElement.yPosition,
+            0,
             "debug"
         )
         return debugBox

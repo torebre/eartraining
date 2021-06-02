@@ -6,7 +6,7 @@ class Context {
 
     private var idCounter = 0
     private var stemCounter = 0
-
+    private var extraBarLinesCounter = 0
 
     // TODO Make proper computation
     fun stemUp(noteId: String) = Stem.UP
@@ -38,6 +38,8 @@ class Context {
 
 
     fun getAndIncrementStemCounter() = "stem-${stemCounter++}"
+
+    fun getAndIncrementExtraBarLinesCounter() = "bar-${extraBarLinesCounter++}"
 
 
 //    private fun addAccidentalIfNeeded(note: NoteType): PositionedRenderingElement? {

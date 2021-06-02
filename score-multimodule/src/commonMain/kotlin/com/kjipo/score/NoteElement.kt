@@ -27,8 +27,6 @@ class NoteElement(
     }
 
     fun layoutNoteHeads() {
-        yPosition = calculateVerticalOffset(note, octave)
-
         accidental?.run {
             positionedRenderingElements.add(setupAccidental(this))
         }
@@ -46,12 +44,16 @@ class NoteElement(
 
         addExtraBarLinesForGClef(
             note, octave,
-            xPosition,
-            0,
+            translation?.xShift ?: 0,
+            translation?.yShift ?: 0,
             glyphData.boundingBox.xMin.toInt(),
-            glyphData.boundingBox.xMax.toInt()
+            glyphData.boundingBox.xMax.toInt(),
+            context.getAndIncrementExtraBarLinesCounter()
         )?.let { extraBarLinesElement ->
-            extraBarLinesElement.translation = Translation(translation?.xShift ?: 0, 0)
+//            extraBarLinesElement.translation = Translation(translation?.xShift ?: 0, 0)
+
+            logger.debug { "Extra bar lines element translation: ${extraBarLinesElement.translation}" }
+
             positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
         }
     }
@@ -113,7 +115,7 @@ class NoteElement(
     override fun getIdsOfHighlightElements() = highlightElements
 
     override fun toString(): String {
-        return "NoteElement(note=$note, octave=$octave, duration=$duration, xPosition=$xPosition, yPosition=$yPosition, id='$id')"
+        return "NoteElement(note=$note, octave=$octave, duration=$duration, translation=$translation)"
     }
 
 }

@@ -6,9 +6,7 @@ import com.kjipo.svg.GlyphData
 /**
  * Subclasses of this can create rendering data.
  */
-abstract class ScoreRenderingElement(var xPosition: Int = 0,
-                                     var yPosition: Int = 0,
-                                     var translation: Translation? = null
+abstract class ScoreRenderingElement(var translation: Translation? = null
 ) {
 
 

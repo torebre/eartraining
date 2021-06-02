@@ -114,8 +114,9 @@ class ScoreSetup(private val score: Score) {
                 lastStem.translation.yShift.toDouble()
             )
 
-        tieElement.xPosition = firstStem.translation.xShift
-        tieElement.yPosition = firstStem.translation.yShift
+        // TODO Set up correct positioning
+//        tieElement.xPosition = firstStem.translation.xShift
+//        tieElement.yPosition = firstStem.translation.yShift
 
         return tieElement
     }

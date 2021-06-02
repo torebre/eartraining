@@ -31,10 +31,11 @@ class NoteGroupElement(
     private fun addExtraBarLines(noteSymbol: NoteSymbol) =
         addExtraBarLinesForGClef(
             getNoteWithoutAccidental(noteSymbol.noteType), noteSymbol.octave,
-            0,
-            0,
+            translation?.xShift ?: 0,
+            translation?.yShift ?: 0,
             -25,
-            35
+            35,
+            context.getAndIncrementExtraBarLinesCounter()
         )?.also { scoreRenderingElement -> scoreRenderingElement.translation = translation }
 
 
@@ -51,7 +52,7 @@ class NoteGroupElement(
                 result.add(
                     setupAccidental(
                         id,
-                        xPosition,
+                        0,
                         yPositionForNoteHead,
                         Accidental.SHARP,
                         translation ?: Translation(0, 0)
@@ -66,12 +67,9 @@ class NoteGroupElement(
                 listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
                 glyphData.boundingBox,
                 context.getAndIncrementIdCounter(),
-//                0,
-//                0,
                 noteHeadTranslation,
                 duration.name
             ).also {
-//                it.typeId = duration.name
                 result.add(it)
                 highlightElements.add(it.id)
             }
