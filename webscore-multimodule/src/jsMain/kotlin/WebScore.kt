@@ -13,9 +13,10 @@ class WebScore(
     private val svgElementId: String = "score",
     allowInput: Boolean = true,
     private val debugLabelId: String? = null
-) {
+) : ScoreHandlerListener {
 
     private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(ScoreProvider(scoreHandler))
+    private val noteInput: NoteInput
 
     var activeElement: String? = null
         set(value) {
@@ -38,6 +39,8 @@ class WebScore(
     private var noteModeOn = true
         get() = field
 
+    private var noteInputMode = false
+
     private val logger = KotlinLogging.logger {}
 
     companion object {
@@ -46,6 +49,8 @@ class WebScore(
     }
 
     init {
+        scoreHandler.addListener(this)
+        noteInput = NoteInput(scoreHandler)
         val element = document.getElementById(svgElementId)
 
         svgElement = if ("svg" == element?.tagName) {
@@ -91,10 +96,6 @@ class WebScore(
     }
 
     fun highlight(id: String) {
-
-        logger.debug { "Activating highlighting: $id" }
-
-
         webscoreSvgProvider.getHighlightForId(id).forEach {
             webscoreSvgProvider.getElement(it)?.classList?.add("highlight")
         }
@@ -139,16 +140,25 @@ class WebScore(
         setupMouseEvent()
 
         document.addEventListener("keydown", { event ->
+//        svgElement.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
-            logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Active element: ${activeElement}" }
+            logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Key: ${keyboardEvent.key}" }
+            logger.debug { "Note input mode: $noteInputMode" }
 
-            handleKeyEvent(keyboardEvent.code, keyboardEvent.keyCode)
+            if (noteInputMode) {
+                noteInput.processInput(keyboardEvent).takeIf { it }?.let {
+                    noteInputMode = false
+                }
+            } else {
+                handleKeyEvent(keyboardEvent.key, keyboardEvent.keyCode)
+            }
         })
     }
 
     private fun setupMouseEvent() {
         document.addEventListener("mousedown", { event ->
+//        svgElement.addEventListener("mousedown", { event ->
             val mouseDownEvent: dynamic = event
             movementActive = true
 
@@ -157,6 +167,7 @@ class WebScore(
         })
 
         document.addEventListener("mouseup", { event ->
+//        svgElement.addEventListener("mouseup", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -171,7 +182,8 @@ class WebScore(
             }
         })
 
-        document.addEventListener("mousemove", { event ->
+//        document.addEventListener("mousemove", { event ->
+        svgElement.addEventListener("mousemove", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -187,6 +199,7 @@ class WebScore(
 
     private fun setupTouchEvents() {
         document.addEventListener("touchstart", { event ->
+//        svgElement.addEventListener("touchstart", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
             movementActive = true
@@ -195,11 +208,10 @@ class WebScore(
                 xStart = changedTouches[0].pageX
                 yStart = changedTouches[0].pageY
             }
-
-            console.log("Touch start")
         })
 
         document.addEventListener("touchend", { event ->
+//        svgElement.addEventListener("touchend", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -220,6 +232,7 @@ class WebScore(
         })
 
         document.addEventListener("touchmove", { event ->
+//        svgElement.addEventListener("touchmove", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -284,16 +297,12 @@ class WebScore(
                     activeElement?.let {
                         // Up
                         scoreHandler.moveNoteOneStep(it, true)
-                        regenerateSvg()
-                        highlightElement(activeElement)
                     }
                     return true
                 } else if (yDiff > VERTICAL_STEP) {
                     activeElement?.let {
                         // Down
                         scoreHandler.moveNoteOneStep(it, false)
-                        regenerateSvg()
-                        highlightElement(activeElement)
                     }
                     return true
                 }
@@ -303,20 +312,18 @@ class WebScore(
         return false
     }
 
-    private fun handleKeyEvent(code: String, keyCode: Int) {
-        when (code) {
+    private fun handleKeyEvent(key: String, keyCode: Int) {
+        // TODO Fix strings to that they match with the keys
+
+        when (key) {
             "ArrowUp" -> activeElement?.let {
                 // Up
                 scoreHandler.moveNoteOneStep(it, true)
-                regenerateSvg()
-                highlightElement(activeElement)
             }
 
             "ArrowDown" -> activeElement?.let {
                 // Down
                 scoreHandler.moveNoteOneStep(it, false)
-                regenerateSvg()
-                highlightElement(activeElement)
             }
 
             "ArrowLeft" -> {
@@ -342,15 +349,11 @@ class WebScore(
                 } else {
                     scoreHandler.applyOperation(InsertRest(activeElement, duration))
                 }
-                regenerateSvg()
-                highlightElement(activeElement)
             }
 
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
                 activeElement?.let {
                     scoreHandler.updateDuration(it, getDuration(keyCode - 96))
-                    regenerateSvg()
-                    highlightElement(activeElement)
                 }
             }
 
@@ -364,7 +367,6 @@ class WebScore(
                         neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
                     }
                     scoreHandler.deleteElement(it)
-                    regenerateSvg()
 
                     if (neighbouringElement != null) {
                         activeElement = neighbouringElement
@@ -375,8 +377,12 @@ class WebScore(
                 }
             }
 
-            "M" -> {
-                noteModeOn != noteModeOn
+            "m" -> {
+                noteModeOn = !noteModeOn
+            }
+
+            "n" -> {
+                noteInputMode = !noteInputMode
             }
 
         }
@@ -395,5 +401,13 @@ class WebScore(
         debugLabelId?.let {
             document.getElementById(it)?.appendText("$tag: $message")
         }
+    }
+
+    override fun scoreUpdated() {
+
+        logger.debug { "Test60" }
+
+        regenerateSvg()
+        highlightElement(activeElement)
     }
 }

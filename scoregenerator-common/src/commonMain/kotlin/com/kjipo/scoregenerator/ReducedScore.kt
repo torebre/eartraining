@@ -437,7 +437,7 @@ class ReducedScore : ReducedScoreInterface {
         }
     }
 
-    fun insertNote(activeElement: String, duration: Duration, pitch: Int = 60): String? {
+    private fun insertNote(activeElement: String, duration: Duration, pitch: Int = 60): String? {
         noteSequence.find { it.id == activeElement }?.let { element ->
 
             // TODO Only hardcoded note type and octave for testing
@@ -521,11 +521,28 @@ class ReducedScore : ReducedScoreInterface {
             is InsertRest -> {
                 handleInsertRest(operation)
             }
-
+            is InsertNoteWithType -> {
+                handleInsertNoteWithType(operation)
+            }
         }
 
         // TODO
         return null
+    }
+
+    private fun handleInsertNoteWithType(operation: InsertNoteWithType): String {
+        val elementId = "note_${++idCounter}"
+        noteSequence.add(
+            NoteSequenceElement.NoteElement(
+                elementId,
+                operation.noteType,
+                operation.octave,
+                operation.duration,
+                mapOf(Pair(ELEMENT_ID, elementId))
+            )
+        )
+        isDirty = true
+        return noteSequence.last().id
     }
 
     private fun handleInsertRest(operation: InsertRest) {

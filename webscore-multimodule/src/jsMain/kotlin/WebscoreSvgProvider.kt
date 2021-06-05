@@ -153,14 +153,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     }
 
     fun getHighlightForId(id: String): Collection<String> {
-        logger.debug { "Highlight ID: $id" }
-        logger.debug { "Highlight map: ${scoreHandler.getHighlightMap()}" }
-
-        val elementsToHighlight = scoreHandler.getHighlightMap()[id] ?: emptySet()
-
-        logger.debug { "Elements to highlight: ${elementsToHighlight}" }
-
-        return elementsToHighlight
+        return scoreHandler.getHighlightMap()[id] ?: emptySet()
     }
 
     fun getElement(id: String): Element? {
