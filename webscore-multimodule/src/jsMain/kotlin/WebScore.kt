@@ -2,10 +2,13 @@ import com.kjipo.handler.InsertNote
 import com.kjipo.handler.InsertRest
 import kotlinx.browser.document
 import kotlinx.dom.appendText
+import kotlinx.html.currentTimeMillis
 import mu.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
+import org.w3c.dom.get
+import org.w3c.dom.svg.SVGSVGElement
 
 
 class WebScore(
@@ -32,7 +35,7 @@ class WebScore(
 
     private var direction: Boolean? = null
     private var movementActive = false
-    private val svgElement: Element
+    private val svgElement: SVGSVGElement
 
     private var currentlyHighlightedElement: String? = null
 
@@ -40,6 +43,8 @@ class WebScore(
         get() = field
 
     private var noteInputMode = false
+
+    private var mouseEventLastFired: Long = 0
 
     private val logger = KotlinLogging.logger {}
 
@@ -53,13 +58,13 @@ class WebScore(
         noteInput = NoteInput(scoreHandler)
         val element = document.getElementById(svgElementId)
 
-        svgElement = if ("svg" == element?.tagName) {
+        svgElement = if (element is SVGSVGElement) {
             element
         } else {
             val createdElement = document.createElementNS(SVG_NAMESPACE_URI, "svg")
             createdElement.id = svgElementId
             document.body?.appendChild(createdElement)
-            createdElement
+            createdElement as SVGSVGElement
         }
 
         if (allowInput) {
@@ -184,6 +189,16 @@ class WebScore(
 
 //        document.addEventListener("mousemove", { event ->
         svgElement.addEventListener("mousemove", { event ->
+            val currentTime = currentTimeMillis()
+
+            if (currentTime - mouseEventLastFired > 1000) {
+                val eventWithPageInformation: dynamic = event
+                val xStop = eventWithPageInformation.pageX as Int
+                val yStop = eventWithPageInformation.pageY as Int
+                highlightElementClosestToMouseCursor(xStop, yStop)
+                mouseEventLastFired = currentTime
+            }
+
             if (!movementActive) {
                 return@addEventListener
             }
@@ -404,10 +419,31 @@ class WebScore(
     }
 
     override fun scoreUpdated() {
-
-        logger.debug { "Test60" }
-
         regenerateSvg()
         highlightElement(activeElement)
     }
+
+
+    private fun highlightElementClosestToMouseCursor(xPosition: Int, yPosition: Int) {
+        val svgRect = svgElement.createSVGRect()
+        with(svgRect) {
+            x = minOf(xPosition.toDouble().minus(500), 0.0)
+            y = minOf(yPosition.toDouble().minus(50), 0.0)
+            width = 500.0
+            height = 500.0
+        }
+
+        val intersectionList = svgElement.getIntersectionList(svgRect, svgElement)
+
+        logger.debug { "Test23: ${intersectionList.length}" }
+
+        val numberOfNodes = intersectionList.length
+        (0..numberOfNodes).forEach {
+            val nodeElement = intersectionList.get(it)
+
+            logger.debug { "Node element: $nodeElement" }
+        }
+
+    }
+
 }

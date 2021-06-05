@@ -30,18 +30,20 @@ sealed class PositionedRenderingElement {
             boundingBox: BoundingBox,
             id: String,
             translation: Translation,
-            typeId: String?
+            typeId: String?,
+            isClickable: Boolean
         ): TranslatedRenderingElement {
             return TranslatedRenderingElement(
                 renderingPath,
                 boundingBox,
                 id,
                 null,
-                translation
+                translation,
+                isClickable
             )
                 .also {
                     it.typeId = typeId
-            }
+                }
         }
 
     }
@@ -58,11 +60,10 @@ class AbsolutelyPositionedRenderingElement(
     override val boundingBox: BoundingBox,
     override val id: String,
     override val groupClass: String? = null,
-) : PositionedRenderingElement()
-{
+    val isClickable: Boolean = false
+) : PositionedRenderingElement() {
     override var glyphData: GlyphData? = null
 }
-
 
 
 @Serializable
@@ -71,7 +72,8 @@ class TranslatedRenderingElement(
     override val boundingBox: BoundingBox,
     override val id: String,
     override val groupClass: String? = null,
-    var translation: Translation
+    var translation: Translation,
+    val isClickable: Boolean = false
 ) : PositionedRenderingElement(
 
 ) {

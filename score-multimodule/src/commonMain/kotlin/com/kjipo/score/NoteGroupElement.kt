@@ -67,7 +67,8 @@ class NoteGroupElement(
                 glyphData.boundingBox,
                 context.getAndIncrementIdCounter(),
                 noteHeadTranslation,
-                duration.name
+                duration.name,
+                true
             ).also {
                 result.add(it)
                 highlightElements.add(it.id)
@@ -175,7 +176,8 @@ class NoteGroupElement(
                     id,
                     inputTranslation.let {
                         Translation(it.xShift - 30, it.yShift)
-                    }, accidental.name
+                    }, accidental.name,
+                    true
                 )
             }
         }

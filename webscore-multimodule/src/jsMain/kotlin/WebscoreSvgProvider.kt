@@ -54,7 +54,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                     defsTag,
                     transformToPathString(definition.value.pathElements),
                     definition.value.strokeWidth,
-                    definition.key
+                    definition.key,
+                    isClickable = false
                 )
             }
 
@@ -77,7 +78,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
             if (renderingElement is TranslatedRenderingElement) {
                 val typeId = renderingElement.typeId
                 if (typeId != null) {
-                    addPathUsingReference(element, typeId, renderingElement, extraAttributes)
+                    addPathUsingReference(element, typeId, renderingElement, extraAttributes, renderingElement.isClickable)
                     idSvgElementMap.put(renderingElement.id, element)
                 } else {
                     renderingElement.renderingPath.forEach { pathInterface ->
@@ -87,7 +88,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                             pathInterface.strokeWidth,
                             renderingElement.id,
                             pathInterface.fill,
-                            extraAttributes
+                            extraAttributes,
+                            renderingElement.isClickable
                         )
                     }
                 }
@@ -99,7 +101,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                         pathInterface.strokeWidth,
                         renderingElement.id,
                         pathInterface.fill,
-                        extraAttributes
+                        extraAttributes,
+                        renderingElement.isClickable
                     )?.let { pathElement ->
                         idSvgElementMap.put(renderingElement.id, pathElement)
                     }
@@ -116,7 +119,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         strokeWidth: Int,
         id: String,
         fill: String? = null,
-        extraAttributes: Map<String, String> = emptyMap()
+        extraAttributes: Map<String, String> = emptyMap(),
+        isClickable: Boolean
     ): Element? {
         return node.ownerDocument?.let { ownerDocument ->
             val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
@@ -124,6 +128,10 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
             fill?.let { path1.setAttribute("fill", it) }
             path1.setAttribute("id", id)
             path1.setAttribute("stroke-width", strokeWidth.toString())
+            if (isClickable) {
+                // TODO Give value as input parameter to attribute
+                path1.setAttribute("pointer-events", "test")
+            }
 
             extraAttributes.forEach {
                 path1.setAttribute(it.key, it.value)
@@ -138,12 +146,18 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         node: Node,
         reference: String,
         positionedRenderingElement: PositionedRenderingElement,
-        extraAttributes: Map<String, String> = emptyMap()
+        extraAttributes: Map<String, String> = emptyMap(),
+        isClickable: Boolean
     ) {
         node.ownerDocument?.let { ownerDocument ->
             val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
             useTag.setAttribute("href", "#$reference")
             useTag.setAttribute("id", positionedRenderingElement.id)
+
+            if (isClickable) {
+                // TODO Give value as input parameter to attribute
+                useTag.setAttribute("pointer-events", "test")
+            }
 
             extraAttributes.forEach {
                 useTag.setAttribute(it.key, it.value)

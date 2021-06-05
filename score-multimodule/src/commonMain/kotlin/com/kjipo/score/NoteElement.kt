@@ -31,40 +31,45 @@ class NoteElement(
             positionedRenderingElements.add(setupAccidental(this))
         }
 
-        val glyphData = getNoteHeadGlyph(duration)
-        val positionedRenderingElement = PositionedRenderingElement.create(
-            listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
-            glyphData.boundingBox,
-            id,
-            translation ?: Translation(0, 0),
-            duration.name
-        )
-        positionedRenderingElements.add(positionedRenderingElement)
-        highlightElements.add(positionedRenderingElement.id)
+        getNoteHeadGlyph(duration).let { noteHeadGlyph ->
+            PositionedRenderingElement.create(
+                listOf(PathInterfaceImpl(noteHeadGlyph.pathElements, 1)),
+                noteHeadGlyph.boundingBox,
+                id,
+                translation ?: Translation(0, 0),
+                duration.name,
+                true
+            ).let {
+                positionedRenderingElements.add(it)
+                highlightElements.add(it.id)
+            }
 
-        addExtraBarLinesForGClef(
-            note, octave,
-            translation?.xShift ?: 0,
-            translation?.yShift ?: 0,
-            glyphData.boundingBox.xMin.toInt(),
-            glyphData.boundingBox.xMax.toInt(),
-            context.getAndIncrementExtraBarLinesCounter()
-        )?.let { extraBarLinesElement ->
-//            extraBarLinesElement.translation = Translation(translation?.xShift ?: 0, 0)
+            addExtraBarLinesForGClef(
+                note,
+                octave,
+                translation?.xShift ?: 0,
+                translation?.yShift ?: 0,
+                noteHeadGlyph.boundingBox.xMin.toInt(),
+                noteHeadGlyph.boundingBox.xMax.toInt(),
+                context.getAndIncrementExtraBarLinesCounter()
+            )?.let { extraBarLinesElement ->
 
-            logger.debug { "Extra bar lines element translation: ${extraBarLinesElement.translation}" }
+                logger.debug { "Extra bar lines element translation: ${extraBarLinesElement.translation}" }
 
-            positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
+                positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
+            }
         }
     }
-
 
     private fun setupAccidental(accidental: Accidental): PositionedRenderingElement {
         val accidentalGlyph = getAccidentalGlyph(accidental)
         return PositionedRenderingElement.create(
-            listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
+            listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)),
+            accidentalGlyph.boundingBox,
+            id,
             translation ?: Translation(0, 0),
-            accidental.name
+            accidental.name,
+            true
         ).apply {
             translation = translation.let {
                 Translation(it.xShift - 30, it.yShift)
