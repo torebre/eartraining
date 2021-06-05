@@ -3,6 +3,7 @@ package com.kjipo.score
 import com.kjipo.handler.NoteSymbol
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.svg.*
+import mu.KotlinLogging
 import kotlin.math.absoluteValue
 
 
@@ -19,6 +20,8 @@ class NoteGroupElement(
     private var stem = Stem.NONE
 
     private val highlightElements = mutableSetOf<String>()
+
+    private val logger = KotlinLogging.logger {}
 
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -51,18 +54,14 @@ class NoteGroupElement(
             if (noteRequiresSharp(note.noteType)) {
                 result.add(
                     setupAccidental(
-                        id,
-                        0,
-                        yPositionForNoteHead,
+                        "${note.id}-sharp",
                         Accidental.SHARP,
-                        translation ?: Translation(0, 0)
+                        noteHeadTranslation
                     )
                 )
             }
 
             val glyphData = getNoteHeadGlyph(duration)
-            // The x and y positions are not used since references are used for note head elements, so
-            // they can be set to 0 without it having any effect
             PositionedRenderingElement.create(
                 listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
                 glyphData.boundingBox,
@@ -166,21 +165,19 @@ class NoteGroupElement(
 
         private fun setupAccidental(
             id: String,
-            xPosition: Int,
-            yPosition: Int,
             accidental: Accidental,
             inputTranslation: Translation
         ): PositionedRenderingElement {
-            val accidentalGlyph = getAccidentalGlyph(accidental)
-
-            // TODO Need to update translation with position cooridnates
-            return PositionedRenderingElement.create(
-                listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)), accidentalGlyph.boundingBox, id,
-//                xPosition - 30,
-//                yPosition,
-                inputTranslation,
-                null
-            )
+            return getAccidentalGlyph(accidental).let { accidentalGlyph ->
+                PositionedRenderingElement.create(
+                    listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)),
+                    accidentalGlyph.boundingBox,
+                    id,
+                    inputTranslation.let {
+                        Translation(it.xShift - 30, it.yShift)
+                    }, accidental.name
+                )
+            }
         }
     }
 
