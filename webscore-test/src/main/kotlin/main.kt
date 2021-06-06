@@ -2,6 +2,8 @@ import com.kjipo.handler.*
 import com.kjipo.handler.BeamGroup
 import com.kjipo.score.*
 import com.kjipo.scoregenerator.ELEMENT_ID
+import com.kjipo.scoregenerator.ReducedScore
+import com.kjipo.scoregenerator.SimpleNoteSequence
 import mu.KotlinLogging
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
@@ -88,9 +90,23 @@ private fun showNoteGroupWithSharp() {
     val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
 }
 
+private fun showNotes() {
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
+    val simpleNoteSequence = NoteType.values().mapIndexed { index, noteType ->
+        NoteSequenceElement.NoteElement("test$index", noteType, 5, Duration.QUARTER, emptyMap())
+    }.toList().let { SimpleNoteSequence(it) }
+
+    val reducedScore = ReducedScore().apply {
+        loadSimpleNoteSequence(simpleNoteSequence)
+    }
+
+    val webScore = WebScore(ScoreHandlerJavaScript(reducedScore), "score", true)
+}
 
 fun main() {
 //showTie()
 //showBeam()
-    showNoteGroupWithSharp()
+//showNoteGroupWithSharp()
+    showNotes()
 }

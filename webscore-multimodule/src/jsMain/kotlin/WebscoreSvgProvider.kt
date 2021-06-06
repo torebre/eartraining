@@ -114,15 +114,14 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                     }
                 }
                 is TranslatedRenderingElementUsingReference -> {
-                    val typeId = renderingElement.typeId
                     addPathUsingReference(
                         element,
-                        typeId,
+                        renderingElement.typeId,
                         renderingElement.id,
                         extraAttributes,
                         renderingElement.isClickable
                     )
-                    idSvgElementMap.put(renderingElement.id, element)
+                    idSvgElementMap[renderingElement.id] = element
                 }
             }
         }

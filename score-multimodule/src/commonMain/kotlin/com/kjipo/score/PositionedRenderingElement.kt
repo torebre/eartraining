@@ -17,7 +17,6 @@ sealed class PositionedRenderingElementParent {
 @Serializable
 sealed class PositionedRenderingElement : PositionedRenderingElementParent() {
     abstract val renderingPath: List<PathInterfaceImpl>
-    abstract var glyphData: GlyphData?
 
 
     companion object {
@@ -64,11 +63,6 @@ sealed class PositionedRenderingElement : PositionedRenderingElementParent() {
                 boundingBox
             )
         }
-
-    }
-
-    override fun toString(): String {
-        return "PositionedRenderingElement(renderingPath=$renderingPath, boundingBox=$boundingBox, id='$id', glyphData=$glyphData"
     }
 
 }
@@ -80,9 +74,7 @@ class AbsolutelyPositionedRenderingElement(
     override val id: String,
     override val groupClass: String? = null,
     override val isClickable: Boolean = false
-) : PositionedRenderingElement() {
-    override var glyphData: GlyphData? = null
-}
+) : PositionedRenderingElement()
 
 
 @Serializable
@@ -92,14 +84,9 @@ class TranslatedRenderingElement(
     override val id: String,
     override val groupClass: String? = null,
     var translation: Translation,
-    override val isClickable: Boolean = false
-) : PositionedRenderingElement(
+    override val isClickable: Boolean = false,
+) : PositionedRenderingElement()
 
-) {
-
-    override var glyphData: GlyphData? = null
-//    var typeId: String? = null
-}
 
 @Serializable
 class TranslatedRenderingElementUsingReference(

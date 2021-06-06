@@ -1,6 +1,5 @@
 package com.kjipo.score
 
-import com.kjipo.score.BarData.Companion.stemCounter
 import com.kjipo.svg.*
 import mu.KotlinLogging
 
@@ -63,7 +62,7 @@ class NoteElement(
             PositionedRenderingElement.create(
                 accidentalGlyph.boundingBox,
                 id,
-                (translation ?: Translation(0, 0)).also {
+                (translation ?: Translation(0, 0)).let {
                     Translation(it.xShift - 30, it.yShift)
                 },
                 accidental.name,
@@ -77,8 +76,8 @@ class NoteElement(
 
         return TranslatedRenderingElement(
             listOf(stem),
-            findBoundingBox(stem.pathElements),
-            "stem-${BarData.barNumber++}-${stemCounter++}", null, translation ?: Translation(0, 0)
+            findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
+            null, translation ?: Translation(0, 0)
         )
     }
 

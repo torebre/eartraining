@@ -12,18 +12,16 @@ import kotlin.math.ceil
 class BarData(
     private val context: Context,
     private val bar: Bar,
-    private val barXoffset: Int = 0,
-    private val barYoffset: Int = 0,
+     private val barXoffset: Int,
+     private val barYoffset: Int,
     private val debug: Boolean = false
 ) {
-    private var clef: Clef = Clef.NONE
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
-    var widthAvailableForTemporalElements = DEFAULT_BAR_WIDTH
-
+    private var clef: Clef = Clef.NONE
     private var timeSignature = TimeSignature(0, 0)
-
     private val logger = KotlinLogging.logger {}
+
 
     fun build(): RenderingSequence {
         clef = bar.clef
@@ -35,11 +33,10 @@ class BarData(
         }
 
         val definitions = mutableMapOf<String, GlyphData>()
-
         val clefElement = getClefElement(barXoffset, barYoffset, definitions)
         val timeSignatureElement = getTimeSignatureElement()
 
-        widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
+        val widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
 
         val valTotalTicksInBar = scoreRenderingElements.filterIsInstance<TemporalElement>().sumOf { it.duration.ticks }
         val pixelsPerTick = widthAvailableForTemporalElements.toDouble() / valTotalTicksInBar
@@ -195,11 +192,6 @@ class BarData(
 
     override fun toString(): String {
         return "BarData(scoreRenderingElements=$scoreRenderingElements)"
-    }
-
-    companion object {
-        var barNumber = 0
-        var stemCounter = 0
     }
 
 }

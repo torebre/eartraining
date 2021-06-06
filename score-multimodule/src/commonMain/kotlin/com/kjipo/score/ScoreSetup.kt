@@ -9,7 +9,6 @@ import mu.KotlinLogging
  * This class produces the rendering sequence that is used to render the score
  */
 class ScoreSetup(private val score: Score) {
-    private val bars = mutableListOf<BarData>()
     val context = Context()
     val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
@@ -19,20 +18,14 @@ class ScoreSetup(private val score: Score) {
 
 
     fun buildWithMetaData(): RenderingSequenceWithMetaData {
-        for (bar in score.bars) {
-            val barData = BarData(context, bar)
-            bars.add(barData)
-        }
-
         val renderingSequence = build()
         val highlightElementMap = mutableMapOf<String, Collection<String>>()
+
         scoreRenderingElements.forEach {
             if (it is HighlightableElement) {
                 highlightElementMap[it.id] = it.getIdsOfHighlightElements()
             }
         }
-
-        logger.debug { "Bars in score: ${bars.size}. Bars in score setup: ${bars.size}" }
 
         return RenderingSequenceWithMetaData(renderingSequence, highlightElementMap)
     }
@@ -43,29 +36,34 @@ class ScoreSetup(private val score: Score) {
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
 
+        val bars = mutableListOf<BarData>()
+
         var barXoffset = 0
         var barYoffset = 0
         val barXspace = 0
         val barYspace = 250
 
         score.bars.forEach { bar ->
-            val currentBar = BarData(context, bar, barXoffset, barXoffset).also { bars.add(it) }.build()
-            currentBar.definitions.forEach {
+            val currentBar = BarData(context, bar, barXoffset, barYoffset)
+
+            bars.add(currentBar)
+            val renderingSequence = currentBar.build()
+            barXoffset += barXspace
+            barYoffset += barYspace
+            renderingSequences.add(renderingSequence)
+
+            renderingSequence.definitions.forEach {
                 if (!definitionMap.containsKey(it.key)) {
                     definitionMap[it.key] = it.value
                 }
             }
-
-            renderingSequences.add(currentBar)
-            barXoffset += barXspace
-            barYoffset += barYspace
         }
 
         bars.flatMap { it.scoreRenderingElements }.forEach {
             scoreRenderingElements.add(it)
         }
 
-        handleBeams(renderingElements)
+        handleBeams(renderingElements, bars)
         handleTies(renderingElements)
 
         renderingSequences.add(
@@ -75,6 +73,7 @@ class ScoreSetup(private val score: Score) {
                 definitionMap
             )
         )
+
         return mergeRenderingSequences(renderingSequences)
     }
 
@@ -122,19 +121,19 @@ class ScoreSetup(private val score: Score) {
     }
 
 
-    private fun handleBeams(renderingElements: MutableList<PositionedRenderingElement>) {
+    private fun handleBeams(renderingElements: MutableList<PositionedRenderingElement>, bars: List<BarData>) {
         var beamCounter = 0
 
         score.beamGroups.map { beam ->
             val beamId = "beam-${beamCounter++}"
-            setupBeamElement(beam, beamId)?.let {
+            setupBeamElement(beam, beamId, bars)?.let {
                 renderingElements.addAll(it.toRenderingElement())
             }
         }
     }
 
 
-    private fun setupBeamElement(beamGroup: BeamGroup, beamId: String): BeamElement? {
+    private fun setupBeamElement(beamGroup: BeamGroup, beamId: String, bars: List<BarData>): BeamElement? {
         // TODO This will not create a proper looking bar in many cases
         val firstNote = findNoteElement(beamGroup.notes.first().id, bars)
         val lastNote = findNoteElement(beamGroup.notes.last().id, bars)
