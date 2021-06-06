@@ -3,12 +3,21 @@ package com.kjipo.score
 import com.kjipo.svg.*
 
 
-class ClefElement(val clef: Clef, private val xPosition: Int, private val yPosition: Int, val id: String) : ScoreRenderingElement() {
+class ClefElement(val clef: Clef, private val xPosition: Int, private val yPosition: Int, val id: String) :
+    ScoreRenderingElement() {
 
-    override fun toRenderingElement(): List<PositionedRenderingElement> {
-        val positionedRenderingElement = PositionedRenderingElement.create(getGlyphData(), id)
-        positionedRenderingElement.typeId = clef.name
-        return listOf(positionedRenderingElement)
+    override fun toRenderingElement(): List<PositionedRenderingElementParent> {
+        return getGlyphData().let { glyphData ->
+            listOf(
+                PositionedRenderingElement.create(
+                    glyphData.boundingBox,
+                    id,
+                    Translation(0, 0),
+                    clef.name,
+                    true
+                )
+            )
+        }
     }
 
     fun getGlyphData(): GlyphData {
@@ -20,8 +29,10 @@ class ClefElement(val clef: Clef, private val xPosition: Int, private val yPosit
 }
 
 
-class TimeSignatureElement(private val nominator: Int, private val denominator: Int,
-                           private val xPosition: Int, private val yPosition: Int, val id: String) : ScoreRenderingElement() {
+class TimeSignatureElement(
+    private val nominator: Int, private val denominator: Int,
+    private val xPosition: Int, private val yPosition: Int, val id: String
+) : ScoreRenderingElement() {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val nominatorGlyph = getNumberGlyph(nominator)
@@ -31,7 +42,15 @@ class TimeSignatureElement(private val nominator: Int, private val denominator: 
         pathElements.addAll(translateGlyph(nominatorGlyph, xPosition, yPosition).pathElements)
         pathElements.addAll(translateGlyph(translateGlyph(denominatorGlyph, xPosition, yPosition), 0, 50).pathElements)
 
-        return listOf(PositionedRenderingElement.create(GlyphData("time_signature", pathElements, findBoundingBox(pathElements)), id))
+        return listOf(
+            PositionedRenderingElement.create(
+                GlyphData(
+                    "time_signature",
+                    pathElements,
+                    findBoundingBox(pathElements)
+                ), id
+            )
+        )
     }
 
 }

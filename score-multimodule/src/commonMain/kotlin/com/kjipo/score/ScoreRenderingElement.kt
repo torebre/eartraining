@@ -10,7 +10,7 @@ abstract class ScoreRenderingElement(var translation: Translation? = null
 ) {
 
 
-    abstract fun toRenderingElement(): List<PositionedRenderingElement>
+    abstract fun toRenderingElement(): List<PositionedRenderingElementParent>
 
     open fun getGlyphs(): Map<String, GlyphData> = emptyMap()
 }

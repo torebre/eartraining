@@ -7,8 +7,9 @@ import kotlinx.serialization.*
 
 @Serializable
 data class RenderingSequence(
-    val renderGroups: List<PositionedRenderingElement>,
-    val viewBox: ViewBox,
+    val renderGroups: List<PositionedRenderingElementParent>,
+    // TODO Fix it so that view boxes are computed for all kinds of rendering elements
+    val viewBox: ViewBox?,
     val definitions: Map<String, GlyphData>
 )
 
@@ -23,12 +24,12 @@ data class ViewBox(val xMin: Int, val yMin: Int, val xMax: Int, val yMax: Int)
 
 @Serializable
 class RenderGroup {
-    val renderingElements: MutableList<PositionedRenderingElement>
+    val renderingElements: MutableList<PositionedRenderingElementParent>
     val renderGroup: RenderGroup?
     val transform: Translation?
 
     constructor(
-        renderingElements: List<PositionedRenderingElement>,
+        renderingElements: List<PositionedRenderingElementParent>,
         transform: Translation? = null,
         renderGroup: RenderGroup? = null
     ) {

@@ -19,29 +19,39 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
 
         svgElement.clear()
-        svgElement.setAttribute(
-            "viewBox",
-            "${renderingSequence.viewBox.xMin} ${renderingSequence.viewBox.yMin} ${renderingSequence.viewBox.xMax} ${renderingSequence.viewBox.yMax}"
-        )
+        renderingSequence.viewBox?.run {
+            svgElement.setAttribute(
+                "viewBox",
+                "$xMin $yMin $xMax $yMax"
+            )
+        }
         setupDefinitionTag(svgElement, renderingSequence)
 
         renderingSequence.renderGroups.forEach { positionedRenderingElement ->
-            val elementToAddRenderingElementsTo = if (positionedRenderingElement is TranslatedRenderingElement) {
-                val translation = positionedRenderingElement.translation
-                svgElement.ownerDocument?.let {
-                    val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
-                    groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
-
-                    svgElement.appendChild(groupingElement)
-                    groupingElement
+            val elementToAddRenderingElementsTo = when (positionedRenderingElement) {
+                is TranslatedRenderingElement -> {
+                    setupTranslatedElement(svgElement, positionedRenderingElement.translation)
                 }
-            } else {
-                svgElement
+                is TranslatedRenderingElementUsingReference -> {
+                    setupTranslatedElement(svgElement, positionedRenderingElement.translation)
+                }
+                is AbsolutelyPositionedRenderingElement -> {
+                    svgElement
+                }
             }
-
             elementToAddRenderingElementsTo?.let {
                 addPositionRenderingElements(listOf(positionedRenderingElement), it)
             }
+        }
+    }
+
+    private fun setupTranslatedElement(svgElement: Element, translation: Translation): Element? {
+        return svgElement.ownerDocument?.let {
+            val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
+            groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
+
+            svgElement.appendChild(groupingElement)
+            groupingElement
         }
     }
 
@@ -58,13 +68,12 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                     isClickable = false
                 )
             }
-
             svgElement.appendChild(defsTag)
         }
     }
 
     private fun addPositionRenderingElements(
-        renderingElements: Collection<PositionedRenderingElement>,
+        renderingElements: Collection<PositionedRenderingElementParent>,
         element: Element
     ) {
         for (renderingElement in renderingElements) {
@@ -75,12 +84,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                 emptyMap()
             }
 
-            if (renderingElement is TranslatedRenderingElement) {
-                val typeId = renderingElement.typeId
-                if (typeId != null) {
-                    addPathUsingReference(element, typeId, renderingElement, extraAttributes, renderingElement.isClickable)
-                    idSvgElementMap.put(renderingElement.id, element)
-                } else {
+            when (renderingElement) {
+                is TranslatedRenderingElement -> {
                     renderingElement.renderingPath.forEach { pathInterface ->
                         addPath(
                             element,
@@ -93,22 +98,32 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                         )
                     }
                 }
-            } else if (renderingElement is AbsolutelyPositionedRenderingElement) {
-                for (pathInterface in renderingElement.renderingPath) {
-                    addPath(
-                        element,
-                        transformToPathString(pathInterface),
-                        pathInterface.strokeWidth,
-                        renderingElement.id,
-                        pathInterface.fill,
-                        extraAttributes,
-                        renderingElement.isClickable
-                    )?.let { pathElement ->
-                        idSvgElementMap.put(renderingElement.id, pathElement)
+                is AbsolutelyPositionedRenderingElement -> {
+                    for (pathInterface in renderingElement.renderingPath) {
+                        addPath(
+                            element,
+                            transformToPathString(pathInterface),
+                            pathInterface.strokeWidth,
+                            renderingElement.id,
+                            pathInterface.fill,
+                            extraAttributes,
+                            renderingElement.isClickable
+                        )?.let { pathElement ->
+                            idSvgElementMap.put(renderingElement.id, pathElement)
+                        }
                     }
                 }
-            } else {
-                logger.error { "Unknown rendering elements type: $renderingElement" }
+                is TranslatedRenderingElementUsingReference -> {
+                    val typeId = renderingElement.typeId
+                    addPathUsingReference(
+                        element,
+                        typeId,
+                        renderingElement.id,
+                        extraAttributes,
+                        renderingElement.isClickable
+                    )
+                    idSvgElementMap.put(renderingElement.id, element)
+                }
             }
         }
     }
@@ -145,14 +160,14 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     private fun addPathUsingReference(
         node: Node,
         reference: String,
-        positionedRenderingElement: PositionedRenderingElement,
+        id: String,
         extraAttributes: Map<String, String> = emptyMap(),
         isClickable: Boolean
     ) {
         node.ownerDocument?.let { ownerDocument ->
             val useTag = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "use")
             useTag.setAttribute("href", "#$reference")
-            useTag.setAttribute("id", positionedRenderingElement.id)
+            useTag.setAttribute("id", id)
 
             if (isClickable) {
                 // TODO Give value as input parameter to attribute

@@ -7,11 +7,16 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-sealed class PositionedRenderingElement {
-    abstract val renderingPath: List<PathInterfaceImpl>
-    abstract val boundingBox: BoundingBox
+sealed class PositionedRenderingElementParent {
     abstract val id: String
     abstract val groupClass: String?
+    abstract val isClickable: Boolean
+    abstract val boundingBox: BoundingBox
+}
+
+@Serializable
+sealed class PositionedRenderingElement : PositionedRenderingElementParent() {
+    abstract val renderingPath: List<PathInterfaceImpl>
     abstract var glyphData: GlyphData?
 
 
@@ -30,7 +35,6 @@ sealed class PositionedRenderingElement {
             boundingBox: BoundingBox,
             id: String,
             translation: Translation,
-            typeId: String?,
             isClickable: Boolean
         ): TranslatedRenderingElement {
             return TranslatedRenderingElement(
@@ -41,9 +45,24 @@ sealed class PositionedRenderingElement {
                 translation,
                 isClickable
             )
-                .also {
-                    it.typeId = typeId
-                }
+        }
+
+
+        fun create(
+            boundingBox: BoundingBox,
+            id: String,
+            translation: Translation,
+            typeId: String,
+            isClickable: Boolean
+        ): TranslatedRenderingElementUsingReference {
+            return TranslatedRenderingElementUsingReference(
+                id,
+                null,
+                translation,
+                typeId,
+                isClickable,
+                boundingBox
+            )
         }
 
     }
@@ -60,7 +79,7 @@ class AbsolutelyPositionedRenderingElement(
     override val boundingBox: BoundingBox,
     override val id: String,
     override val groupClass: String? = null,
-    val isClickable: Boolean = false
+    override val isClickable: Boolean = false
 ) : PositionedRenderingElement() {
     override var glyphData: GlyphData? = null
 }
@@ -73,11 +92,21 @@ class TranslatedRenderingElement(
     override val id: String,
     override val groupClass: String? = null,
     var translation: Translation,
-    val isClickable: Boolean = false
+    override val isClickable: Boolean = false
 ) : PositionedRenderingElement(
 
 ) {
 
     override var glyphData: GlyphData? = null
-    var typeId: String? = null
+//    var typeId: String? = null
 }
+
+@Serializable
+class TranslatedRenderingElementUsingReference(
+    override val id: String,
+    override val groupClass: String?,
+    val translation: Translation,
+    val typeId: String,
+    override val isClickable: Boolean = false,
+    override val boundingBox: BoundingBox
+) : PositionedRenderingElementParent()

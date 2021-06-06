@@ -14,7 +14,7 @@ class NoteGroupElement(
     val context: Context,
     override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
-    val result = mutableListOf<PositionedRenderingElement>()
+    val result = mutableListOf<PositionedRenderingElementParent>()
     var yLowestPosition = Int.MAX_VALUE
     var yHighestPosition = Int.MIN_VALUE
     private var stem = Stem.NONE
@@ -24,9 +24,7 @@ class NoteGroupElement(
     private val logger = KotlinLogging.logger {}
 
 
-    override fun toRenderingElement(): List<PositionedRenderingElement> {
-//        layoutNoteHeads()
-
+    override fun toRenderingElement(): List<PositionedRenderingElementParent> {
         return result
     }
 
@@ -63,7 +61,6 @@ class NoteGroupElement(
 
             val glyphData = getNoteHeadGlyph(duration)
             PositionedRenderingElement.create(
-                listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
                 glyphData.boundingBox,
                 context.getAndIncrementIdCounter(),
                 noteHeadTranslation,
@@ -100,7 +97,6 @@ class NoteGroupElement(
         }
     }
 
-
     private fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stem != Stem.DOWN)
 
@@ -127,7 +123,6 @@ class NoteGroupElement(
         if (sharpInUse()) {
             glyphsUsed.put(Accidental.SHARP.name, getAccidentalGlyph(Accidental.SHARP))
         }
-
 
         if (duration == Duration.EIGHT) {
             getFlagGlyph(Duration.EIGHT, stem == Stem.UP).let {
@@ -168,10 +163,9 @@ class NoteGroupElement(
             id: String,
             accidental: Accidental,
             inputTranslation: Translation
-        ): PositionedRenderingElement {
+        ): TranslatedRenderingElementUsingReference {
             return getAccidentalGlyph(accidental).let { accidentalGlyph ->
                 PositionedRenderingElement.create(
-                    listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)),
                     accidentalGlyph.boundingBox,
                     id,
                     inputTranslation.let {
@@ -181,31 +175,32 @@ class NoteGroupElement(
                 )
             }
         }
-    }
 
-    private fun getNoteWithoutAccidental(noteType: NoteType): GClefNoteLine {
-        return when (noteType) {
-            NoteType.A_SHARP -> GClefNoteLine.A
-            NoteType.A -> GClefNoteLine.A
-            NoteType.H -> GClefNoteLine.H
-            NoteType.C -> GClefNoteLine.C
-            NoteType.C_SHARP -> GClefNoteLine.C
-            NoteType.D -> GClefNoteLine.D
-            NoteType.D_SHARP -> GClefNoteLine.D
-            NoteType.E -> GClefNoteLine.E
-            NoteType.F -> GClefNoteLine.F
-            NoteType.F_SHARP -> GClefNoteLine.F
-            NoteType.G -> GClefNoteLine.G
-            NoteType.G_SHARP -> GClefNoteLine.G
+        private fun getNoteWithoutAccidental(noteType: NoteType): GClefNoteLine {
+            return when (noteType) {
+                NoteType.A_SHARP -> GClefNoteLine.A
+                NoteType.A -> GClefNoteLine.A
+                NoteType.H -> GClefNoteLine.H
+                NoteType.C -> GClefNoteLine.C
+                NoteType.C_SHARP -> GClefNoteLine.C
+                NoteType.D -> GClefNoteLine.D
+                NoteType.D_SHARP -> GClefNoteLine.D
+                NoteType.E -> GClefNoteLine.E
+                NoteType.F -> GClefNoteLine.F
+                NoteType.F_SHARP -> GClefNoteLine.F
+                NoteType.G -> GClefNoteLine.G
+                NoteType.G_SHARP -> GClefNoteLine.G
+            }
+
         }
 
-    }
-
-    fun noteRequiresSharp(noteType: NoteType): Boolean {
-        return when (noteType) {
-            NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
-            else -> false
+        fun noteRequiresSharp(noteType: NoteType): Boolean {
+            return when (noteType) {
+                NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
+                else -> false
+            }
         }
+
     }
 
 }

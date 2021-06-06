@@ -15,16 +15,14 @@ class NoteElement(
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     var accidental: Accidental? = null
     private var stem = Stem.NONE
-    val positionedRenderingElements = mutableListOf<PositionedRenderingElement>()
+    val positionedRenderingElements = mutableListOf<PositionedRenderingElementParent>()
 
     private val highlightElements = mutableSetOf<String>()
 
     private val logger = KotlinLogging.logger {}
 
 
-    override fun toRenderingElement(): List<PositionedRenderingElement> {
-        return positionedRenderingElements
-    }
+    override fun toRenderingElement() = positionedRenderingElements
 
     fun layoutNoteHeads() {
         accidental?.run {
@@ -33,7 +31,6 @@ class NoteElement(
 
         getNoteHeadGlyph(duration).let { noteHeadGlyph ->
             PositionedRenderingElement.create(
-                listOf(PathInterfaceImpl(noteHeadGlyph.pathElements, 1)),
                 noteHeadGlyph.boundingBox,
                 id,
                 translation ?: Translation(0, 0),
@@ -61,19 +58,17 @@ class NoteElement(
         }
     }
 
-    private fun setupAccidental(accidental: Accidental): PositionedRenderingElement {
-        val accidentalGlyph = getAccidentalGlyph(accidental)
-        return PositionedRenderingElement.create(
-            listOf(PathInterfaceImpl(accidentalGlyph.pathElements, 1)),
-            accidentalGlyph.boundingBox,
-            id,
-            translation ?: Translation(0, 0),
-            accidental.name,
-            true
-        ).apply {
-            translation = translation.let {
-                Translation(it.xShift - 30, it.yShift)
-            }
+    private fun setupAccidental(accidental: Accidental): PositionedRenderingElementParent {
+        return getAccidentalGlyph(accidental).let { accidentalGlyph ->
+            PositionedRenderingElement.create(
+                accidentalGlyph.boundingBox,
+                id,
+                (translation ?: Translation(0, 0)).also {
+                    Translation(it.xShift - 30, it.yShift)
+                },
+                accidental.name,
+                true
+            )
         }
     }
 

@@ -4,7 +4,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
-internal fun determineViewBox(renderingElements: Collection<PositionedRenderingElement>): ViewBox {
+internal fun determineViewBox(renderingElements: Collection<PositionedRenderingElementParent>): ViewBox {
     var xMin = 0.0
     var yMin = 0.0
     var xMax = 0.0

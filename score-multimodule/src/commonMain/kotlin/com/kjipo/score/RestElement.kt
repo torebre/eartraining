@@ -1,7 +1,6 @@
 package com.kjipo.score
 
 import com.kjipo.svg.GlyphData
-import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.getRestGlyph
 
 
@@ -16,23 +15,18 @@ class RestElement(
 
     private val highlightElements = mutableSetOf<String>()
 
-    override fun toRenderingElement(): List<PositionedRenderingElement> {
+    override fun toRenderingElement(): List<PositionedRenderingElementParent> {
         val glyphData = getRestGlyph(duration)
-        val positionedRenderingElement = TranslatedRenderingElement(
-            listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
-            glyphData.boundingBox,
+        val positionedRenderingElement = TranslatedRenderingElementUsingReference(
             id,
-            translation = translation ?: Translation(0, 0)
-        ).apply {
-//            if (translation == null) {
-//                translation = Translation(0, -30)
-//            } else {
-                translation = translation.let {
-                    Translation(it.xShift, it.yShift - 30)
-                }
-//            }
-            typeId = typeName
-        }
+            null,
+            (translation ?: Translation(0, 0)).let {
+                Translation(it.xShift, it.yShift - 30)
+            },
+            typeName,
+            true,
+            glyphData.boundingBox
+        )
         highlightElements.add(positionedRenderingElement.id)
         return listOf(positionedRenderingElement)
     }

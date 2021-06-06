@@ -184,6 +184,8 @@ class ScoreSetup(private val score: Score) {
         }
 
         // TODO Viewbox will be wrong since translations are not taken into account
+
+
         return RenderingSequence(
             renderGroups,
             determineViewBox(renderGroups),
