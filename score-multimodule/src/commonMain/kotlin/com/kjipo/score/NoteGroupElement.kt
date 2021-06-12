@@ -1,5 +1,6 @@
 package com.kjipo.score
 
+import com.kjipo.handler.NoteGroup
 import com.kjipo.handler.NoteSymbol
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.svg.*
@@ -8,18 +9,20 @@ import kotlin.math.absoluteValue
 
 
 class NoteGroupElement(
-    val notes: List<NoteSymbol>,
-    override var duration: Duration,
-    override val id: String,
+    val noteGroup: NoteGroup,
+//    val notes: List<NoteSymbol>,
     val context: Context,
     override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     val result = mutableListOf<PositionedRenderingElementParent>()
     var yLowestPosition = Int.MAX_VALUE
     var yHighestPosition = Int.MIN_VALUE
-    private var stem = Stem.NONE
 
     private val highlightElements = mutableSetOf<String>()
+
+    override val id: String = noteGroup.id
+    // TODO Handle duration on note level
+    override var duration: Duration = noteGroup.notes.first().duration
 
     private val logger = KotlinLogging.logger {}
 
@@ -41,7 +44,7 @@ class NoteGroupElement(
 
 
     fun layoutNoteHeads() {
-        for (note in notes) {
+        for (note in noteGroup.notes) {
             val yPositionForNoteHead = calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
             val noteHeadTranslation =
                 translation?.let { Translation(it.xShift, it.yShift + yPositionForNoteHead) } ?: Translation(
@@ -80,7 +83,7 @@ class NoteGroupElement(
             }
         }
 
-        notes.maxWithOrNull { a, b ->
+        noteGroup.notes.maxWithOrNull { a, b ->
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
             addExtraBarLines(noteSymbol)?.let {
@@ -88,17 +91,27 @@ class NoteGroupElement(
             }
         }
 
-        notes.minWithOrNull { a, b ->
+        noteGroup.notes.minWithOrNull { a, b ->
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
             addExtraBarLines(noteSymbol)?.let {
                 result.addAll(it.toRenderingElement())
             }
         }
+
+        noteGroup.stem?.let {
+            result.add(addStem(it == Stem.UP))
+        }
+
     }
 
-    private fun getStem(xCoordinate: Int, yCoordinate: Int, stemHeight: Int): PositionedRenderingElement {
-        val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stem != Stem.DOWN)
+    private fun getStem(
+        xCoordinate: Int,
+        yCoordinate: Int,
+        stemHeight: Int,
+        stemUp: Boolean
+    ): PositionedRenderingElement {
+        val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stemUp)
 
         return TranslatedRenderingElement(
             listOf(stem),
@@ -125,7 +138,7 @@ class NoteGroupElement(
         }
 
         if (duration == Duration.EIGHT) {
-            getFlagGlyph(Duration.EIGHT, stem == Stem.UP).let {
+            getFlagGlyph(Duration.EIGHT, noteGroup.stem == Stem.UP).let {
                 glyphsUsed[it.name] = it
             }
         }
@@ -136,18 +149,16 @@ class NoteGroupElement(
     }
 
 
-    private fun sharpInUse() = notes.map {
+    private fun sharpInUse() = noteGroup.notes.map {
         noteRequiresSharp(it.noteType)
     }.any { it }
 
 
-    fun addStem(stem: Stem) {
-        this.stem = stem
+    fun addStem(stemUp: Boolean): PositionedRenderingElement {
         val xCoordinate = getRightEdgeOfNoteHeadGlyph()
         // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
         val ySpanForNoteGroup = yHighestPosition.minus(yLowestPosition).absoluteValue
-        val stemElement = getStem(xCoordinate, yHighestPosition, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT)
-        result.add(stemElement)
+        return getStem(xCoordinate, yHighestPosition, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT, stemUp)
     }
 
     private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()

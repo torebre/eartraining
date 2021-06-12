@@ -1,7 +1,9 @@
 package com.kjipo.handler
 
+import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
+import com.kjipo.score.Stem
 
 
 /**
@@ -18,7 +20,9 @@ data class Note(
     val duration: Duration,
     val octave: Int,
     val noteType: NoteType,
-    override val properties: Map<String, String> = emptyMap()
+    override val properties: Map<String, String> = emptyMap(),
+    val stem: Stem? = null,
+    val accidental: Accidental? = null
 ) : ScoreHandlerElement(), IsNote
 
 data class Rest(
@@ -32,7 +36,8 @@ data class Rest(
 data class NoteGroup(
     override val id: String,
     val notes: List<NoteSymbol>,
-    override val properties: Map<String, String> = emptyMap()
+    override val properties: Map<String, String> = emptyMap(),
+    val stem: Stem? = null
 ) : ScoreHandlerElement(), IsNote
 
 

@@ -4,7 +4,7 @@ import com.kjipo.score.*
 
 object ScoreHelperFunctions {
 
-    internal fun transformToNoteAndAccidental(noteType: NoteType): Pair<GClefNoteLine, Accidental?> {
+    fun transformToNoteAndAccidental(noteType: NoteType): Pair<GClefNoteLine, Accidental?> {
         return when (noteType) {
             NoteType.A -> Pair(GClefNoteLine.A, null)
             NoteType.A_SHARP -> Pair(GClefNoteLine.A, Accidental.SHARP)
@@ -25,18 +25,11 @@ object ScoreHelperFunctions {
     internal fun createTemporalElement(element: ScoreHandlerElement, context: Context): ScoreRenderingElement {
         return when (element) {
             is Note -> {
-                transformToNoteAndAccidental(element.noteType).let { (note, accidental) ->
-                    NoteElement(
-                        note,
-                        element.octave,
-                        element.duration,
-                        context,
-                        id = element.id,
-                        properties = element.properties
-                    ).also {
-                        it.accidental = accidental
-                    }
-                }
+                NoteElement(
+                    element,
+                    context,
+                    properties = element.properties
+                )
             }
             is Rest -> {
                 RestElement(
@@ -49,9 +42,9 @@ object ScoreHelperFunctions {
             is NoteGroup -> {
                 // TODO Handle duration on note level
                 return NoteGroupElement(
-                    element.notes,
-                    element.notes.first().duration,
-                    element.id,
+                    element,
+//                    element.notes.first().duration,
+//                    element.id,
                     context,
                     properties = element.properties
                 )

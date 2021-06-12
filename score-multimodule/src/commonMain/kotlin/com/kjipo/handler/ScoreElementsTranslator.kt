@@ -87,7 +87,14 @@ object ScoreElementsTranslator {
                 var previous: ScoreHandlerElement? = null
                 for (duration in durationsInCurrentBar) {
                     val splitScoreElement =
-                        Note(element.id, duration, element.octave, element.note, element.properties)
+                        Note(
+                            element.id,
+                            duration,
+                            element.octave,
+                            element.note,
+                            element.properties,
+                            requiresStem(element)
+                        )
                     currentBar.scoreHandlerElements.add(splitScoreElement)
 
                     if (previous != null) {
@@ -107,7 +114,8 @@ object ScoreElementsTranslator {
                             duration,
                             element.octave,
                             element.note,
-                            element.properties
+                            element.properties,
+                            requiresStem(element)
                         )
 
                     if (previous != null) {
@@ -124,7 +132,8 @@ object ScoreElementsTranslator {
                     element.duration,
                     element.octave,
                     element.note,
-                    element.properties
+                    element.properties,
+                    requiresStem(element)
                 )
                 currentBar1.scoreHandlerElements.add(scoreHandlerElement)
             }
@@ -246,7 +255,9 @@ object ScoreElementsTranslator {
                             it.octave,
                             it.note
                         )
-                    }, element.properties)
+                    }, element.properties,
+                    requiresStem(element)
+                )
                 currentBar1.scoreHandlerElements.add(noteGroupElement)
             }
         }
@@ -273,7 +284,39 @@ object ScoreElementsTranslator {
         }
         bars.takeLastWhile { bar -> bar.scoreHandlerElements.all { it is Rest } }
             .forEach { bars.remove(it) }
-
     }
 
+
+    // TODO This only works for C scale and G clef
+    private fun stemUp(pitch: Int) = if (pitch >= 71) {
+        Stem.DOWN
+    } else {
+        Stem.UP
+    }
+
+    private fun requiresStem(noteElement: NoteSequenceElement.NoteElement): Stem {
+        return noteElement.duration.let {
+            // TODO Make proper computation
+            if (it == Duration.HALF || it == Duration.QUARTER || it == Duration.EIGHT) {
+                stemUp(ScoreHandlerUtilities.getPitch(noteElement.note, noteElement.octave))
+            } else {
+                Stem.NONE
+            }
+        }
+    }
+
+
+    private fun requiresStem(multipleNotesElements: NoteSequenceElement.MultipleNotesElement): Stem {
+        return multipleNotesElements.duration.let {
+            // TODO Make proper computation
+            if (it == Duration.HALF || it == Duration.QUARTER || it == Duration.EIGHT) {
+                // TODO Make proper computation to see whether the stem should be up or down
+                multipleNotesElements.elements.first().let { noteElement ->
+                    stemUp(ScoreHandlerUtilities.getPitch(noteElement.note, noteElement.octave))
+                }
+            } else {
+                Stem.NONE
+            }
+        }
+    }
 }

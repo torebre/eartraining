@@ -2,6 +2,7 @@ package com.kjipo.score
 
 import com.kjipo.handler.Bar
 import com.kjipo.handler.ScoreHelperFunctions.createTemporalElement
+import com.kjipo.handler.ScoreHelperFunctions.transformToNoteAndAccidental
 import com.kjipo.svg.GlyphData
 import mu.KotlinLogging
 import kotlin.math.ceil
@@ -12,8 +13,8 @@ import kotlin.math.ceil
 class BarData(
     private val context: Context,
     private val bar: Bar,
-     private val barXoffset: Int,
-     private val barYoffset: Int,
+    private val barXoffset: Int,
+    private val barYoffset: Int,
     private val debug: Boolean = false
 ) {
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
@@ -54,48 +55,27 @@ class BarData(
                     val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
                     var yPosition = barYoffset
 
-                    if (scoreRenderingElement is NoteElement) {
-                        // This updating of the y-position is done because when references are used, the y-position is not used, the translate is used instead
-                        yPosition += calculateVerticalOffset(scoreRenderingElement.note, scoreRenderingElement.octave)
-                        scoreRenderingElement.translation = Translation(xPosition, yPosition)
-                        scoreRenderingElement.layoutNoteHeads()
-                    } else if (scoreRenderingElement is NoteGroupElement) {
-                        scoreRenderingElement.translation = Translation(xPosition, yPosition)
-                        scoreRenderingElement.layoutNoteHeads()
-                    } else {
-                        scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                    when (scoreRenderingElement) {
+                        is NoteElement -> {
+                            transformToNoteAndAccidental(scoreRenderingElement.note.noteType).let { noteLineAndAccidental ->
+                                // This updating of the y-position is done because when references are used, the y-position is not used, the translate is used instead
+                                yPosition += calculateVerticalOffset(
+                                    noteLineAndAccidental.first,
+                                    scoreRenderingElement.note.octave
+                                )
+                                scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                                scoreRenderingElement.layoutNoteHeads()
+                            }
+                        }
+                        is NoteGroupElement -> {
+                            scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                            scoreRenderingElement.layoutNoteHeads()
+                        }
+                        else -> {
+                            scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                        }
                     }
                     tickCounter += scoreRenderingElement.duration.ticks
-
-                    if (debug) {
-                        scoreRenderingElements.add(
-                            addDebugBox(
-                                barXoffset,
-                                xOffset,
-                                tickCounter,
-                                pixelsPerTick,
-                                scoreRenderingElement
-                            )
-                        )
-                    }
-
-                }
-            }
-        }
-
-        // Add stems
-        for (scoreRenderingElement in scoreRenderingElements) {
-            when (scoreRenderingElement) {
-                is TemporalElement -> {
-                    if (scoreRenderingElement is NoteElement) {
-                        if (context.requiresStem(scoreRenderingElement)) {
-                            addStem(scoreRenderingElement)
-                        }
-                    } else if (scoreRenderingElement is NoteGroupElement) {
-                        if (context.requiresStem(scoreRenderingElement)) {
-                            addStem(scoreRenderingElement)
-                        }
-                    }
                 }
             }
         }
@@ -126,35 +106,6 @@ class BarData(
         )
     }
 
-    private fun addDebugBox(
-        barXoffset: Int,
-        xOffset: Int,
-        tickCounter: Int,
-        pixelsPerTick: Double,
-        scoreRenderingElement: ScoreRenderingElement
-    ): Box {
-
-        // TODO Fix positioning
-
-        val width = barXoffset.plus(ceil(xOffset.plus(tickCounter.times(pixelsPerTick))))
-            .minus(0).toInt()
-        val debugBox = Box(
-            0,
-            0,
-            width,
-            0,
-            "debug"
-        )
-        return debugBox
-    }
-
-    private fun addStem(scoreRenderingElement: NoteElement) {
-        scoreRenderingElement.addStem(context.stemUp(scoreRenderingElement.id))
-    }
-
-    private fun addStem(scoreRenderingElement: NoteGroupElement) {
-        scoreRenderingElement.addStem(context.stemUp(scoreRenderingElement.id))
-    }
 
     private fun getClefElement(
         barXoffset: Int,

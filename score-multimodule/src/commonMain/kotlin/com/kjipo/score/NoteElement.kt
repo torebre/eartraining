@@ -1,19 +1,20 @@
 package com.kjipo.score
 
+import com.kjipo.handler.Note
+import com.kjipo.handler.ScoreHelperFunctions.transformToNoteAndAccidental
 import com.kjipo.svg.*
 import mu.KotlinLogging
 
 
 class NoteElement(
-    var note: GClefNoteLine,
-    var octave: Int,
-    override var duration: Duration,
+    val note: Note,
     val context: Context,
-    override val id: String = context.getAndIncrementIdCounter(),
-    override val properties: Map<String, String> = mapOf()
+    override val properties: Map<String, String> = mapOf(),
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
-    var accidental: Accidental? = null
-    private var stem = Stem.NONE
+
+    override var duration: Duration = note.duration
+    override val id: String = note.id
+
     val positionedRenderingElements = mutableListOf<PositionedRenderingElementParent>()
 
     private val highlightElements = mutableSetOf<String>()
@@ -24,7 +25,7 @@ class NoteElement(
     override fun toRenderingElement() = positionedRenderingElements
 
     fun layoutNoteHeads() {
-        accidental?.run {
+        note.accidental?.run {
             positionedRenderingElements.add(setupAccidental(this))
         }
 
@@ -40,9 +41,13 @@ class NoteElement(
                 highlightElements.add(it.id)
             }
 
+            note.stem?.run {
+                positionedRenderingElements.add(getStem())
+            }
+
             addExtraBarLinesForGClef(
-                note,
-                octave,
+                transformToNoteAndAccidental(note.noteType).first,
+                note.octave,
                 translation?.xShift ?: 0,
                 translation?.yShift ?: 0,
                 noteHeadGlyph.boundingBox.xMin.toInt(),
@@ -55,6 +60,10 @@ class NoteElement(
                 positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
             }
         }
+
+//        if(context.debug) {
+//            addDebugBox(determineViewBox(positionedRenderingElements)).let { positionedRenderingElements.addAll(it.toRenderingElement()) }
+//        }
     }
 
     private fun setupAccidental(accidental: Accidental): PositionedRenderingElementParent {
@@ -72,7 +81,7 @@ class NoteElement(
     }
 
     fun getStem(): PositionedRenderingElement {
-        val stem = addStem(getNoteHeadGlyph(duration).boundingBox, stem != Stem.DOWN)
+        val stem = addStem(getNoteHeadGlyph(duration).boundingBox, note.stem != Stem.DOWN)
 
         return TranslatedRenderingElement(
             listOf(stem),
@@ -91,12 +100,12 @@ class NoteElement(
 //            glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
 //        }
 
-        accidental?.let {
+        note.accidental?.let {
             glyphsUsed.put(it.name, getAccidentalGlyph(it))
         }
 
         if (duration == Duration.EIGHT) {
-            getFlagGlyph(Duration.EIGHT, stem == Stem.UP).let {
+            getFlagGlyph(Duration.EIGHT, note.stem == Stem.UP).let {
                 glyphsUsed[it.name] = it
             }
         }
@@ -106,15 +115,10 @@ class NoteElement(
         return glyphsUsed
     }
 
-    fun addStem(stem: Stem) {
-        this.stem = stem
-        positionedRenderingElements.add(getStem())
-    }
-
     override fun getIdsOfHighlightElements() = highlightElements
 
     override fun toString(): String {
-        return "NoteElement(note=$note, octave=$octave, duration=$duration, translation=$translation)"
+        return "NoteElement(note=$note, translation=$translation)"
     }
 
 }
