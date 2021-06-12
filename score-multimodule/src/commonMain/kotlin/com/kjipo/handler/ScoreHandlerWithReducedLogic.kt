@@ -41,8 +41,12 @@ class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
         }
     )
 
-    private fun filterHighlightableElements(scoreSetup: ScoreSetup) =
-        scoreSetup.scoreRenderingElements.filter { it is HighlightableElement }.toList()
+    private fun filterHighlightableElements(scoreSetup: ScoreSetup): List<HighlightableElement> {
+        val highlightableElements = scoreSetup.scoreRenderingElements.filter { it is HighlightableElement }
+            .map { it as HighlightableElement }.toList()
+
+        return highlightableElements
+    }
 
 
     private fun build(): RenderingSequenceWithMetaData {

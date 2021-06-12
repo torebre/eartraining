@@ -84,6 +84,7 @@ class ReducedScore : ReducedScoreInterface {
 
     private fun updateIfDirty() {
         if (isDirty) {
+
             val score = ScoreElementsTranslator.createRenderingData(noteSequence)
 
             // TODO If the score does not have to be rebuilt the whole time it will be more efficient
@@ -99,6 +100,8 @@ class ReducedScore : ReducedScoreInterface {
 
             highlightMap = generateHighlightMap()
 
+            logger.debug { "Test70: ${highlightMap}" }
+
             isDirty = false
         }
     }
@@ -106,15 +109,11 @@ class ReducedScore : ReducedScoreInterface {
 
     private fun generateHighlightMap(): MutableMap<String, Collection<String>> {
         val elementToScoreHighlightMap = mutableMapOf<String, Collection<String>>()
-
-        logger.debug { "Note sequence elements: ${noteSequence}" }
+        val highlightableElements = scoreHandler.getHighlightableElements()
 
         for (noteSequenceElement in noteSequence) {
             noteSequenceElement.properties[ELEMENT_ID]?.let { scoreElementId ->
-                elementToScoreHighlightMap[scoreElementId] = scoreHandler.getHighlightableElements()
-                    .filter {
-                        it is HighlightableElement
-                    }.map { it as HighlightableElement }.filter {
+                elementToScoreHighlightMap[scoreElementId] = highlightableElements.filter {
                         it.properties[ELEMENT_ID] == scoreElementId
                     }
                     .flatMap { it.getIdsOfHighlightElements() }

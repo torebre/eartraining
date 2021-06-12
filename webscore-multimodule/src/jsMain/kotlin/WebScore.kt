@@ -8,7 +8,9 @@ import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
 import org.w3c.dom.get
+import org.w3c.dom.svg.SVGPathElement
 import org.w3c.dom.svg.SVGSVGElement
+import org.w3c.dom.svg.SVGUseElement
 
 
 class WebScore(
@@ -100,9 +102,23 @@ class WebScore(
         ids.forEach { highlight(it) }
     }
 
-    fun highlight(id: String) {
-        webscoreSvgProvider.getHighlightForId(id).forEach {
-            webscoreSvgProvider.getElement(it)?.classList?.add("highlight")
+    fun highlight(id: String, removeExistingHighlight: Boolean = true): Boolean {
+        webscoreSvgProvider.getHighlightForId(id).let { elementsToHighlight ->
+
+
+            if (elementsToHighlight.isEmpty()) {
+                return false
+            }
+            if (removeExistingHighlight) {
+                currentlyHighlightedElement?.let {
+                    removeHighlight(it)
+                }
+            }
+
+            elementsToHighlight.forEach {
+                webscoreSvgProvider.getElement(it)?.classList?.add("highlight")
+            }
+            return true
         }
 
         // TODO For some reason an exception is thrown if the addClass-method is used
@@ -131,6 +147,13 @@ class WebScore(
                 removeHighlight(it)
             }
             currentlyHighlightedElement = null
+        }
+    }
+
+
+    private fun highlightElementIfFound(elementId: String) {
+        highlight(elementId, true).takeIf { it }?.run {
+            currentlyHighlightedElement = elementId
         }
     }
 
@@ -191,7 +214,7 @@ class WebScore(
         svgElement.addEventListener("mousemove", { event ->
             val currentTime = currentTimeMillis()
 
-            if (currentTime - mouseEventLastFired > 1000) {
+            if (currentTime - mouseEventLastFired > 200) {
                 val eventWithPageInformation: dynamic = event
                 val xStop = eventWithPageInformation.pageX as Int
                 val yStop = eventWithPageInformation.pageY as Int
@@ -427,21 +450,34 @@ class WebScore(
     private fun highlightElementClosestToMouseCursor(xPosition: Int, yPosition: Int) {
         val svgRect = svgElement.createSVGRect()
         with(svgRect) {
-            x = minOf(xPosition.toDouble().minus(500), 0.0)
-            y = minOf(yPosition.toDouble().minus(50), 0.0)
-            width = 500.0
-            height = 500.0
+            x = maxOf(xPosition.toDouble().minus(10), 0.0)
+            y = maxOf(yPosition.toDouble().minus(10), 0.0)
+            width = 20.0
+            height = 20.0
         }
 
         val intersectionList = svgElement.getIntersectionList(svgRect, svgElement)
-
-        logger.debug { "Test23: ${intersectionList.length}" }
-
         val numberOfNodes = intersectionList.length
-        (0..numberOfNodes).forEach {
-            val nodeElement = intersectionList.get(it)
+        (0..numberOfNodes).forEach { index ->
+            intersectionList[index]?.let { node ->
 
-            logger.debug { "Node element: $nodeElement" }
+                when (node) {
+                    is SVGUseElement -> {
+                        highlightElementIfFound(node.id)
+                    }
+                    is SVGPathElement -> {
+                        highlightElementIfFound(node.id)
+                    }
+
+                    // TODO Which element types to check?
+//                    else -> {
+//                        logger.debug { "Test90: $node" }
+//                    }
+
+                }
+
+            }
+
         }
 
     }

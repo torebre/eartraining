@@ -94,7 +94,8 @@ private fun showNotes() {
     KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
 
     val simpleNoteSequence = NoteType.values().mapIndexed { index, noteType ->
-        NoteSequenceElement.NoteElement("test$index", noteType, 5, Duration.QUARTER, emptyMap())
+        val id = "test$index"
+        NoteSequenceElement.NoteElement(id, noteType, 5, Duration.QUARTER, mapOf(Pair(ELEMENT_ID, id)))
     }.toList().let { SimpleNoteSequence(it) }
 
     val reducedScore = ReducedScore().apply {
