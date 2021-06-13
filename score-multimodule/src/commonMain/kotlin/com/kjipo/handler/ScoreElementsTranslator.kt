@@ -62,14 +62,14 @@ object ScoreElementsTranslator {
     }
 
     private fun handleNoteElement(
-        element: NoteSequenceElement.NoteElement,
+        noteElement: NoteSequenceElement.NoteElement,
         remainingTicksInBar: Int,
         currentBar: Bar,
         score: Score
     ): Pair<Bar, Int> {
         var remainingTicksInBar1 = remainingTicksInBar
         var currentBar1 = currentBar
-        val ticksNeededForElement = element.duration.ticks
+        val ticksNeededForElement = noteElement.duration.ticks
 
         if (remainingTicksInBar1 == 0) {
             // No more room in bar, start on a new one
@@ -83,17 +83,22 @@ object ScoreElementsTranslator {
                 val durationsInCurrentBar = ScoreHandlerUtilities.splitIntoDurations(remainingTicksInBar1)
                 val durationsInNextBar =
                     ScoreHandlerUtilities.splitIntoDurations(ticksNeededForElement - remainingTicksInBar1)
-
                 var previous: ScoreHandlerElement? = null
+
                 for (duration in durationsInCurrentBar) {
                     val splitScoreElement =
                         Note(
-                            element.id,
+                            noteElement.id,
                             duration,
-                            element.octave,
-                            element.note,
-                            element.properties,
-                            requiresStem(element)
+                            noteElement.octave,
+                            noteElement.note,
+                            noteElement.properties,
+                            requiresStem(noteElement),
+                            if (noteRequiresSharp(noteElement.note)) {
+                                Accidental.SHARP
+                            } else {
+                                null
+                            }
                         )
                     currentBar.scoreHandlerElements.add(splitScoreElement)
 
@@ -112,10 +117,15 @@ object ScoreElementsTranslator {
                         Note(
                             score.getAndIncrementIdCounter(),
                             duration,
-                            element.octave,
-                            element.note,
-                            element.properties,
-                            requiresStem(element)
+                            noteElement.octave,
+                            noteElement.note,
+                            noteElement.properties,
+                            requiresStem(noteElement),
+                            if (noteRequiresSharp(noteElement.note)) {
+                                Accidental.SHARP
+                            } else {
+                                null
+                            }
                         )
 
                     if (previous != null) {
@@ -128,12 +138,17 @@ object ScoreElementsTranslator {
             else -> {
                 remainingTicksInBar1 -= ticksNeededForElement
                 val scoreHandlerElement = Note(
-                    element.id,
-                    element.duration,
-                    element.octave,
-                    element.note,
-                    element.properties,
-                    requiresStem(element)
+                    noteElement.id,
+                    noteElement.duration,
+                    noteElement.octave,
+                    noteElement.note,
+                    noteElement.properties,
+                    requiresStem(noteElement),
+                    if (noteRequiresSharp(noteElement.note)) {
+                        Accidental.SHARP
+                    } else {
+                        null
+                    }
                 )
                 currentBar1.scoreHandlerElements.add(scoreHandlerElement)
             }

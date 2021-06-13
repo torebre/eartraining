@@ -13,10 +13,13 @@ class ExtraBarLinesElement(
 ) : ScoreRenderingElement() {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
+        val xStart = xPosition.minus(leftStart).toDouble()
+        val xStop = xStart + rightEnd.toDouble()
+
         val pathElements = yPositions.map {
             listOf(
                 PathElement(
-                    PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.minus(leftStart).toDouble(), it.toDouble())
+                    PathCommand.MOVE_TO_ABSOLUTE, listOf(xStart, it.toDouble())
                 ),
                 PathElement(
                     PathCommand.HORIZONAL_LINE_TO_RELATIVE, listOf(rightEnd.toDouble())
@@ -33,9 +36,9 @@ class ExtraBarLinesElement(
             AbsolutelyPositionedRenderingElement(
                 listOf(PathInterfaceImpl(pathElements, 1)),
                 BoundingBox(
-                    leftStart.times(-1).toDouble(),
+                    xStart,
                     yMin.toDouble(),
-                    leftStart.plus(rightEnd).toDouble(),
+                    xStop,
                     yMax.toDouble()
                 ),
                 id,

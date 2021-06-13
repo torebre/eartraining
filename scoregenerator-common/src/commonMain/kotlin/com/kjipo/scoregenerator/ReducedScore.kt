@@ -100,8 +100,6 @@ class ReducedScore : ReducedScoreInterface {
 
             highlightMap = generateHighlightMap()
 
-            logger.debug { "Test70: ${highlightMap}" }
-
             isDirty = false
         }
     }

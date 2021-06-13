@@ -21,6 +21,7 @@ class NoteGroupElement(
     private val highlightElements = mutableSetOf<String>()
 
     override val id: String = noteGroup.id
+
     // TODO Handle duration on note level
     override var duration: Duration = noteGroup.notes.first().duration
 
@@ -186,32 +187,6 @@ class NoteGroupElement(
                 )
             }
         }
-
-        private fun getNoteWithoutAccidental(noteType: NoteType): GClefNoteLine {
-            return when (noteType) {
-                NoteType.A_SHARP -> GClefNoteLine.A
-                NoteType.A -> GClefNoteLine.A
-                NoteType.H -> GClefNoteLine.H
-                NoteType.C -> GClefNoteLine.C
-                NoteType.C_SHARP -> GClefNoteLine.C
-                NoteType.D -> GClefNoteLine.D
-                NoteType.D_SHARP -> GClefNoteLine.D
-                NoteType.E -> GClefNoteLine.E
-                NoteType.F -> GClefNoteLine.F
-                NoteType.F_SHARP -> GClefNoteLine.F
-                NoteType.G -> GClefNoteLine.G
-                NoteType.G_SHARP -> GClefNoteLine.G
-            }
-
-        }
-
-        fun noteRequiresSharp(noteType: NoteType): Boolean {
-            return when (noteType) {
-                NoteType.A_SHARP, NoteType.C_SHARP, NoteType.D_SHARP, NoteType.F_SHARP, NoteType.G_SHARP -> true
-                else -> false
-            }
-        }
-
     }
 
 }

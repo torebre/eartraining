@@ -461,6 +461,10 @@ class WebScore(
         (0..numberOfNodes).forEach { index ->
             intersectionList[index]?.let { node ->
 
+
+                logger.debug { "Test80: $node" }
+
+
                 when (node) {
                     is SVGUseElement -> {
                         highlightElementIfFound(node.id)

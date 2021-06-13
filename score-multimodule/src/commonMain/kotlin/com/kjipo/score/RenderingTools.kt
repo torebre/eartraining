@@ -20,13 +20,11 @@ fun addExtraBarLinesForGClef(
             xPosition, yPosition, it,
             boundingBoxMin.plus(EXTRA_BAR_LINE_LEFT_PADDING),
             boundingBoxMax.plus(EXTRA_BAR_LINE_RIGHT_PADDING),
-           id
+            id
         )
     }
 }
 
-fun addStem(noteHeadBoundingBox: BoundingBox, stemUp: Boolean = true) =
-    addStem(noteHeadBoundingBox.xMax.toInt(), 0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, stemUp)
 
 fun addStem(
     xTranslate: Int,

@@ -15,7 +15,7 @@ class NoteElement(
     override var duration: Duration = note.duration
     override val id: String = note.id
 
-    val positionedRenderingElements = mutableListOf<PositionedRenderingElementParent>()
+    private val positionedRenderingElements = mutableListOf<PositionedRenderingElementParent>()
 
     private val highlightElements = mutableSetOf<String>()
 
@@ -54,16 +54,17 @@ class NoteElement(
                 noteHeadGlyph.boundingBox.xMax.toInt(),
                 context.getAndIncrementExtraBarLinesCounter()
             )?.let { extraBarLinesElement ->
-
-                logger.debug { "Extra bar lines element translation: ${extraBarLinesElement.translation}" }
-
                 positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
             }
         }
 
-//        if(context.debug) {
-//            addDebugBox(determineViewBox(positionedRenderingElements)).let { positionedRenderingElements.addAll(it.toRenderingElement()) }
-//        }
+        if (context.debug) {
+            determineDebugBox(
+                "${note.id}_debug_box",
+                positionedRenderingElements
+            ).let {
+                positionedRenderingElements.addAll(it.toRenderingElement()) }
+        }
     }
 
     private fun setupAccidental(accidental: Accidental): PositionedRenderingElementParent {
@@ -81,8 +82,15 @@ class NoteElement(
     }
 
     fun getStem(): PositionedRenderingElement {
-        val stem = addStem(getNoteHeadGlyph(duration).boundingBox, note.stem != Stem.DOWN)
+        val xTranslateForStem = if (note.stem == Stem.UP) {
+            // If the stem is pointing up then it should be moved to the
+            // right side of the note head
+            getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+        } else {
+            0
+        }
 
+        val stem = addStem(xTranslateForStem, 0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, note.stem != Stem.DOWN)
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),

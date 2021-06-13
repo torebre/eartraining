@@ -7,5 +7,10 @@ bar-line {
 }
 
 .highlight {
-    fill: red
+    fill: red;
+}
+
+.debug_box {
+    fill: blue;
+    opacity: 0.5;
 }

@@ -5,7 +5,13 @@ import com.kjipo.svg.PathElement
 import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.findBoundingBox
 
-class Box(val xPosition: Int, val yPosition: Int, val width: Int, val height: Int, val id: String) :
+class Box(
+    private val xPosition: Int,
+    private val yPosition: Int,
+    private val width: Int,
+    private val height: Int,
+    val id: String
+) :
     ScoreRenderingElement() {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
@@ -20,10 +26,15 @@ class Box(val xPosition: Int, val yPosition: Int, val width: Int, val height: In
                     listOf(PathInterfaceImpl(pathElements, 1)),
                     findBoundingBox(pathElements),
                     id,
-                    null
+                    "debug_box"
                 )
             )
         }
     }
+
+    override fun toString(): String {
+        return "Box(xPosition=$xPosition, yPosition=$yPosition, width=$width, height=$height, id='$id')"
+    }
+
 
 }
