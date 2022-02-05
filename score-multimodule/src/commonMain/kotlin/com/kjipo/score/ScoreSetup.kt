@@ -133,7 +133,11 @@ class ScoreSetup(private val score: Score) {
     }
 
 
-    private fun setupBeamElement(beamGroup: BeamGroup, beamId: String, bars: List<BarData>): BeamElement? {
+    private fun setupBeamElement(
+        beamGroup: BeamGroup,
+        beamId: String,
+        bars: List<BarData>
+    ): BeamElementAbsolutePosition? {
         // TODO This will not create a proper looking bar in many cases
         val firstNote = findNoteElement(beamGroup.notes.first().id, bars)
         val lastNote = findNoteElement(beamGroup.notes.last().id, bars)
@@ -146,25 +150,24 @@ class ScoreSetup(private val score: Score) {
         val firstStem = firstNote.getStem()
         val lastStem = lastNote.getStem()
 
-        var startX: Double
-        var startY: Double
-
-        firstNote.let {
-            startX = firstStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
-            startY = firstStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
+        val (startX, startY) = with(firstNote) {
+            Pair(
+                firstStem.boundingBox.xMax - DEFAULT_STEM_WIDTH + (translation?.xShift ?: 0).toDouble(),
+                firstStem.boundingBox.yMin + (translation?.yShift ?: 0).toDouble()
+            )
         }
 
-        var stopX: Double
-        var stopY: Double
-        lastNote.let {
-            stopX = lastStem.boundingBox.xMax + (it.translation?.xShift ?: 0).toDouble()
-            stopY = lastStem.boundingBox.yMin + (it.translation?.yShift ?: 0).toDouble()
+        val (stopX, stopY) = with(lastNote) {
+            Pair(
+                lastStem.boundingBox.xMax + (translation?.xShift ?: 0).toDouble(),
+                lastStem.boundingBox.yMin + (translation?.yShift ?: 0).toDouble()
+            )
         }
 
-        return BeamElement(
+        return BeamElementAbsolutePosition(
             beamId,
-            Pair(firstStem.boundingBox.xMax, firstStem.boundingBox.yMin),
-            Pair(stopX - startX, stopY - startY)
+            Pair(startX, startY),
+            Pair(stopX, stopY)
         )
     }
 

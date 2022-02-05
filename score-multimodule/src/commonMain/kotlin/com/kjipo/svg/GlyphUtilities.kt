@@ -8,18 +8,27 @@ private const val STEP_SIZE = 0.1
 
 
 fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
-    return PathInterfaceImpl(glyphData.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, glyphData.strokeWidth)
+    return PathInterfaceImpl(
+        glyphData.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) },
+        glyphData.strokeWidth
+    )
 }
 
 
 fun translateGlyph(pathInterface: PathInterfaceImpl, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
-    return PathInterfaceImpl(pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) }, pathInterface.strokeWidth)
+    return PathInterfaceImpl(
+        pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) },
+        pathInterface.strokeWidth
+    )
 }
 
 
 fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {
     return when (pathElement.command) {
-        PathCommand.MOVE_TO_ABSOLUTE -> PathElement(pathElement.command, translateAbsoluteMovement(pathElement.numbers, xTranslate, yTranslate))
+        PathCommand.MOVE_TO_ABSOLUTE -> PathElement(
+            pathElement.command,
+            translateAbsoluteMovement(pathElement.numbers, xTranslate, yTranslate)
+        )
         else -> pathElement
     }
 }
@@ -48,19 +57,33 @@ fun processPath(pathElements: List<PathElement>): List<CoordinatePair> {
         when (pathElement.command) {
             PathCommand.CURVE_TO_RELATIVE -> processCurveToRelative(pathElement.numbers, pathAsLineSegments.last())
             PathCommand.CURVE_TO_ABSOLUTE -> processCurveToAbsolute(pathElement.numbers, pathAsLineSegments.last())
-            PathCommand.VERTICAL_LINE_TO_RELATIVE -> processVerticalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
-            PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> processVerticalLineToAbsolute(pathElement.numbers, pathAsLineSegments.last())
-            PathCommand.HORIZONAL_LINE_TO_RELATIVE -> processHorizontalLineToRelative(pathElement.numbers, pathAsLineSegments.last())
+            PathCommand.VERTICAL_LINE_TO_RELATIVE -> processVerticalLineToRelative(
+                pathElement.numbers,
+                pathAsLineSegments.last()
+            )
+            PathCommand.VERTICAL_LINE_TO_ABSOLUTE -> processVerticalLineToAbsolute(
+                pathElement.numbers,
+                pathAsLineSegments.last()
+            )
+            PathCommand.HORIZONAL_LINE_TO_RELATIVE -> processHorizontalLineToRelative(
+                pathElement.numbers,
+                pathAsLineSegments.last()
+            )
             PathCommand.MOVE_TO_ABSOLUTE -> processMoveToAbsolute(pathElement.numbers)
             PathCommand.MOVE_TO_RELATIVE -> processMoveToRelative(pathElement.numbers, pathAsLineSegments.lastOrNull())
             PathCommand.LINE_TO_RELATIVE -> processLineToRelative(pathElement.numbers, pathAsLineSegments.last())
+            PathCommand.LINE_TO_ABSOLUTE -> processLineToAbsolute(pathElement.numbers)
             PathCommand.CLOSE_PATH -> emptyList()
-            PathCommand.SMOOTH_CURVE_TO_RELATIVE -> processSmoothCurveToRelative(pathElement.numbers, pathAsLineSegments.lastOrNull(), previousPathElement)
+            PathCommand.SMOOTH_CURVE_TO_RELATIVE -> processSmoothCurveToRelative(
+                pathElement.numbers,
+                pathAsLineSegments.lastOrNull(),
+                previousPathElement
+            )
         }.let { pathAsLineSegments.addAll(it) }
         previousPathElement = pathElement
     }
 
-    return pathAsLineSegments;
+    return pathAsLineSegments
 }
 
 fun processVerticalLineToAbsolute(numbers: List<Double>, startCoordinate: CoordinatePair): List<CoordinatePair> {
@@ -79,34 +102,51 @@ private fun processMoveToRelative(numbers: List<Double>, startCoordinate: Coordi
     if (startCoordinate == null) {
         coordinatePairs.add(CoordinatePair(numbers.get(0), numbers.get(1), true))
     } else {
-        coordinatePairs.add(CoordinatePair(startCoordinate.x + numbers.get(0), startCoordinate.y + numbers.get(1), true))
+        coordinatePairs.add(
+            CoordinatePair(
+                startCoordinate.x + numbers.get(0),
+                startCoordinate.y + numbers.get(1),
+                true
+            )
+        )
     }
 
-    for (i in 2..numbers.size - 1 step 2) {
-        coordinatePairs.add(CoordinatePair(numbers.get(i) + coordinatePairs.last().x, numbers.get(i + 1) + coordinatePairs.last().y))
+    for (i in 2 until numbers.size step 2) {
+        coordinatePairs.add(
+            CoordinatePair(
+                numbers.get(i) + coordinatePairs.last().x,
+                numbers.get(i + 1) + coordinatePairs.last().y
+            )
+        )
     }
 
     return coordinatePairs
 }
 
-private fun processVerticalLineToRelative(numbers: List<Double>, startCoordinate: CoordinatePair): List<CoordinatePair> {
+private fun processVerticalLineToRelative(
+    numbers: List<Double>,
+    startCoordinate: CoordinatePair
+): List<CoordinatePair> {
     var currentY = startCoordinate.y
 
     val newCoordinates = mutableListOf<CoordinatePair>()
 
-    for (i in 0..numbers.size - 1) {
+    for (i in numbers.indices) {
         currentY += numbers.get(i)
         newCoordinates.add(CoordinatePair(startCoordinate.x, currentY))
     }
     return newCoordinates
 }
 
-private fun processHorizontalLineToRelative(numbers: List<Double>, startCoordinate: CoordinatePair): List<CoordinatePair> {
+private fun processHorizontalLineToRelative(
+    numbers: List<Double>,
+    startCoordinate: CoordinatePair
+): List<CoordinatePair> {
     var currentX = startCoordinate.x
 
     val newCoordinates = mutableListOf<CoordinatePair>()
 
-    for (i in 0..numbers.size - 1) {
+    for (i in numbers.indices) {
         currentX += numbers.get(i)
         newCoordinates.add(CoordinatePair(currentX, startCoordinate.y))
     }
@@ -120,7 +160,7 @@ private fun processMoveToAbsolute(numbers: List<Double>): List<CoordinatePair> {
 
     coordinatePairs.add(CoordinatePair(currentX, currentY, true))
 
-    for (i in 2..numbers.size - 1 step 2) {
+    for (i in 2 until numbers.size step 2) {
         currentX += numbers.get(i)
         currentY += numbers.get(i + 1)
 
@@ -135,7 +175,7 @@ private fun processLineToRelative(numbers: List<Double>, startCoordinate: Coordi
     var currentX = startCoordinate.x
     var currentY = startCoordinate.y
 
-    for (i in 0..numbers.size - 1 step 2) {
+    for (i in numbers.indices step 2) {
         currentX += numbers.get(i)
         currentY += numbers.get(i + 1)
         coordinatePairs.add(CoordinatePair(currentX, currentY))
@@ -144,8 +184,28 @@ private fun processLineToRelative(numbers: List<Double>, startCoordinate: Coordi
     return coordinatePairs
 }
 
-private fun processSmoothCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePair?,
-                                         previousPathElement: PathElement?): List<CoordinatePair> {
+fun processLineToAbsolute(numbers: List<Double>): List<CoordinatePair> {
+    val coordinatePairs = mutableListOf<CoordinatePair>()
+    var currentX = numbers[0]
+    var currentY = numbers[1]
+
+    coordinatePairs.add(CoordinatePair(currentX, currentY))
+
+    for (i in 2 until numbers.size step 2) {
+        currentX += numbers[i]
+        currentY += numbers[i + 1]
+
+        coordinatePairs.add(CoordinatePair(currentX, currentY))
+    }
+
+    return coordinatePairs
+}
+
+
+private fun processSmoothCurveToRelative(
+    numbers: List<Double>, startCoordinate: CoordinatePair?,
+    previousPathElement: PathElement?
+): List<CoordinatePair> {
     var filteredStartCoordinate: CoordinatePair
 
     if (startCoordinate != null) {
@@ -156,9 +216,15 @@ private fun processSmoothCurveToRelative(numbers: List<Double>, startCoordinate:
 
     var firstControlPoint: CoordinatePair
     if (previousPathElement != null) {
-        if (setOf<PathCommand>(PathCommand.CURVE_TO_RELATIVE, PathCommand.SMOOTH_CURVE_TO_RELATIVE).contains(previousPathElement.command)) {
-            firstControlPoint = CoordinatePair(2 * filteredStartCoordinate.x - previousPathElement.numbers.get(previousPathElement.numbers.size - 4),
-                    2 * filteredStartCoordinate.y - previousPathElement.numbers.get(previousPathElement.numbers.size - 3))
+        if (setOf(
+                PathCommand.CURVE_TO_RELATIVE,
+                PathCommand.SMOOTH_CURVE_TO_RELATIVE
+            ).contains(previousPathElement.command)
+        ) {
+            firstControlPoint = CoordinatePair(
+                2 * filteredStartCoordinate.x - previousPathElement.numbers.get(previousPathElement.numbers.size - 4),
+                2 * filteredStartCoordinate.y - previousPathElement.numbers.get(previousPathElement.numbers.size - 3)
+            )
         } else {
             firstControlPoint = filteredStartCoordinate
         }
@@ -172,20 +238,34 @@ private fun processSmoothCurveToRelative(numbers: List<Double>, startCoordinate:
 //    coordinatePairs.add(filteredStartCoordinate)
 //    coordinatePairs.add(firstControlPoint)
 
-    for (i in 0..numbers.size - 1 step 2) {
-        coordinatePairs.add(CoordinatePair(numbers.get(i) + filteredStartCoordinate.x, numbers.get(i + 1) + filteredStartCoordinate.y))
+    for (i in numbers.indices step 2) {
+        coordinatePairs.add(
+            CoordinatePair(
+                numbers.get(i) + filteredStartCoordinate.x,
+                numbers.get(i + 1) + filteredStartCoordinate.y
+            )
+        )
     }
 
     val n = coordinatePairs.size
     val newCoordinates = mutableListOf<CoordinatePair>()
-    for (curveNumber in 0..n - 1 step 2) {
-        val bezierCurve = processSingleCubicBezierCurve(listOf(filteredStartCoordinate, firstControlPoint,
-                coordinatePairs.get(curveNumber), coordinatePairs.get(curveNumber + 1)))
+    for (curveNumber in 0 until n step 2) {
+        val bezierCurve = processSingleCubicBezierCurve(
+            listOf(
+                filteredStartCoordinate, firstControlPoint,
+                coordinatePairs.get(curveNumber), coordinatePairs.get(curveNumber + 1)
+            )
+        )
         filteredStartCoordinate = bezierCurve.last()
         firstControlPoint = coordinatePairs.get(curveNumber)
         newCoordinates.addAll(bezierCurve)
     }
-    return newCoordinates.map { coordinatePair -> CoordinatePair(coordinatePair.x + filteredStartCoordinate.x, coordinatePair.y + filteredStartCoordinate.y) }
+    return newCoordinates.map { coordinatePair ->
+        CoordinatePair(
+            coordinatePair.x + filteredStartCoordinate.x,
+            coordinatePair.y + filteredStartCoordinate.y
+        )
+    }
 }
 
 fun processCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePair): List<CoordinatePair> {
@@ -194,7 +274,7 @@ fun processCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePai
     // TODO This will cause duplicate points
 //    inputPoints.add(startCoordinate)
 
-    for (i in 0..numbers.size - 1 step 2) {
+    for (i in numbers.indices step 2) {
         inputPoints.add(CoordinatePair(numbers.get(i) + startCoordinate.x, numbers.get(i + 1) + startCoordinate.y))
     }
 
@@ -203,8 +283,12 @@ fun processCurveToRelative(numbers: List<Double>, startCoordinate: CoordinatePai
     val outputPoints = mutableListOf<CoordinatePair>()
 
     for (curveNumber in 0..n - 1 step 3) {
-        val bezierCurve = processSingleCubicBezierCurve(listOf(currentPoint, inputPoints.get(curveNumber),
-                inputPoints.get(curveNumber + 1), inputPoints.get(curveNumber + 2)))
+        val bezierCurve = processSingleCubicBezierCurve(
+            listOf(
+                currentPoint, inputPoints.get(curveNumber),
+                inputPoints.get(curveNumber + 1), inputPoints.get(curveNumber + 2)
+            )
+        )
         outputPoints.addAll(bezierCurve)
         currentPoint = inputPoints.get(curveNumber + 2)
     }
@@ -218,7 +302,7 @@ fun processCurveToAbsolute(numbers: List<Double>, startCoordinate: CoordinatePai
     // TODO This will cause duplicate points
 //    inputPoints.add(startCoordinate)
 
-    for (i in 0..numbers.size - 1 step 2) {
+    for (i in numbers.indices step 2) {
         inputPoints.add(CoordinatePair(numbers.get(i), numbers.get(i + 1)))
     }
 
@@ -226,9 +310,13 @@ fun processCurveToAbsolute(numbers: List<Double>, startCoordinate: CoordinatePai
     var currentPoint = startCoordinate
     val outputPoints = mutableListOf<CoordinatePair>()
 
-    for (curveNumber in 0..n - 1 step 3) {
-        val bezierCurve = processSingleCubicBezierCurve(listOf(currentPoint, inputPoints.get(curveNumber),
-                inputPoints.get(curveNumber + 1), inputPoints.get(curveNumber + 2)))
+    for (curveNumber in 0 until n step 3) {
+        val bezierCurve = processSingleCubicBezierCurve(
+            listOf(
+                currentPoint, inputPoints.get(curveNumber),
+                inputPoints.get(curveNumber + 1), inputPoints.get(curveNumber + 2)
+            )
+        )
         outputPoints.addAll(bezierCurve)
         currentPoint = inputPoints.get(curveNumber + 2)
     }
@@ -236,21 +324,35 @@ fun processCurveToAbsolute(numbers: List<Double>, startCoordinate: CoordinatePai
 }
 
 
-
-
 fun processSingleCubicBezierCurve(points: List<CoordinatePair>): List<CoordinatePair> {
     val xCoordinates = mutableListOf<Double>()
     val yCoordinates = mutableListOf<Double>()
 
     for (t in generateSequence({ 0.0 }, { it + STEP_SIZE }).takeWhile { it < 1.0 }) {
-        xCoordinates.add(evaluateCubicBezierCurvePolynomial(t, points.get(0).x, points.get(1).x, points.get(2).x, points.get(3).x))
-        yCoordinates.add(evaluateCubicBezierCurvePolynomial(t, points.get(0).y, points.get(1).y, points.get(2).y, points.get(3).y))
+        xCoordinates.add(
+            evaluateCubicBezierCurvePolynomial(
+                t,
+                points.get(0).x,
+                points.get(1).x,
+                points.get(2).x,
+                points.get(3).x
+            )
+        )
+        yCoordinates.add(
+            evaluateCubicBezierCurvePolynomial(
+                t,
+                points.get(0).y,
+                points.get(1).y,
+                points.get(2).y,
+                points.get(3).y
+            )
+        )
     }
 
     xCoordinates.add(points.get(3).x)
     yCoordinates.add(points.get(3).y)
 
-    return (0..xCoordinates.size - 1).map { CoordinatePair(xCoordinates.get(it), yCoordinates.get(it)) }.toList()
+    return (0 until xCoordinates.size).map { CoordinatePair(xCoordinates.get(it), yCoordinates.get(it)) }.toList()
 }
 
 private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double, p2: Double, p3: Double): Double {
@@ -258,7 +360,12 @@ private fun evaluateCubicBezierCurvePolynomial(t: Double, p0: Double, p1: Double
 }
 
 fun offSetBoundingBox(boundingBox: BoundingBox, xOffset: Int, yOffset: Int): BoundingBox {
-    return BoundingBox(boundingBox.xMin + xOffset, boundingBox.yMin + yOffset, boundingBox.xMax + xOffset, boundingBox.yMax + yOffset)
+    return BoundingBox(
+        boundingBox.xMin + xOffset,
+        boundingBox.yMin + yOffset,
+        boundingBox.xMax + xOffset,
+        boundingBox.yMax + yOffset
+    )
 }
 
 
@@ -271,6 +378,7 @@ fun invertYCoordinates(glyphData: GlyphData): GlyphData {
             PathCommand.HORIZONAL_LINE_TO_RELATIVE -> fontPathElement.numbers
             PathCommand.MOVE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.MOVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
+            PathCommand.LINE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.LINE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.CURVE_TO_RELATIVE -> invertEverySecondNumber(fontPathElement.numbers)
             PathCommand.CURVE_TO_ABSOLUTE -> invertEverySecondNumber(fontPathElement.numbers)
@@ -298,7 +406,8 @@ fun invertEverySecondNumber(numbers: Iterable<Double>): List<Double> {
 
 
 fun scaleGlyph(glyphData: GlyphData, scaleFactor: Double): GlyphData {
-    val newPathElements = glyphData.pathElements.map { it -> PathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) }
+    val newPathElements =
+        glyphData.pathElements.map { it -> PathElement(it.command, it.numbers.map { it * scaleFactor }.toList()) }
     return GlyphData(glyphData.name, newPathElements, findBoundingBox(newPathElements))
 }
 
@@ -309,20 +418,20 @@ fun transformToPathString(pathInterface: PathInterfaceImpl) = transformToPathStr
 fun transformToPathString(pathElements: Collection<PathElement>): String {
     return pathElements.map {
         it.command.command
-                .plus(" ")
-                .plus(it.numbers.joinToString(" ") {
-                    val numberAsString = it.toString()
-                    val decimalPoint = numberAsString.indexOf('.')
+            .plus(" ")
+            .plus(it.numbers.joinToString(" ") {
+                val numberAsString = it.toString()
+                val decimalPoint = numberAsString.indexOf('.')
 
-                    // Cut off places that lie beyond the max number of allowed decimal places
-                    if (decimalPoint < numberAsString.length - MAX_NUMBER_OF_DECIMALS) {
-                        numberAsString.subSequence(0, decimalPoint + MAX_NUMBER_OF_DECIMALS)
-                    } else {
-                        numberAsString
-                    }
-                })
+                // Cut off places that lie beyond the max number of allowed decimal places
+                if (decimalPoint < numberAsString.length - MAX_NUMBER_OF_DECIMALS) {
+                    numberAsString.subSequence(0, decimalPoint + MAX_NUMBER_OF_DECIMALS)
+                } else {
+                    numberAsString
+                }
+            })
     }
-            .joinToString(" ")
+        .joinToString(" ")
 
 }
 

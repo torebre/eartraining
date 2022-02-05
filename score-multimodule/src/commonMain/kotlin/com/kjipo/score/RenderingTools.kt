@@ -54,9 +54,7 @@ fun addBeam(xMin: Double, yMin: Double, xMax: Double, yMax: Double): PathInterfa
             PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xMin, yMin)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(DEFAULT_BEAM_HEIGHT.toDouble())),
             PathElement(
-                PathCommand.LINE_TO_RELATIVE, listOf(
-                    0.0,
-                    0.0,
+                PathCommand.LINE_TO_ABSOLUTE, listOf(
                     xMax,
                     yMax
                 )

@@ -49,8 +49,8 @@ private fun showBeam() {
         it.timeSignature = TimeSignature(4, 4)
     }
 
-    val note1 = Note("test1", Duration.QUARTER, 5, NoteType.A_SHARP)
-    val note2 = Note("test2", Duration.QUARTER, 5, NoteType.A)
+    val note1 = Note("test1", Duration.QUARTER, 5, NoteType.A_SHARP, stem = Stem.UP)
+    val note2 = Note("test2", Duration.QUARTER, 5, NoteType.A, stem = Stem.UP)
     val notes = listOf(note1, note2)
 
     bar.scoreHandlerElements.addAll(notes)
@@ -107,7 +107,7 @@ private fun showNotes() {
 
 fun main() {
 //showTie()
-//showBeam()
+    showBeam()
 //showNoteGroupWithSharp()
-    showNotes()
+//    showNotes()
 }

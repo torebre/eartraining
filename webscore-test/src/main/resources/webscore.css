@@ -1,0 +1,16 @@
+.bar {
+    stroke: black;
+}
+
+bar-line {
+    color: #555;
+}
+
+.highlight {
+    fill: red;
+}
+
+.debug_box {
+    fill: blue;
+    opacity: 0.5;
+}
