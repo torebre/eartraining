@@ -9,4 +9,6 @@ include ':webscore-multimodule'
 include ':synthesizerbrowser'
 include ':webscore-test'
 
-enableFeaturePreview('GRADLE_METADATA')
+//enableFeaturePreview('GRADLE_METADATA')
+include 'webpitch2'
+
