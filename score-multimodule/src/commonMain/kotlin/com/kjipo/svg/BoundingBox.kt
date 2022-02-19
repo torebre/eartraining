@@ -21,10 +21,11 @@ data class CoordinatePair(val x: Double, val y: Double, val skipLine: Boolean = 
 
 
 private fun findBoundingBoxInternal(coordinates: Iterable<CoordinatePair>): BoundingBox {
-    return BoundingBox(coordinates.map { coordinatePair -> coordinatePair.x }.min() ?: 0.0,
-            coordinates.map { coordinatePair -> coordinatePair.y }.min() ?: 0.0,
-            coordinates.map { coordinatePair -> coordinatePair.x }.max() ?: 0.0,
-            coordinates.map { coordinatePair -> coordinatePair.y }.max() ?: 0.0)
+    return BoundingBox(
+        coordinates.map { coordinatePair -> coordinatePair.x }.minOrNull() ?: 0.0,
+            coordinates.map { coordinatePair -> coordinatePair.y }.minOrNull() ?: 0.0,
+            coordinates.map { coordinatePair -> coordinatePair.x }.maxOrNull() ?: 0.0,
+            coordinates.map { coordinatePair -> coordinatePair.y }.maxOrNull() ?: 0.0)
 }
 
 fun findBoundingBox(pathElements: List<PathElement>): BoundingBox {
