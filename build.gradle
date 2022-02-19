@@ -4,7 +4,7 @@ allprojects {
 }
 
 buildscript {
-    ext.kotlinVersion = '1.4.21'
+    ext.kotlinVersion = '1.6.10'
 
     repositories {
         jcenter()
@@ -20,7 +20,7 @@ ext {
     nodeVersion = '8.11.1'
     qunitVersion = '2.6.0'
     assert4jVersion = '3.12.2'
-    kotlinVersion = '1.4.0'
+    kotlinVersion = '1.6.0'
     serializationRuntime = '1.0.0-RC'
     multiplatform = '$kotlinVersion'
     kotlinLogging = '2.0.2'
