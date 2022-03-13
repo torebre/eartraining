@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+//    "module": "UMD",
+      "typeRoots": ["src/@types", "node_modules/@types"]
+  },
+  "files": [
+    "src/essentiaModule.ts",
+//    "imports/essentia.js-core.umd.js",
+//    "imports/essentia-wasm.umd.js"
+  ]
+}

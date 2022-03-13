@@ -27,7 +27,7 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
 
 
     // TODO It is an AudioWorkletNode, but where is the code for the interface?
-    private var pitchNode: dynamic = Any()
+    private var testAudioProcessorNode: dynamic = Any()
     private val logger = KotlinLogging.logger {}
 
 
@@ -89,7 +89,10 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
         logger.info { "Setting up audio stream from microphone" }
         microphoneNode = audioContext.createMediaStreamSource(stream as webaudioapi.MediaStream)
 
-        setupPitchDetection()
+        // TODO Comment back in pitch detection
+//        setupPitchDetection()
+
+        addTestAudioProcessor()
     }
 
     private suspend fun setupPitchDetection() {
@@ -112,21 +115,21 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
         logger.info { "Sample rate: ${audioContext.sampleRate}" }
 
         addModulePromise.then {
-            pitchNode =
+            testAudioProcessorNode =
                 js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'pitchyinprob-processor', { processorOptions: { bufferSize: 8192, sampleRate: webpitch2.PitchDetection.audioContext.sampleRate}});")
 
             val input: dynamic = Any()
             input.sab = sharedArrayBuffer
 
             // Set up the audio network
-            pitchNode.port.postMessage(input)
+            testAudioProcessorNode.port.postMessage(input)
             gainNode = audioContext.createGain()
 
             gainNode?.let { gain ->
                 gain.gain.setValueAtTime(0, audioContext.currentTime)
 
-                microphoneNode?.connect(pitchNode as AudioNode)
-                pitchNode?.connect(gainNode)
+                microphoneNode?.connect(testAudioProcessorNode as AudioNode)
+                testAudioProcessorNode?.connect(gainNode)
                 gain.connect(audioContext.destination)
             }
         }
@@ -163,6 +166,35 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
         window.requestAnimationFrame { timestamp: Any -> callback(timestamp) }
     }
 
+    private suspend fun addTestAudioProcessor() {
+        val fileContents = urlFromFiles(listOf("audio-worker.js"))
+
+        val addModulePromise: Promise<Any> =
+            js("webpitch2.PitchDetection.audioContext.audioWorklet.addModule(fileContents);")
+
+        addModulePromise.then {
+            testAudioProcessorNode =
+                js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'test-audio-processor');")
+
+            gainNode = audioContext.createGain()
+
+            gainNode?.let { gain ->
+
+                console.log("Test23")
+
+                gain.gain.setValueAtTime(0, audioContext.currentTime)
+
+                microphoneNode?.connect(testAudioProcessorNode as AudioNode)
+                testAudioProcessorNode?.connect(gainNode)
+                gain.connect(audioContext.destination)
+            }
+
+
+        }
+            .catch({ throwable -> logger.info(throwable, { "Exception when setting up audio graph" }) })
+    }
+
+
     fun stopRecording() {
         processData = false
         mediaStream?.getAudioTracks()?.forEach {
@@ -172,11 +204,11 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
 
         audioContext.close().then {
             microphoneNode?.disconnect()
-            pitchNode.disconnect()
+            testAudioProcessorNode.disconnect()
             gainNode?.disconnect()
 
             microphoneNode = null
-            pitchNode = null
+            testAudioProcessorNode = null
             gainNode = null
         }
 

@@ -12,4 +12,5 @@ include ':webscore-test'
 //enableFeaturePreview('GRADLE_METADATA')
 include 'webpitch2'
 include 'pitchDetection'
+include 'essentia_module2'
 
