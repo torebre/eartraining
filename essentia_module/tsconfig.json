@@ -1,12 +1,31 @@
 {
+  //  "compilerOptions": {
+  //    "allowJs": true,
+  //        "module": "none",
+  //    //      "typeRoots": [
+  //    //        "./src/types/webaudio",
+  //    //        "./src/types/essentia",
+  //    //        "./src/types"
+  //    //      ],
+  //    "outDir": "dist"
+  //  },
   "compilerOptions": {
-    "allowJs": true,
-//    "module": "UMD",
-      "typeRoots": ["src/@types", "node_modules/@types"]
+    "incremental": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "rootDir": "./src",
+    "declaration": false,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    //    "outDir": "./public/js",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    //    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node"
   },
-  "files": [
-    "src/essentiaModule.ts",
-//    "imports/essentia.js-core.umd.js",
-//    "imports/essentia-wasm.umd.js"
+  "include": [
+    "./src"
   ]
 }

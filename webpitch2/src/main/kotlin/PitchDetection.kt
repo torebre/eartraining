@@ -92,7 +92,9 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
         // TODO Comment back in pitch detection
 //        setupPitchDetection()
 
-        addTestAudioProcessor()
+//        addTestAudioProcessor()
+
+        setupPitchDetectionTest()
     }
 
     private suspend fun setupPitchDetection() {
@@ -167,21 +169,21 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
     }
 
     private suspend fun addTestAudioProcessor() {
-        val fileContents = urlFromFiles(listOf("audio-worker.js"))
+//        val fileContents = urlFromFiles(listOf("audio-worker.js"))
+        val fileContents = urlFromFiles(listOf("essentiaModule.js"))
+//        val fileContents = urlFromFiles(listOf("audio-worker2.js"))
 
         val addModulePromise: Promise<Any> =
             js("webpitch2.PitchDetection.audioContext.audioWorklet.addModule(fileContents);")
 
+        // TODO Give buffer size as argument, not a hardcoded value
         addModulePromise.then {
             testAudioProcessorNode =
-                js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'test-audio-processor');")
+                js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'test-audio-processor', {processorOptions: { bufferSize: 8192, sampleRate: webpitch2.PitchDetection.audioContext.sampleRate, }});")
 
             gainNode = audioContext.createGain()
 
             gainNode?.let { gain ->
-
-                console.log("Test23")
-
                 gain.gain.setValueAtTime(0, audioContext.currentTime)
 
                 microphoneNode?.connect(testAudioProcessorNode as AudioNode)
@@ -192,6 +194,72 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
 
         }
             .catch({ throwable -> logger.info(throwable, { "Exception when setting up audio graph" }) })
+    }
+
+
+
+    private suspend fun setupPitchDetectionTest() {
+        val sharedArrayBuffer =
+            js("RingBuffer.getStorageForCapacity(3, Float32Array);") // capacity: three float32 values [pitch, confidence, rms]
+        val rb = js("new RingBuffer(sharedArrayBuffer, Float32Array);")
+        val audioReader = js("new AudioReader(rb);")
+        val fileContents = urlFromFiles(listOf("essentiaModule.js"))
+
+        val addModulePromise: Promise<Any> =
+            js("webpitch2.PitchDetection.audioContext.audioWorklet.addModule(fileContents);")
+
+        logger.info { "Sample rate: ${audioContext.sampleRate}" }
+
+        addModulePromise.then {
+            testAudioProcessorNode =
+                js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'test-audio-processor', { processorOptions: { bufferSize: 8192, sampleRate: webpitch2.PitchDetection.audioContext.sampleRate}});")
+
+            val input: dynamic = Any()
+            input.sab = sharedArrayBuffer
+
+            // Set up the audio network
+            testAudioProcessorNode.port.postMessage(input)
+            gainNode = audioContext.createGain()
+
+            gainNode?.let { gain ->
+                gain.gain.setValueAtTime(0, audioContext.currentTime)
+
+                microphoneNode?.connect(testAudioProcessorNode as AudioNode)
+                testAudioProcessorNode?.connect(gainNode)
+                gain.connect(audioContext.destination)
+            }
+        }
+            .catch({ throwable -> logger.info(throwable, { "Exception when setting up audio graph" }) })
+
+        val pitchBuffer = js("new Float32Array(3);")
+
+        processData = true
+//            while(processData) {
+//                // TODO This is a very tight loop, add a sleep?
+//
+//                if (audioReader.available_read() >= 1) {
+//                    val read = audioReader.dequeue(pitchBuffer)
+//                    if (read !== 0) {
+//                        logger.info { "main: ${pitchBuffer[0]}, ${pitchBuffer[1]}, ${pitchBuffer[2]}" }
+//                    }
+//                }
+//            }
+
+        fun callback(timeStamp: Any) {
+            if (!processData) {
+                return
+            }
+
+            logger.info { "Bytes available for reading: ${audioReader.available_read()}" }
+            window.requestAnimationFrame { timestamp: Any -> callback(timestamp) }
+            if (audioReader.available_read() >= 1) {
+                val read = audioReader.dequeue(pitchBuffer)
+                if (read !== 0) {
+                    logger.info { "main: ${pitchBuffer[0]}, ${pitchBuffer[1]}, ${pitchBuffer[2]}" }
+                }
+            }
+        }
+        window.requestAnimationFrame { timestamp: Any -> callback(timestamp) }
     }
 
 
