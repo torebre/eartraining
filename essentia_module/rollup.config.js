@@ -1,5 +1,4 @@
-// import commonjs from "@rollup/plugin-commonjs"
-import { nodeResolve } from "@rollup/plugin-node-resolve"
+import {nodeResolve} from "@rollup/plugin-node-resolve"
 import rollupTypescript from "@rollup/plugin-typescript"
 
 const output = {
@@ -8,20 +7,11 @@ const output = {
 }
 
 const plugins = [
-    nodeResolve({ preferBuiltins: false, browser: true }),
-    // commonjs(),
+    nodeResolve({preferBuiltins: false, browser: true}),
     rollupTypescript(),
 ]
 
 export default [
-    // {
-        // input: "src/essentiaModule.ts",
-        // output: {
-        //     ...output,
-        //     format: "commonjs",
-        // },
-        // plugins,
-    // },
     {
         input: "src/essentiaModule.ts",
         output: {
@@ -30,12 +20,4 @@ export default [
         },
         plugins,
     },
-    // {
-    //     input: "src/renderer/rendererWorker.ts",
-    //     output: {
-    //         ...output,
-    //         format: "iife",
-    //     },
-    //     plugins,
-    // },
 ]
