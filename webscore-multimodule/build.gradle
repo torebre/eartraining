@@ -33,7 +33,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
-                implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
+                implementation "org.jetbrains.kotlinx:kotlinx-html-js:$kotlinxHtmlVersion"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
                 implementation project(':scoregenerator-common')
                 implementation project(':score-multimodule')
