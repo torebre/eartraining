@@ -51,7 +51,8 @@ private fun showBeam() {
 
     val note1 = Note("test1", Duration.QUARTER, 5, NoteType.A_SHARP, stem = Stem.UP)
     val note2 = Note("test2", Duration.QUARTER, 5, NoteType.A, stem = Stem.UP)
-    val notes = listOf(note1, note2)
+    val rest1 = Rest("test3", Duration.HALF)
+    val notes = listOf(note1, note2, rest1)
 
     bar.scoreHandlerElements.addAll(notes)
 
@@ -105,9 +106,35 @@ private fun showNotes() {
     val webScore = WebScore(ScoreHandlerJavaScript(reducedScore), "score", true)
 }
 
+
+private fun showChordWithTwoSharps() {
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
+    val bar = Bar().also {
+        it.clef = Clef.G
+        it.timeSignature = TimeSignature(4, 4)
+    }
+
+    val note1 = NoteSymbol("test1", Duration.QUARTER, 5, NoteType.A_SHARP)
+    val note2 = NoteSymbol("test2", Duration.QUARTER, 6, NoteType.C_SHARP)
+    val notes = listOf(note1, note2)
+
+    val noteGroup = NoteGroup("testGroup", notes)
+
+    bar.scoreHandlerElements.addAll(setOf(noteGroup))
+
+    val score = Score()
+    score.bars.add(bar)
+
+    val scoreHandler = ScoreHandlerWithReducedLogic(score)
+
+    val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
+}
+
 fun main() {
 //showTie()
-    showBeam()
+//    showBeam()
 //showNoteGroupWithSharp()
 //    showNotes()
+    showChordWithTwoSharps()
 }

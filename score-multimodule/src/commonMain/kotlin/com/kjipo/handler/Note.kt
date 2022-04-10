@@ -28,7 +28,7 @@ data class Note(
 data class Rest(
     override val id: String,
     val duration: Duration,
-    override val properties: Map<String, String>
+    override val properties: Map<String, String> = emptyMap()
 ) :
     ScoreHandlerElement()
 

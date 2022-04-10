@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import kotlinx.dom.appendText
 import kotlinx.html.currentTimeMillis
 import mu.KotlinLogging
+import mu.KotlinLogging.logger
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
@@ -179,7 +180,7 @@ class WebScore(
                     noteInputMode = false
                 }
             } else {
-                handleKeyEvent(keyboardEvent.key, keyboardEvent.keyCode)
+                handleKeyEvent(keyboardEvent)
             }
         })
     }
@@ -350,10 +351,10 @@ class WebScore(
         return false
     }
 
-    private fun handleKeyEvent(key: String, keyCode: Int) {
+    private fun handleKeyEvent(keyboardEvent: KeyboardEvent) {
         // TODO Fix strings to that they match with the keys
 
-        when (key) {
+        when (keyboardEvent.code) {
             "ArrowUp" -> activeElement?.let {
                 // Up
                 scoreHandler.moveNoteOneStep(it, true)
@@ -375,109 +376,117 @@ class WebScore(
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                val duration = getDuration(keyCode - 48)
-                if (noteModeOn) {
-                    scoreHandler.applyOperation(
-                        InsertNote(
-                            activeElement,
-                            60,
-                            duration
+                val duration = getDuration(keyboardEvent.keyCode - 48)
+
+                logger.debug { "Test23" }
+
+                    if (noteModeOn) {
+
+                        logger.debug { "Test24" }
+
+                        scoreHandler.applyOperation(
+                            InsertNote(
+                                activeElement,
+                                60,
+                                duration
+                            )
                         )
-                    )
-                } else {
-                    scoreHandler.applyOperation(InsertRest(activeElement, duration))
-                }
-            }
-
-            "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
-                activeElement?.let {
-                    scoreHandler.updateDuration(it, getDuration(keyCode - 96))
-                }
-            }
-
-            "Delete" -> {
-                activeElement?.let {
-                    deactivateActiveElement()
-                    activeElement = null
-
-                    var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
-                    if (neighbouringElement == null) {
-                        neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
-                    }
-                    scoreHandler.deleteElement(it)
-
-                    if (neighbouringElement != null) {
-                        activeElement = neighbouringElement
-                        highlightElement(activeElement)
                     } else {
-                        scoreHandler.getIdOfFirstSelectableElement()
+                        scoreHandler.applyOperation(InsertRest(activeElement, duration))
                     }
                 }
-            }
 
-            "m" -> {
-                noteModeOn = !noteModeOn
-            }
-
-            "n" -> {
-                noteInputMode = !noteInputMode
-            }
-
-        }
-    }
-
-    private fun generateSvgData(svgElement: Element) {
-        webscoreSvgProvider.generateSvgData(svgElement)
-        highlightElement(activeElement)
-    }
-
-    private fun regenerateSvg() {
-        generateSvgData(svgElement)
-    }
-
-    private fun writeDebug(tag: String, message: String?) {
-        debugLabelId?.let {
-            document.getElementById(it)?.appendText("$tag: $message")
-        }
-    }
-
-    override fun scoreUpdated() {
-        regenerateSvg()
-        highlightElement(activeElement)
-    }
-
-
-    private fun highlightElementClosestToMouseCursor(xPosition: Int, yPosition: Int) {
-        val svgRect = svgElement.createSVGRect()
-        with(svgRect) {
-            x = maxOf(xPosition.toDouble().minus(10), 0.0)
-            y = maxOf(yPosition.toDouble().minus(10), 0.0)
-            width = 20.0
-            height = 20.0
-        }
-
-        val intersectionList = svgElement.getIntersectionList(svgRect, svgElement)
-        val numberOfNodes = intersectionList.length
-        (0..numberOfNodes).forEach { index ->
-            intersectionList[index]?.let { node ->
-
-
-                logger.debug { "Test80: $node" }
-
-
-                when (node) {
-                    is SVGUseElement -> {
-                        highlightElementIfFound(node.id)
+                "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
+                    activeElement?.let {
+                        scoreHandler.updateDuration(it, getDuration(keyboardEvent.keyCode - 96))
                     }
-                    is SVGPathElement -> {
-                        highlightElementIfFound(node.id)
-                    }
+                }
 
-                    // TODO Which element types to check?
+                "Delete" -> {
+                    activeElement?.let {
+                        deactivateActiveElement()
+                        activeElement = null
+
+                        var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
+                        if (neighbouringElement == null) {
+                            neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
+                        }
+                        scoreHandler.deleteElement(it)
+
+                        if (neighbouringElement != null) {
+                            activeElement = neighbouringElement
+                            highlightElement(activeElement)
+                        } else {
+                            scoreHandler.getIdOfFirstSelectableElement()
+                        }
+                    }
+                }
+
+                "m" -> {
+                    noteModeOn = !noteModeOn
+                }
+
+                "n" -> {
+                    noteInputMode = !noteInputMode
+                }
+
+            }
+        }
+
+        private fun generateSvgData(svgElement: Element) {
+            webscoreSvgProvider.generateSvgData(svgElement)
+            highlightElement(activeElement)
+        }
+
+        private fun regenerateSvg() {
+            generateSvgData(svgElement)
+        }
+
+        private fun writeDebug(tag: String, message: String?) {
+            debugLabelId?.let {
+                document.getElementById(it)?.appendText("$tag: $message")
+            }
+        }
+
+        override fun scoreUpdated() {
+            regenerateSvg()
+            highlightElement(activeElement)
+        }
+
+
+        private fun highlightElementClosestToMouseCursor(xPosition: Int, yPosition: Int) {
+            val svgRect = svgElement.createSVGRect()
+            with(svgRect) {
+                x = maxOf(xPosition.toDouble().minus(10), 0.0)
+                y = maxOf(yPosition.toDouble().minus(10), 0.0)
+                width = 20.0
+                height = 20.0
+            }
+
+            val intersectionList = svgElement.getIntersectionList(svgRect, svgElement)
+            val numberOfNodes = intersectionList.length
+            (0..numberOfNodes).forEach { index ->
+                intersectionList[index]?.let { node ->
+
+
+                    logger.debug { "Test80: $node" }
+
+
+                    when (node) {
+                        is SVGUseElement -> {
+                            highlightElementIfFound(node.id)
+                        }
+                        is SVGPathElement -> {
+                            highlightElementIfFound(node.id)
+                        }
+
+                        // TODO Which element types to check?
 //                    else -> {
 //                        logger.debug { "Test90: $node" }
 //                    }
 
+                    }
+
                 }
 
             }
@@ -485,5 +494,3 @@ class WebScore(
         }
 
     }
-
-}

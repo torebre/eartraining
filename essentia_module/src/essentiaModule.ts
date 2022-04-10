@@ -29,8 +29,6 @@ class TestAudioProcessor extends AudioWorkletProcessor {
         this.essentia = new Essentia(EssentiaWASM)
         this.frameSize = this.bufferSize / 2
         this.hopSize = this.frameSize / 4
-
-        // buffersize mismatch helpers
         this.inputRingBuffer = new ChromeLabsRingBuffer(this.bufferSize, this.channelCount)
 
         this.accumData = [new Float32Array(this.bufferSize)]
@@ -53,8 +51,6 @@ class TestAudioProcessor extends AudioWorkletProcessor {
 
         if (this.inputRingBuffer.framesAvailable >= this.bufferSize) {
             this.inputRingBuffer.pull(this.accumData)
-
-            console.log("Test30 : " + this.inputRingBuffer.framesAvailable)
 
             const accumDataVector = this.essentia.arrayToVector(this.accumData[0])
             const rms = this.essentia.RMS(accumDataVector).rms

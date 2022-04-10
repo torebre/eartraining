@@ -4,6 +4,10 @@ import com.kjipo.scoregenerator.ReducedScore
 import com.kjipo.submithandling.SubmitHandler
 import mu.KotlinLogging
 
+/**
+ * Shows two scores. One with the target sequence and one with the
+ * user input sequence.
+ */
 class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
@@ -37,7 +41,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     }
 
     fun submit(attempt: List<NoteSequenceElement>) {
-       submitHandler.getCurrentExercise()?.submit(attempt)
+        submitHandler.getCurrentExercise()?.submit(attempt)
     }
 
     suspend fun playSequence() {
