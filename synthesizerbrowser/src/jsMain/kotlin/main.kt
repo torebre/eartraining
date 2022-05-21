@@ -10,6 +10,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
+import org.w3c.dom.events.KeyboardEvent
 
 
 fun showWebscore() {
@@ -32,6 +33,26 @@ fun showWebscore() {
 
     document.querySelector("btnSubmit")?.addEventListener("click", {
         webscoreShow.submit()
+    })
+
+    var noteInputMode = false
+    document.addEventListener("keydown", { event ->
+        with(event as KeyboardEvent) {
+            if (code == "KeyN") {
+                document.querySelector("#inputMode")?.let {
+                    it.firstChild?.let {
+                        it.textContent = if (noteInputMode) {
+                            "Note input on"
+                        } else {
+                            "Note input off"
+                        }
+                        noteInputMode = !noteInputMode
+                    }
+                }
+            }
+
+        }
+
     })
 }
 

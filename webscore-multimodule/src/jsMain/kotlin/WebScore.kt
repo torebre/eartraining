@@ -168,7 +168,7 @@ class WebScore(
         setupTouchEvents()
         setupMouseEvent()
 
-        svgElement.addEventListener("keydown", { event ->
+        document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
             logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Key: ${keyboardEvent.key}" }
