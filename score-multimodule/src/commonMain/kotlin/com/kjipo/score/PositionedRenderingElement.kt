@@ -89,7 +89,7 @@ class TranslatedRenderingElement(
 
 
 @Serializable
-class TranslatedRenderingElementUsingReference(
+data class TranslatedRenderingElementUsingReference(
     override val id: String,
     override val groupClass: String?,
     val translation: Translation,

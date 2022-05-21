@@ -119,7 +119,7 @@ private fun showChordWithTwoSharps() {
     val note2 = NoteSymbol("test2", Duration.QUARTER, 6, NoteType.C_SHARP)
     val notes = listOf(note1, note2)
 
-    val noteGroup = NoteGroup("testGroup", notes)
+    val noteGroup = NoteGroup("testGroup", notes, stem=Stem.UP)
 
     bar.scoreHandlerElements.addAll(setOf(noteGroup))
 

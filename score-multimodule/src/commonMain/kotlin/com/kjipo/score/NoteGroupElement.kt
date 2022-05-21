@@ -45,6 +45,8 @@ class NoteGroupElement(
 
 
     fun layoutNoteHeads() {
+        val accidentals = mutableListOf<TranslatedRenderingElementUsingReference>()
+
         for (note in noteGroup.notes) {
             val yPositionForNoteHead = calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
             val noteHeadTranslation =
@@ -54,13 +56,12 @@ class NoteGroupElement(
                 )
 
             if (noteRequiresSharp(note.noteType)) {
-                result.add(
-                    setupAccidental(
-                        "${note.id}-sharp",
-                        Accidental.SHARP,
-                        noteHeadTranslation
-                    )
-                )
+                setupAccidental(
+                    "${note.id}-sharp",
+                    Accidental.SHARP,
+                    noteHeadTranslation
+                ).also { accidentals.add(it) }
+                    .also { result.add(it) }
             }
 
             val glyphData = getNoteHeadGlyph(duration)
@@ -84,6 +85,8 @@ class NoteGroupElement(
             }
         }
 
+        handleOverlappingAccidentals(accidentals)
+
         noteGroup.notes.maxWithOrNull { a, b ->
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
@@ -104,6 +107,50 @@ class NoteGroupElement(
             result.add(addStem(it == Stem.UP))
         }
 
+    }
+
+    private fun handleOverlappingAccidentals(accidentals: MutableList<TranslatedRenderingElementUsingReference>) {
+        if (accidentals.isNotEmpty()) {
+            val positionedBoundingBoxes = mutableListOf<BoundingBox>()
+            val positionedBoundingBoxAccidentalMap =
+                mutableMapOf<BoundingBox, PositionedRenderingElementParent>()
+            for (accidental in accidentals) {
+                val positionedBoundingBox = BoundingBox(
+                    accidental.translation.xShift + accidental.boundingBox.xMin,
+                    accidental.translation.yShift + accidental.boundingBox.yMin,
+                    accidental.translation.xShift + accidental.boundingBox.xMax,
+                    accidental.translation.yShift + accidental.boundingBox.yMax
+                )
+                positionedBoundingBoxes.add(positionedBoundingBox)
+                positionedBoundingBoxAccidentalMap[positionedBoundingBox] = accidental
+            }
+
+            positionedBoundingBoxes.sortBy { it.yMax }
+            for ((index, positionedBoundingBox) in positionedBoundingBoxes.withIndex()) {
+                if (index != positionedBoundingBoxes.size - 1) {
+                    val positionedBoundingBoxNext = positionedBoundingBoxes[index + 1]
+
+                    // TODO Need to take x-coordinates into consideration too it is not necessary to move all sharps that overlap on the y-axis
+                    if (positionedBoundingBox.yMin < positionedBoundingBoxNext.yMax) {
+                        val accidental = positionedBoundingBoxAccidentalMap[positionedBoundingBoxNext]
+
+                        val indexAccidental = result.indexOf(accidental)
+                        result.removeAt(indexAccidental)
+                        with(accidental as TranslatedRenderingElementUsingReference) {
+                            result.add(
+                                indexAccidental,
+                                copy(
+                                    translation = Translation(
+                                        accidental.translation.xShift - 50,
+                                        accidental.translation.yShift
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun getStem(
