@@ -168,8 +168,7 @@ class WebScore(
         setupTouchEvents()
         setupMouseEvent()
 
-        document.addEventListener("keydown", { event ->
-//        svgElement.addEventListener("keydown", { event ->
+        svgElement.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
 
             logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Key: ${keyboardEvent.key}" }
@@ -186,7 +185,7 @@ class WebScore(
     }
 
     private fun setupMouseEvent() {
-        document.addEventListener("mousedown", { event ->
+        svgElement.addEventListener("mousedown", { event ->
 //        svgElement.addEventListener("mousedown", { event ->
             val mouseDownEvent: dynamic = event
             movementActive = true
@@ -195,7 +194,7 @@ class WebScore(
             yStart = mouseDownEvent.pageY
         })
 
-        document.addEventListener("mouseup", { event ->
+        svgElement.addEventListener("mouseup", { event ->
 //        svgElement.addEventListener("mouseup", { event ->
             if (!movementActive) {
                 return@addEventListener
@@ -211,7 +210,6 @@ class WebScore(
             }
         })
 
-//        document.addEventListener("mousemove", { event ->
         svgElement.addEventListener("mousemove", { event ->
             val currentTime = currentTimeMillis()
 
@@ -237,8 +235,7 @@ class WebScore(
     }
 
     private fun setupTouchEvents() {
-        document.addEventListener("touchstart", { event ->
-//        svgElement.addEventListener("touchstart", { event ->
+        svgElement.addEventListener("touchstart", { event ->
             val touchEvent: dynamic = event
             val changedTouches = touchEvent.changedTouches
             movementActive = true
@@ -249,8 +246,7 @@ class WebScore(
             }
         })
 
-        document.addEventListener("touchend", { event ->
-//        svgElement.addEventListener("touchend", { event ->
+        svgElement.addEventListener("touchend", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -270,8 +266,7 @@ class WebScore(
             }
         })
 
-        document.addEventListener("touchmove", { event ->
-//        svgElement.addEventListener("touchmove", { event ->
+        svgElement.addEventListener("touchmove", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -380,112 +375,110 @@ class WebScore(
 
                 logger.debug { "Test23" }
 
-                    if (noteModeOn) {
+                if (noteModeOn) {
 
-                        logger.debug { "Test24" }
+                    logger.debug { "Test24" }
 
-                        scoreHandler.applyOperation(
-                            InsertNote(
-                                activeElement,
-                                60,
-                                duration
-                            )
+                    scoreHandler.applyOperation(
+                        InsertNote(
+                            activeElement,
+                            60,
+                            duration
                         )
+                    )
+                } else {
+                    scoreHandler.applyOperation(InsertRest(activeElement, duration))
+                }
+            }
+
+            "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
+                activeElement?.let {
+                    scoreHandler.updateDuration(it, getDuration(keyboardEvent.keyCode - 96))
+                }
+            }
+
+            "Delete" -> {
+                activeElement?.let {
+                    deactivateActiveElement()
+                    activeElement = null
+
+                    var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
+                    if (neighbouringElement == null) {
+                        neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
+                    }
+                    scoreHandler.deleteElement(it)
+
+                    if (neighbouringElement != null) {
+                        activeElement = neighbouringElement
+                        highlightElement(activeElement)
                     } else {
-                        scoreHandler.applyOperation(InsertRest(activeElement, duration))
+                        scoreHandler.getIdOfFirstSelectableElement()
                     }
                 }
+            }
 
-                "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
-                    activeElement?.let {
-                        scoreHandler.updateDuration(it, getDuration(keyboardEvent.keyCode - 96))
+            "m" -> {
+                noteModeOn = !noteModeOn
+            }
+
+            "n" -> {
+                noteInputMode = !noteInputMode
+            }
+
+        }
+    }
+
+    private fun generateSvgData(svgElement: Element) {
+        webscoreSvgProvider.generateSvgData(svgElement)
+        highlightElement(activeElement)
+    }
+
+    private fun regenerateSvg() {
+        generateSvgData(svgElement)
+    }
+
+    private fun writeDebug(tag: String, message: String?) {
+        debugLabelId?.let {
+            document.getElementById(it)?.appendText("$tag: $message")
+        }
+    }
+
+    override fun scoreUpdated() {
+        regenerateSvg()
+        highlightElement(activeElement)
+    }
+
+
+    private fun highlightElementClosestToMouseCursor(xPosition: Int, yPosition: Int) {
+        val svgRect = svgElement.createSVGRect()
+        with(svgRect) {
+            x = maxOf(xPosition.toDouble().minus(10), 0.0)
+            y = maxOf(yPosition.toDouble().minus(10), 0.0)
+            width = 20.0
+            height = 20.0
+        }
+
+        val intersectionList = svgElement.getIntersectionList(svgRect, svgElement)
+        val numberOfNodes = intersectionList.length
+        (0..numberOfNodes).forEach { index ->
+            intersectionList[index]?.let { node ->
+
+
+                logger.debug { "Test80: $node" }
+
+
+                when (node) {
+                    is SVGUseElement -> {
+                        highlightElementIfFound(node.id)
                     }
-                }
-
-                "Delete" -> {
-                    activeElement?.let {
-                        deactivateActiveElement()
-                        activeElement = null
-
-                        var neighbouringElement = scoreHandler.getNeighbouringElement(it, true)
-                        if (neighbouringElement == null) {
-                            neighbouringElement = scoreHandler.getNeighbouringElement(it, false)
-                        }
-                        scoreHandler.deleteElement(it)
-
-                        if (neighbouringElement != null) {
-                            activeElement = neighbouringElement
-                            highlightElement(activeElement)
-                        } else {
-                            scoreHandler.getIdOfFirstSelectableElement()
-                        }
+                    is SVGPathElement -> {
+                        highlightElementIfFound(node.id)
                     }
-                }
 
-                "m" -> {
-                    noteModeOn = !noteModeOn
-                }
-
-                "n" -> {
-                    noteInputMode = !noteInputMode
-                }
-
-            }
-        }
-
-        private fun generateSvgData(svgElement: Element) {
-            webscoreSvgProvider.generateSvgData(svgElement)
-            highlightElement(activeElement)
-        }
-
-        private fun regenerateSvg() {
-            generateSvgData(svgElement)
-        }
-
-        private fun writeDebug(tag: String, message: String?) {
-            debugLabelId?.let {
-                document.getElementById(it)?.appendText("$tag: $message")
-            }
-        }
-
-        override fun scoreUpdated() {
-            regenerateSvg()
-            highlightElement(activeElement)
-        }
-
-
-        private fun highlightElementClosestToMouseCursor(xPosition: Int, yPosition: Int) {
-            val svgRect = svgElement.createSVGRect()
-            with(svgRect) {
-                x = maxOf(xPosition.toDouble().minus(10), 0.0)
-                y = maxOf(yPosition.toDouble().minus(10), 0.0)
-                width = 20.0
-                height = 20.0
-            }
-
-            val intersectionList = svgElement.getIntersectionList(svgRect, svgElement)
-            val numberOfNodes = intersectionList.length
-            (0..numberOfNodes).forEach { index ->
-                intersectionList[index]?.let { node ->
-
-
-                    logger.debug { "Test80: $node" }
-
-
-                    when (node) {
-                        is SVGUseElement -> {
-                            highlightElementIfFound(node.id)
-                        }
-                        is SVGPathElement -> {
-                            highlightElementIfFound(node.id)
-                        }
-
-                        // TODO Which element types to check?
+                    // TODO Which element types to check?
 //                    else -> {
 //                        logger.debug { "Test90: $node" }
 //                    }
-
-                    }
 
                 }
 
@@ -494,3 +487,5 @@ class WebScore(
         }
 
     }
+
+}
