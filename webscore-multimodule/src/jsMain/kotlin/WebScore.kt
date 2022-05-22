@@ -4,7 +4,6 @@ import kotlinx.browser.document
 import kotlinx.dom.appendText
 import kotlinx.html.currentTimeMillis
 import mu.KotlinLogging
-import mu.KotlinLogging.logger
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent
@@ -19,10 +18,12 @@ class WebScore(
     private val svgElementId: String = "score",
     allowInput: Boolean = true,
     private val debugLabelId: String? = null
-) : ScoreHandlerListener {
+) : ScoreHandlerListener, NoteInputListener {
 
     private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(ScoreProvider(scoreHandler))
     private val noteInput: NoteInput
+
+    private val webscoreListeners = mutableListOf<WebscoreListener>()
 
     var activeElement: String? = null
         set(value) {
@@ -42,7 +43,7 @@ class WebScore(
 
     private var currentlyHighlightedElement: String? = null
 
-    private var noteModeOn = true
+    private var insertNoteNotRest = true
         get() = field
 
     private var noteInputMode = false
@@ -59,6 +60,7 @@ class WebScore(
     init {
         scoreHandler.addListener(this)
         noteInput = NoteInput(scoreHandler)
+        noteInput.addNoteInputListener(this)
         val element = document.getElementById(svgElementId)
 
         svgElement = if (element is SVGSVGElement) {
@@ -75,6 +77,10 @@ class WebScore(
         }
         loadScore()
     }
+
+    fun addListener(webscoreListener: WebscoreListener) = webscoreListeners.add(webscoreListener)
+
+    fun removeListener(webscoreListener: WebscoreListener) = webscoreListeners.remove(webscoreListener)
 
     // TODO Is there no difference between load and reload?
     @JsName("reload")
@@ -174,13 +180,8 @@ class WebScore(
             logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Key: ${keyboardEvent.key}" }
             logger.debug { "Note input mode: $noteInputMode" }
 
-            if (noteInputMode) {
-                noteInput.processInput(keyboardEvent).takeIf { it }?.let {
-                    noteInputMode = false
-                }
-            } else {
-                handleKeyEvent(keyboardEvent)
-            }
+            handleKeyEvent(keyboardEvent)
+
         })
     }
 
@@ -350,6 +351,26 @@ class WebScore(
         // TODO Fix strings to that they match with the keys
 
         when (keyboardEvent.code) {
+            "KeyM" -> {
+                insertNoteNotRest = !insertNoteNotRest
+                webscoreListeners.forEach { it.noteInputNotRest(insertNoteNotRest) }
+            }
+            "KeyN" -> {
+                noteInputMode = !noteInputMode
+                webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
+            }
+            else -> {
+                if (noteInputMode) {
+                    noteInput.processInput(keyboardEvent)
+                } else {
+                    processNotNoteInputModeKey(keyboardEvent.code, keyboardEvent.keyCode)
+                }
+            }
+        }
+    }
+
+    private fun processNotNoteInputModeKey(code: String, keyCode: Int) {
+        when (code) {
             "ArrowUp" -> activeElement?.let {
                 // Up
                 scoreHandler.moveNoteOneStep(it, true)
@@ -371,14 +392,9 @@ class WebScore(
             }
 
             "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                val duration = getDuration(keyboardEvent.keyCode - 48)
+                val duration = getDuration(keyCode - 48)
 
-                logger.debug { "Test23" }
-
-                if (noteModeOn) {
-
-                    logger.debug { "Test24" }
-
+                if (insertNoteNotRest) {
                     scoreHandler.applyOperation(
                         InsertNote(
                             activeElement,
@@ -393,7 +409,7 @@ class WebScore(
 
             "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
                 activeElement?.let {
-                    scoreHandler.updateDuration(it, getDuration(keyboardEvent.keyCode - 96))
+                    scoreHandler.updateDuration(it, getDuration(keyCode - 96))
                 }
             }
 
@@ -417,15 +433,8 @@ class WebScore(
                 }
             }
 
-            "m" -> {
-                noteModeOn = !noteModeOn
-            }
-
-            "n" -> {
-                noteInputMode = !noteInputMode
-            }
-
         }
+
     }
 
     private fun generateSvgData(svgElement: Element) {
@@ -475,17 +484,16 @@ class WebScore(
                         highlightElementIfFound(node.id)
                     }
 
-                    // TODO Which element types to check?
-//                    else -> {
-//                        logger.debug { "Test90: $node" }
-//                    }
-
                 }
 
             }
 
         }
 
+    }
+
+    override fun currentStep(currentStep: NoteInput.NoteInputStep?) {
+        webscoreListeners.forEach { it.currentStep(currentStep) }
     }
 
 }

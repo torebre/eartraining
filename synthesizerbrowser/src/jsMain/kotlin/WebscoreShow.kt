@@ -14,7 +14,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     private var targetSequenceGenerator = ReducedScore()
     private var inputSequenceGenerator = ReducedScore()
     private var webScore: WebScore? = null
-    private var inputScore: WebScore? = null
+    internal var inputScore: WebScore? = null
 
     private val submitHandler = SubmitHandler()
 

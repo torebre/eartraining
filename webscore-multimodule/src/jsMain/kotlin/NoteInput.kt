@@ -10,7 +10,8 @@ import kotlin.math.log
 
 class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
 
-    private enum class NoteInputStep {
+    enum class NoteInputStep {
+        Duration,
         Note,
         Modifier,
         Octave
@@ -27,16 +28,25 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
         var octave: Int? = null
     )
 
-    private var currentStep: NoteInputStep? = null
+    private var currentStep: NoteInputStep = NoteInputStep.Duration
     private var currentNoteInput: NoteInput? = null
+
+    private val noteInputListeners = mutableListOf<NoteInputListener>()
+
 
     private val logger = KotlinLogging.logger {}
 
 
     private fun clear() {
-        currentStep = null
+        currentStep = NoteInputStep.Duration
         currentNoteInput = null
+        noteInputListeners.forEach { it.currentStep(currentStep) }
     }
+
+    fun addNoteInputListener(noteInputListener: NoteInputListener) = noteInputListeners.add(noteInputListener)
+
+    fun removeNoteInputListener(noteInputListener: NoteInputListener) = noteInputListeners.remove(noteInputListener)
+
 
     fun processInput(keyboardEvent: KeyboardEvent): Boolean {
         if (keyboardEvent.key == "Escape") {
@@ -45,8 +55,11 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
         }
 
         var insertedNote = false
+
+        console.log("Current step: ${currentStep}")
+
         when (currentStep) {
-            null -> {
+            NoteInputStep.Duration -> {
                 if (keyboardEvent.key in setOf("1", "2", "3", "4", "5")) {
                     getDuration(keyboardEvent.keyCode - 48).let {
                         currentNoteInput = NoteInput(it)
@@ -86,6 +99,8 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
                 }
             }
         }
+
+        noteInputListeners.forEach { it.currentStep(currentStep) }
         return insertedNote
     }
 
@@ -138,8 +153,11 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
     private fun handleModifierStepInput(inputModifier: Accidental) {
         currentNoteInput?.run {
             // TODO Handle other cases
-            when (inputModifier) {
-                Accidental.SHARP -> modifier = Modifier.Accidental
+            modifier = when (inputModifier) {
+                Accidental.SHARP -> Modifier.Accidental
+                else -> {
+                    null
+                }
             }
         }
     }

@@ -10,50 +10,74 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
-import org.w3c.dom.events.KeyboardEvent
 
 
-fun showWebscore() {
-    val synthesizer = SynthesizerScript()
-    val webscoreShow = WebscoreShow(synthesizer)
-    webscoreShow.createSequence()
-    webscoreShow.createInputScore()
+object WebScoreApp {
 
-    document.querySelector("#playTarget")!!.addEventListener("click", {
-        GlobalScope.launch(Dispatchers.Default) {
-            webscoreShow.playSequence()
-        }
-    })
+    private val webscoreListener: WebscoreListener = object : WebscoreListener {
 
-    document.querySelector("#playInput")!!.addEventListener("click", {
-        GlobalScope.launch(Dispatchers.Default) {
-            webscoreShow.playInputSequence()
-        }
-    })
-
-    document.querySelector("btnSubmit")?.addEventListener("click", {
-        webscoreShow.submit()
-    })
-
-    var noteInputMode = false
-    document.addEventListener("keydown", { event ->
-        with(event as KeyboardEvent) {
-            if (code == "KeyN") {
-                document.querySelector("#inputMode")?.let {
-                    it.firstChild?.let {
-                        it.textContent = if (noteInputMode) {
-                            "Note input on"
-                        } else {
-                            "Note input off"
-                        }
-                        noteInputMode = !noteInputMode
-                    }
+        override fun noteInputMode(noteInputMode: Boolean) {
+            setTextForChildNode(
+                "#inputMode", if (noteInputMode) {
+                    "Note input on"
+                } else {
+                    "Note input off"
                 }
-            }
-
+            )
         }
 
-    })
+        override fun noteInputNotRest(noteInput: Boolean) {
+            setTextForChildNode(
+                "#noteOrRestInput", if (noteInput) {
+                    "Note input"
+                } else {
+                    "Rest input"
+                }
+            )
+        }
+
+
+        override fun currentStep(currentStep: NoteInput.NoteInputStep?) {
+            setTextForChildNode(
+                "#currentStep", currentStep?.name ?: "None"
+            )
+        }
+    }
+
+
+    fun showWebscore() {
+        val synthesizer = SynthesizerScript()
+        val webscoreShow = WebscoreShow(synthesizer)
+        webscoreShow.createSequence()
+        webscoreShow.createInputScore()
+        webscoreShow.inputScore?.addListener(webscoreListener)
+
+        document.querySelector("#playTarget")!!.addEventListener("click", {
+            GlobalScope.launch(Dispatchers.Default) {
+                webscoreShow.playSequence()
+            }
+        })
+
+        document.querySelector("#playInput")!!.addEventListener("click", {
+            GlobalScope.launch(Dispatchers.Default) {
+                webscoreShow.playInputSequence()
+            }
+        })
+
+        document.querySelector("btnSubmit")?.addEventListener("click", {
+            webscoreShow.submit()
+        })
+
+    }
+
+    private fun setTextForChildNode(idSelector: String, textContent: String) {
+        document.querySelector(idSelector)?.let { element ->
+            element.firstChild?.let {
+                it.textContent = textContent
+            }
+        }
+    }
+
 }
 
 //fun showScaleTest() {
@@ -84,7 +108,7 @@ fun showScaleTest() {
             .toMutableList()
 
     val splitScoreHandler = ReducedScore().also { it.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence)) }
-    val webScore = WebScore(ScoreHandlerJavaScript(splitScoreHandler), "scaleTest", false)
+    WebScore(ScoreHandlerJavaScript(splitScoreHandler), "scaleTest", false)
 }
 
 
@@ -102,6 +126,6 @@ fun <T> Array<T>.leftShift(positionsToShift: Int): Array<T> {
 fun main() {
     KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
 
-    showWebscore()
+    WebScoreApp.showWebscore()
 //    showScaleTest()
 }
