@@ -3,6 +3,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import org.khronos.webgl.Float32Array
 import org.w3c.dom.mediacapture.MediaStream
 import org.w3c.dom.url.URL
 import org.w3c.files.Blob
@@ -14,9 +15,7 @@ import webaudioapi.MediaStreamAudioSourceNode
 import kotlin.js.Promise
 
 
-data class PitchData(val pitch: Float, val certainty: Float)
-
-object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
+class PitchDetection {
     @JsName("audioContext")
     var audioContext: AudioContext = js("new AudioContext();")
 
@@ -28,6 +27,9 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
 
     // TODO It is an AudioWorkletNode, but where is the code for the interface?
     private var testAudioProcessorNode: dynamic = Any()
+
+    private val pitchDetectionListeners = mutableListOf<PitchDetectionListener>()
+
     private val logger = KotlinLogging.logger {}
 
 
@@ -92,12 +94,16 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
         setupPitchDetectionTest()
     }
 
+
     private suspend fun setupPitchDetectionTest() {
+        // The variable is used in the JavaScript-code
+        val bytes = 8 + 4 * Float32Array.BYTES_PER_ELEMENT
         val sharedArrayBuffer =
-            js("RingBuffer.getStorageForCapacity(3, Float32Array);") // capacity: three float32 values [pitch, confidence, rms]
-        val rb = js("new RingBuffer(sharedArrayBuffer, Float32Array);")
-        val audioReader = js("new AudioReader(rb);")
+            js("new SharedArrayBuffer(bytes);")
+        // The variable is used in the JavaScript-code
         val fileContents = urlFromFiles(listOf("essentiaModule.js"))
+        // TODO InternalAudioBuffer is loaded on the index.html page, that is why it is available here. It would be better if the code could access in a different way
+        val audioBuffer = js("new InternalAudioBuffer(sharedArrayBuffer);")
 
         val addModulePromise: Promise<Any> =
             js("webpitch2.PitchDetection.audioContext.audioWorklet.addModule(fileContents);")
@@ -144,12 +150,14 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
                 return
             }
 
-            logger.info { "Bytes available for reading: ${audioReader.available_read()}" }
+            logger.info { "Bytes available for reading: ${audioBuffer.availableRead()}" }
             window.requestAnimationFrame { timestamp: Any -> callback(timestamp) }
-            if (audioReader.available_read() >= 1) {
-                val read = audioReader.dequeue(pitchBuffer)
+            if (audioBuffer.availableRead() >= 1) {
+                val read = audioBuffer.dequeue(pitchBuffer)
                 if (read !== 0) {
                     logger.info { "main: ${pitchBuffer[0]}, ${pitchBuffer[1]}, ${pitchBuffer[2]}" }
+//                    val pitchData = PitchData(pitchBuffer[0] as Float, pitchBuffer[1] as Float)
+//                    pitchDetectionListeners.forEach { it.pitchData(pitchData) }
                 }
             }
         }
@@ -175,5 +183,12 @@ object PitchDetection { // callback: (pitchData: PitchData) -> Unit) {
         }
 
     }
+
+
+    fun addPitchDetectionListener(pitchDetectionListener: PitchDetectionListener) =
+        pitchDetectionListeners.add(pitchDetectionListener)
+
+    fun removePitchDetectionListener(pitchDetectionListener: PitchDetectionListener) =
+        pitchDetectionListeners.remove(pitchDetectionListener)
 
 }

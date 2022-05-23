@@ -9,7 +9,6 @@ fun main() {
         logger.info { "Got pitch data: ${pitchData}" }
     }
 
-    // TODO Use a class instead of an object
     var pitchDetection: PitchDetection? = null
     var isRecording = false
 
@@ -18,8 +17,17 @@ fun main() {
 
         recordingButton.addEventListener("click", {
             if (!isRecording) {
-                if(pitchDetection == null) {
-                   pitchDetection = PitchDetection
+                if (pitchDetection == null) {
+                    pitchDetection = PitchDetection().also {
+                        it.addPitchDetectionListener(object : PitchDetectionListener {
+                            override fun pitchData(pitchData: PitchData) {
+                                logger.info { "Pitch: ${pitchData.pitch}. Certainty: ${pitchData.certainty}" }
+                                setTextForChildNode("#pitchLabel", pitchData.pitch.toString())
+                                setTextForChildNode("#certaintyLabel", pitchData.certainty.toString())
+                            }
+                        })
+                    }
+
                 }
                 pitchDetection?.startRecording()
                 recordingButton.textContent = "Stop recording"
@@ -32,4 +40,14 @@ fun main() {
         })
     }
 
+
+}
+
+
+fun setTextForChildNode(idSelector: String, textContent: String) {
+    document.querySelector(idSelector)?.let { element ->
+        element.firstChild?.let {
+            it.textContent = textContent
+        }
+    }
 }

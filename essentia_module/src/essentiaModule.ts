@@ -1,6 +1,7 @@
 import {EssentiaWASM} from './essentia/essentia-wasm.module.js'
 import {Essentia} from './essentia/essentia.js-core.js'
 import {ChromeLabsRingBuffer} from "./ChromeLabsRingBuffer";
+import InternalAudioBuffer from "./internalAudioBuffer";
 
 
 /**
@@ -19,7 +20,7 @@ class TestAudioProcessor extends AudioWorkletProcessor {
 
     private inputRingBuffer: ChromeLabsRingBuffer
     private accumData: any
-    private audioWriter: AudioBuffer
+    private audioWriter: InternalAudioBuffer
 
     constructor(options) {
         super()
@@ -35,7 +36,7 @@ class TestAudioProcessor extends AudioWorkletProcessor {
 
         // SAB config
         this.port.onmessage = e => {
-            this.audioWriter = new AudioBuffer(e.data.sab)
+            this.audioWriter = new InternalAudioBuffer(e.data.sab)
         };
     }
 
@@ -71,7 +72,7 @@ class TestAudioProcessor extends AudioWorkletProcessor {
             const meanConfidence = confidenceFrames.reduce((acc, val) => acc + val, 0) / numVoicedFrames
             console.info("audio: ", meanPitch, meanConfidence, rms)
             // write to SAB using AudioWriter object so that pitch output can be accesed from the main UI thread
-            if (this.audioWriter.available_write() >= 1) {
+            if (this.audioWriter.availableWrite() >= 1) {
                 this.audioWriter.push([meanPitch, meanConfidence, rms])
             }
 
@@ -81,77 +82,6 @@ class TestAudioProcessor extends AudioWorkletProcessor {
         return true
     }
 
-}
-
-
-class AudioBuffer {
-    private readonly writePointer: Uint32Array
-    private readonly readPointer: Uint32Array
-    private readonly storage: Float32Array
-    private readonly capacityVariable: number
-    private readonly sharedArrayBuffer: SharedArrayBuffer
-
-    constructor(sharedArrayBuffer: SharedArrayBuffer) {
-        this.sharedArrayBuffer = sharedArrayBuffer
-
-        this.capacityVariable = (sharedArrayBuffer.byteLength - 8) / Float32Array.BYTES_PER_ELEMENT
-        this.writePointer = new Uint32Array(this.sharedArrayBuffer, 0, 1)
-        this.readPointer = new Uint32Array(this.sharedArrayBuffer, 4, 1)
-        this.storage = new Float32Array(this.sharedArrayBuffer, 8, this.capacityVariable)
-    }
-
-    push(elements: Array<number>) {
-        const rd = Atomics.load(this.readPointer, 0)
-        const wr = Atomics.load(this.writePointer, 0)
-
-        if ((wr + 1) % this.capacityVariable == rd) {
-            // full
-            return 0;
-        }
-
-        const to_write = Math.min(this.availableWrite(rd, wr), elements.length)
-        const first_part = Math.min(this.capacityVariable - wr, to_write)
-        const second_part = to_write - first_part
-
-        this.copy(elements, 0, this.storage, wr, first_part)
-        this.copy(elements, first_part, this.storage, 0, second_part)
-
-        // publish the enqueued data to the other side
-        Atomics.store(
-            this.writePointer,
-            0,
-            (wr + to_write) % this.capacityVariable
-        )
-
-        return to_write
-    }
-
-
-    // Query the free space in the ring buffer. This is the amount of samples that
-    // can be queued, with a guarantee of success.
-    available_write() {
-        const rd = Atomics.load(this.readPointer, 0)
-        const wr = Atomics.load(this.writePointer, 0)
-        return this.availableWrite(rd, wr)
-    }
-
-
-    private availableWrite(rd, wr) {
-        let rv = rd - wr - 1
-        if (wr >= rd) {
-            rv += this.capacityVariable
-        }
-        return rv
-    }
-
-
-    // Copy `size` elements from `input`, starting at offset `offset_input`, to
-    // `output`, starting at offset `offset_output`.
-    private copy(input, offset_input, output, offset_output, size) {
-        for (let i = 0; i < size; i++) {
-            output[offset_output + i] = input[offset_input + i]
-        }
-    }
 }
 
 
