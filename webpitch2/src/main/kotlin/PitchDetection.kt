@@ -15,7 +15,7 @@ import webaudioapi.MediaStreamAudioSourceNode
 import kotlin.js.Promise
 
 
-class PitchDetection {
+object PitchDetection {
     @JsName("audioContext")
     var audioContext: AudioContext = js("new AudioContext();")
 
@@ -114,6 +114,8 @@ class PitchDetection {
             testAudioProcessorNode =
                 js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'test-audio-processor', { processorOptions: { bufferSize: 8192, sampleRate: webpitch2.PitchDetection.audioContext.sampleRate}});")
 
+            logger.info { "AudioWorkletNode: ${testAudioProcessorNode}" }
+
             val input: dynamic = Any()
             input.sab = sharedArrayBuffer
 
@@ -156,8 +158,8 @@ class PitchDetection {
                 val read = audioBuffer.dequeue(pitchBuffer)
                 if (read !== 0) {
                     logger.info { "main: ${pitchBuffer[0]}, ${pitchBuffer[1]}, ${pitchBuffer[2]}" }
-//                    val pitchData = PitchData(pitchBuffer[0] as Float, pitchBuffer[1] as Float)
-//                    pitchDetectionListeners.forEach { it.pitchData(pitchData) }
+                    val pitchData = PitchData(pitchBuffer[0] as Float, pitchBuffer[1] as Float)
+                    pitchDetectionListeners.forEach { it.pitchData(pitchData) }
                 }
             }
         }

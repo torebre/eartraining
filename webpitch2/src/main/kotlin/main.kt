@@ -9,6 +9,7 @@ fun main() {
         logger.info { "Got pitch data: ${pitchData}" }
     }
 
+    // TODO Why does it not work when PitchDetection is a class?
     var pitchDetection: PitchDetection? = null
     var isRecording = false
 
@@ -18,7 +19,7 @@ fun main() {
         recordingButton.addEventListener("click", {
             if (!isRecording) {
                 if (pitchDetection == null) {
-                    pitchDetection = PitchDetection().also {
+                    pitchDetection = PitchDetection.also {
                         it.addPitchDetectionListener(object : PitchDetectionListener {
                             override fun pitchData(pitchData: PitchData) {
                                 logger.info { "Pitch: ${pitchData.pitch}. Certainty: ${pitchData.certainty}" }
@@ -27,6 +28,7 @@ fun main() {
                             }
                         })
                     }
+                    pitchDetection = PitchDetection
 
                 }
                 pitchDetection?.startRecording()

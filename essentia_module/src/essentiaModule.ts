@@ -81,8 +81,6 @@ class TestAudioProcessor extends AudioWorkletProcessor {
         }
         return true
     }
-
 }
-
 
 registerProcessor("test-audio-processor", TestAudioProcessor)
