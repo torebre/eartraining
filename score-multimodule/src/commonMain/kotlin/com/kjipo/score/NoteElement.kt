@@ -41,9 +41,7 @@ class NoteElement(
                 highlightElements.add(it.id)
             }
 
-            note.stem?.run {
-                positionedRenderingElements.add(getStem())
-            }
+            getStem()?.let { positionedRenderingElements.add(it) }
 
             addExtraBarLinesForGClef(
                 transformToNoteAndAccidental(note.noteType).first,
@@ -63,7 +61,8 @@ class NoteElement(
                 "${note.id}_debug_box",
                 positionedRenderingElements
             ).let {
-                positionedRenderingElements.addAll(it.toRenderingElement()) }
+                positionedRenderingElements.addAll(it.toRenderingElement())
+            }
         }
     }
 
@@ -81,7 +80,11 @@ class NoteElement(
         }
     }
 
-    fun getStem(): PositionedRenderingElement {
+    fun getStem(): PositionedRenderingElement? {
+        if (note.stem == Stem.NONE) {
+            return null
+        }
+
         val xTranslateForStem = if (note.stem == Stem.UP) {
             // If the stem is pointing up then it should be moved to the
             // right side of the note head

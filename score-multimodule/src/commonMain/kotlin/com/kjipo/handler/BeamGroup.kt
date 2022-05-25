@@ -1,3 +1,3 @@
 package com.kjipo.handler
 
-class BeamGroup(val notes: List<IsNote>)
+data class BeamGroup(val notes: List<IsNote>)

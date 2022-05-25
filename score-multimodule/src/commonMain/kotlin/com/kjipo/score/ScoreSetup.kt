@@ -139,6 +139,7 @@ class ScoreSetup(private val score: Score) {
         bars: List<BarData>
     ): BeamElementAbsolutePosition? {
         // TODO This will not create a proper looking bar in many cases
+        // TODO Need to handle beams with multiple lines
         val firstNote = findNoteElement(beamGroup.notes.first().id, bars)
         val lastNote = findNoteElement(beamGroup.notes.last().id, bars)
 
@@ -149,6 +150,11 @@ class ScoreSetup(private val score: Score) {
 
         val firstStem = firstNote.getStem()
         val lastStem = lastNote.getStem()
+
+        if (firstStem == null || lastStem == null) {
+            logger.error { "Need stems for both notes included in beam. Beam group: ${beamGroup}" }
+            return null
+        }
 
         val (startX, startY) = with(firstNote) {
             Pair(

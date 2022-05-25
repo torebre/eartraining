@@ -4,6 +4,7 @@ class InternalAudioBuffer {
     storage;
     capacityVariable;
     sharedArrayBuffer;
+
     constructor(sharedArrayBuffer) {
         this.sharedArrayBuffer = sharedArrayBuffer;
         this.capacityVariable = (sharedArrayBuffer.byteLength - 8) / Float32Array.BYTES_PER_ELEMENT;
@@ -11,6 +12,7 @@ class InternalAudioBuffer {
         this.readPointer = new Uint32Array(this.sharedArrayBuffer, 4, 1);
         this.storage = new Float32Array(this.sharedArrayBuffer, 8, this.capacityVariable);
     }
+
     push(elements) {
         const rd = Atomics.load(this.readPointer, 0);
         const wr = Atomics.load(this.writePointer, 0);
@@ -27,6 +29,7 @@ class InternalAudioBuffer {
         Atomics.store(this.writePointer, 0, (wr + to_write) % this.capacityVariable);
         return to_write;
     }
+
     // Query the free space in the ring buffer. This is the amount of samples that
     // can be queued, with a guarantee of success.
     availableWrite() {
@@ -34,6 +37,7 @@ class InternalAudioBuffer {
         const wr = Atomics.load(this.writePointer, 0);
         return this.availableWriteInternal(rd, wr);
     }
+
     availableWriteInternal(rd, wr) {
         let rv = rd - wr - 1;
         if (wr >= rd) {
@@ -41,20 +45,22 @@ class InternalAudioBuffer {
         }
         return rv;
     }
+
     availableRead() {
         const rd = Atomics.load(this.readPointer, 0);
         const wr = Atomics.load(this.writePointer, 0);
         return this.availableReadInternal(rd, wr);
     }
+
     // Number of elements available for reading, given a read and write pointer
     availableReadInternal(rd, wr) {
         if (wr > rd) {
             return wr - rd;
-        }
-        else {
+        } else {
             return wr + this.capacityVariable - rd;
         }
     }
+
     // Attempt to dequeue at most `buf.length` samples from the queue. This
     // returns the number of samples dequeued. If greater than 0, the samples are
     // at the beginning of `buf`
@@ -64,6 +70,7 @@ class InternalAudioBuffer {
         }
         return this.pop(buf);
     }
+
     // True if the ring buffer is empty false otherwise. This can be late on the
     // reader side: it can return true even if something has just been pushed.
     empty() {
@@ -71,6 +78,7 @@ class InternalAudioBuffer {
         var wr = Atomics.load(this.writePointer, 0);
         return wr == rd;
     }
+
     // Read `elements.length` elements from the ring buffer. `elements` is a typed
     // array of the same type as passed in the ctor.
     // Returns the number of elements read from the queue, they are placed at the
@@ -89,6 +97,7 @@ class InternalAudioBuffer {
         Atomics.store(this.readPointer, 0, (rd + to_read) % this.capacityVariable);
         return to_read;
     }
+
     // Copy `size` elements from `input`, starting at offset `offset_input`, to
     // `output`, starting at offset `offset_output`.
     copy(input, offset_input, output, offset_output, size) {
