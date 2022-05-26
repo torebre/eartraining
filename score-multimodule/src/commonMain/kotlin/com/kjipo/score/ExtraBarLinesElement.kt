@@ -4,8 +4,8 @@ import com.kjipo.svg.*
 
 
 class ExtraBarLinesElement(
-    private val xPosition: Int,
-    private val yPosition: Int,
+    private val xPosition: Double,
+    private val yPosition: Double,
     private val yPositions: List<Int>,
     private val leftStart: Int,
     private val rightEnd: Int,

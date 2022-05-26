@@ -7,7 +7,7 @@ import com.kjipo.svg.findBoundingBox
 import mu.KotlinLogging
 import kotlin.math.log
 
-class BarLines(val xPosition: Int, val yPosition: Int, val id: String) : ScoreRenderingElement() {
+class BarLines(val xPosition: Double, val yPosition: Double, val id: String) : ScoreRenderingElement() {
 
     private val logger = KotlinLogging.logger {}
 

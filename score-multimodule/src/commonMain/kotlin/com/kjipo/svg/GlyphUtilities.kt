@@ -7,7 +7,7 @@ private const val MAX_NUMBER_OF_DECIMALS = 5
 private const val STEP_SIZE = 0.1
 
 
-fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
+fun translateGlyph(glyphData: GlyphData, xTranslate: Double, yTranslate: Double): PathInterfaceImpl {
     return PathInterfaceImpl(
         glyphData.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) },
         glyphData.strokeWidth
@@ -15,7 +15,7 @@ fun translateGlyph(glyphData: GlyphData, xTranslate: Int, yTranslate: Int): Path
 }
 
 
-fun translateGlyph(pathInterface: PathInterfaceImpl, xTranslate: Int, yTranslate: Int): PathInterfaceImpl {
+fun translateGlyph(pathInterface: PathInterfaceImpl, xTranslate: Double, yTranslate: Double): PathInterfaceImpl {
     return PathInterfaceImpl(
         pathInterface.pathElements.map { translateFontPathElement(it, xTranslate, yTranslate) },
         pathInterface.strokeWidth
@@ -23,7 +23,7 @@ fun translateGlyph(pathInterface: PathInterfaceImpl, xTranslate: Int, yTranslate
 }
 
 
-fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTranslate: Int): PathElement {
+fun translateFontPathElement(pathElement: PathElement, xTranslate: Double, yTranslate: Double): PathElement {
     return when (pathElement.command) {
         PathCommand.MOVE_TO_ABSOLUTE -> PathElement(
             pathElement.command,
@@ -34,7 +34,7 @@ fun translateFontPathElement(pathElement: PathElement, xTranslate: Int, yTransla
 }
 
 
-fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Int, yTranslate: Int): List<Double> {
+fun translateAbsoluteMovement(numbers: List<Double>, xTranslate: Double, yTranslate: Double): List<Double> {
     var isYCoordinate = true
 
     return numbers.map {

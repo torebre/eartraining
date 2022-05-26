@@ -6,8 +6,8 @@ import com.kjipo.svg.*
 fun addExtraBarLinesForGClef(
     note: GClefNoteLine,
     octave: Int,
-    xPosition: Int,
-    yPosition: Int,
+    xPosition: Double,
+    yPosition: Double,
     boundingBoxMin: Int,
     boundingBoxMax: Int,
     id: String
@@ -27,13 +27,13 @@ fun addExtraBarLinesForGClef(
 
 
 fun addStem(
-    xTranslate: Int,
-    yTranslate: Int,
+    xTranslate: Double,
+    yTranslate: Double,
     stemWidth: Int,
-    stemHeight: Int = DEFAULT_STEM_HEIGHT,
+    stemHeight: Double = DEFAULT_STEM_HEIGHT,
     stemUp: Boolean = true
 ): PathInterfaceImpl {
-    val yEnd = if (stemUp) -stemHeight.toDouble() else stemHeight.toDouble()
+    val yEnd = if (stemUp) -stemHeight else stemHeight
     return translateGlyph(
         PathInterfaceImpl(
             listOf(

@@ -46,7 +46,7 @@ class NoteElement(
         noteHead = PositionedRenderingElement.create(
             noteHeadGlyph.boundingBox,
             id,
-            translation ?: Translation(0, 0),
+            translation ?: Translation(0.0, 0.0),
             duration.name,
             true
         ).also {
@@ -59,8 +59,8 @@ class NoteElement(
         addExtraBarLinesForGClef(
             transformToNoteAndAccidental(note.noteType).first,
             note.octave,
-            translation?.xShift ?: 0,
-            translation?.yShift ?: 0,
+            translation?.xShift ?: 0.0,
+            translation?.yShift ?: 0.0,
             noteHeadGlyph.boundingBox.xMin.toInt(),
             noteHeadGlyph.boundingBox.xMax.toInt(),
             context.getAndIncrementExtraBarLinesCounter()
@@ -74,7 +74,7 @@ class NoteElement(
             PositionedRenderingElement.create(
                 accidentalGlyph.boundingBox,
                 id,
-                (translation ?: Translation(0, 0)).let {
+                (translation ?: Translation(0.0, 0.0)).let {
                     Translation(it.xShift - 30, it.yShift)
                 },
                 accidental.name,
@@ -91,16 +91,16 @@ class NoteElement(
         val xTranslateForStem = if (note.stem == Stem.UP) {
             // If the stem is pointing up then it should be moved to the
             // right side of the note head
-            getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+            getNoteHeadGlyph(duration).boundingBox.xMax
         } else {
-            0
+            0.0
         }
 
-        val stem = addStem(xTranslateForStem, 0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, note.stem != Stem.DOWN)
+        val stem = addStem(xTranslateForStem, 0.0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, note.stem != Stem.DOWN)
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
-            null, translation ?: Translation(0, 0)
+            null, translation ?: Translation(0.0, 0.0)
         )
     }
 

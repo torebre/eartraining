@@ -10,13 +10,12 @@ import kotlin.math.absoluteValue
 
 class NoteGroupElement(
     val noteGroup: NoteGroup,
-//    val notes: List<NoteSymbol>,
     val context: Context,
     override val properties: Map<String, String> = mapOf()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
     val result = mutableListOf<PositionedRenderingElementParent>()
-    var yLowestPosition = Int.MAX_VALUE
-    var yHighestPosition = Int.MIN_VALUE
+    var yLowestPosition = Double.MAX_VALUE
+    var yHighestPosition = Double.MIN_VALUE
 
     private val highlightElements = mutableSetOf<String>()
 
@@ -36,8 +35,8 @@ class NoteGroupElement(
     private fun addExtraBarLines(noteSymbol: NoteSymbol) =
         addExtraBarLinesForGClef(
             getNoteWithoutAccidental(noteSymbol.noteType), noteSymbol.octave,
-            translation?.xShift ?: 0,
-            translation?.yShift ?: 0,
+            translation?.xShift ?: 0.0,
+            translation?.yShift ?: 0.0,
             -25,
             35,
             context.getAndIncrementExtraBarLinesCounter()
@@ -51,7 +50,7 @@ class NoteGroupElement(
             val yPositionForNoteHead = calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
             val noteHeadTranslation =
                 translation?.let { Translation(it.xShift, it.yShift + yPositionForNoteHead) } ?: Translation(
-                    0,
+                    0.0,
                     yPositionForNoteHead
                 )
 
@@ -154,9 +153,9 @@ class NoteGroupElement(
     }
 
     private fun getStem(
-        xCoordinate: Int,
-        yCoordinate: Int,
-        stemHeight: Int,
+        xCoordinate: Double,
+        yCoordinate: Double,
+        stemHeight: Double,
         stemUp: Boolean
     ): PositionedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stemUp)
@@ -166,7 +165,7 @@ class NoteGroupElement(
             findBoundingBox(stem.pathElements),
             context.getAndIncrementStemCounter(),
             null,
-            translation ?: Translation(0, 0)
+            translation ?: Translation(0.0, 0.0)
         )
     }
 
@@ -209,7 +208,7 @@ class NoteGroupElement(
         return getStem(xCoordinate, yHighestPosition, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT, stemUp)
     }
 
-    private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax.toInt()
+    private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax
 
     override fun getIdsOfHighlightElements(): Collection<String> {
         return highlightElements

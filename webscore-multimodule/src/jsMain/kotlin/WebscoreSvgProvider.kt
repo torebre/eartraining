@@ -89,7 +89,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                     renderingElement.renderingPath.forEach { pathInterface ->
                         addPath(
                             element,
-                            transformToPathString(translateGlyph(pathInterface, 0, 0)),
+                            transformToPathString(translateGlyph(pathInterface, 0.0, 0.0)),
                             pathInterface.strokeWidth,
                             renderingElement.id,
                             pathInterface.fill,

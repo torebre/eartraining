@@ -20,7 +20,7 @@ class RestElement(
         val positionedRenderingElement = TranslatedRenderingElementUsingReference(
             id,
             null,
-            (translation ?: Translation(0, 0)).let {
+            (translation ?: Translation(0.0, 0.0)).let {
                 Translation(it.xShift, it.yShift - 30)
             },
             typeName,

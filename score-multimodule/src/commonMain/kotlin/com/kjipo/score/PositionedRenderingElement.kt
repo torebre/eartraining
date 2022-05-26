@@ -25,7 +25,7 @@ sealed class PositionedRenderingElement : PositionedRenderingElementParent() {
             // TODO
             return TranslatedRenderingElement(
                 listOf(PathInterfaceImpl(glyphData.pathElements, 1)),
-                glyphData.boundingBox, id, null, Translation(0, 0)
+                glyphData.boundingBox, id, null, Translation(0.0, 0.0)
             )
         }
 

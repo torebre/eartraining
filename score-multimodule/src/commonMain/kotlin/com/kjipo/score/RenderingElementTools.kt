@@ -18,9 +18,9 @@ fun getExtraBarlines(note: GClefNoteLine, octave: Int): List<Int> {
 }
 
 
-fun calculateVerticalOffset(note: GClefNoteLine, octave: Int): Int {
+fun calculateVerticalOffset(note: GClefNoteLine, octave: Int): Double {
     val halfSteps = getPlacementAndOctave(note)
-    return (5 - octave) * 7 * DEFAULT_VERTICAL_NOTE_SPACING + (4 - halfSteps) * DEFAULT_VERTICAL_NOTE_SPACING
+    return ((5 - octave) * 7 * DEFAULT_VERTICAL_NOTE_SPACING + (4 - halfSteps) * DEFAULT_VERTICAL_NOTE_SPACING).toDouble()
 }
 
 /**

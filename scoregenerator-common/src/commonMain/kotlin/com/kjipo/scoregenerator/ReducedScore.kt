@@ -60,7 +60,10 @@ class ReducedScore : ReducedScoreInterface {
                 )
             }
 
-            // TODO Need to handle multiple notes elements too?
+            is NoteSequenceElement.MultipleNotesElement -> {
+                TODO("Not implemented")
+            }
+
 
         }
 
@@ -112,8 +115,8 @@ class ReducedScore : ReducedScoreInterface {
         for (noteSequenceElement in noteSequence) {
             noteSequenceElement.properties[ELEMENT_ID]?.let { scoreElementId ->
                 elementToScoreHighlightMap[scoreElementId] = highlightableElements.filter {
-                        it.properties[ELEMENT_ID] == scoreElementId
-                    }
+                    it.properties[ELEMENT_ID] == scoreElementId
+                }
                     .flatMap { it.getIdsOfHighlightElements() }
             }
         }

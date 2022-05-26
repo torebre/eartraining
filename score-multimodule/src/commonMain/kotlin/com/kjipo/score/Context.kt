@@ -10,6 +10,9 @@ class Context {
     private var stemCounter = 0
     private var extraBarLinesCounter = 0
 
+    val barXspace = 0.0
+    val barYspace = 250.0
+
     var debug = true
 
 

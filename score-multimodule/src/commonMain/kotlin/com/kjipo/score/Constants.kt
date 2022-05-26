@@ -1,7 +1,7 @@
 package com.kjipo.score
 
 
-const val DEFAULT_STEM_HEIGHT = 100
+const val DEFAULT_STEM_HEIGHT = 100.0
 const val DEFAULT_BAR_WIDTH = 1000
 const val DEFAULT_BEAM_HEIGHT = 18
 const val DEFAULT_VERTICAL_NOTE_SPACING = 12
@@ -27,8 +27,8 @@ const val FILL_COLOUR = "black"
 const val STEM_UP = "stem-up"
 const val STEM_DOWN = "stem-down"
 
-const val timeSignatureXOffset = 80
-const val timeSignatureYOffset = -25
+const val timeSignatureXOffset = 80.0
+const val timeSignatureYOffset = -25.0
 
 
 enum class Accidental {

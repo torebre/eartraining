@@ -13,8 +13,8 @@ import kotlin.math.ceil
 class BarData(
     private val context: Context,
     private val bar: Bar,
-    private val barXoffset: Int,
-    private val barYoffset: Int,
+    private val barXoffset: Double,
+    private val barYoffset: Double,
     private val debug: Boolean = false
 ) {
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
@@ -34,7 +34,7 @@ class BarData(
         }
 
         val definitions = mutableMapOf<String, GlyphData>()
-        val clefElement = getClefElement(barXoffset, barYoffset, definitions)
+        val clefElement = getClefElement(definitions)
         val timeSignatureElement = getTimeSignatureElement()
 
         val widthAvailableForTemporalElements = getWidthAvailable(clefElement, timeSignatureElement)
@@ -52,7 +52,7 @@ class BarData(
         for (scoreRenderingElement in scoreRenderingElements) {
             when (scoreRenderingElement) {
                 is TemporalElement -> {
-                    val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick))).toInt()
+                    val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))
                     var yPosition = barYoffset
 
                     when (scoreRenderingElement) {
@@ -107,15 +107,12 @@ class BarData(
     }
 
 
-    private fun getClefElement(
-        barXoffset: Int,
-        barYoffset: Int,
-        definitions: MutableMap<String, GlyphData>
+    private fun getClefElement(definitions: MutableMap<String, GlyphData>
     ): ClefElement? {
         return if (clef == Clef.NONE) {
             null
         } else {
-            val element = ClefElement(clef, barXoffset, barYoffset, "clef")
+            val element = ClefElement(clef, "clef")
             definitions[clef.name] = element.getGlyphData()
             element
         }

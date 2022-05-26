@@ -38,18 +38,16 @@ class ScoreSetup(private val score: Score) {
 
         val bars = mutableListOf<BarData>()
 
-        var barXoffset = 0
-        var barYoffset = 0
-        val barXspace = 0
-        val barYspace = 250
+        var barXoffset = 0.0
+        var barYoffset = 0.0
 
         score.bars.forEach { bar ->
             val currentBar = BarData(context, bar, barXoffset, barYoffset)
 
             bars.add(currentBar)
             val renderingSequence = currentBar.build()
-            barXoffset += barXspace
-            barYoffset += barYspace
+            barXoffset += context.barXspace
+            barYoffset += context.barYspace
             renderingSequences.add(renderingSequence)
 
             renderingSequence.definitions.forEach {
