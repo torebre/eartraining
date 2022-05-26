@@ -21,7 +21,7 @@ class RestElement(
             id,
             null,
             (translation ?: Translation(0.0, 0.0)).let {
-                Translation(it.xShift, it.yShift - 30)
+                Translation(it.xShift, it.yShift - 22.5)
             },
             typeName,
             true,
