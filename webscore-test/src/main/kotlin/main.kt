@@ -119,7 +119,7 @@ private fun showChordWithTwoSharps() {
     val note2 = NoteSymbol("test2", Duration.QUARTER, 6, NoteType.C_SHARP)
     val notes = listOf(note1, note2)
 
-    val noteGroup = NoteGroup("testGroup", notes, stem=Stem.UP)
+    val noteGroup = NoteGroup("testGroup", notes, stem = Stem.UP)
 
     bar.scoreHandlerElements.addAll(setOf(noteGroup))
 
@@ -131,10 +131,38 @@ private fun showChordWithTwoSharps() {
     val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
 }
 
+
+private fun showTieAcrossBars() {
+    val score = Score()
+
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
+    val bar = Bar().apply {
+        clef = Clef.G
+        timeSignature = TimeSignature(4, 4)
+    }
+
+    val note1 = Note("test1", Duration.HALF, 5, NoteType.A, stem = Stem.UP)
+    val rest1 = Rest("rest1", Duration.HALF)
+    bar.scoreHandlerElements.addAll(listOf(rest1, note1))
+    score.bars.add(bar)
+
+    val bar2 = Bar()
+    val note2 = Note("test2", Duration.WHOLE, 5, NoteType.A)
+    bar2.scoreHandlerElements.addAll(listOf(note2))
+    score.bars.add(bar2)
+
+    val scoreHandler = ScoreHandlerWithReducedLogic(score)
+    score.ties.add(Pair(note1, note2))
+
+    val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
+}
+
 fun main() {
 //showTie()
 //    showBeam()
 //showNoteGroupWithSharp()
 //    showNotes()
-    showChordWithTwoSharps()
+//    showChordWithTwoSharps()
+    showTieAcrossBars()
 }

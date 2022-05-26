@@ -1,5 +1,3 @@
-import com.kjipo.handler.InsertNote
-import com.kjipo.handler.InsertRest
 import kotlinx.browser.document
 import kotlinx.dom.appendText
 import kotlinx.html.currentTimeMillis
@@ -187,7 +185,6 @@ class WebScore(
 
     private fun setupMouseEvent() {
         svgElement.addEventListener("mousedown", { event ->
-//        svgElement.addEventListener("mousedown", { event ->
             val mouseDownEvent: dynamic = event
             movementActive = true
 
@@ -196,7 +193,6 @@ class WebScore(
         })
 
         svgElement.addEventListener("mouseup", { event ->
-//        svgElement.addEventListener("mouseup", { event ->
             if (!movementActive) {
                 return@addEventListener
             }
@@ -353,6 +349,7 @@ class WebScore(
         when (keyboardEvent.code) {
             "KeyM" -> {
                 insertNoteNotRest = !insertNoteNotRest
+                noteInput.insertNoteNotRest(insertNoteNotRest)
                 webscoreListeners.forEach { it.noteInputNotRest(insertNoteNotRest) }
             }
             "KeyN" -> {
@@ -363,13 +360,13 @@ class WebScore(
                 if (noteInputMode) {
                     noteInput.processInput(keyboardEvent)
                 } else {
-                    processNotNoteInputModeKey(keyboardEvent.code, keyboardEvent.keyCode)
+                    processNotNoteInputModeKey(keyboardEvent.code)
                 }
             }
         }
     }
 
-    private fun processNotNoteInputModeKey(code: String, keyCode: Int) {
+    private fun processNotNoteInputModeKey(code: String) {
         when (code) {
             "ArrowUp" -> activeElement?.let {
                 // Up
@@ -389,28 +386,6 @@ class WebScore(
             "ArrowRight" -> {
                 activeElement = scoreHandler.getNeighbouringElement(activeElement, false)
                 highlightElement(activeElement)
-            }
-
-            "Digit1", "Digit2", "Digit3", "Digit4", "Digit5" -> {
-                val duration = getDuration(keyCode - 48)
-
-                if (insertNoteNotRest) {
-                    scoreHandler.applyOperation(
-                        InsertNote(
-                            activeElement,
-                            60,
-                            duration
-                        )
-                    )
-                } else {
-                    scoreHandler.applyOperation(InsertRest(activeElement, duration))
-                }
-            }
-
-            "Numpad1", "Numpad2", "Numpad3", "Numpad4" -> {
-                activeElement?.let {
-                    scoreHandler.updateDuration(it, getDuration(keyCode - 96))
-                }
             }
 
             "Delete" -> {
@@ -471,11 +446,6 @@ class WebScore(
         val numberOfNodes = intersectionList.length
         (0..numberOfNodes).forEach { index ->
             intersectionList[index]?.let { node ->
-
-
-                logger.debug { "Test80: $node" }
-
-
                 when (node) {
                     is SVGUseElement -> {
                         highlightElementIfFound(node.id)

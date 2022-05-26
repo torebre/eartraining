@@ -10,14 +10,15 @@ class NoteElement(
     val note: Note,
     val context: Context,
     override val properties: Map<String, String> = mapOf(),
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied {
 
     override var duration: Duration = note.duration
     override val id: String = note.id
 
     private val positionedRenderingElements = mutableListOf<PositionedRenderingElementParent>()
-
     private val highlightElements = mutableSetOf<String>()
+    private var noteHead: TranslatedRenderingElementUsingReference? = null
+
 
     private val logger = KotlinLogging.logger {}
 
@@ -29,32 +30,7 @@ class NoteElement(
             positionedRenderingElements.add(setupAccidental(this))
         }
 
-        getNoteHeadGlyph(duration).let { noteHeadGlyph ->
-            PositionedRenderingElement.create(
-                noteHeadGlyph.boundingBox,
-                id,
-                translation ?: Translation(0, 0),
-                duration.name,
-                true
-            ).let {
-                positionedRenderingElements.add(it)
-                highlightElements.add(it.id)
-            }
-
-            getStem()?.let { positionedRenderingElements.add(it) }
-
-            addExtraBarLinesForGClef(
-                transformToNoteAndAccidental(note.noteType).first,
-                note.octave,
-                translation?.xShift ?: 0,
-                translation?.yShift ?: 0,
-                noteHeadGlyph.boundingBox.xMin.toInt(),
-                noteHeadGlyph.boundingBox.xMax.toInt(),
-                context.getAndIncrementExtraBarLinesCounter()
-            )?.let { extraBarLinesElement ->
-                positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
-            }
-        }
+        setupNoteHeadStemAndExtraBarLines(getNoteHeadGlyph(duration))
 
         if (context.debug) {
             determineDebugBox(
@@ -63,6 +39,33 @@ class NoteElement(
             ).let {
                 positionedRenderingElements.addAll(it.toRenderingElement())
             }
+        }
+    }
+
+    private fun setupNoteHeadStemAndExtraBarLines(noteHeadGlyph: GlyphData) {
+        noteHead = PositionedRenderingElement.create(
+            noteHeadGlyph.boundingBox,
+            id,
+            translation ?: Translation(0, 0),
+            duration.name,
+            true
+        ).also {
+            positionedRenderingElements.add(it)
+            highlightElements.add(it.id)
+        }
+
+        getStem()?.let { positionedRenderingElements.add(it) }
+
+        addExtraBarLinesForGClef(
+            transformToNoteAndAccidental(note.noteType).first,
+            note.octave,
+            translation?.xShift ?: 0,
+            translation?.yShift ?: 0,
+            noteHeadGlyph.boundingBox.xMin.toInt(),
+            noteHeadGlyph.boundingBox.xMax.toInt(),
+            context.getAndIncrementExtraBarLinesCounter()
+        )?.let { extraBarLinesElement ->
+            positionedRenderingElements.addAll(extraBarLinesElement.toRenderingElement())
         }
     }
 
@@ -127,6 +130,28 @@ class NoteElement(
     }
 
     override fun getIdsOfHighlightElements() = highlightElements
+    override fun getTieCoordinates(top: Boolean): Pair<Double, Double> {
+        val tieCoordinates = getTieCoordinatesInternal(top)
+        if (tieCoordinates == null) {
+            logger.error { "Unable to get tie coordinates for element with ID: {id}" }
+            return Pair(0.0, 0.0)
+        }
+        return tieCoordinates
+    }
+
+    private fun getTieCoordinatesInternal(top: Boolean): Pair<Double, Double>? {
+        return noteHead?.run {
+            val xCoord = boundingBox.xMin + (boundingBox.xMax - boundingBox.xMin) / 2
+            val yCoord = if (top) {
+                boundingBox.yMin
+            } else {
+                boundingBox.yMax
+            }
+
+            Pair(xCoord + translation.xShift, yCoord + translation.yShift)
+        }
+    }
+
 
     override fun toString(): String {
         return "NoteElement(note=$note, translation=$translation)"

@@ -79,43 +79,39 @@ class ScoreSetup(private val score: Score) {
 
     private fun handleTies(renderingElements: MutableList<PositionedRenderingElement>) {
         // TODO Note group elements can also have ties
-        score.ties.map { tie ->
+        score.ties.mapNotNull { tie ->
             val firstNote =
                 scoreRenderingElements.find { it is NoteElement && it.id == tie.first.id }
-                    ?.let { (it as NoteElement).getStem() }
             val secondNote =
                 scoreRenderingElements.find { it is NoteElement && it.id == tie.second.id }
-                    ?.let { (it as NoteElement).getStem() }
 
-            if (firstNote == null || secondNote == null) {
+            if (firstNote !is ElementCanBeTied || secondNote !is ElementCanBeTied) {
                 logger.error { "Did not find all elements in tie. First element: $firstNote. Second element: $secondNote" }
                 null
             } else {
-                if (firstNote is TranslatedRenderingElement && secondNote is TranslatedRenderingElement) {
-                    setupTie(firstNote, secondNote)
-                } else {
-                    logger.error { "Unexpected rendering element type" }
-                    null
-                }
+                setupTie(firstNote, secondNote)
             }
-        }.filterNotNull()
+        }
             .forEach {
                 it.toRenderingElement()
                     .forEach { positionedRenderingElement -> renderingElements.add(positionedRenderingElement) }
             }
     }
 
-    private fun setupTie(firstStem: TranslatedRenderingElement, lastStem: TranslatedRenderingElement): TieElement {
+    private fun setupTie(fromElement: ElementCanBeTied, toElement: ElementCanBeTied): TieElement {
+        val useTop = true
+
+        // TODO Need to be able to determine when to use top and bottom position
+        // TODO Need to handle case when from and to coordinates are on different rows in the score
+        val fromCoordinates = fromElement.getTieCoordinates(useTop)
+        val toCoordinates = toElement.getTieCoordinates(useTop)
+
         val tieElement =
             TieElement(
                 "tie-element-$tieElementCounter",
-                lastStem.translation.xShift.toDouble(),
-                lastStem.translation.yShift.toDouble()
+                fromCoordinates,
+                toCoordinates
             )
-
-        // TODO Set up correct positioning
-//        tieElement.xPosition = firstStem.translation.xShift
-//        tieElement.yPosition = firstStem.translation.yShift
 
         return tieElement
     }
@@ -152,7 +148,7 @@ class ScoreSetup(private val score: Score) {
         val lastStem = lastNote.getStem()
 
         if (firstStem == null || lastStem == null) {
-            logger.error { "Need stems for both notes included in beam. Beam group: ${beamGroup}" }
+            logger.error { "Need stems for both notes included in beam. Beam group: $beamGroup" }
             return null
         }
 

@@ -103,7 +103,7 @@ class NoteGroupElement(
             }
         }
 
-        noteGroup.stem?.let {
+        noteGroup.stem.let {
             result.add(addStem(it == Stem.UP))
         }
 

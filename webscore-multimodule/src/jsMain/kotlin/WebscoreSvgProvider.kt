@@ -65,7 +65,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                     transformToPathString(definition.value.pathElements),
                     definition.value.strokeWidth,
                     definition.key,
-                    isClickable = false
+                    isClickable = false,
                 )
             }
             svgElement.appendChild(defsTag)
@@ -94,7 +94,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                             renderingElement.id,
                             pathInterface.fill,
                             extraAttributes,
-                            renderingElement.isClickable
+                            renderingElement.isClickable,
+                            pathInterface.stroke
                         )
                     }
                 }
@@ -107,7 +108,8 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                             renderingElement.id,
                             pathInterface.fill,
                             extraAttributes,
-                            renderingElement.isClickable
+                            renderingElement.isClickable,
+                            pathInterface.stroke
                         )?.let { pathElement ->
                             idSvgElementMap.put(renderingElement.id, pathElement)
                         }
@@ -134,12 +136,14 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         id: String,
         fill: String? = null,
         extraAttributes: Map<String, String> = emptyMap(),
-        isClickable: Boolean
+        isClickable: Boolean,
+        stroke: String? = null
     ): Element? {
         return node.ownerDocument?.let { ownerDocument ->
             val path1 = ownerDocument.createElementNS(SVG_NAMESPACE_URI, "path")
             path1.setAttribute("d", path)
             fill?.let { path1.setAttribute("fill", it) }
+            stroke?.let { path1.setAttribute("stroke", it) }
             path1.setAttribute("id", id)
             path1.setAttribute("stroke-width", strokeWidth.toString())
             if (isClickable) {

@@ -6,9 +6,9 @@ import com.kjipo.svg.GlyphData
 /**
  * Subclasses of this can create rendering data.
  */
-abstract class ScoreRenderingElement(var translation: Translation? = null
+abstract class ScoreRenderingElement(
+    var translation: Translation? = null
 ) {
-
 
     abstract fun toRenderingElement(): List<PositionedRenderingElementParent>
 

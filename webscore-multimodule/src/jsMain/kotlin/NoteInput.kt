@@ -5,7 +5,6 @@ import com.kjipo.score.GClefNoteLine
 import com.kjipo.score.NoteType
 import mu.KotlinLogging
 import org.w3c.dom.events.KeyboardEvent
-import kotlin.math.log
 
 
 class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
@@ -30,6 +29,7 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
 
     private var currentStep: NoteInputStep = NoteInputStep.Duration
     private var currentNoteInput: NoteInput? = null
+    private var insertNoteNotRest = true
 
     private val noteInputListeners = mutableListOf<NoteInputListener>()
 
@@ -61,7 +61,7 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
         when (currentStep) {
             NoteInputStep.Duration -> {
                 if (keyboardEvent.key in setOf("1", "2", "3", "4", "5")) {
-                    getDuration(keyboardEvent.keyCode - 48).let {
+                    getDuration(keyboardEvent.key.toInt())?.let {
                         currentNoteInput = NoteInput(it)
                         currentStep = NoteInputStep.Note
                     }
@@ -165,6 +165,10 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
     private fun handleNoteStepInput(inputNoteType: GClefNoteLine) {
         currentNoteInput?.note = inputNoteType
         currentStep = NoteInputStep.Modifier
+    }
+
+    fun insertNoteNotRest(insertNoteNotRest: Boolean) {
+        this.insertNoteNotRest = insertNoteNotRest
     }
 
 }

@@ -1,10 +1,11 @@
 import com.kjipo.score.Duration
 
 
-internal fun getDuration(keyPressed: Int): Duration =
-    when (keyPressed) {
-        1 -> Duration.QUARTER
+internal fun getDuration(value: Int): Duration? =
+    when (value) {
+        1 -> Duration.WHOLE
         2 -> Duration.HALF
-        3 -> Duration.WHOLE
-        else -> Duration.QUARTER
+        3 -> Duration.QUARTER
+        4 -> Duration.EIGHT
+        else -> null
     }
