@@ -1,5 +1,6 @@
 package com.kjipo.handler
 
+import com.kjipo.score.ScoreElementMarker
 
 
 /**
@@ -12,10 +13,13 @@ class Score {
     val ties = mutableListOf<Pair<ScoreHandlerElement, ScoreHandlerElement>>()
     val beamGroups = mutableListOf<BeamGroup>()
 
+
     private var idCounter = 0
 
 
     fun getAndIncrementIdCounter() = "score-${idCounter++}"
+
+
 
     override fun toString(): String {
         return "Score(bars=$bars, ties=$ties, idCounter=$idCounter)"

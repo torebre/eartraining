@@ -13,8 +13,8 @@ import kotlin.math.ceil
 class BarData(
     private val context: Context,
     private val bar: Bar,
-    private val barXoffset: Double,
-    private val barYoffset: Double,
+    internal val barXoffset: Double,
+    internal val barYoffset: Double,
     private val debug: Boolean = false
 ) {
     var scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
@@ -107,7 +107,8 @@ class BarData(
     }
 
 
-    private fun getClefElement(definitions: MutableMap<String, GlyphData>
+    private fun getClefElement(
+        definitions: MutableMap<String, GlyphData>
     ): ClefElement? {
         return if (clef == Clef.NONE) {
             null
@@ -136,6 +137,14 @@ class BarData(
      */
     fun getHighlightElements(): List<ScoreRenderingElement> {
         return scoreRenderingElements.filter { it is HighlightableElement }
+    }
+
+    fun getBarXStart(): Double {
+        return barXoffset
+    }
+
+    fun getBarXEnd(): Double {
+        return barXoffset + DEFAULT_BAR_WIDTH
     }
 
     override fun toString(): String {

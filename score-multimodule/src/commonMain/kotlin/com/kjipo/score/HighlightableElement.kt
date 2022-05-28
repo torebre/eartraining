@@ -1,6 +1,6 @@
 package com.kjipo.score
 
-interface HighlightableElement {
+interface HighlightableElement: ScoreElementMarker {
 
     val id: String
 

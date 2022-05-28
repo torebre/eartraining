@@ -8,7 +8,7 @@ import com.kjipo.svg.GlyphData
  */
 abstract class ScoreRenderingElement(
     var translation: Translation? = null
-) {
+) : ScoreElementMarker {
 
     abstract fun toRenderingElement(): List<PositionedRenderingElementParent>
 

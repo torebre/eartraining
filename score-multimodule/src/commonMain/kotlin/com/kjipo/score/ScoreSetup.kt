@@ -12,7 +12,7 @@ class ScoreSetup(private val score: Score) {
     val context = Context()
     val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
-    private var tieElementCounter = 0
+    private val barData = mutableListOf<BarData>()
 
     private val logger = KotlinLogging.logger {}
 
@@ -30,13 +30,18 @@ class ScoreSetup(private val score: Score) {
         return RenderingSequenceWithMetaData(renderingSequence, highlightElementMap)
     }
 
+
+    private fun clearData() {
+        barData.clear()
+    }
+
     private fun build(): RenderingSequence {
         // TODO The position will be wrong when there are multiple bars
         val renderingSequences = mutableListOf<RenderingSequence>()
         val renderingElements = mutableListOf<PositionedRenderingElement>()
         val definitionMap = mutableMapOf<String, GlyphData>()
 
-        val bars = mutableListOf<BarData>()
+        clearData()
 
         var barXoffset = 0.0
         var barYoffset = 0.0
@@ -44,7 +49,7 @@ class ScoreSetup(private val score: Score) {
         score.bars.forEach { bar ->
             val currentBar = BarData(context, bar, barXoffset, barYoffset)
 
-            bars.add(currentBar)
+            barData.add(currentBar)
             val renderingSequence = currentBar.build()
             barXoffset += context.barXspace
             barYoffset += context.barYspace
@@ -57,11 +62,11 @@ class ScoreSetup(private val score: Score) {
             }
         }
 
-        bars.flatMap { it.scoreRenderingElements }.forEach {
+        barData.flatMap { it.scoreRenderingElements }.forEach {
             scoreRenderingElements.add(it)
         }
 
-        handleBeams(renderingElements, bars)
+        handleBeams(renderingElements, barData)
         handleTies(renderingElements)
 
         renderingSequences.add(
@@ -89,37 +94,85 @@ class ScoreSetup(private val score: Score) {
             } else {
                 setupTie(firstNote, secondNote)
             }
-        }
+        }.flatten()
             .forEach {
                 it.toRenderingElement()
                     .forEach { positionedRenderingElement -> renderingElements.add(positionedRenderingElement) }
             }
     }
 
-    private fun setupTie(fromElement: ElementCanBeTied, toElement: ElementCanBeTied): TieElement {
-        val useTop = true
 
+    private fun getBarForElement(scoreElementMarker: ScoreElementMarker): BarData? {
+        return barData.find { barData -> barData.scoreRenderingElements.contains(scoreElementMarker) }
+    }
+
+
+    private fun setupTie(fromElement: ElementCanBeTied, toElement: ElementCanBeTied): Collection<TieElement> {
         // TODO Need to be able to determine when to use top and bottom position
-        // TODO Need to handle case when from and to coordinates are on different rows in the score
+        val useTop = false
+
+        val startBar = getBarForElement(fromElement)
+        val endBar = getBarForElement(toElement)
+
+        if (startBar == null || endBar == null) {
+            logger.error { "Start or end bar of tie missing. Start: {startBar}. End: {endBar}" }
+            return emptyList()
+        }
+
+        return if (startBar.barYoffset != endBar.barYoffset) {
+            setTwoTiesForTieSpanningRows(fromElement, startBar, toElement, endBar, useTop)
+        } else {
+            setupTieForSingleRow(fromElement, toElement, useTop)
+        }
+    }
+
+    private fun setupTieForSingleRow(
+        fromElement: ElementCanBeTied,
+        toElement: ElementCanBeTied,
+        useTop: Boolean
+    ): List<TieElement> {
         val fromCoordinates = fromElement.getTieCoordinates(useTop)
         val toCoordinates = toElement.getTieCoordinates(useTop)
 
         val tieElement =
             TieElement(
-                "tie-element-$tieElementCounter",
+                context.getAndIncrementTieCounter(),
                 fromCoordinates,
-                toCoordinates
+                toCoordinates,
+                useTop
             )
 
-        return tieElement
+        return listOf(tieElement)
+    }
+
+    private fun setTwoTiesForTieSpanningRows(
+        fromElement: ElementCanBeTied,
+        startBarData: BarData,
+        toElement: ElementCanBeTied,
+        endBarData: BarData,
+        useTop: Boolean
+    ): List<TieElement> {
+        val fromCoordinates = fromElement.getTieCoordinates(useTop)
+        val toCoordinates = toElement.getTieCoordinates(useTop)
+        val firstTie = TieElement(
+            context.getAndIncrementTieCounter(),
+            fromCoordinates,
+            Pair(startBarData.getBarXEnd(), fromCoordinates.second),
+            useTop
+        )
+        val secondTie = TieElement(
+            context.getAndIncrementTieCounter(),
+            Pair(endBarData.getBarXStart(), toCoordinates.second), toCoordinates,
+            useTop
+        )
+
+        return listOf(firstTie, secondTie)
     }
 
 
     private fun handleBeams(renderingElements: MutableList<PositionedRenderingElement>, bars: List<BarData>) {
-        var beamCounter = 0
-
         score.beamGroups.map { beam ->
-            val beamId = "beam-${beamCounter++}"
+            val beamId = context.getAndIncrementBeamCounter()
             setupBeamElement(beam, beamId, bars)?.let {
                 renderingElements.addAll(it.toRenderingElement())
             }
@@ -186,8 +239,6 @@ class ScoreSetup(private val score: Score) {
         }
 
         // TODO Viewbox will be wrong since translations are not taken into account
-
-
         return RenderingSequence(
             renderGroups,
             determineViewBox(renderGroups),

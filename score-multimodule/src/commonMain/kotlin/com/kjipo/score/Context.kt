@@ -9,12 +9,13 @@ class Context {
     private var idCounter = 0
     private var stemCounter = 0
     private var extraBarLinesCounter = 0
+    private var tieElementCounter = 0
+    private var beamCounter = 0
 
     val barXspace = 0.0
     val barYspace = 250.0
 
     var debug = true
-
 
 
     fun requiresStem(note: NoteSymbol): Boolean {
@@ -27,5 +28,9 @@ class Context {
     fun getAndIncrementStemCounter() = "stem-${stemCounter++}"
 
     fun getAndIncrementExtraBarLinesCounter() = "bar-${extraBarLinesCounter++}"
+
+    fun getAndIncrementTieCounter() = "tie-element-${tieElementCounter++}"
+    fun getAndIncrementBeamCounter() = "beam-${beamCounter++}"
+
 
 }

@@ -1,7 +1,7 @@
 package com.kjipo.score
 
 
-interface ElementCanBeTied {
+interface ElementCanBeTied: ScoreElementMarker {
 
     fun getTieCoordinates(top: Boolean): Pair<Double, Double>
 
