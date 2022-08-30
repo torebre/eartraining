@@ -12,7 +12,7 @@ interface ReducedScoreInterface {
 
     fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean): String?
 
-    fun updateDuration(id: String, duration: Duration)
+//    fun updateDuration(id: String, duration: Duration)
 
     fun deleteElement(id: String)
 
@@ -21,5 +21,5 @@ interface ReducedScoreInterface {
 
     fun getHighlightElementsMap(): Map<String, Collection<String>>
 
-    fun applyOperation(operation: ScoreOperation): String?
+    fun applyOperation(operation: PitchSequenceOperation)
 }

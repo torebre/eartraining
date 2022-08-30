@@ -8,10 +8,10 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     private val listeners = mutableListOf<ScoreHandlerListener>()
 
-    override fun updateDuration(id: String, keyPressed: Int) {
-        scoreHandler.updateDuration(id, keyPressed)
-        listeners.forEach { it.pitchSequenceChanged() }
-    }
+//     fun updateDuration(id: String, keyPressed: Int) {
+//        scoreHandler.updateDuration(id, keyPressed)
+//        listeners.forEach { it.pitchSequenceChanged() }
+//    }
 
     override fun getScoreAsJson() = scoreHandler.getScoreAsJson()
 
@@ -38,7 +38,10 @@ class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandle
 
     override fun getHighlightElementsMap() = scoreHandler.getHighlightElementsMap()
 
-    override fun applyOperation(operation: ScoreOperation) = scoreHandler.applyOperation(operation)
+    override fun applyOperation(operation: PitchSequenceOperation) {
+        scoreHandler.applyOperation(operation)
+        listeners.forEach { it.pitchSequenceChanged() }
+    }
 
     fun addListener(scoreHandlerListener: ScoreHandlerListener) = listeners.add(scoreHandlerListener)
 

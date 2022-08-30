@@ -13,7 +13,7 @@ interface ScoreHandlerInterface {
 
     fun getNeighbouringElement(activeElement: String, lookLeft: Boolean): String?
 
-    fun updateDuration(id: String, keyPressed: Int)
+//    fun updateDuration(id: String, keyPressed: Int)
 
 //    fun insertNote(activeElement: String, keyPressed: Int): String?
 
@@ -34,6 +34,6 @@ interface ScoreHandlerInterface {
 
     fun getHighlightElementsMap(): Map<String, Collection<String>>
 
-    fun applyOperation(operation: ScoreOperation): String?
+    fun applyOperation(operation: PitchSequenceOperation)
 
 }

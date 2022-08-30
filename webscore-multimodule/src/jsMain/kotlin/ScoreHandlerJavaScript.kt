@@ -1,6 +1,5 @@
 import com.kjipo.handler.ReducedScoreInterface
-import com.kjipo.handler.ScoreOperation
-import com.kjipo.score.Duration
+import com.kjipo.handler.PitchSequenceOperation
 
 class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
 
@@ -22,11 +21,11 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
     fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean) =
         scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
-    @JsName("updateDuration")
-    fun updateDuration(activeElement: String, duration: Duration) {
-        scoreHandler.updateDuration(activeElement, duration)
-        fireListeners()
-    }
+//    @JsName("updateDuration")
+//    fun updateDuration(activeElement: String, duration: Duration) {
+//        scoreHandler.updateDuration(activeElement, duration)
+//        fireListeners()
+//    }
 
     @JsName("deleteElement")
     fun deleteElement(id: String) {
@@ -38,8 +37,8 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
     fun getHighlightMap() = scoreHandler.getHighlightElementsMap()
 
     @JsName("applyOperation")
-    fun applyOperation(scoreOperation: ScoreOperation) {
-        scoreHandler.applyOperation(scoreOperation)
+    fun applyOperation(pitchSequenceOperation: PitchSequenceOperation) {
+        scoreHandler.applyOperation(pitchSequenceOperation)
         fireListeners()
     }
 

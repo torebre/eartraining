@@ -13,7 +13,7 @@ public final class MidiTrackBuilder {
     private int ticksPerQuarterNote;
     private int deltaWaiting = -1;
     private int microsecondsPerMidiQuarterNote;
-    private List<Integer> midiMessages = new ArrayList<Integer>();
+    private List<Integer> midiMessages = new ArrayList<>();
 
 
     private MidiTrackBuilder() {

@@ -2,7 +2,6 @@ package com.kjipo.scoregenerator
 
 import com.kjipo.handler.*
 import com.kjipo.score.Duration
-import com.kjipo.score.HighlightableElement
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
 import mu.KotlinLogging
@@ -14,7 +13,7 @@ import mu.KotlinLogging
 class ReducedScore : ReducedScoreInterface {
     private val pitchSequence = mutableListOf<Pitch>()
     private val actionSequence = mutableListOf<Action>()
-    val noteSequence = mutableListOf<NoteSequenceElement>()
+    private val noteSequence = mutableListOf<NoteSequenceElement>()
 
     private var scoreHandler = ScoreHandlerWithReducedLogic(Score())
     private var highlightMap: Map<String, Collection<String>> = emptyMap()
@@ -22,6 +21,8 @@ class ReducedScore : ReducedScoreInterface {
     var idCounter = 0
 
     var isDirty = true
+
+    private val operationsSinceLastRender = mutableListOf<PitchSequenceOperation>()
 
     private val logger = KotlinLogging.logger {}
 
@@ -34,7 +35,7 @@ class ReducedScore : ReducedScoreInterface {
         isDirty = true
     }
 
-    override fun updateDuration(id: String, duration: Duration) {
+    private fun updateDuration(id: String, duration: Duration) {
         val element = noteSequence.find { id == it.id } ?: return
         val elementId = (++idCounter).toString()
 
@@ -87,7 +88,6 @@ class ReducedScore : ReducedScoreInterface {
 
     private fun updateIfDirty() {
         if (isDirty) {
-
             val score = ScoreElementsTranslator.createRenderingData(noteSequence)
 
             // TODO If the score does not have to be rebuilt the whole time it will be more efficient
@@ -287,12 +287,15 @@ class ReducedScore : ReducedScoreInterface {
 
     override fun moveNoteOneStep(id: String, up: Boolean) {
 
+        // TODO Check that note does not move outside allowed limits
         logger.debug { "Moving note with ID: $id" }
 
-        noteSequence.find { it.id == id }?.let {
-            when (it) {
+        noteSequence.find { it.id == id }?.let { existingNoteSequenceElement ->
+            when (existingNoteSequenceElement) {
                 is NoteSequenceElement.NoteElement -> {
-                    handleMoveNoteForNote(it, up)
+//                    handleMoveNoteForNote(it, up)
+
+                    updateElement(ScoreHandlerUtilities.getPitch(existingNoteSequenceElement.note, existingNoteSequenceElement.octave) + if(up) 1 else -1, existingNoteSequenceElement.duration, existingNoteSequenceElement)
 
                 }
                 // TODO Need to handle notes inside note group
@@ -504,7 +507,9 @@ class ReducedScore : ReducedScoreInterface {
     }
 
 
-    override fun applyOperation(operation: ScoreOperation): String? {
+    override fun applyOperation(operation: PitchSequenceOperation) {
+        operationsSinceLastRender.add(operation)
+
         when (operation) {
             is InsertNote -> {
                 handleInsertNote(operation)
@@ -525,9 +530,6 @@ class ReducedScore : ReducedScoreInterface {
                 handleInsertNoteWithType(operation)
             }
         }
-
-        // TODO
-        return null
     }
 
     private fun handleInsertNoteWithType(operation: InsertNoteWithType): String {
@@ -550,7 +552,38 @@ class ReducedScore : ReducedScoreInterface {
     }
 
     private fun handleUpdateElement(operation: UpdateElement) {
-        // TODO
+        noteSequence.find { it.id == operation.id }?.let {existingElement ->
+            when (existingElement) {
+                is NoteSequenceElement.NoteElement -> {
+                    updateElement(operation, existingElement)
+
+                }
+                // TODO Need to handle notes inside note group
+
+            }
+        }
+    }
+
+    private fun updateElement(operation: UpdateElement, existingElement: NoteSequenceElement.NoteElement) {
+        updateElement(operation.pitch, operation.duration, existingElement)
+    }
+
+    private fun updateElement(pitch: Int?, duration: Duration?, existingElement: NoteSequenceElement.NoteElement) {
+        val (noteType, octave) = pitch?.let {
+            ScoreHandlerUtilities.pitchToNoteAndOctave(it)
+        } ?: Pair(existingElement.note, existingElement.octave)
+        val durationAfterUpdate = duration ?: existingElement.duration
+
+        replaceElement(
+            NoteSequenceElement.NoteElement(
+                existingElement.id,
+                noteType,
+                octave,
+                durationAfterUpdate,
+                mapOf(Pair(ELEMENT_ID, existingElement.id))
+            ), existingElement)
+
+        isDirty = true
     }
 
     private fun handleDeleteElement(operation: DeleteElement) {
@@ -572,5 +605,7 @@ class ReducedScore : ReducedScoreInterface {
             insertNote(duration, insertNote.pitch)
         }
     }
+
+    fun getCurrentNoteSequence() = noteSequence.toList()
 
 }

@@ -36,8 +36,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     }
 
     fun submit() {
-        val attempt = inputSequenceGenerator.noteSequence
-        submitHandler.getCurrentExercise()?.submit(attempt)
+        submitHandler.getCurrentExercise()?.submit(inputSequenceGenerator.getCurrentNoteSequence())
     }
 
     fun submit(attempt: List<NoteSequenceElement>) {

@@ -48,9 +48,6 @@ object ScoreHandlerUtilities {
 
 
     fun getPitch(noteType: NoteType, octave: Int): Int {
-
-        logger.debug { "Note type: $noteType" }
-
         return 12 * octave + when (noteType) {
             NoteType.A -> 9
             NoteType.A_SHARP -> 10

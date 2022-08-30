@@ -32,9 +32,11 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                 is TranslatedRenderingElement -> {
                     setupTranslatedElement(svgElement, positionedRenderingElement.translation)
                 }
+
                 is TranslatedRenderingElementUsingReference -> {
                     setupTranslatedElement(svgElement, positionedRenderingElement.translation)
                 }
+
                 is AbsolutelyPositionedRenderingElement -> {
                     svgElement
                 }
@@ -99,6 +101,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                         )
                     }
                 }
+
                 is AbsolutelyPositionedRenderingElement -> {
                     for (pathInterface in renderingElement.renderingPath) {
                         addPath(
@@ -115,6 +118,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                         }
                     }
                 }
+
                 is TranslatedRenderingElementUsingReference -> {
                     addPathUsingReference(
                         element,

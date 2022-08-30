@@ -5,7 +5,6 @@ allprojects {
 
 buildscript {
     ext.kotlinVersion = '1.6.20'
-//    ext.kotlinVersion = '1.4.21'
 
     repositories {
         mavenCentral()
