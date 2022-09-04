@@ -1,5 +1,5 @@
 interface ScoreHandlerListener {
 
-    fun scoreUpdated()
+    fun scoreUpdated(updateId: Int)
 
 }

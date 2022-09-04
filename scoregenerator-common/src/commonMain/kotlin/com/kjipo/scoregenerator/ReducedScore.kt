@@ -1,9 +1,7 @@
 package com.kjipo.scoregenerator
 
 import com.kjipo.handler.*
-import com.kjipo.score.Duration
-import com.kjipo.score.NoteSequenceElement
-import com.kjipo.score.NoteType
+import com.kjipo.score.*
 import mu.KotlinLogging
 
 
@@ -18,7 +16,13 @@ class ReducedScore : ReducedScoreInterface {
     private var scoreHandler = ScoreHandlerWithReducedLogic(Score())
     private var highlightMap: Map<String, Collection<String>> = emptyMap()
 
-    var idCounter = 0
+    private var currentScore: Score? = null
+    private var latestScoreId = 0
+    private var currentRenderingSequence =
+        RenderingSequenceWithMetaData(RenderingSequence(emptyList(), null, emptyMap()), emptyMap())
+    private var changeSet: Map<String, PositionedRenderingElementParent> = emptyMap()
+
+    private var idCounter = 0
 
     var isDirty = true
 
@@ -31,42 +35,6 @@ class ReducedScore : ReducedScoreInterface {
         noteSequence.addAll(simpleNoteSequence.elements)
 
         logger.debug { "Number of elements in sequence ${simpleNoteSequence.elements.size}" }
-
-        isDirty = true
-    }
-
-    private fun updateDuration(id: String, duration: Duration) {
-        val element = noteSequence.find { id == it.id } ?: return
-        val elementId = (++idCounter).toString()
-
-        when (element) {
-            is NoteSequenceElement.NoteElement -> {
-                replaceElement(
-                    NoteSequenceElement.NoteElement(
-                        elementId,
-                        element.note,
-                        element.octave,
-                        duration,
-                        mapOf(Pair(ELEMENT_ID, elementId))
-                    ), element
-                )
-            }
-            is NoteSequenceElement.RestElement -> {
-                replaceElement(
-                    NoteSequenceElement.RestElement(
-                        (++idCounter).toString(),
-                        duration,
-                        mapOf(Pair(ELEMENT_ID, elementId))
-                    ), element
-                )
-            }
-
-            is NoteSequenceElement.MultipleNotesElement -> {
-                TODO("Not implemented")
-            }
-
-
-        }
 
         isDirty = true
     }
@@ -86,23 +54,88 @@ class ReducedScore : ReducedScoreInterface {
         return scoreHandler.score
     }
 
+    /**
+     * If null is returned then everything should be rerendered
+     */
+    fun getElementReplacements(): Collection<String>? {
+        return currentScore?.let { _ ->
+            val idsOfElementsToUpdate = mutableListOf<String>()
+
+            for (pitchSequenceOperation in operationsSinceLastRender) {
+                var notHandledOperation = false
+
+                idsOfElementsToUpdate.addAll(when (pitchSequenceOperation) {
+                    is MoveElement -> {
+                        setOf(pitchSequenceOperation.id)
+                    }
+
+                    is UpdateElement -> {
+                        setOf(pitchSequenceOperation.id)
+                    }
+
+                    // TODO Handle other operations
+
+                    else -> {
+//                        emptySet()
+
+                        logger.info { pitchSequenceOperation }
+
+                        notHandledOperation = true
+
+                        emptySet()
+                    }
+
+                })
+
+                if (notHandledOperation) {
+                    return null
+                }
+
+            }
+
+            return idsOfElementsToUpdate
+        }
+
+    }
+
+    private fun generateChangeSet(): Map<String, PositionedRenderingElementParent> {
+        val elementsToUpdate = mutableMapOf<String, PositionedRenderingElementParent>()
+
+        getElementReplacements()?.let { elementIdsChanged ->
+            val scoreSetup = scoreHandler.getScoreSetup()
+            scoreSetup.scoreRenderingElements.forEach { scoreRenderingElement ->
+                if (scoreRenderingElement is NoteElement && elementIdsChanged.contains(scoreRenderingElement.properties[ELEMENT_ID])) {
+                    scoreRenderingElement.toRenderingElement().forEach { positionedRenderingElementParent ->
+                        elementsToUpdate[positionedRenderingElementParent.id] = positionedRenderingElementParent
+                    }
+                }
+            }
+        }
+
+        return elementsToUpdate
+    }
+
     private fun updateIfDirty() {
         if (isDirty) {
-            val score = ScoreElementsTranslator.createRenderingData(noteSequence)
+            currentScore = ScoreElementsTranslator.createRenderingData(noteSequence).also { score ->
+                // TODO If the score does not have to be rebuilt the whole time it will be more efficient
+                scoreHandler = ScoreHandlerWithReducedLogic(score)
 
-            // TODO If the score does not have to be rebuilt the whole time it will be more efficient
-            scoreHandler = ScoreHandlerWithReducedLogic(score)
+                val (newPitchSequence, newActionSequence) = computePitchSequence()
 
-            val (newPitchSequence, newActionSequence) = computePitchSequence()
+                pitchSequence.clear()
+                pitchSequence.addAll(newPitchSequence)
 
-            pitchSequence.clear()
-            pitchSequence.addAll(newPitchSequence)
+                actionSequence.clear()
+                actionSequence.addAll(newActionSequence)
 
-            actionSequence.clear()
-            actionSequence.addAll(newActionSequence)
+                highlightMap = generateHighlightMap()
 
-            highlightMap = generateHighlightMap()
+                currentRenderingSequence = scoreHandler.build()
+            }
 
+            changeSet = generateChangeSet()
+            ++latestScoreId
             isDirty = false
         }
     }
@@ -147,6 +180,7 @@ class ReducedScore : ReducedScoreInterface {
 
                     timeCounter += durationInMilliseconds
                 }
+
                 is NoteSequenceElement.RestElement -> {
                     val durationInMilliseconds =
                         ScoreHandlerUtilities.getDurationInMilliseconds(noteSequenceElement.duration)
@@ -162,6 +196,7 @@ class ReducedScore : ReducedScoreInterface {
                     )
                     timeCounter += durationInMilliseconds
                 }
+
                 is NoteSequenceElement.MultipleNotesElement -> {
                     timeCounter = handleMultipleNotesElement(
                         timeCounter,
@@ -293,9 +328,12 @@ class ReducedScore : ReducedScoreInterface {
         noteSequence.find { it.id == id }?.let { existingNoteSequenceElement ->
             when (existingNoteSequenceElement) {
                 is NoteSequenceElement.NoteElement -> {
-//                    handleMoveNoteForNote(it, up)
-
-                    updateElement(ScoreHandlerUtilities.getPitch(existingNoteSequenceElement.note, existingNoteSequenceElement.octave) + if(up) 1 else -1, existingNoteSequenceElement.duration, existingNoteSequenceElement)
+                    updateElement(
+                        ScoreHandlerUtilities.getPitch(
+                            existingNoteSequenceElement.note,
+                            existingNoteSequenceElement.octave
+                        ) + if (up) 1 else -1, existingNoteSequenceElement.duration, existingNoteSequenceElement
+                    )
 
                 }
                 // TODO Need to handle notes inside note group
@@ -303,69 +341,6 @@ class ReducedScore : ReducedScoreInterface {
             }
         }
         isDirty = true
-    }
-
-    private fun handleMoveNoteForNote(noteElement: NoteSequenceElement.NoteElement, up: Boolean) {
-        if (up) {
-            moveNoteUp(noteElement)
-        } else {
-            moveNoteDown(noteElement)
-        }
-    }
-
-    private fun moveNoteDown(noteElement: NoteSequenceElement.NoteElement) {
-        // The ID of the new element is set to the same as the old
-        if (noteElement.note == NoteType.C) {
-            replaceElement(
-                NoteSequenceElement.NoteElement(
-                    noteElement.id,
-                    NoteType.H, noteElement.octave - 1, noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, noteElement.id))
-                ), noteElement
-            )
-        } else {
-            val noteTypeValue = (noteElement.note.ordinal - 1).let {
-                if (it < 0) {
-                    it + NoteType.values().size
-                } else {
-                    it
-                }
-            }
-            replaceElement(
-                NoteSequenceElement.NoteElement(
-                    noteElement.id,
-                    NoteType.values()[noteTypeValue],
-                    noteElement.octave,
-                    noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, noteElement.id))
-                ), noteElement
-            )
-        }
-    }
-
-    private fun moveNoteUp(noteElement: NoteSequenceElement.NoteElement) {
-        // The ID of the new element is set to the same as the old
-        if (noteElement.note == NoteType.H) {
-            replaceElement(
-                NoteSequenceElement.NoteElement(
-                    noteElement.id,
-                    NoteType.C,
-                    noteElement.octave + 1,
-                    noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, noteElement.id))
-                ), noteElement
-            )
-        } else {
-            replaceElement(
-                NoteSequenceElement.NoteElement(
-                    noteElement.id,
-                    NoteType.values()[(noteElement.note.ordinal + 1) % NoteType.values().size],
-                    noteElement.octave,
-                    noteElement.duration,
-                    mapOf(Pair(ELEMENT_ID, noteElement.id))
-                ), noteElement
-            )
-        }
     }
 
     private fun replaceElement(
@@ -514,23 +489,41 @@ class ReducedScore : ReducedScoreInterface {
             is InsertNote -> {
                 handleInsertNote(operation)
             }
+
             is MoveElement -> {
                 handleMoveElement(operation)
             }
+
             is DeleteElement -> {
                 handleDeleteElement(operation)
             }
+
             is UpdateElement -> {
                 handleUpdateElement(operation)
             }
+
             is InsertRest -> {
                 handleInsertRest(operation)
             }
+
             is InsertNoteWithType -> {
                 handleInsertNoteWithType(operation)
             }
         }
+
+        updateIfDirty()
     }
+
+    override fun getLatestId() = latestScoreId
+
+    override fun getChangeSet(scoreId: Int): RenderingSequenceUpdate? {
+        if (scoreId != latestScoreId - 1) {
+            return null
+        }
+
+        return RenderingSequenceUpdate(changeSet, null)
+    }
+
 
     private fun handleInsertNoteWithType(operation: InsertNoteWithType): String {
         val elementId = "note_${++idCounter}"
@@ -552,7 +545,7 @@ class ReducedScore : ReducedScoreInterface {
     }
 
     private fun handleUpdateElement(operation: UpdateElement) {
-        noteSequence.find { it.id == operation.id }?.let {existingElement ->
+        noteSequence.find { it.id == operation.id }?.let { existingElement ->
             when (existingElement) {
                 is NoteSequenceElement.NoteElement -> {
                     updateElement(operation, existingElement)
@@ -581,7 +574,8 @@ class ReducedScore : ReducedScoreInterface {
                 octave,
                 durationAfterUpdate,
                 mapOf(Pair(ELEMENT_ID, existingElement.id))
-            ), existingElement)
+            ), existingElement
+        )
 
         isDirty = true
     }
@@ -595,7 +589,6 @@ class ReducedScore : ReducedScoreInterface {
     }
 
     private fun handleInsertNote(insertNote: InsertNote) {
-        // Default to quarter if nothing is set
         val duration = insertNote.duration
         val id = insertNote.id
 

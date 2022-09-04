@@ -49,10 +49,13 @@ class ScoreHandlerWithReducedLogic(score: Score) : ScoreProviderInterface {
     }
 
 
-    private fun build(): RenderingSequenceWithMetaData {
+    fun build(): RenderingSequenceWithMetaData {
         scoreSetup = ScoreSetup(score)
 
         return scoreSetup.buildWithMetaData().also { cachedBuild = it }
     }
+
+
+    fun getScoreSetup() = scoreSetup
 
 }

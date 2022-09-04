@@ -21,12 +21,6 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
     fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean) =
         scoreHandler.getNeighbouringElement(activeElement, lookLeft)
 
-//    @JsName("updateDuration")
-//    fun updateDuration(activeElement: String, duration: Duration) {
-//        scoreHandler.updateDuration(activeElement, duration)
-//        fireListeners()
-//    }
-
     @JsName("deleteElement")
     fun deleteElement(id: String) {
         scoreHandler.deleteElement(id)
@@ -49,7 +43,9 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
     fun removeListener(scoreHandlerListener: ScoreHandlerListener) = listeners.remove(scoreHandlerListener)
 
     private fun fireListeners() {
-        listeners.forEach { it.scoreUpdated() }
+        scoreHandler.getLatestId().let { latestId ->
+            listeners.forEach { it.scoreUpdated(latestId) }
+        }
     }
 
 }

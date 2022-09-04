@@ -8,7 +8,7 @@ import mu.KotlinLogging
 
 class NoteElement(
     val note: Note,
-    val context: Context,
+    private val context: Context,
     override val properties: Map<String, String> = mapOf(),
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied {
 
@@ -23,7 +23,9 @@ class NoteElement(
     private val logger = KotlinLogging.logger {}
 
 
-    override fun toRenderingElement() = positionedRenderingElements
+    override fun toRenderingElement(): List<PositionedRenderingElementParent> {
+        return positionedRenderingElements
+    }
 
     fun layoutNoteHeads() {
         note.accidental?.run {
@@ -49,9 +51,9 @@ class NoteElement(
             translation ?: Translation(0.0, 0.0),
             duration.name,
             true
-        ).also {
-            positionedRenderingElements.add(it)
-            highlightElements.add(it.id)
+        ).also { translatedRenderingElementUsingReference ->
+            positionedRenderingElements.add(translatedRenderingElementUsingReference)
+            highlightElements.add(translatedRenderingElementUsingReference.id)
         }
 
         getStem()?.let { positionedRenderingElements.add(it) }

@@ -1,14 +1,20 @@
 package com.kjipo.scoregenerator
 
 import com.kjipo.handler.Note
+import com.kjipo.handler.ScoreHandlerUtilities
+import com.kjipo.handler.UpdateElement
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.score.NoteType
+import mu.KotlinLogging
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ReducedScoreTest {
+
+    private val logger = KotlinLogging.logger {}
 
     @Test
     fun elementsAreAddedToScoreTest() {
@@ -18,13 +24,13 @@ class ReducedScoreTest {
         sequenceGenerator.getActionSequenceScript()
         val notes = sequenceGenerator.getScore()
         val noteElements =
-            notes.bars.flatMap { it.scoreHandlerElements }.filter { it is Note && it.isNote }.toList()
+            notes.bars.flatMap { it.scoreHandlerElements }.filterIsInstance<Note>().toList()
 
         assertFalse { noteElements.isEmpty() }
     }
 
     @Test
-    fun `Elements show up in score output`() {
+    fun elementsShowUpInScoreOutput() {
         val sequenceGenerator = ReducedScore()
         val noteSequence =
             listOf<NoteSequenceElement>(NoteSequenceElement.NoteElement("test1", NoteType.C, 5, Duration.QUARTER))
@@ -35,7 +41,7 @@ class ReducedScoreTest {
     }
 
     @Test
-    fun `Action sequence gets generated`() {
+    fun actionSequenceGetRendered() {
         val sequenceGenerator = ReducedScore()
         val noteSequence =
             listOf<NoteSequenceElement>(
@@ -54,7 +60,7 @@ class ReducedScoreTest {
     }
 
     @Test
-    fun `Action sequence contains multiple note pitches`() {
+    fun actionSequenceContainsMultipleNotePitches() {
         val sequenceGenerator = ReducedScore()
         val noteSequence = listOf(
             NoteSequenceElement.NoteElement("test1", NoteType.G, 5, Duration.QUARTER),
@@ -72,6 +78,33 @@ class ReducedScoreTest {
             actionScript.timeEventList.flatMap { it.second }.filterIsInstance<Action.PitchEvent>().filter { it.noteOn }
 
         assertTrue(pitchEvents.size == 2)
+    }
+
+    @Test
+    fun getChangeSetTest() {
+        val reducedScore = ReducedScore()
+        val noteSequence = listOf(
+            NoteSequenceElement.NoteElement("test1", NoteType.G, 5, Duration.QUARTER),
+            NoteSequenceElement.MultipleNotesElement(
+                "test3", listOf(
+                    NoteSequenceElement.NoteElement("test3", NoteType.C, 5, Duration.QUARTER),
+                    NoteSequenceElement.NoteElement("test4", NoteType.E, 5, Duration.QUARTER)
+                ), Duration.QUARTER
+            )
+        )
+
+        assertEquals(0, reducedScore.getLatestId())
+        reducedScore.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence))
+        reducedScore.applyOperation(UpdateElement("test1", ScoreHandlerUtilities.getPitch(NoteType.G, 5) + 1))
+        assertEquals(1, reducedScore.getLatestId())
+
+        logger.info { reducedScore.getChangeSet(0) }
+
+
+
+
+
+
     }
 
 }

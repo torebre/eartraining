@@ -1,6 +1,8 @@
 package com.kjipo.handler
 
 import com.kjipo.score.Duration
+import com.kjipo.score.PositionedRenderingElementParent
+import com.kjipo.score.RenderingSequenceUpdate
 
 interface ReducedScoreInterface {
 
@@ -12,8 +14,6 @@ interface ReducedScoreInterface {
 
     fun getNeighbouringElement(activeElement: String?, lookLeft: Boolean): String?
 
-//    fun updateDuration(id: String, duration: Duration)
-
     fun deleteElement(id: String)
 
     // Add duration on note level
@@ -22,4 +22,7 @@ interface ReducedScoreInterface {
     fun getHighlightElementsMap(): Map<String, Collection<String>>
 
     fun applyOperation(operation: PitchSequenceOperation)
+
+    fun getLatestId(): Int
+    fun getChangeSet(scoreId: Int): RenderingSequenceUpdate?
 }

@@ -20,6 +20,11 @@ class Score {
     fun getAndIncrementIdCounter() = "score-${idCounter++}"
 
 
+    fun getAllScoreHandlerElements(filter: (ScoreHandlerElement) -> Boolean): List<ScoreHandlerElement> {
+        return bars.flatMap { it.scoreHandlerElements }.filter(filter)
+    }
+
+
 
     override fun toString(): String {
         return "Score(bars=$bars, ties=$ties, idCounter=$idCounter)"

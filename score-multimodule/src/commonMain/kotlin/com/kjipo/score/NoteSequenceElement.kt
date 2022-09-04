@@ -8,7 +8,7 @@ sealed class NoteSequenceElement(val id: String, val duration: Duration, val pro
         id: String,
         val elements: Collection<NoteElement>,
         duration: Duration,
-        properties: Map<String, String>
+        properties: Map<String, String> = emptyMap()
     ) :
         NoteSequenceElement(id, duration, properties) {
 
@@ -22,7 +22,7 @@ sealed class NoteSequenceElement(val id: String, val duration: Duration, val pro
         val note: NoteType,
         val octave: Int,
         duration: Duration,
-        properties: Map<String, String>
+        properties: Map<String, String> = emptyMap()
     ) : NoteSequenceElement(id, duration, properties) {
 
         override fun toString(): String {

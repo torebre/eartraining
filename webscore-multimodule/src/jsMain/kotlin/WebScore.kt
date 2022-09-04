@@ -1,3 +1,4 @@
+import com.kjipo.handler.MoveElement
 import kotlinx.browser.document
 import kotlinx.dom.appendText
 import kotlinx.html.currentTimeMillis
@@ -24,13 +25,6 @@ class WebScore(
     private val webscoreListeners = mutableListOf<WebscoreListener>()
 
     var activeElement: String? = null
-        set(value) {
-            field = value
-
-            writeDebug("Active element", value)
-
-            // reload()
-        }
 
     private var xStart = 0
     private var yStart = 0
@@ -310,30 +304,30 @@ class WebScore(
             if (it) {
                 if (xDiff < -HORIZONTAL_STEP) {
                     deactivateActiveElement()
-                    activeElement = activeElement?.let {
-                        scoreHandler.getNeighbouringElement(it, true)
+                    activeElement = activeElement?.let { id ->
+                        scoreHandler.getNeighbouringElement(id, true)
                     }
                     highlightElement(activeElement)
                     return true
                 } else if (xDiff > HORIZONTAL_STEP) {
                     deactivateActiveElement()
-                    activeElement = activeElement?.let {
-                        scoreHandler.getNeighbouringElement(it, false)
+                    activeElement = activeElement?.let { id ->
+                        scoreHandler.getNeighbouringElement(id, false)
                     }
                     highlightElement(activeElement)
                     return true
                 }
             } else {
                 if (yDiff < -VERTICAL_STEP) {
-                    activeElement?.let {
+                    activeElement?.let { id ->
                         // Up
-                        scoreHandler.moveNoteOneStep(it, true)
+                        scoreHandler.applyOperation(MoveElement(id, true))
                     }
                     return true
                 } else if (yDiff > VERTICAL_STEP) {
-                    activeElement?.let {
+                    activeElement?.let { id ->
                         // Down
-                        scoreHandler.moveNoteOneStep(it, false)
+                        scoreHandler.moveNoteOneStep(id, false)
                     }
                     return true
                 }
@@ -352,10 +346,12 @@ class WebScore(
                 noteInput.insertNoteNotRest(insertNoteNotRest)
                 webscoreListeners.forEach { it.noteInputNotRest(insertNoteNotRest) }
             }
+
             "KeyN" -> {
                 noteInputMode = !noteInputMode
                 webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
             }
+
             else -> {
                 if (noteInputMode) {
                     noteInput.processInput(keyboardEvent)
@@ -417,18 +413,8 @@ class WebScore(
         highlightElement(activeElement)
     }
 
-    private fun regenerateSvg() {
+    override fun scoreUpdated(updateId: Int) {
         generateSvgData(svgElement)
-    }
-
-    private fun writeDebug(tag: String, message: String?) {
-        debugLabelId?.let {
-            document.getElementById(it)?.appendText("$tag: $message")
-        }
-    }
-
-    override fun scoreUpdated() {
-        regenerateSvg()
         highlightElement(activeElement)
     }
 
@@ -450,6 +436,7 @@ class WebScore(
                     is SVGUseElement -> {
                         highlightElementIfFound(node.id)
                     }
+
                     is SVGPathElement -> {
                         highlightElementIfFound(node.id)
                     }
