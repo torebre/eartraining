@@ -3,6 +3,7 @@ package com.kjipo.scoregenerator
 import com.kjipo.handler.*
 import com.kjipo.score.*
 import mu.KotlinLogging
+import kotlin.math.log
 
 
 /**
@@ -58,11 +59,15 @@ class ReducedScore : ReducedScoreInterface {
      * If null is returned then everything should be rerendered
      */
     fun getElementReplacements(): Collection<String>? {
-        return currentScore?.let { _ ->
+        return currentScore?.let {
             val idsOfElementsToUpdate = mutableListOf<String>()
+
+            logger.debug { "Seeing which elements have updated since last render" }
 
             for (pitchSequenceOperation in operationsSinceLastRender) {
                 var notHandledOperation = false
+
+                logger.debug { "Pitch sequence update operation: $pitchSequenceOperation" }
 
                 idsOfElementsToUpdate.addAll(when (pitchSequenceOperation) {
                     is MoveElement -> {
@@ -76,12 +81,9 @@ class ReducedScore : ReducedScoreInterface {
                     // TODO Handle other operations
 
                     else -> {
-//                        emptySet()
-
                         logger.info { pitchSequenceOperation }
 
                         notHandledOperation = true
-
                         emptySet()
                     }
 
@@ -112,6 +114,8 @@ class ReducedScore : ReducedScoreInterface {
             }
         }
 
+        logger.debug { "Calculating changeset. Elements to update: $elementsToUpdate" }
+
         return elementsToUpdate
     }
 
@@ -135,6 +139,7 @@ class ReducedScore : ReducedScoreInterface {
             }
 
             changeSet = generateChangeSet()
+            operationsSinceLastRender.clear()
             ++latestScoreId
             isDirty = false
         }
@@ -328,15 +333,19 @@ class ReducedScore : ReducedScoreInterface {
         noteSequence.find { it.id == id }?.let { existingNoteSequenceElement ->
             when (existingNoteSequenceElement) {
                 is NoteSequenceElement.NoteElement -> {
-                    updateElement(
-                        ScoreHandlerUtilities.getPitch(
-                            existingNoteSequenceElement.note,
-                            existingNoteSequenceElement.octave
-                        ) + if (up) 1 else -1, existingNoteSequenceElement.duration, existingNoteSequenceElement
+                    applyOperation(
+                        UpdateElement(
+                            id, ScoreHandlerUtilities.getPitch(
+                                existingNoteSequenceElement.note,
+                                existingNoteSequenceElement.octave
+                            ) + if (up) 1 else -1
+                        )
                     )
-
                 }
-                // TODO Need to handle notes inside note group
+
+                else -> {
+                    // TODO Need to handle notes inside note group
+                }
 
             }
         }
@@ -483,6 +492,8 @@ class ReducedScore : ReducedScoreInterface {
 
 
     override fun applyOperation(operation: PitchSequenceOperation) {
+        logger.debug { "Applying operation: $operation" }
+
         operationsSinceLastRender.add(operation)
 
         when (operation) {
@@ -491,11 +502,11 @@ class ReducedScore : ReducedScoreInterface {
             }
 
             is MoveElement -> {
-                handleMoveElement(operation)
+                moveNoteOneStep(operation.id, operation.up)
             }
 
             is DeleteElement -> {
-                handleDeleteElement(operation)
+                deleteElement(operation.id)
             }
 
             is UpdateElement -> {
@@ -548,18 +559,17 @@ class ReducedScore : ReducedScoreInterface {
         noteSequence.find { it.id == operation.id }?.let { existingElement ->
             when (existingElement) {
                 is NoteSequenceElement.NoteElement -> {
-                    updateElement(operation, existingElement)
-
+                    updateElement(operation.pitch, operation.duration, existingElement)
                 }
-                // TODO Need to handle notes inside note group
+
+                else -> {
+                    // TODO Need to handle notes inside note group
+                }
 
             }
         }
     }
 
-    private fun updateElement(operation: UpdateElement, existingElement: NoteSequenceElement.NoteElement) {
-        updateElement(operation.pitch, operation.duration, existingElement)
-    }
 
     private fun updateElement(pitch: Int?, duration: Duration?, existingElement: NoteSequenceElement.NoteElement) {
         val (noteType, octave) = pitch?.let {
@@ -578,14 +588,6 @@ class ReducedScore : ReducedScoreInterface {
         )
 
         isDirty = true
-    }
-
-    private fun handleDeleteElement(operation: DeleteElement) {
-        deleteElement(operation.id)
-    }
-
-    private fun handleMoveElement(operation: MoveElement) {
-        moveNoteOneStep(operation.id, operation.up)
     }
 
     private fun handleInsertNote(insertNote: InsertNote) {

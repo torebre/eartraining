@@ -12,8 +12,10 @@ import org.w3c.dom.Node
 class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
 
     private val idSvgElementMap = mutableMapOf<String, Element>()
+    private val idElementGroupMap = mutableMapOf<String, Element>()
 
     private val logger = KotlinLogging.logger {}
+
 
     fun generateSvgData(svgElement: Element) {
         val renderingSequence = transformJsonToRenderingSequence(scoreHandler.getScoreAsJson())
@@ -28,27 +30,63 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         setupDefinitionTag(svgElement, renderingSequence)
 
         renderingSequence.renderGroups.forEach { positionedRenderingElement ->
-            val elementToAddRenderingElementsTo = when (positionedRenderingElement) {
-                is TranslatedRenderingElement -> {
-                    setupTranslatedElement(svgElement, positionedRenderingElement.translation)
-                }
+            renderElement(positionedRenderingElement, svgElement)
+        }
+    }
 
-                is TranslatedRenderingElementUsingReference -> {
-                    setupTranslatedElement(svgElement, positionedRenderingElement.translation)
-                }
+    private fun renderElement(
+        positionedRenderingElement: PositionedRenderingElementParent,
+        svgElement: Element
+    ) {
+        val elementToAddRenderingElementsTo = setupSvgGroupingElement(positionedRenderingElement, svgElement)
+        idElementGroupMap[positionedRenderingElement.id] = elementToAddRenderingElementsTo
+        addPositionRenderingElements(listOf(positionedRenderingElement), elementToAddRenderingElementsTo)
+    }
 
-                is AbsolutelyPositionedRenderingElement -> {
-                    svgElement
-                }
-            }
-            elementToAddRenderingElementsTo?.let {
-                addPositionRenderingElements(listOf(positionedRenderingElement), it)
+    /**
+     * This will return an element where the render data should be added to.
+     */
+    private fun setupSvgGroupingElement(
+        positionedRenderingElement: PositionedRenderingElementParent,
+        svgElement: Element
+    ) = when (positionedRenderingElement) {
+        is TranslatedRenderingElement -> {
+            setupTranslatedElement(svgElement, positionedRenderingElement.translation)
+        }
+
+        is TranslatedRenderingElementUsingReference -> {
+            setupTranslatedElement(svgElement, positionedRenderingElement.translation)
+        }
+
+        is AbsolutelyPositionedRenderingElement -> {
+            setupGroupElement(svgElement)
+        }
+    }
+
+    fun updateSvg(renderingSequenceUpdate: RenderingSequenceUpdate, svgElement: Element) {
+        renderingSequenceUpdate.renderGroupUpdates.forEach { entry ->
+            idElementGroupMap[entry.key]?.let { existingElement ->
+                logger.debug { "Removing element with key: ${entry.key}" }
+                existingElement.remove()
+
+                val svgGroupingElement = setupSvgGroupingElement(entry.value, svgElement)
+                idElementGroupMap[entry.key] = svgGroupingElement
+                addPositionRenderingElements(listOf(entry.value), svgGroupingElement)
             }
         }
     }
 
-    private fun setupTranslatedElement(svgElement: Element, translation: Translation): Element? {
-        return svgElement.ownerDocument?.let {
+    private fun setupGroupElement(svgElement: Element): Element {
+        return svgElement.ownerDocument!!.let {
+            val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
+
+            svgElement.appendChild(groupingElement)
+            groupingElement
+        }
+    }
+
+    private fun setupTranslatedElement(svgElement: Element, translation: Translation): Element {
+        return svgElement.ownerDocument!!.let {
             val groupingElement = it.createElementNS(SVG_NAMESPACE_URI, "g")
             groupingElement.setAttribute("transform", "translate(${translation.xShift}, ${translation.yShift})")
 
@@ -76,7 +114,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
 
     private fun addPositionRenderingElements(
         renderingElements: Collection<PositionedRenderingElementParent>,
-        element: Element
+        elementToAddTo: Element
     ) {
         for (renderingElement in renderingElements) {
             val groupClass = renderingElement.groupClass
@@ -90,7 +128,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                 is TranslatedRenderingElement -> {
                     renderingElement.renderingPath.forEach { pathInterface ->
                         addPath(
-                            element,
+                            elementToAddTo,
                             transformToPathString(translateGlyph(pathInterface, 0.0, 0.0)),
                             pathInterface.strokeWidth,
                             renderingElement.id,
@@ -105,7 +143,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
                 is AbsolutelyPositionedRenderingElement -> {
                     for (pathInterface in renderingElement.renderingPath) {
                         addPath(
-                            element,
+                            elementToAddTo,
                             transformToPathString(pathInterface),
                             pathInterface.strokeWidth,
                             renderingElement.id,
@@ -121,13 +159,13 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
 
                 is TranslatedRenderingElementUsingReference -> {
                     addPathUsingReference(
-                        element,
+                        elementToAddTo,
                         renderingElement.typeId,
                         renderingElement.id,
                         extraAttributes,
                         renderingElement.isClickable
                     )
-                    idSvgElementMap[renderingElement.id] = element
+                    idSvgElementMap[renderingElement.id] = elementToAddTo
                 }
             }
         }

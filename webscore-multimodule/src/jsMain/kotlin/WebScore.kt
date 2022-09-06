@@ -1,6 +1,5 @@
 import com.kjipo.handler.MoveElement
 import kotlinx.browser.document
-import kotlinx.dom.appendText
 import kotlinx.html.currentTimeMillis
 import mu.KotlinLogging
 import org.w3c.dom.Element
@@ -15,10 +14,10 @@ import org.w3c.dom.svg.SVGUseElement
 class WebScore(
     private val scoreHandler: ScoreHandlerJavaScript,
     private val svgElementId: String = "score",
-    allowInput: Boolean = true,
-    private val debugLabelId: String? = null
+    allowInput: Boolean = true
 ) : ScoreHandlerListener, NoteInputListener {
 
+    private var latestId: Int = 0
     private val webscoreSvgProvider: WebscoreSvgProvider = WebscoreSvgProvider(ScoreProvider(scoreHandler))
     private val noteInput: NoteInput
 
@@ -94,6 +93,10 @@ class WebScore(
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
+
+        logger.debug { "Updating latest ID: $latestId" }
+
+        latestId = scoreHandler.getLatestId()
         highlightElement(activeElement)
     }
 
@@ -365,12 +368,10 @@ class WebScore(
     private fun processNotNoteInputModeKey(code: String) {
         when (code) {
             "ArrowUp" -> activeElement?.let {
-                // Up
                 scoreHandler.moveNoteOneStep(it, true)
             }
 
             "ArrowDown" -> activeElement?.let {
-                // Down
                 scoreHandler.moveNoteOneStep(it, false)
             }
 
@@ -414,8 +415,12 @@ class WebScore(
     }
 
     override fun scoreUpdated(updateId: Int) {
-        generateSvgData(svgElement)
-        highlightElement(activeElement)
+        logger.debug { "Latest ID: ${latestId}. Update ID: ${updateId}. Change set: ${scoreHandler.getChangeSet(latestId)}" }
+
+        scoreHandler.getChangeSet(latestId)?.let { changeSet ->
+            webscoreSvgProvider.updateSvg(changeSet, svgElement)
+        } ?: generateSvgData(svgElement)
+        latestId = scoreHandler.getLatestId()
     }
 
 

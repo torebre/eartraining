@@ -36,6 +36,9 @@ class ScoreHandlerJavaScript(private val scoreHandler: ReducedScoreInterface) {
         fireListeners()
     }
 
+    fun getLatestId() = scoreHandler.getLatestId()
+    fun getChangeSet(scoreId: Int) = scoreHandler.getChangeSet(scoreId)
+
     @JsName("addListener")
     fun addListener(scoreHandlerListener: ScoreHandlerListener) = listeners.add(scoreHandlerListener)
 

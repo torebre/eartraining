@@ -9,3 +9,15 @@ internal fun getDuration(value: Int): Duration? =
         4 -> Duration.EIGHT
         else -> null
     }
+
+
+fun <T> Array<T>.leftShift(positionsToShift: Int): Array<T> {
+    val newList = this.copyOf()
+    var shift = positionsToShift
+    if (shift > size) shift %= size
+    forEachIndexed { index, value ->
+        val newIndex = (index + (size - shift)) % size
+        newList[newIndex] = value
+    }
+    return newList
+}

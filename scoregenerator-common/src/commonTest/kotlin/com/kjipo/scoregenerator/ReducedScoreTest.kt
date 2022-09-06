@@ -53,9 +53,6 @@ class ReducedScoreTest {
         val pitchEvents =
             actionScript.timeEventList.flatMap { it.second }.filterIsInstance<Action.PitchEvent>().filter { it.noteOn }
 
-
-        println("Pitch events: ${pitchEvents}")
-
         assertTrue(pitchEvents.size == 2)
     }
 
@@ -100,11 +97,31 @@ class ReducedScoreTest {
 
         logger.info { reducedScore.getChangeSet(0) }
 
+    }
 
+    @Test
+    fun moveNoteOneStepChangeSet() {
+        val elementId = "note1"
+        val noteSequenceElements =
+            listOf(
+                NoteSequenceElement.NoteElement(
+                    elementId,
+                    NoteType.A,
+                    5,
+                    Duration.QUARTER,
+                    mapOf(Pair(ELEMENT_ID, elementId))
+                )
+            )
 
+        val reducedScore =
+            ReducedScore().also { it.loadSimpleNoteSequence(SimpleNoteSequence(noteSequenceElements)) }
+        val firstId = reducedScore.getLatestId()
+        reducedScore.moveNoteOneStep(elementId, true)
 
-
-
+        val changeSet = reducedScore.getChangeSet(firstId)!!
+        assertFalse {
+            changeSet.renderGroupUpdates.isEmpty()
+        }
     }
 
 }

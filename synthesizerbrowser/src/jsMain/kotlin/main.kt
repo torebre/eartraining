@@ -112,16 +112,6 @@ fun showScaleTest() {
 }
 
 
-fun <T> Array<T>.leftShift(positionsToShift: Int): Array<T> {
-    val newList = this.copyOf()
-    var shift = positionsToShift
-    if (shift > size) shift %= size
-    forEachIndexed { index, value ->
-        val newIndex = (index + (size - shift)) % size
-        newList[newIndex] = value
-    }
-    return newList
-}
 
 fun main() {
     KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
