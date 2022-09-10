@@ -21,7 +21,7 @@ class ReducedScore : ReducedScoreInterface {
     private var latestScoreId = 0
     private var currentRenderingSequence =
         RenderingSequenceWithMetaData(RenderingSequence(emptyList(), null, emptyMap()), emptyMap())
-    private var changeSet: Map<String, PositionedRenderingElementParent> = emptyMap()
+    private var changeSet: Map<String, PositionedRenderingElementParent>? = null
 
     private var idCounter = 0
 
@@ -100,10 +100,10 @@ class ReducedScore : ReducedScoreInterface {
 
     }
 
-    private fun generateChangeSet(): Map<String, PositionedRenderingElementParent> {
-        val elementsToUpdate = mutableMapOf<String, PositionedRenderingElementParent>()
+    private fun generateChangeSet(): Map<String, PositionedRenderingElementParent>? {
+        return getElementReplacements()?.let { elementIdsChanged ->
+            val elementsToUpdate = mutableMapOf<String, PositionedRenderingElementParent>()
 
-        getElementReplacements()?.let { elementIdsChanged ->
             val scoreSetup = scoreHandler.getScoreSetup()
             scoreSetup.scoreRenderingElements.forEach { scoreRenderingElement ->
                 if (scoreRenderingElement is NoteElement && elementIdsChanged.contains(scoreRenderingElement.properties[ELEMENT_ID])) {
@@ -112,11 +112,10 @@ class ReducedScore : ReducedScoreInterface {
                     }
                 }
             }
+            logger.debug { "Calculating changeset. Elements to update: $elementsToUpdate" }
+
+            elementsToUpdate
         }
-
-        logger.debug { "Calculating changeset. Elements to update: $elementsToUpdate" }
-
-        return elementsToUpdate
     }
 
     private fun updateIfDirty() {
@@ -528,13 +527,14 @@ class ReducedScore : ReducedScoreInterface {
     override fun getLatestId() = latestScoreId
 
     override fun getChangeSet(scoreId: Int): RenderingSequenceUpdate? {
-        if (scoreId != latestScoreId - 1) {
-            return null
+        return if (scoreId == latestScoreId - 1) {
+            changeSet?.let {
+                RenderingSequenceUpdate(it, null)
+            }
+        } else {
+            null
         }
-
-        return RenderingSequenceUpdate(changeSet, null)
     }
-
 
     private fun handleInsertNoteWithType(operation: InsertNoteWithType): String {
         val elementId = "note_${++idCounter}"

@@ -351,6 +351,9 @@ class WebScore(
             }
 
             "KeyN" -> {
+                if(noteInputMode) {
+                    noteInput.clear()
+                }
                 noteInputMode = !noteInputMode
                 webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
             }

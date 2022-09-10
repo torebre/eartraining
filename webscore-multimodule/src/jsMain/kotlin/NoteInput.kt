@@ -1,5 +1,4 @@
 import com.kjipo.handler.InsertNoteWithType
-import com.kjipo.score.Accidental
 import com.kjipo.score.Duration
 import com.kjipo.score.GClefNoteLine
 import com.kjipo.score.NoteType
@@ -7,7 +6,7 @@ import mu.KotlinLogging
 import org.w3c.dom.events.KeyboardEvent
 
 
-class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
+class NoteInput(private val scoreHandler: ScoreHandlerJavaScript) {
 
     enum class NoteInputStep {
         Duration,
@@ -17,6 +16,7 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
     }
 
     private enum class Modifier {
+        None,
         Accidental
     }
 
@@ -37,7 +37,7 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
     private val logger = KotlinLogging.logger {}
 
 
-    private fun clear() {
+    fun clear() {
         currentStep = NoteInputStep.Duration
         currentNoteInput = null
         noteInputListeners.forEach { it.currentStep(currentStep) }
@@ -48,15 +48,18 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
     fun removeNoteInputListener(noteInputListener: NoteInputListener) = noteInputListeners.remove(noteInputListener)
 
 
-    fun processInput(keyboardEvent: KeyboardEvent): Boolean {
+    fun processInput(keyboardEvent: KeyboardEvent) {
+        processInputInternal(keyboardEvent)?.let {
+            insertCurrentNote(it)
+        }
+        noteInputListeners.forEach { it.currentStep(currentStep) }
+    }
+
+    private fun processInputInternal(keyboardEvent: KeyboardEvent): NoteInput? {
         if (keyboardEvent.key == "Escape") {
             clear()
-            return true
         }
-
-        var insertedNote = false
-
-        console.log("Current step: ${currentStep}")
+        logger.debug { "Current step: $currentStep" }
 
         when (currentStep) {
             NoteInputStep.Duration -> {
@@ -67,58 +70,76 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
                     }
                 }
             }
+
             NoteInputStep.Note -> {
-                // TODO Handle other notes
-                when (keyboardEvent.key) {
-                    "c" -> handleNoteStepInput(GClefNoteLine.C)
-                    "d" -> handleNoteStepInput(GClefNoteLine.D)
-                    "e" -> handleNoteStepInput(GClefNoteLine.E)
-                    "f" -> handleNoteStepInput(GClefNoteLine.F)
-                    "g" -> handleNoteStepInput(GClefNoteLine.G)
-                    "a" -> handleNoteStepInput(GClefNoteLine.A)
-                    "h" -> handleNoteStepInput(GClefNoteLine.H)
-                }
+                processNoteKeyAndUpdateCurrentStepIfNecessary(keyboardEvent)
             }
+
             NoteInputStep.Modifier -> {
                 val keyToDigit = keyboardEvent.key.toIntOrNull()
 
                 if (keyToDigit == null) {
-                    when (keyboardEvent.key) {
-                        "#" -> handleModifierStepInput(Accidental.SHARP)
+                    currentNoteInput?.let {
+                        it.modifier = when (keyboardEvent.key) {
+                            "#" -> Modifier.Accidental
+                            else -> Modifier.None
+                        }
                     }
                     currentStep = NoteInputStep.Octave
                 } else {
+                    // Number given as input, interpret that as the octave
                     jumpToOctaveInput(keyToDigit)
-                    insertedNote = true
                 }
             }
+
             NoteInputStep.Octave -> {
                 keyboardEvent.key.toIntOrNull()?.let { octave ->
                     jumpToOctaveInput(octave)
-                    insertedNote = true
                 }
             }
         }
 
-        noteInputListeners.forEach { it.currentStep(currentStep) }
-        return insertedNote
+        return currentNoteInput?.let {
+            if (noteInputReady(it)) {
+                currentNoteInput
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun processNoteKeyAndUpdateCurrentStepIfNecessary(keyboardEvent: KeyboardEvent) {
+        when (keyboardEvent.key) {
+            // TODO Handle other notes
+            "c" -> handleNoteStepInput(GClefNoteLine.C)
+            "d" -> handleNoteStepInput(GClefNoteLine.D)
+            "e" -> handleNoteStepInput(GClefNoteLine.E)
+            "f" -> handleNoteStepInput(GClefNoteLine.F)
+            "g" -> handleNoteStepInput(GClefNoteLine.G)
+            "a" -> handleNoteStepInput(GClefNoteLine.A)
+            "h" -> handleNoteStepInput(GClefNoteLine.H)
+        }
+    }
+
+
+    private fun noteInputReady(noteInput: NoteInput): Boolean {
+        return noteInput.note != null && noteInput.octave != null && noteInput.modifier != null
     }
 
     private fun jumpToOctaveInput(octave: Int) {
         if (octave in 1..12) {
             currentNoteInput?.octave = octave
-            insertCurrentNote()
         }
     }
 
-    private fun insertCurrentNote() {
-        currentNoteInput?.let {
-            it.octave?.let { octave ->
-                it.note?.let { note ->
+    private fun insertCurrentNote(noteInput: NoteInput) {
+        with(noteInput) {
+            octave?.let { octave ->
+                note?.let { note ->
                     // TODO This should be done in a more clear way
-                    val noteType = when (it.modifier) {
-                        null -> {
-                            when (it.note) {
+                    val noteType = when (modifier) {
+                        Modifier.None, null -> {
+                            when (note) {
                                 GClefNoteLine.A -> NoteType.A
                                 GClefNoteLine.C -> NoteType.C
                                 GClefNoteLine.D -> NoteType.D
@@ -127,10 +148,11 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
                                 GClefNoteLine.H -> NoteType.H
                                 GClefNoteLine.E -> NoteType.E
                                 else -> {
-                                    throw IllegalStateException("Unknown note type: ${it.note}")
+                                    throw IllegalStateException("Unknown note type: $note")
                                 }
                             }
                         }
+
                         Modifier.Accidental -> {
                             when (note) {
                                 GClefNoteLine.A -> NoteType.A_SHARP
@@ -144,19 +166,7 @@ class NoteInput(val scoreHandler: ScoreHandlerJavaScript) {
                         }
                     }
                     clear()
-                    scoreHandler.applyOperation(InsertNoteWithType(null, noteType, octave, it.duration))
-                }
-            }
-        }
-    }
-
-    private fun handleModifierStepInput(inputModifier: Accidental) {
-        currentNoteInput?.run {
-            // TODO Handle other cases
-            modifier = when (inputModifier) {
-                Accidental.SHARP -> Modifier.Accidental
-                else -> {
-                    null
+                    scoreHandler.applyOperation(InsertNoteWithType(null, noteType, octave, duration))
                 }
             }
         }
