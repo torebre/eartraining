@@ -31,6 +31,9 @@ const val timeSignatureXOffset = 80.0
 const val timeSignatureYOffset = -25.0
 
 
+const val ELEMENT_ID = "elementId"
+
+
 enum class Accidental {
     SHARP,
     FLAT

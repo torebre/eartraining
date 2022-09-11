@@ -136,38 +136,40 @@ class NoteInput(private val scoreHandler: ScoreHandlerJavaScript) {
         with(noteInput) {
             octave?.let { octave ->
                 note?.let { note ->
-                    // TODO This should be done in a more clear way
-                    val noteType = when (modifier) {
-                        Modifier.None, null -> {
-                            when (note) {
-                                GClefNoteLine.A -> NoteType.A
-                                GClefNoteLine.C -> NoteType.C
-                                GClefNoteLine.D -> NoteType.D
-                                GClefNoteLine.F -> NoteType.F
-                                GClefNoteLine.G -> NoteType.G
-                                GClefNoteLine.H -> NoteType.H
-                                GClefNoteLine.E -> NoteType.E
-                                else -> {
-                                    throw IllegalStateException("Unknown note type: $note")
-                                }
-                            }
-                        }
-
-                        Modifier.Accidental -> {
-                            when (note) {
-                                GClefNoteLine.A -> NoteType.A_SHARP
-                                GClefNoteLine.C -> NoteType.C_SHARP
-                                GClefNoteLine.D -> NoteType.D_SHARP
-                                GClefNoteLine.F -> NoteType.F_SHARP
-                                GClefNoteLine.G -> NoteType.G_SHARP
-                                GClefNoteLine.H -> NoteType.H
-                                GClefNoteLine.E -> NoteType.E
-                            }
-                        }
-                    }
+                    // TODO This should be done in clearer way
+                    val noteType = determineNoteType(note, modifier)
                     clear()
                     scoreHandler.applyOperation(InsertNoteWithType(null, noteType, octave, duration))
                 }
+            }
+        }
+    }
+
+    private fun determineNoteType(note: GClefNoteLine, modifier: Modifier?) = when (modifier) {
+        Modifier.None, null -> {
+            when (note) {
+                GClefNoteLine.A -> NoteType.A
+                GClefNoteLine.C -> NoteType.C
+                GClefNoteLine.D -> NoteType.D
+                GClefNoteLine.F -> NoteType.F
+                GClefNoteLine.G -> NoteType.G
+                GClefNoteLine.H -> NoteType.H
+                GClefNoteLine.E -> NoteType.E
+                else -> {
+                    throw IllegalStateException("Unknown note type: $note")
+                }
+            }
+        }
+
+        Modifier.Accidental -> {
+            when (note) {
+                GClefNoteLine.A -> NoteType.A_SHARP
+                GClefNoteLine.C -> NoteType.C_SHARP
+                GClefNoteLine.D -> NoteType.D_SHARP
+                GClefNoteLine.F -> NoteType.F_SHARP
+                GClefNoteLine.G -> NoteType.G_SHARP
+                GClefNoteLine.H -> NoteType.H
+                GClefNoteLine.E -> NoteType.E
             }
         }
     }

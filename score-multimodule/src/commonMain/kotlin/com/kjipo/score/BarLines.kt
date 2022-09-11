@@ -5,9 +5,13 @@ import com.kjipo.svg.PathElement
 import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.findBoundingBox
 import mu.KotlinLogging
-import kotlin.math.log
 
-class BarLines(val xPosition: Double, val yPosition: Double, val id: String) : ScoreRenderingElement() {
+class BarLines(
+    val xPosition: Double,
+    val yPosition: Double,
+    val id: String,
+    private val properties: ElementWithProperties = Properties()
+) : ScoreRenderingElement(), ElementWithProperties by properties {
 
     private val logger = KotlinLogging.logger {}
 
@@ -19,7 +23,7 @@ class BarLines(val xPosition: Double, val yPosition: Double, val id: String) : S
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(4.times(spaceBetweenLines).toDouble())),
             PathElement(
                 PathCommand.MOVE_TO_ABSOLUTE,
-                listOf(xPosition.plus(DEFAULT_BAR_WIDTH).toDouble(), y.toDouble())
+                listOf(xPosition.plus(DEFAULT_BAR_WIDTH), y)
             ),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(4.times(spaceBetweenLines).toDouble()))
         )

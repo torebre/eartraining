@@ -12,6 +12,8 @@ sealed class PositionedRenderingElementParent {
     abstract val groupClass: String?
     abstract val isClickable: Boolean
     abstract val boundingBox: BoundingBox
+
+    val properties = mutableMapOf<String, String>()
 }
 
 @Serializable

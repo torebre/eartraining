@@ -9,8 +9,9 @@ import mu.KotlinLogging
 class NoteElement(
     val note: Note,
     private val context: Context,
-    override val properties: Map<String, String> = mapOf(),
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied {
+    val properties: ElementWithProperties = Properties()
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied,
+    ElementWithProperties by properties {
 
     override var duration: Duration = note.duration
     override val id: String = note.id
@@ -41,6 +42,10 @@ class NoteElement(
             ).let {
                 positionedRenderingElements.addAll(it.toRenderingElement())
             }
+        }
+
+        properties.getProperty(ELEMENT_ID)?.let { elementId ->
+            positionedRenderingElements.forEach { it.properties[ELEMENT_ID] = elementId }
         }
     }
 
@@ -75,7 +80,7 @@ class NoteElement(
         return getAccidentalGlyph(accidental).let { accidentalGlyph ->
             PositionedRenderingElement.create(
                 accidentalGlyph.boundingBox,
-                id,
+                "$id-acc",
                 (translation ?: Translation(0.0, 0.0)).let {
                     Translation(it.xShift - 30, it.yShift)
                 },

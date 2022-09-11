@@ -3,7 +3,6 @@ package com.kjipo.scoregenerator
 import com.kjipo.handler.*
 import com.kjipo.score.*
 import mu.KotlinLogging
-import kotlin.math.log
 
 
 /**
@@ -106,7 +105,10 @@ class ReducedScore : ReducedScoreInterface {
 
             val scoreSetup = scoreHandler.getScoreSetup()
             scoreSetup.scoreRenderingElements.forEach { scoreRenderingElement ->
-                if (scoreRenderingElement is NoteElement && elementIdsChanged.contains(scoreRenderingElement.properties[ELEMENT_ID])) {
+                if (scoreRenderingElement is ElementWithProperties && elementIdsChanged.contains(
+                        scoreRenderingElement.getProperty(ELEMENT_ID)
+                    )
+                ) {
                     scoreRenderingElement.toRenderingElement().forEach { positionedRenderingElementParent ->
                         elementsToUpdate[positionedRenderingElementParent.id] = positionedRenderingElementParent
                     }
@@ -152,7 +154,7 @@ class ReducedScore : ReducedScoreInterface {
         for (noteSequenceElement in noteSequence) {
             noteSequenceElement.properties[ELEMENT_ID]?.let { scoreElementId ->
                 elementToScoreHighlightMap[scoreElementId] = highlightableElements.filter {
-                    it.properties[ELEMENT_ID] == scoreElementId
+                    it.getProperty(ELEMENT_ID) == scoreElementId
                 }
                     .flatMap { it.getIdsOfHighlightElements() }
             }

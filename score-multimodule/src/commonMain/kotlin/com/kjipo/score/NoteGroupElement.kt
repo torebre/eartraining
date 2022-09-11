@@ -11,8 +11,8 @@ import kotlin.math.absoluteValue
 class NoteGroupElement(
     val noteGroup: NoteGroup,
     val context: Context,
-    override val properties: Map<String, String> = mapOf()
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
+    val properties: ElementWithProperties = Properties()
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementWithProperties by properties {
     val result = mutableListOf<PositionedRenderingElementParent>()
     var yLowestPosition = Double.MAX_VALUE
     var yHighestPosition = Double.MIN_VALUE

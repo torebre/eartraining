@@ -12,7 +12,7 @@ import org.w3c.dom.Node
 class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
 
     private val idSvgElementMap = mutableMapOf<String, Element>()
-    private val idElementGroupMap = mutableMapOf<String, Element>()
+    private val elementIdGroupMap = mutableMapOf<String, MutableSet<Element>>()
 
     private val logger = KotlinLogging.logger {}
 
@@ -39,7 +39,16 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         svgElement: Element
     ) {
         val elementToAddRenderingElementsTo = setupSvgGroupingElement(positionedRenderingElement, svgElement)
-        idElementGroupMap[positionedRenderingElement.id] = elementToAddRenderingElementsTo
+
+        logger.debug { "Rendering element with ID: ${positionedRenderingElement.id}" }
+
+        positionedRenderingElement.properties[ELEMENT_ID]?.let { elementId ->
+            if (elementIdGroupMap.contains(elementId)) {
+                elementIdGroupMap[elementId]?.add(elementToAddRenderingElementsTo)
+            } else {
+                elementIdGroupMap[elementId] = mutableSetOf(elementToAddRenderingElementsTo)
+            }
+        }
         addPositionRenderingElements(listOf(positionedRenderingElement), elementToAddRenderingElementsTo)
     }
 
@@ -63,16 +72,42 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
         }
     }
 
+    /**
+     * Applies an update to the SVG. This method is used when there is a change set
+     * to be applied, instead of having to rerender the entire SVG.
+     */
     fun updateSvg(renderingSequenceUpdate: RenderingSequenceUpdate, svgElement: Element) {
-        renderingSequenceUpdate.renderGroupUpdates.forEach { entry ->
-            idElementGroupMap[entry.key]?.let { existingElement ->
-                logger.debug { "Removing element with key: ${entry.key}" }
-                existingElement.remove()
+        // TODO Need to look closer at the update logic. Right now it takes the ELEMENT_ID property, which links graphical elements to score elements, and removes the elements associated with it from the score, before adding the updated versions. It is not certain that this will work in all settings
+        val scoreRenderingElementsAffected =
+            renderingSequenceUpdate.renderGroupUpdates.map { it.value.properties[ELEMENT_ID] }.filterNotNull().toSet()
 
-                val svgGroupingElement = setupSvgGroupingElement(entry.value, svgElement)
-                idElementGroupMap[entry.key] = svgGroupingElement
-                addPositionRenderingElements(listOf(entry.value), svgGroupingElement)
+        scoreRenderingElementsAffected.forEach { scoreRenderingElementId ->
+            elementIdGroupMap.remove(scoreRenderingElementId)?.let { elementsBelongingToScoreElement ->
+                logger.debug { "Removing element with key: $scoreRenderingElementId" }
+                elementsBelongingToScoreElement.forEach {
+                    it.remove()
+                }
             }
+        }
+
+        createElementsBasedOnRenderingSequenceUpdate(renderingSequenceUpdate, svgElement)
+    }
+
+    private fun createElementsBasedOnRenderingSequenceUpdate(
+        renderingSequenceUpdate: RenderingSequenceUpdate,
+        svgElement: Element
+    ) {
+        renderingSequenceUpdate.renderGroupUpdates.forEach { renderGroupUpdate ->
+            val svgGroupingElement = setupSvgGroupingElement(renderGroupUpdate.value, svgElement)
+
+            renderGroupUpdate.value.properties[ELEMENT_ID]?.let { elementId ->
+                if (elementIdGroupMap.contains(elementId)) {
+                    elementIdGroupMap[elementId]?.add(svgGroupingElement)
+                } else {
+                    elementIdGroupMap[elementId] = mutableSetOf(svgGroupingElement)
+                }
+            }
+            addPositionRenderingElements(listOf(renderGroupUpdate.value), svgGroupingElement)
         }
     }
 

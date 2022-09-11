@@ -28,26 +28,29 @@ object ScoreHelperFunctions {
                 NoteElement(
                     element,
                     context,
-                    properties = element.properties
-                )
+                ).also {
+                    element.properties.forEach { entry -> it.setProperty(entry.key, entry.value) }
+                }
             }
+
             is Rest -> {
                 RestElement(
                     element.duration,
                     context,
                     id = element.id,
-                    properties = element.properties
-                )
+                ).also {
+                    element.properties.forEach { entry -> it.setProperty(entry.key, entry.value) }
+                }
             }
+
             is NoteGroup -> {
                 // TODO Handle duration on note level
                 return NoteGroupElement(
                     element,
-//                    element.notes.first().duration,
-//                    element.id,
                     context,
-                    properties = element.properties
-                )
+                ).also {
+                    element.properties.forEach { entry -> it.setProperty(entry.key, entry.value) }
+                }
             }
 
         }

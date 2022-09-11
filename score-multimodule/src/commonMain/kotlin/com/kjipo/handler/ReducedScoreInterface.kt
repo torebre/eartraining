@@ -1,7 +1,6 @@
 package com.kjipo.handler
 
 import com.kjipo.score.Duration
-import com.kjipo.score.PositionedRenderingElementParent
 import com.kjipo.score.RenderingSequenceUpdate
 
 interface ReducedScoreInterface {

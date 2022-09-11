@@ -9,9 +9,10 @@ class TieElement(
     val id: String,
     private val fromCoordinates: Pair<Double, Double>,
     private val toCoordinates: Pair<Double, Double>,
-    private val curvePointingUp: Boolean
+    private val curvePointingUp: Boolean,
+    private val properties: ElementWithProperties = Properties()
 ) :
-    ScoreRenderingElement() {
+    ScoreRenderingElement(), ElementWithProperties by properties {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
         val xDiff = toCoordinates.first - fromCoordinates.first

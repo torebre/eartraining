@@ -119,6 +119,9 @@ class ReducedScoreTest {
         reducedScore.moveNoteOneStep(elementId, true)
 
         val changeSet = reducedScore.getChangeSet(firstId)!!
+
+        println(changeSet)
+
         assertFalse {
             changeSet.renderGroupUpdates.isEmpty()
         }

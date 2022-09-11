@@ -8,8 +8,8 @@ class RestElement(
     override var duration: Duration,
     val context: Context,
     override val id: String = context.getAndIncrementIdCounter(),
-    override val properties: Map<String, String> = mapOf()
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement {
+    private val properties: ElementWithProperties = Properties()
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementWithProperties by properties {
 
     private val typeName = "rest_${duration.name}"
 
