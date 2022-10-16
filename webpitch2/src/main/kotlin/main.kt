@@ -1,3 +1,5 @@
+import graph.PitchGraph
+import graph.PitchGraphModel
 import kotlinx.browser.document
 import mu.KotlinLogging
 
@@ -12,6 +14,9 @@ fun main() {
     // TODO Why does it not work when PitchDetection is a class?
     var pitchDetection: PitchDetection? = null
     var isRecording = false
+
+    val pitchGraphModel = PitchGraphModel()
+    val pitchGraph = PitchGraph("pitchGraph", pitchGraphModel)
 
     document.querySelector("#btnToggleRecording")?.let { recordingButton ->
         logger.info { "Adding event listener" }
@@ -32,6 +37,7 @@ fun main() {
 
                 }
                 pitchDetection?.startRecording()
+                pitchDetection?.addPitchDetectionListener(pitchGraphModel)
                 recordingButton.textContent = "Stop recording"
                 isRecording = true
             } else {
@@ -41,7 +47,6 @@ fun main() {
             }
         })
     }
-
 
 }
 
