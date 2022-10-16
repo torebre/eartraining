@@ -2,11 +2,15 @@ import graph.PitchGraph
 import graph.PitchGraphModel
 import kotlinx.browser.document
 import mu.KotlinLogging
+import mu.KotlinLoggingConfiguration
+import mu.KotlinLoggingLevel
 
 
 private val logger = KotlinLogging.logger {}
 
 fun main() {
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
     val callback = { pitchData: PitchData ->
         logger.info { "Got pitch data: ${pitchData}" }
     }

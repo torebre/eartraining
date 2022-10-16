@@ -1,0 +1,9 @@
+
+#pitchGraph {
+    border: black;
+    background: grey;
+}
+
+.pitchAxis {
+    font-size: 50%;
+}

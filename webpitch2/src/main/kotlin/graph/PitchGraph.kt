@@ -1,13 +1,18 @@
 package graph
 
 import kotlinx.browser.document
+import mu.KotlinLogging
 import org.w3c.dom.svg.SVGElement
+import kotlin.math.log2
 
 class PitchGraph(svgElementId: String, pitchGraphModel: PitchGraphModel) : PitchGraphModelListener {
-    private val xMin = 0
-    private val yMin = 0
-    private val xMax = 500
-    private val yMax = 500
+    private val xMinCoordinate = 0
+    private val yMinCoordinate = 0
+    private val xMaxCoordinate = 500
+    private val yMaxCoordinate = 500
+
+    private val yMinValue = log2(PITCH_CLASS_FREQUENCIES.first())
+    private val yMaxValue = log2(PITCH_CLASS_FREQUENCIES.last())
 
     private val svgElement: SVGElement
 
@@ -18,13 +23,18 @@ class PitchGraph(svgElementId: String, pitchGraphModel: PitchGraphModel) : Pitch
     private var previousYCoord: Int = -1
 
     private var zoomLevel = 100000
-    private var stepSize = zoomLevel / xMax
+    private var stepSize = zoomLevel / xMaxCoordinate
     private var pixelStepSize = 1
+
+    private var axisRightXStart = xMaxCoordinate - 100
+
+    private val logger = KotlinLogging.logger {}
 
 
     init {
         svgElement = document.getElementById(svgElementId) as SVGElement
-        svgElement.setAttribute("viewBox", "$xMin $yMin $xMax $yMax")
+        svgElement.setAttribute("viewBox", "$xMinCoordinate $yMinCoordinate $xMaxCoordinate $yMaxCoordinate")
+        drawPitchAxis()
 
         pitchGraphModel.addPitchDataListener(this)
     }
@@ -36,8 +46,9 @@ class PitchGraph(svgElementId: String, pitchGraphModel: PitchGraphModel) : Pitch
 
 
     private fun transformToY(pitch: Float): Int {
-        // TODO For now just convert the value directly to an integer
-        return pitch.toInt()
+        val pitchOnLogScale = log2(pitch)
+        val yCoord = yMaxCoordinate - ((yMaxValue - pitchOnLogScale) / (yMaxValue - yMinValue)) * (yMaxCoordinate - yMinCoordinate)
+        return turnYAxis(yCoord.toInt())
     }
 
     override fun newPitchDataReceived(pitchData: PitchDataWithTime) {
@@ -50,7 +61,7 @@ class PitchGraph(svgElementId: String, pitchGraphModel: PitchGraphModel) : Pitch
 
         lastTimePoint = pitchData.timeStamp - startTime
 
-        if(previousXCoord != -1) {
+        if (previousXCoord != -1) {
             connectPointsWithLine(xCoord, yCoord)
         }
 
@@ -60,8 +71,13 @@ class PitchGraph(svgElementId: String, pitchGraphModel: PitchGraphModel) : Pitch
         previousYCoord = yCoord
     }
 
+    private fun turnYAxis(yCoord: Int) = yMaxCoordinate - yCoord
+
     override fun uncertainPitchReceived(timestamp: Long) {
         // TODO Mark in graph
+
+        // Set to -1 to avoid line being drawn from uncertain pitch to certain
+        previousXCoord = -1
     }
 
 
@@ -89,6 +105,29 @@ class PitchGraph(svgElementId: String, pitchGraphModel: PitchGraphModel) : Pitch
             }
         }
         svgElement.appendChild(newLineSegment)
+    }
+
+
+    private fun drawPitchAxis() {
+        for (pitchClassFrequency in PITCH_CLASS_FREQUENCIES) {
+            logger.debug {
+                "Pitch class frequency: $pitchClassFrequency. Y-coordinate: ${
+                    transformToY(
+                        pitchClassFrequency
+                    )
+                }"
+            }
+
+            val textElement = document.createElementNS(SVG_NAMESPACE_URI, "text").also {
+                with(it) {
+                    setAttribute("x", "$axisRightXStart")
+                    setAttribute("y", "${transformToY(pitchClassFrequency)}")
+                    setAttribute("class", "pitchAxis")
+                    textContent = "${getPitchClosestToFrequency(pitchClassFrequency)} (${pitchClassFrequency})"
+                }
+            }
+            svgElement.appendChild(textElement)
+        }
     }
 
 

@@ -27,6 +27,10 @@ class PitchGraphModel : PitchDetectionListener {
         }
     }
 
+
+
+
+
     fun addPitchDataListener(pitchGraphModelListener: PitchGraphModelListener) =
         pitchDataListeners.add(pitchGraphModelListener)
 
