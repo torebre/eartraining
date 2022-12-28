@@ -9,6 +9,11 @@ repositories {
     mavenCentral()
 }
 
+// Fixes webpack-cli incompatibility by pinning the newest version.
+rootProject.kotlinNodeJs {
+    versions.webpackCli.version = "4.10.0"
+}
+
 dependencies {
     implementation project(':webscore-multimodule')
     implementation project(':scoregenerator-common')
