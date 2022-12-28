@@ -20,6 +20,8 @@ class NoteInput(private val scoreHandler: ScoreHandlerJavaScript) {
         Accidental
     }
 
+    private val durationKeys = setOf("1", "2", "3", "4", "5")
+
     private data class NoteInput(
         val duration: Duration,
         var note: GClefNoteLine? = null,
@@ -63,7 +65,7 @@ class NoteInput(private val scoreHandler: ScoreHandlerJavaScript) {
 
         when (currentStep) {
             NoteInputStep.Duration -> {
-                if (keyboardEvent.key in setOf("1", "2", "3", "4", "5")) {
+                if (keyboardEvent.key in durationKeys) {
                     getDuration(keyboardEvent.key.toInt())?.let {
                         currentNoteInput = NoteInput(it)
                         currentStep = NoteInputStep.Note

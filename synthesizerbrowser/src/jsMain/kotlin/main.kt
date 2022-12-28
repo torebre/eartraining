@@ -10,9 +10,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
-
+import mu.KotlinLogging
 
 object WebScoreApp {
+
+    private val logger = KotlinLogging.logger {}
 
     private val webscoreListener: WebscoreListener = object : WebscoreListener {
 
@@ -36,11 +38,36 @@ object WebScoreApp {
             )
         }
 
-
         override fun currentStep(currentStep: NoteInput.NoteInputStep?) {
             setTextForChildNode(
                 "#currentStep", currentStep?.name ?: "None"
             )
+            setAllowedInputText(currentStep)
+        }
+
+        private fun setAllowedInputText(currentStep: NoteInput.NoteInputStep?) {
+            logger.debug {
+                "Current step: $currentStep"
+            }
+
+            val helperText = when (currentStep) {
+                NoteInput.NoteInputStep.Duration -> {
+                    "1, 2, 3, 4"
+                }
+                NoteInput.NoteInputStep.Note -> {
+                    "a, h, c, d, e, f, g"
+                }
+                NoteInput.NoteInputStep.Modifier -> {
+                    "#"
+                }
+                NoteInput.NoteInputStep.Octave -> {
+                    "1 to 12"
+                }
+                null -> {
+                    ""
+                }
+            }
+            setTextForChildNode("#allowedInput", helperText)
         }
     }
 
@@ -110,7 +137,6 @@ fun showScaleTest() {
     val splitScoreHandler = ReducedScore().also { it.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence)) }
     WebScore(ScoreHandlerJavaScript(splitScoreHandler), "scaleTest", false)
 }
-
 
 
 fun main() {

@@ -14,3 +14,14 @@ bar-line {
     fill: blue;
     opacity: 0.5;
 }
+
+#inputMode {
+    background-color: blue;
+}
+
+
+#noteOrRestInput {
+    border-style: solid;
+    border-color: black;
+    background-color: green;
+}
