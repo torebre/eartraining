@@ -32,7 +32,9 @@ const val timeSignatureYOffset = -25.0
 
 
 const val STEM_Y_OFFSET_STEM_UP = 12
-const val STEM_Y_OFFSET_STEM_DOWN = 10
+const val STEM_Y_OFFSET_STEM_DOWN = 1
+
+const val STEM_UP_STEM_X_OFFSET = 2
 
 
 const val ELEMENT_ID = "elementId"

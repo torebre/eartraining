@@ -202,19 +202,32 @@ class NoteGroupElement(
 
 
     fun addStem(stemUp: Boolean): PositionedRenderingElement {
-        val xCoordinate = getRightEdgeOfNoteHeadGlyph()
-        // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
-        val stemStart = if (stemUp) {
-            yHighestPosition - STEM_Y_OFFSET_STEM_UP
+        val xCoordinate = if(stemUp) {
+            getRightEdgeOfNoteHeadGlyph()
         }
         else {
-            yHighestPosition + STEM_Y_OFFSET_STEM_DOWN
+            getLeftEdgeOfNoteHeadGlpyh() + STEM_UP_STEM_X_OFFSET
         }
-        val ySpanForNoteGroup = stemStart.minus(yLowestPosition).absoluteValue
-        return getStem(xCoordinate, stemStart, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT, stemUp)
+
+        // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
+        val startStop = if (stemUp) {
+            Pair(
+                yHighestPosition - STEM_Y_OFFSET_STEM_UP,
+                yHighestPosition.minus(yLowestPosition).absoluteValue + DEFAULT_STEM_HEIGHT
+            )
+        } else {
+            Pair(
+                yLowestPosition + STEM_Y_OFFSET_STEM_DOWN,
+                yHighestPosition.minus(yLowestPosition).absoluteValue + DEFAULT_STEM_HEIGHT
+            )
+        }
+
+        return getStem(xCoordinate, startStop.first, startStop.second, stemUp)
     }
 
     private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax
+
+    private fun getLeftEdgeOfNoteHeadGlpyh() = getNoteHeadGlyph(duration).boundingBox.xMin
 
     override fun getIdsOfHighlightElements(): Collection<String> {
         return highlightElements

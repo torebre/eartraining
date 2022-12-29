@@ -26,7 +26,6 @@ class NoteElement(
 
     private val logger = KotlinLogging.logger {}
 
-
     override fun toRenderingElement(): List<PositionedRenderingElementParent> {
         return positionedRenderingElements
     }
