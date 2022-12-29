@@ -6,6 +6,9 @@ import com.kjipo.svg.*
 import mu.KotlinLogging
 
 
+/**
+ * Knows how to generate a layout for the graphical elements belonging to a note.
+ */
 class NoteElement(
     val note: Note,
     private val context: Context,
@@ -95,20 +98,21 @@ class NoteElement(
             return null
         }
 
-        val xTranslateForStem = if (note.stem == Stem.UP) {
-            // If the stem is pointing up then it should be moved to the
-            // right side of the note head
-            getNoteHeadGlyph(duration).boundingBox.xMax
-        } else {
-            0.0
-        }
-
+        val xTranslateForStem = getXTranslateForStem()
         val stem = addStem(xTranslateForStem, 0.0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, note.stem != Stem.DOWN)
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
             null, translation ?: Translation(0.0, 0.0)
         )
+    }
+
+    private fun getXTranslateForStem() = if (note.stem == Stem.UP) {
+        // If the stem is pointing up then it should be moved to the
+        // right side of the note head
+        getNoteHeadGlyph(duration).boundingBox.xMax
+    } else {
+        0.0
     }
 
     override fun getGlyphs(): Map<String, GlyphData> {

@@ -163,6 +163,6 @@ fun main() {
 //    showBeam()
 //showNoteGroupWithSharp()
 //    showNotes()
-//    showChordWithTwoSharps()
-    showTieAcrossBars()
+    showChordWithTwoSharps()
+//    showTieAcrossBars()
 }

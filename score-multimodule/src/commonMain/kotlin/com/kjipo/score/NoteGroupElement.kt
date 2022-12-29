@@ -204,8 +204,14 @@ class NoteGroupElement(
     fun addStem(stemUp: Boolean): PositionedRenderingElement {
         val xCoordinate = getRightEdgeOfNoteHeadGlyph()
         // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
-        val ySpanForNoteGroup = yHighestPosition.minus(yLowestPosition).absoluteValue
-        return getStem(xCoordinate, yHighestPosition, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT, stemUp)
+        val stemStart = if (stemUp) {
+            yHighestPosition - STEM_Y_OFFSET_STEM_UP
+        }
+        else {
+            yHighestPosition + STEM_Y_OFFSET_STEM_DOWN
+        }
+        val ySpanForNoteGroup = stemStart.minus(yLowestPosition).absoluteValue
+        return getStem(xCoordinate, stemStart, ySpanForNoteGroup + DEFAULT_STEM_HEIGHT, stemUp)
     }
 
     private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax

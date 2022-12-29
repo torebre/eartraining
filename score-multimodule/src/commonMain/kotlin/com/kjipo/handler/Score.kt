@@ -1,7 +1,5 @@
 package com.kjipo.handler
 
-import com.kjipo.score.ScoreElementMarker
-
 
 /**
  * Contains information about the elements that should go into the score, but does
