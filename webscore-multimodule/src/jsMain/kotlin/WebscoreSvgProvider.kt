@@ -40,7 +40,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     ) {
         val elementToAddRenderingElementsTo = setupSvgGroupingElement(positionedRenderingElement, svgElement)
 
-        logger.debug { "Rendering element with ID: ${positionedRenderingElement.id}" }
+//        logger.debug { "Rendering element with ID: ${positionedRenderingElement.id}" }
 
         positionedRenderingElement.properties[ELEMENT_ID]?.let { elementId ->
             if (elementIdGroupMap.contains(elementId)) {
