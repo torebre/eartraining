@@ -227,8 +227,6 @@ class ScoreSetup(private val score: Score) {
                     if(index != 0 && index != elementsToIncludeInBeam.size - 1) {
 
                         element.getStem()?.let { stem ->
-//                            firstNote.translation
-
                             val stemTranslationX = stem.translation.xShift
                             val stemTranslationY = stem.translation.yShift
 
@@ -240,7 +238,6 @@ class ScoreSetup(private val score: Score) {
 
 
                         }
-
                     }
                 }
 
@@ -253,48 +250,12 @@ class ScoreSetup(private val score: Score) {
                 )
             }
 
-//                is NoteGroupElement -> { noteGroupElement ->
-//                    val (stopX, stopY) = with(noteGroupElement) {
-//                        Pair(
-//                            lastStem.boundingBox.xMax + (translation?.xShift ?: 0).toDouble(),
-//                            lastStem.boundingBox.yMin + (translation?.yShift ?: 0).toDouble()
-//                        )
-//                    }
-//
-//                }
-
-
             // TODO This will not create a proper looking bar in many cases
             // TODO Need to handle beams with multiple lines
-
-//        val firstStem = firstNote.getStem()
-//        val lastStem = lastNote.getStem()
-//
-//        if (firstStem == null || lastStem == null) {
-//            logger.error { "Need stems for both notes included in beam. Beam group: $beamGroup" }
-//            return null
-//        }
-
 
         }
 
         return result
-    }
-
-    private fun extractStemCoordinates(note: ElementCanBeInBeamGroup): Pair<Double, Double>? {
-        return note.getStem()?.let {
-            val firstStem = note.getStem()
-
-           note.getAbsoluteCoordinatesForEndpointOfStem()
-
-            firstStem?.let {
-                Pair(
-                    firstStem.boundingBox.xMax - DEFAULT_STEM_WIDTH + (note.translation?.xShift ?: 0).toDouble(),
-                    firstStem.boundingBox.yMin + (note.translation?.yShift ?: 0).toDouble()
-                )
-            }
-
-        }
     }
 
     private fun findBeamableElement(noteId: String, bars: List<BarData>) = bars.flatMap { it.scoreRenderingElements }
