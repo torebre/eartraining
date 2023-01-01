@@ -13,7 +13,7 @@ class NoteElement(
     val note: Note,
     private val context: Context,
     val properties: ElementWithProperties = Properties()
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied,
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied, ElementCanBeInBeamGroup,
     ElementWithProperties by properties {
 
     override var duration: Duration = note.duration
@@ -23,11 +23,14 @@ class NoteElement(
     private val highlightElements = mutableSetOf<String>()
     private var noteHead: TranslatedRenderingElementUsingReference? = null
 
+    private var stem: TranslatedRenderingElement? = null
+    private var stemHeight = DEFAULT_STEM_HEIGHT
+
 
     private val logger = KotlinLogging.logger {}
 
     override fun toRenderingElement(): List<PositionedRenderingElementParent> {
-        return positionedRenderingElements
+        return positionedRenderingElements + stem.let { if (it == null) emptyList() else listOf(it) }
     }
 
     fun layoutNoteHeads() {
@@ -35,7 +38,10 @@ class NoteElement(
             positionedRenderingElements.add(setupAccidental(this))
         }
 
-        setupNoteHeadStemAndExtraBarLines(getNoteHeadGlyph(duration))
+        stem = calculateStem()
+        stem?.let { positionedRenderingElements.add(it) }
+
+        setupNoteHeadAndExtraBarLines(getNoteHeadGlyph(duration))
 
         if (context.debug) {
             determineDebugBox(
@@ -51,7 +57,7 @@ class NoteElement(
         }
     }
 
-    private fun setupNoteHeadStemAndExtraBarLines(noteHeadGlyph: GlyphData) {
+    private fun setupNoteHeadAndExtraBarLines(noteHeadGlyph: GlyphData) {
         noteHead = PositionedRenderingElement.create(
             noteHeadGlyph.boundingBox,
             id,
@@ -62,8 +68,6 @@ class NoteElement(
             positionedRenderingElements.add(translatedRenderingElementUsingReference)
             highlightElements.add(translatedRenderingElementUsingReference.id)
         }
-
-        getStem()?.let { positionedRenderingElements.add(it) }
 
         addExtraBarLinesForGClef(
             transformToNoteAndAccidental(note.noteType).first,
@@ -92,13 +96,37 @@ class NoteElement(
         }
     }
 
-    fun getStem(): PositionedRenderingElement? {
+    override fun getStem() = stem
+
+    override fun updateStemHeight(stemHeight: Double) {
+        this.stemHeight = stemHeight
+        stem = calculateStem()
+    }
+
+    override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
+        val xCoord = getXTranslateForStem()
+        val yCoord = when (note.stem) {
+            Stem.UP -> -stemHeight
+            Stem.DOWN -> stemHeight
+            Stem.NONE -> null
+        }
+
+        return if (yCoord != null) {
+            Pair((translation?.xShift ?: 0.0) + xCoord,(translation?.yShift ?: 0.0) + yCoord)
+        } else {
+            null
+        }
+    }
+
+
+    private fun calculateStem(): TranslatedRenderingElement? {
         if (note.stem == Stem.NONE) {
             return null
         }
 
         val xTranslateForStem = getXTranslateForStem()
-        val stem = addStem(xTranslateForStem, 0.0, DEFAULT_STEM_WIDTH, DEFAULT_STEM_HEIGHT, note.stem != Stem.DOWN)
+        val stem = addStem(xTranslateForStem, 0.0, DEFAULT_STEM_WIDTH, stemHeight, note.stem != Stem.DOWN)
+
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
@@ -106,6 +134,9 @@ class NoteElement(
         )
     }
 
+    /**
+     * This is the translation to move a stem pointing upwards to the right of the note head.
+     */
     private fun getXTranslateForStem() = if (note.stem == Stem.UP) {
         // If the stem is pointing up then it should be moved to the
         // right side of the note head

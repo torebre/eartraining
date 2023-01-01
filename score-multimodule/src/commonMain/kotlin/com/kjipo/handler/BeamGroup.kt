@@ -1,3 +1,7 @@
 package com.kjipo.handler
 
-data class BeamGroup(val notes: List<IsNote>)
+
+
+class BeamLine(val position: Int, val elements: List<IsBeamableElement>)
+
+data class BeamGroup(val beamLines: List<BeamLine>)

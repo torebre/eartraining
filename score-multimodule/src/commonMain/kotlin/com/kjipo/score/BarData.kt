@@ -21,19 +21,24 @@ class BarData(
 
     private var clef: Clef = Clef.NONE
     private var timeSignature = TimeSignature(0, 0)
+    private val definitions = mutableMapOf<String, GlyphData>()
+
     private val logger = KotlinLogging.logger {}
 
 
-    fun build(): RenderingSequence {
+    fun doLayout() {
         clef = bar.clef
         bar.timeSignature?.run {
             timeSignature = this
         }
+
+        definitions.clear()
+        scoreRenderingElements.clear()
+
         for (element in bar.scoreHandlerElements) {
             scoreRenderingElements.add(createTemporalElement(element, context))
         }
 
-        val definitions = mutableMapOf<String, GlyphData>()
         val clefElement = getClefElement(definitions)
         val timeSignatureElement = getTimeSignatureElement()
 
@@ -85,6 +90,9 @@ class BarData(
         }
 
         scoreRenderingElements.add(BarLines(barXoffset, barYoffset, "bar-line"))
+    }
+
+    fun getRenderingSequence(): RenderingSequence {
         val positionedRenderingElements = scoreRenderingElements.flatMap { it.toRenderingElement() }
 
         return RenderingSequence(

@@ -23,7 +23,7 @@ data class Note(
     override val properties: Map<String, String> = emptyMap(),
     val stem: Stem = Stem.NONE,
     val accidental: Accidental? = null
-) : ScoreHandlerElement(), IsNote
+) : ScoreHandlerElement(), IsBeamableElement
 
 data class Rest(
     override val id: String,
@@ -38,7 +38,7 @@ data class NoteGroup(
     val notes: List<NoteSymbol>,
     override val properties: Map<String, String> = emptyMap(),
     val stem: Stem = Stem.NONE
-) : ScoreHandlerElement(), IsNote
+) : ScoreHandlerElement(), IsBeamableElement
 
 
 data class NoteSymbol(
@@ -49,6 +49,6 @@ data class NoteSymbol(
 )
 
 
-interface IsNote {
+interface IsBeamableElement {
     val id: String
 }

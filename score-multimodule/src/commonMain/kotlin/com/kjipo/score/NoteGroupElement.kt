@@ -12,14 +12,20 @@ class NoteGroupElement(
     val noteGroup: NoteGroup,
     val context: Context,
     val properties: ElementWithProperties = Properties()
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementWithProperties by properties {
+) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeInBeamGroup,
+    ElementWithProperties by properties {
     val result = mutableListOf<PositionedRenderingElementParent>()
     var yLowestPosition = Double.MAX_VALUE
     var yHighestPosition = Double.MIN_VALUE
 
+    private var stem: TranslatedRenderingElement? = null
+
     private val highlightElements = mutableSetOf<String>()
 
     override val id: String = noteGroup.id
+    override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
+        TODO("Not yet implemented")
+    }
 
     // TODO Handle duration on note level
     override var duration: Duration = noteGroup.notes.first().duration
@@ -103,7 +109,10 @@ class NoteGroupElement(
         }
 
         noteGroup.stem.let {
-            result.add(addStem(it == Stem.UP))
+            addStem(it == Stem.UP).let {stemElement ->
+                result.add(stemElement)
+                stem = stemElement
+            }
         }
 
     }
@@ -157,7 +166,7 @@ class NoteGroupElement(
         yCoordinate: Double,
         stemHeight: Double,
         stemUp: Boolean
-    ): PositionedRenderingElement {
+    ): TranslatedRenderingElement {
         val stem = addStem(xCoordinate, yCoordinate, DEFAULT_STEM_WIDTH, stemHeight, stemUp)
 
         return TranslatedRenderingElement(
@@ -201,7 +210,15 @@ class NoteGroupElement(
     }.any { it }
 
 
-    fun addStem(stemUp: Boolean): PositionedRenderingElement {
+    override fun getStem(): TranslatedRenderingElement? {
+        return stem
+    }
+
+    override fun updateStemHeight(stemHeight: Double) {
+        TODO("Not yet implemented")
+    }
+
+    fun addStem(stemUp: Boolean): TranslatedRenderingElement {
         val xCoordinate = if(stemUp) {
             getRightEdgeOfNoteHeadGlyph()
         }
