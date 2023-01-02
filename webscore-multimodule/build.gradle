@@ -35,6 +35,7 @@ kotlin {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:$kotlinxHtmlVersion"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationRuntime"
                 implementation project(':scoregenerator-common')
                 implementation project(':score-multimodule')
 

@@ -69,3 +69,8 @@ kotlin {
         }
     }
 }
+
+// This is here to get around a problem with a task not being found
+task prepareKotlinBuildScriptModel {
+
+}

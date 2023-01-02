@@ -19,7 +19,7 @@ ext {
     nodeVersion = '8.11.1'
     assert4jVersion = '3.12.2'
     kotlinVersion = '1.7.21'
-    serializationRuntime = '1.0.0-RC'
+    serializationRuntime = '1.4.1'
     multiplatform = '$kotlinVersion'
     kotlinLogging = '2.0.2'
     kotlinxHtmlVersion = '0.7.5'

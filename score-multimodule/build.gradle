@@ -1,25 +1,23 @@
 buildscript {
-    repositories {
-        mavenCentral()
-//        jcenter()
+
+//    repositories {
+//        mavenCentral()
+//        maven { url "https://plugins.gradle.org/m2/" }
+//    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 
+
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.21'
 }
 
-repositories {
-    mavenCentral()
-//    jcenter()
-//    maven { url "https://kotlin.bintray.com/kotlinx" }
-}
 
 kotlin {
-    /* Targets configuration omitted. 
-    *  To find out how to configure the targets, please follow the link:
-    *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
 
     jvm()
     js {
@@ -33,7 +31,8 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
                 implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
             }
         }
@@ -47,8 +46,14 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation kotlin('stdlib-jdk8')
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1"
                 implementation "com.flipkart.zjsonpatch:zjsonpatch:0.4.10"
+
+                implementation 'io.github.microutils:kotlin-logging-jvm:3.0.4'
+
+                // TODO Should not be necessary to have these both as implementation
+                implementation group: 'org.slf4j', name: 'slf4j-api', version:'1.7.7'
+                implementation group: 'org.slf4j', name: 'slf4j-simple', version:'1.7.7'
             }
         }
         jvmTest {
@@ -60,7 +65,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1"
             }
         }
         jsTest {
@@ -69,4 +74,8 @@ kotlin {
             }
         }
     }
+}
+
+task prepareKotlinBuildScriptModel {
+
 }
