@@ -62,15 +62,11 @@ class BarData(
 
                     when (scoreRenderingElement) {
                         is NoteElement -> {
-                            transformToNoteAndAccidental(scoreRenderingElement.note.noteType).let { noteLineAndAccidental ->
-                                // This updating of the y-position is done because when references are used, the y-position is not used, the translate is used instead
-                                yPosition += calculateVerticalOffset(
-                                    noteLineAndAccidental.first,
-                                    scoreRenderingElement.note.octave
-                                )
-                                scoreRenderingElement.translation = Translation(xPosition, yPosition)
-                                scoreRenderingElement.layoutNoteHeads()
-                            }
+                            val localYOffset = scoreRenderingElement.getVerticalOffset()
+                            // This updating of the y-position is done because when references are used, the y-position is not used, the translate is used instead
+                            yPosition += localYOffset
+                            scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                            scoreRenderingElement.layoutNoteHeads()
                         }
                         is NoteGroupElement -> {
                             scoreRenderingElement.translation = Translation(xPosition, yPosition)

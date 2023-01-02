@@ -46,10 +46,12 @@ private fun showBeam() {
 
     val bar = Bar(clef = Clef.G, timeSignature = TimeSignature(4, 4))
 
-    val note1 = Note("test1", Duration.QUARTER, 5, NoteType.A_SHARP, stem = Stem.UP)
-    val note2 = Note("test2", Duration.QUARTER, 5, NoteType.A, stem = Stem.UP)
+    val note11 = Note("test11", Duration.EIGHT, 5, NoteType.A_SHARP, stem = Stem.UP)
+    val note12 = Note("test12", Duration.EIGHT, 5, NoteType.C, stem = Stem.UP)
+    val note13 = Note("test13", Duration.EIGHT, 5, NoteType.G, stem = Stem.UP)
+    val note14 = Note("test14", Duration.EIGHT, 5, NoteType.A, stem = Stem.UP)
     val rest1 = Rest("test3", Duration.HALF)
-    val notes = listOf(note1, note2, rest1)
+    val notes = listOf(note11, note12, note13, note14, rest1)
 
     bar.scoreHandlerElements.addAll(notes)
 
@@ -67,7 +69,7 @@ private fun showBeam() {
     bar2.scoreHandlerElements.addAll(listOf(note3, note4, note5, note6, rest2))
     score.bars.add(bar2)
 
-    val beamGroup = BeamGroup(listOf(BeamLine(1, listOf(note1, note2))))
+    val beamGroup = BeamGroup(listOf(BeamLine(1, listOf(note11, note12, note13, note14))))
     score.beamGroups.add(beamGroup)
 
     val beamGroup2 = BeamGroup(listOf(BeamLine(1, listOf(note3, note4, note5, note6))))

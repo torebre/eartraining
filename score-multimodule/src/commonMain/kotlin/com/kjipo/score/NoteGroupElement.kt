@@ -27,6 +27,10 @@ class NoteGroupElement(
         TODO("Not yet implemented")
     }
 
+    override fun getVerticalOffset(): Double {
+        TODO("Not yet implemented")
+    }
+
     // TODO Handle duration on note level
     override var duration: Duration = noteGroup.notes.first().duration
 
@@ -214,8 +218,16 @@ class NoteGroupElement(
         return stem
     }
 
+    override fun getStemHeight(): Double {
+        TODO("Not yet implemented")
+    }
+
     override fun updateStemHeight(stemHeight: Double) {
         TODO("Not yet implemented")
+    }
+
+    override fun isStemUp(): Boolean {
+        return this.noteGroup.stem == Stem.UP
     }
 
     fun addStem(stemUp: Boolean): TranslatedRenderingElement {

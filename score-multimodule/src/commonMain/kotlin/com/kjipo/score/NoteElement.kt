@@ -39,7 +39,8 @@ class NoteElement(
         }
 
         stem = calculateStem()
-        stem?.let { positionedRenderingElements.add(it) }
+        // TODO This is a bit brittle. Waiting to add the stem to the list of rendering elements until the list is requested. This is because the stem may change after the first layout calculations. Its height may change because of beams
+//        stem?.let { positionedRenderingElements.add(it) }
 
         setupNoteHeadAndExtraBarLines(getNoteHeadGlyph(duration))
 
@@ -98,6 +99,14 @@ class NoteElement(
 
     override fun getStem() = stem
 
+    override fun getStemHeight(): Double {
+        return this.stemHeight
+    }
+
+    override fun isStemUp(): Boolean {
+        return this.note.stem == Stem.UP
+    }
+
     override fun updateStemHeight(stemHeight: Double) {
         this.stemHeight = stemHeight
         stem = calculateStem()
@@ -143,6 +152,13 @@ class NoteElement(
         getNoteHeadGlyph(duration).boundingBox.xMax
     } else {
         0.0
+    }
+
+    override fun getVerticalOffset(): Double {
+        return calculateVerticalOffset(
+            transformToNoteAndAccidental(note.noteType).first,
+            note.octave
+        )
     }
 
     override fun getGlyphs(): Map<String, GlyphData> {

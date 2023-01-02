@@ -17,8 +17,14 @@ interface ElementCanBeInBeamGroup : ScoreElementMarker {
 
     fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>?
 
+    fun getVerticalOffset(): Double
+
+    fun isStemUp(): Boolean
+
     fun getStem(): TranslatedRenderingElement?
 
     fun updateStemHeight(stemHeight: Double)
+
+    fun getStemHeight(): Double
 
 }

@@ -4,6 +4,7 @@ import com.kjipo.handler.BeamGroup
 import com.kjipo.handler.Score
 import com.kjipo.svg.GlyphData
 import mu.KotlinLogging
+import kotlin.math.absoluteValue
 
 /**
  * This class produces the rendering sequence that is used to render the score
@@ -61,7 +62,7 @@ class ScoreSetup(private val score: Score) {
         handleBeams(renderingElements, barData)
         handleTies(renderingElements)
 
-        barData.forEach {currentBar ->
+        barData.forEach { currentBar ->
             val renderingSequence = currentBar.getRenderingSequence()
 
             renderingSequences.add(renderingSequence)
@@ -215,44 +216,79 @@ class ScoreSetup(private val score: Score) {
             val firstNoteYTranslation = (firstNote.translation?.yShift ?: 0.0).toDouble()
             val lastNoteYTranslation = (lastNote.translation?.yShift ?: 0.0).toDouble()
 
-            val delta = (lastNoteYTranslation - firstNoteYTranslation) / (lastNoteXTranslation - firstNoteXTranslation)
 
-            val startCoordinates = firstNote.getAbsoluteCoordinatesForEndpointOfStem()
-            val stopCoordinates = lastNote.getAbsoluteCoordinatesForEndpointOfStem()
+            val startCoordinates = firstNote.getAbsoluteCoordinatesForEndpointOfStem()?.let {
+                Pair(
+                    it.first, if (firstNote.isStemUp()) {
+                        it.second + DEFAULT_BEAM_HEIGHT
+                    } else {
+                        it.second
+                    }
+                )
+            }
+            val stopCoordinates = lastNote.getAbsoluteCoordinatesForEndpointOfStem()?.let {
+                Pair(
+                    it.first, if (lastNote.isStemUp()) {
+                        it.second + DEFAULT_BEAM_HEIGHT
+                    } else {
+                        it.second
+                    }
+                )
+            }
 
             if (startCoordinates == null || stopCoordinates == null) {
                 logger.error { "Need coordinates of first and last notes in beam group" }
-            } else {
-                elementsToIncludeInBeam.forEachIndexed { index, element ->
-                    if(index != 0 && index != elementsToIncludeInBeam.size - 1) {
+                return@forEach
+            }
 
-                        element.getStem()?.let { stem ->
-                            val stemTranslationX = stem.translation.xShift
-                            val stemTranslationY = stem.translation.yShift
+            // The y-coordinate increases when moving downwards
+//            val delta = (lastNoteYTranslation - firstNoteYTranslation) / (lastNoteXTranslation - firstNoteXTranslation)
+            val delta =
+                (stopCoordinates.second - startCoordinates.second) / (stopCoordinates.first - startCoordinates.first)
 
-                            val updatedStemHeight = (stemTranslationX - firstNoteXTranslation) * delta + firstNoteYTranslation - stemTranslationY
+            elementsToIncludeInBeam.forEachIndexed { index, element ->
+                if (index != 0 && index != elementsToIncludeInBeam.size - 1) {
+                    element.getStem()?.let { stem ->
+                        val elementTranslationX = element.translation?.xShift ?: 0.0
+                        val elementTranslationY = element.getVerticalOffset()
 
-                            element.updateStemHeight(updatedStemHeight)
+//                        val stemTranslationX = stem.translation.xShift
+//                        val stemTranslationY = stem.translation.yShift
 
-                            // TODO
+//                        val updatedStemHeight =
+//                            ((elementTranslationX - firstNoteXTranslation) * delta + firstNoteYTranslation - elementTranslationY + firstNote.getStemHeight()).absoluteValue
 
+                        val updatedStemHeight = if (element.isStemUp()) {
+                            ((elementTranslationX - firstNoteXTranslation) * delta + elementTranslationY + firstNote.getStemHeight()).absoluteValue
+                        } else {
+//                            (elementTranslationX - firstNoteXTranslation) * delta + elementTranslationY + firstNote.getStemHeight()
 
+                            val beamPoint =
+                                (elementTranslationX - firstNoteXTranslation) * delta + firstNote.getVerticalOffset() + firstNote.getStemHeight()
+
+                            beamPoint - element.getVerticalOffset()
                         }
+
+                        element.updateStemHeight(updatedStemHeight)
+
+                        // TODO
+
+
                     }
                 }
 
-                result.add(
-                    BeamElementAbsolutePosition(
-                        beamId,
-                        Pair(startCoordinates.first, startCoordinates.second),
-                        Pair(stopCoordinates.first, stopCoordinates.second)
-                    )
-                )
             }
 
             // TODO This will not create a proper looking bar in many cases
             // TODO Need to handle beams with multiple lines
 
+            result.add(
+                BeamElementAbsolutePosition(
+                    beamId,
+                    Pair(startCoordinates.first, startCoordinates.second),
+                    Pair(stopCoordinates.first, stopCoordinates.second)
+                )
+            )
         }
 
         return result
