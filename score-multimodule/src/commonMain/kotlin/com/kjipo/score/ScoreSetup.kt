@@ -200,14 +200,6 @@ class ScoreSetup(private val score: Score) {
                 findBeamableElement(beamableElement.id, bars)
             }
 
-//            val firstNote = findNoteElement(beamLine.elements.first().id, bars)
-//            val lastNote = findNoteElement(beamLine.elements.last().id, bars)
-
-//            if (firstNote == null || lastNote == null) {
-//                logger.error { "Notes not found. First note: $firstNote. Second note: $lastNote" }
-//                return null
-//            }
-
             val firstNote = elementsToIncludeInBeam.first()
             val lastNote = elementsToIncludeInBeam.last()
             val firstNoteXTranslation = (firstNote.translation?.xShift ?: 0.0).toDouble()
@@ -242,7 +234,6 @@ class ScoreSetup(private val score: Score) {
             }
 
             // The y-coordinate increases when moving downwards
-//            val delta = (lastNoteYTranslation - firstNoteYTranslation) / (lastNoteXTranslation - firstNoteXTranslation)
             val delta =
                 (stopCoordinates.second - startCoordinates.second) / (stopCoordinates.first - startCoordinates.first)
 
@@ -252,17 +243,9 @@ class ScoreSetup(private val score: Score) {
                         val elementTranslationX = element.translation?.xShift ?: 0.0
                         val elementTranslationY = element.getVerticalOffset()
 
-//                        val stemTranslationX = stem.translation.xShift
-//                        val stemTranslationY = stem.translation.yShift
-
-//                        val updatedStemHeight =
-//                            ((elementTranslationX - firstNoteXTranslation) * delta + firstNoteYTranslation - elementTranslationY + firstNote.getStemHeight()).absoluteValue
-
                         val updatedStemHeight = if (element.isStemUp()) {
                             ((elementTranslationX - firstNoteXTranslation) * delta + elementTranslationY + firstNote.getStemHeight()).absoluteValue
                         } else {
-//                            (elementTranslationX - firstNoteXTranslation) * delta + elementTranslationY + firstNote.getStemHeight()
-
                             val beamPoint =
                                 (elementTranslationX - firstNoteXTranslation) * delta + firstNote.getVerticalOffset() + firstNote.getStemHeight()
 
