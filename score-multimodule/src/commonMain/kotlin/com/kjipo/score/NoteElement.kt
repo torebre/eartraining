@@ -26,6 +26,8 @@ class NoteElement(
     private var stem: TranslatedRenderingElement? = null
     private var stemHeight = DEFAULT_STEM_HEIGHT
 
+    private var internalShiftX = 0.0
+    private var internalShiftY = 0.0
 
     private val logger = KotlinLogging.logger {}
 
@@ -33,16 +35,21 @@ class NoteElement(
         return positionedRenderingElements + stem.let { if (it == null) emptyList() else listOf(it) }
     }
 
-    fun layoutNoteHeads() {
-        note.accidental?.run {
-            positionedRenderingElements.add(setupAccidental(this))
-        }
+    override fun doLayout(pixelsPerTick: Double) {
+        layoutElements()
 
-        stem = calculateStem()
-        // TODO This is a bit brittle. Waiting to add the stem to the list of rendering elements until the list is requested. This is because the stem may change after the first layout calculations. Its height may change because of beams
-//        stem?.let { positionedRenderingElements.add(it) }
+        val debugBox = determineDebugBox(
+            "${note.id}_debug_box",
+            positionedRenderingElements
+        )
 
-        setupNoteHeadAndExtraBarLines(getNoteHeadGlyph(duration))
+        internalShiftX = (note.duration.ticks * pixelsPerTick - debugBox.width) / 2.0
+
+        logger.info { "Test23: $internalShiftX" }
+
+        positionedRenderingElements.clear()
+        highlightElements.clear()
+        layoutElements()
 
         if (context.debug) {
             determineDebugBox(
@@ -58,11 +65,23 @@ class NoteElement(
         }
     }
 
+    private fun layoutElements() {
+        note.accidental?.run {
+            positionedRenderingElements.add(setupAccidental(this))
+        }
+
+        stem = calculateStem()
+        // TODO This is a bit brittle. Waiting to add the stem to the list of rendering elements until the list is requested. This is because the stem may change after the first layout calculations. Its height may change because of beams
+//        stem?.let { positionedRenderingElements.add(it) }
+
+        setupNoteHeadAndExtraBarLines(getNoteHeadGlyph(duration))
+    }
+
     private fun setupNoteHeadAndExtraBarLines(noteHeadGlyph: GlyphData) {
         noteHead = PositionedRenderingElement.create(
             noteHeadGlyph.boundingBox,
             id,
-            translation ?: Translation(0.0, 0.0),
+            getTranslation(),
             duration.name,
             true
         ).also { translatedRenderingElementUsingReference ->
@@ -73,8 +92,8 @@ class NoteElement(
         addExtraBarLinesForGClef(
             transformToNoteAndAccidental(note.noteType).first,
             note.octave,
-            translation?.xShift ?: 0.0,
-            translation?.yShift ?: 0.0,
+            getTranslationX(),
+            getTranslationY(),
             noteHeadGlyph.boundingBox.xMin.toInt(),
             noteHeadGlyph.boundingBox.xMax.toInt(),
             context.getAndIncrementExtraBarLinesCounter()
@@ -88,7 +107,7 @@ class NoteElement(
             PositionedRenderingElement.create(
                 accidentalGlyph.boundingBox,
                 "$id-acc",
-                (translation ?: Translation(0.0, 0.0)).let {
+                getTranslation().let {
                     Translation(it.xShift - 30, it.yShift)
                 },
                 accidental.name,
@@ -121,7 +140,7 @@ class NoteElement(
         }
 
         return if (yCoord != null) {
-            Pair((translation?.xShift ?: 0.0) + xCoord,(translation?.yShift ?: 0.0) + yCoord)
+            getTranslation().let { Pair(it.xShift + xCoord, it.yShift + yCoord) }
         } else {
             null
         }
@@ -139,7 +158,7 @@ class NoteElement(
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
-            null, translation ?: Translation(0.0, 0.0)
+            null, getTranslation()
         )
     }
 
@@ -208,6 +227,12 @@ class NoteElement(
             Pair(xCoord + translation.xShift, yCoord + translation.yShift)
         }
     }
+
+    private fun getTranslationX() = (translation?.xShift ?: 0.0) + internalShiftX
+
+    private fun getTranslationY() = (translation?.yShift ?: 0.0) + internalShiftY
+
+    private fun getTranslation() = Translation(getTranslationX(), getTranslationY())
 
 
     override fun toString(): String {

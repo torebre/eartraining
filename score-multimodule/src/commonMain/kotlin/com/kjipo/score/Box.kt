@@ -6,10 +6,10 @@ import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.findBoundingBox
 
 class Box(
-    private val xPosition: Int,
-    private val yPosition: Int,
-    private val width: Int,
-    private val height: Int,
+    val xPosition: Int,
+    val yPosition: Int,
+    val width: Int,
+    val height: Int,
     val id: String
 ) :
     ScoreRenderingElement() {

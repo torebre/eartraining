@@ -2,7 +2,6 @@ package com.kjipo.score
 
 import com.kjipo.handler.Bar
 import com.kjipo.handler.ScoreHelperFunctions.createTemporalElement
-import com.kjipo.handler.ScoreHelperFunctions.transformToNoteAndAccidental
 import com.kjipo.svg.GlyphData
 import mu.KotlinLogging
 import kotlin.math.ceil
@@ -57,7 +56,9 @@ class BarData(
         for (scoreRenderingElement in scoreRenderingElements) {
             when (scoreRenderingElement) {
                 is TemporalElement -> {
-                    val xPosition = barXoffset + ceil(xOffset.plus(tickCounter.times(pixelsPerTick)))
+                    val xPosition = barXoffset + ceil(
+                        xOffset.plus(tickCounter.times(pixelsPerTick))
+                    )
                     var yPosition = barYoffset
 
                     when (scoreRenderingElement) {
@@ -66,14 +67,17 @@ class BarData(
                             // This updating of the y-position is done because when references are used, the y-position is not used, the translate is used instead
                             yPosition += localYOffset
                             scoreRenderingElement.translation = Translation(xPosition, yPosition)
-                            scoreRenderingElement.layoutNoteHeads()
+                            scoreRenderingElement.doLayout(pixelsPerTick)
                         }
+
                         is NoteGroupElement -> {
                             scoreRenderingElement.translation = Translation(xPosition, yPosition)
-                            scoreRenderingElement.layoutNoteHeads()
+                            scoreRenderingElement.doLayout(pixelsPerTick)
                         }
+
                         else -> {
                             scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                            scoreRenderingElement.doLayout(pixelsPerTick)
                         }
                     }
                     tickCounter += scoreRenderingElement.duration.ticks

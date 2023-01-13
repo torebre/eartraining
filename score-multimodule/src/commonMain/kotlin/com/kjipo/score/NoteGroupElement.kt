@@ -53,7 +53,7 @@ class NoteGroupElement(
         )?.also { scoreRenderingElement -> scoreRenderingElement.translation = translation }
 
 
-    fun layoutNoteHeads() {
+    override fun doLayout(pixelsPerTick: Double) {
         val accidentals = mutableListOf<TranslatedRenderingElementUsingReference>()
 
         for (note in noteGroup.notes) {
