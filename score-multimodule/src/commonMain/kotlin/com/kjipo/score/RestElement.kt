@@ -40,7 +40,7 @@ class RestElement(
         positionedRenderingElement = TranslatedRenderingElementUsingReference(
             id,
             null,
-            getTranslation().let {
+            getTranslations().let {
                 Translation(it.xShift, it.yShift - 22.5)
             },
             typeName,
@@ -65,7 +65,7 @@ class RestElement(
 
     private fun getTranslationY() = (translation?.yShift ?: 0.0)
 
-    private fun getTranslation() = Translation(getTranslationX(), getTranslationY())
+    private fun getTranslations() = Translation(getTranslationX(), getTranslationY())
     override fun getGlyphs(): Map<String, GlyphData> = mapOf(Pair(typeName, getRestGlyph(duration)))
 
     override fun getIdsOfHighlightElements() = highlightElements

@@ -8,6 +8,9 @@ import com.kjipo.score.Duration
 const val SCALE = 0.1
 val blankGlyph = GlyphData("blank", emptyList(), 0, BoundingBox(0.0, 0.0, 0.0, 0.0))
 
+const val EIGHT_NOTE_FLAG_UP = "flags.u3"
+const val EIGHT_NOTE_FLAG_DOWN = "flags.d3"
+
 
 fun getNoteHeadGlyph(noteType: Duration): GlyphData {
     return when (noteType) {
@@ -40,10 +43,10 @@ fun getRestGlyph(restDuration: Duration): GlyphData {
 fun getFlagGlyph(duration: Duration, up: Boolean): GlyphData {
     return when (duration) {
         Duration.EIGHT -> if(up) {
-            getGlyph("flags.u3")
+            getGlyph(EIGHT_NOTE_FLAG_UP)
         }
         else {
-            getGlyph("flags.d3")
+            getGlyph(EIGHT_NOTE_FLAG_DOWN)
         }
         else -> blankGlyph
     }

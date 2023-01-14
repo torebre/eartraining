@@ -75,6 +75,16 @@ private fun showBeam() {
     val beamGroup2 = BeamGroup(listOf(BeamLine(1, listOf(note3, note4, note5, note6))))
     score.beamGroups.add(beamGroup2)
 
+    val bar3 = Bar()
+
+    val note31 = Note("test31", Duration.EIGHT, 6, NoteType.F, stem = Stem.DOWN)
+    val note32 = Note("test32", Duration.EIGHT, 5, NoteType.E, stem = Stem.UP)
+    val note33 = Note("test33", Duration.EIGHT, 6, NoteType.F_SHARP, stem = Stem.UP)
+    val note34 = Note("test34", Duration.EIGHT, 5, NoteType.G, stem = Stem.DOWN)
+    val rest3 = Rest("test35", Duration.HALF)
+
+    bar3.scoreHandlerElements.addAll(listOf(note31, note32, note33, note34, rest3))
+    score.bars.add(bar3)
 
     val scoreHandler = ScoreHandlerWithReducedLogic(score)
 

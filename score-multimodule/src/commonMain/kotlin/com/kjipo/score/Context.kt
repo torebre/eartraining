@@ -2,9 +2,10 @@ package com.kjipo.score
 
 import com.kjipo.handler.Note
 import com.kjipo.handler.NoteSymbol
-import com.kjipo.handler.ScoreHandlerUtilities.getPitch
+import com.kjipo.handler.Score
+import mu.KotlinLogging
 
-class Context {
+class Context(private val score: Score) {
 
     private var idCounter = 0
     private var stemCounter = 0
@@ -16,6 +17,9 @@ class Context {
     val barYspace = 250.0
 
     var debug = true
+
+
+    private val logger = KotlinLogging.logger {}
 
 
     fun requiresStem(note: NoteSymbol): Boolean {
@@ -32,5 +36,22 @@ class Context {
     fun getAndIncrementTieCounter() = "tie-element-${tieElementCounter++}"
     fun getAndIncrementBeamCounter() = "beam-${beamCounter++}"
 
+    fun shouldNoteFlagBeAdded(id: String): Boolean {
+        score.getAllScoreHandlerElements { it.id == id }.firstOrNull()?.let { scoreHandlerElement ->
+            if (!(scoreHandlerElement is Note && scoreHandlerElement.duration == Duration.EIGHT)) {
+                return false
+            }
+        }
+
+        val isElementPartOfBeamGroup = score.beamGroups.map { beamGroup ->
+            beamGroup.beamLines.mapNotNull { beamLine -> beamLine.elements.find { it.id == id } }.any()
+        }.any { it }
+
+        if (isElementPartOfBeamGroup) {
+            return false
+        }
+
+        return true
+    }
 
 }

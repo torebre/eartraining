@@ -45,8 +45,6 @@ class NoteElement(
 
         internalShiftX = (note.duration.ticks * pixelsPerTick - debugBox.width) / 2.0
 
-        logger.info { "Test23: $internalShiftX" }
-
         positionedRenderingElements.clear()
         highlightElements.clear()
         layoutElements()
@@ -75,13 +73,64 @@ class NoteElement(
 //        stem?.let { positionedRenderingElements.add(it) }
 
         setupNoteHeadAndExtraBarLines(getNoteHeadGlyph(duration))
+
+        if (context.shouldNoteFlagBeAdded(id)) {
+            setupNoteStemAttachment(duration)?.let { positionedRenderingElements.add(it) }
+        }
+    }
+
+    private fun setupNoteStemAttachment(duration: Duration): TranslatedRenderingElementUsingReference? {
+        return when (duration) {
+            Duration.EIGHT -> {
+                addEightNoteFlag()
+            }
+
+            else -> {
+                // The other cases do not need something added to a stem
+                null
+            }
+        }
+    }
+
+
+    private fun addEightNoteFlag(): TranslatedRenderingElementUsingReference {
+        return if (isStemUp()) {
+            val flagGlyph = getFlagGlyph(Duration.EIGHT, true)
+
+            PositionedRenderingElement.create(
+                flagGlyph.boundingBox,
+                "$id-flag",
+                getTranslations().let {
+                    Translation(it.xShift - 30, it.yShift)
+                },
+                flagGlyph.name,
+                false
+            )
+
+        } else {
+            val flagGlyph = getFlagGlyph(Duration.EIGHT, false)
+
+            PositionedRenderingElement.create(
+                flagGlyph.boundingBox,
+                "$id-flag",
+                getTranslations().let {
+                    Translation(it.xShift - 30, it.yShift)
+                },
+                flagGlyph.name,
+                false
+            )
+
+
+        }
+
+
     }
 
     private fun setupNoteHeadAndExtraBarLines(noteHeadGlyph: GlyphData) {
         noteHead = PositionedRenderingElement.create(
             noteHeadGlyph.boundingBox,
             id,
-            getTranslation(),
+            getTranslations(),
             duration.name,
             true
         ).also { translatedRenderingElementUsingReference ->
@@ -107,7 +156,7 @@ class NoteElement(
             PositionedRenderingElement.create(
                 accidentalGlyph.boundingBox,
                 "$id-acc",
-                getTranslation().let {
+                getTranslations().let {
                     Translation(it.xShift - 30, it.yShift)
                 },
                 accidental.name,
@@ -140,7 +189,7 @@ class NoteElement(
         }
 
         return if (yCoord != null) {
-            getTranslation().let { Pair(it.xShift + xCoord, it.yShift + yCoord) }
+            getTranslations().let { Pair(it.xShift + xCoord, it.yShift + yCoord) }
         } else {
             null
         }
@@ -158,7 +207,7 @@ class NoteElement(
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
-            null, getTranslation()
+            null, getTranslations()
         )
     }
 
@@ -194,7 +243,7 @@ class NoteElement(
             glyphsUsed.put(it.name, getAccidentalGlyph(it))
         }
 
-        if (duration == Duration.EIGHT) {
+        if (duration == Duration.EIGHT && context.shouldNoteFlagBeAdded(id)) {
             getFlagGlyph(Duration.EIGHT, note.stem == Stem.UP).let {
                 glyphsUsed[it.name] = it
             }
@@ -232,7 +281,7 @@ class NoteElement(
 
     private fun getTranslationY() = (translation?.yShift ?: 0.0) + internalShiftY
 
-    private fun getTranslation() = Translation(getTranslationX(), getTranslationY())
+    private fun getTranslations() = Translation(getTranslationX(), getTranslationY())
 
 
     override fun toString(): String {

@@ -10,7 +10,7 @@ import kotlin.math.absoluteValue
  * This class produces the rendering sequence that is used to render the score
  */
 class ScoreSetup(private val score: Score) {
-    val context = Context()
+    val context = Context(score)
     val scoreRenderingElements = mutableListOf<ScoreRenderingElement>()
 
     private val barData = mutableListOf<BarData>()
