@@ -186,11 +186,39 @@ private fun showTieAcrossBars() {
     val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
 }
 
+private fun showBeamIncludingChords() {
+    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+
+    val bar = Bar(clef = Clef.G, timeSignature = TimeSignature(4, 4))
+
+    val note11 = NoteSymbol("test11", Duration.EIGHT, 5, NoteType.A_SHARP)
+    val note12 = NoteSymbol("test12", Duration.EIGHT, 5, NoteType.C)
+    val note13 = NoteSymbol("test13", Duration.EIGHT, 4, NoteType.G)
+    val note14 = NoteSymbol("test14", Duration.EIGHT, 4, NoteType.A)
+    val rest1 = Rest("test3", Duration.HALF)
+
+    val noteGroup1 = NoteGroup("notegroup1", listOf(note11, note12), stem = Stem.UP)
+    val noteGroup2 = NoteGroup("notegroup2", listOf(note13, note14), stem = Stem.UP)
+
+    bar.scoreHandlerElements.addAll(setOf(noteGroup1, noteGroup2))
+
+    val score = Score()
+    score.bars.add(bar)
+
+    val beamGroup = BeamGroup(listOf(BeamLine(1, listOf(noteGroup1, noteGroup2))))
+    score.beamGroups.add(beamGroup)
+
+    val scoreHandler = ScoreHandlerWithReducedLogic(score)
+
+    val webScore = WebScoreView(WebscoreSvgProvider(scoreHandler), "score")
+}
+
 fun main() {
 //showTie()
-    showBeam()
+//    showBeam()
 //showNoteGroupWithSharp()
 //    showNotes()
 //    showChordWithTwoSharps()
 //    showTieAcrossBars()
+    showBeamIncludingChords()
 }

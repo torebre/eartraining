@@ -168,11 +168,11 @@ class NoteElement(
     override fun getStem() = stem
 
     override fun getStemHeight(): Double {
-        return this.stemHeight
+        return stemHeight
     }
 
     override fun isStemUp(): Boolean {
-        return this.note.stem == Stem.UP
+        return note.stem == Stem.UP
     }
 
     override fun updateStemHeight(stemHeight: Double) {

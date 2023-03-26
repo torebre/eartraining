@@ -5,7 +5,6 @@ import com.kjipo.handler.NoteSymbol
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.svg.*
 import mu.KotlinLogging
-import kotlin.math.absoluteValue
 
 
 class NoteGroupElement(
@@ -14,22 +13,19 @@ class NoteGroupElement(
     val properties: ElementWithProperties = Properties()
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeInBeamGroup,
     ElementWithProperties by properties {
-    val result = mutableListOf<PositionedRenderingElementParent>()
-    var yLowestPosition = Double.MAX_VALUE
-    var yHighestPosition = Double.MIN_VALUE
+    private val positionedRenderingElementParents = mutableListOf<PositionedRenderingElementParent>()
+//    private var yLowestPosition = Double.MAX_VALUE
+//    private var yHighestPosition = Double.MIN_VALUE
 
     private var stem: TranslatedRenderingElement? = null
+    private var stemHeight = DEFAULT_STEM_HEIGHT
+
+    private var internalShiftX = 0.0
+    private var internalShiftY = 0.0
 
     private val highlightElements = mutableSetOf<String>()
 
     override val id: String = noteGroup.id
-    override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
-        TODO("Not yet implemented")
-    }
-
-    override fun getVerticalOffset(): Double {
-        TODO("Not yet implemented")
-    }
 
     // TODO Handle duration on note level
     override var duration: Duration = noteGroup.notes.first().duration
@@ -38,7 +34,7 @@ class NoteGroupElement(
 
 
     override fun toRenderingElement(): List<PositionedRenderingElementParent> {
-        return result
+        return positionedRenderingElementParents + stem.let { if (it == null) emptyList() else listOf(it) }
     }
 
 
@@ -70,7 +66,7 @@ class NoteGroupElement(
                     Accidental.SHARP,
                     noteHeadTranslation
                 ).also { accidentals.add(it) }
-                    .also { result.add(it) }
+                    .also { positionedRenderingElementParents.add(it) }
             }
 
             val glyphData = getNoteHeadGlyph(duration)
@@ -81,17 +77,17 @@ class NoteGroupElement(
                 duration.name,
                 true
             ).also {
-                result.add(it)
+                positionedRenderingElementParents.add(it)
                 highlightElements.add(it.id)
             }
 
-            if (yLowestPosition > yPositionForNoteHead) {
-                yLowestPosition = yPositionForNoteHead
-            }
-
-            if (yHighestPosition < yPositionForNoteHead) {
-                yHighestPosition = yPositionForNoteHead
-            }
+//            if (yLowestPosition > yPositionForNoteHead) {
+//                yLowestPosition = yPositionForNoteHead
+//            }
+//
+//            if (yHighestPosition < yPositionForNoteHead) {
+//                yHighestPosition = yPositionForNoteHead
+//            }
         }
 
         handleOverlappingAccidentals(accidentals)
@@ -100,7 +96,7 @@ class NoteGroupElement(
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
             addExtraBarLines(noteSymbol)?.let {
-                result.addAll(it.toRenderingElement())
+                positionedRenderingElementParents.addAll(it.toRenderingElement())
             }
         }
 
@@ -108,15 +104,12 @@ class NoteGroupElement(
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
             addExtraBarLines(noteSymbol)?.let {
-                result.addAll(it.toRenderingElement())
+                positionedRenderingElementParents.addAll(it.toRenderingElement())
             }
         }
 
-        noteGroup.stem.let {
-            addStem(it == Stem.UP).let {stemElement ->
-                result.add(stemElement)
-                stem = stemElement
-            }
+        if (noteGroup.stem != Stem.NONE) {
+            stem = addStem()
         }
 
     }
@@ -146,10 +139,10 @@ class NoteGroupElement(
                     if (positionedBoundingBox.yMin < positionedBoundingBoxNext.yMax) {
                         val accidental = positionedBoundingBoxAccidentalMap[positionedBoundingBoxNext]
 
-                        val indexAccidental = result.indexOf(accidental)
-                        result.removeAt(indexAccidental)
+                        val indexAccidental = positionedRenderingElementParents.indexOf(accidental)
+                        positionedRenderingElementParents.removeAt(indexAccidental)
                         with(accidental as TranslatedRenderingElementUsingReference) {
-                            result.add(
+                            positionedRenderingElementParents.add(
                                 indexAccidental,
                                 copy(
                                     translation = Translation(
@@ -219,39 +212,41 @@ class NoteGroupElement(
     }
 
     override fun getStemHeight(): Double {
-        TODO("Not yet implemented")
+        return stemHeight
     }
 
     override fun updateStemHeight(stemHeight: Double) {
-        TODO("Not yet implemented")
+        this.stemHeight = stemHeight
+        stem = addStem()
     }
 
     override fun isStemUp(): Boolean {
         return this.noteGroup.stem == Stem.UP
     }
 
-    fun addStem(stemUp: Boolean): TranslatedRenderingElement {
-        val xCoordinate = if(stemUp) {
-            getRightEdgeOfNoteHeadGlyph()
+    private fun addStem(): TranslatedRenderingElement? {
+        if (noteGroup.stem == Stem.NONE) {
+            return null
         }
-        else {
-            getLeftEdgeOfNoteHeadGlpyh() + STEM_UP_STEM_X_OFFSET
-        }
+
+        val stemUp = isStemUp()
+        val xCoordinate = getXTranslateForStem()
 
         // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
-        val startStop = if (stemUp) {
-            Pair(
-                yHighestPosition - STEM_Y_OFFSET_STEM_UP,
-                yHighestPosition.minus(yLowestPosition).absoluteValue + DEFAULT_STEM_HEIGHT
-            )
-        } else {
-            Pair(
-                yLowestPosition + STEM_Y_OFFSET_STEM_DOWN,
-                yHighestPosition.minus(yLowestPosition).absoluteValue + DEFAULT_STEM_HEIGHT
-            )
-        }
+        return getStem(
+            xCoordinate,
+            getVerticalOffset(),
+            stemHeight,
+            stemUp
+        )
+    }
 
-        return getStem(xCoordinate, startStop.first, startStop.second, stemUp)
+    private fun getXTranslateForStem(): Double {
+        return if (isStemUp()) {
+            getRightEdgeOfNoteHeadGlyph()
+        } else {
+            getLeftEdgeOfNoteHeadGlpyh() + STEM_UP_STEM_X_OFFSET
+        }
     }
 
     private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax
@@ -260,6 +255,36 @@ class NoteGroupElement(
 
     override fun getIdsOfHighlightElements(): Collection<String> {
         return highlightElements
+    }
+
+    override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
+        val yCoord = when (noteGroup.stem) {
+            Stem.UP -> -stemHeight
+            Stem.DOWN -> stemHeight
+            Stem.NONE -> return null
+        }
+        val xCoord = getXTranslateForStem()
+
+        return getTranslations().let { Pair(it.xShift + xCoord, it.yShift + yCoord) }
+    }
+
+    private fun getTranslationX() = (translation?.xShift ?: 0.0) + internalShiftX
+
+    private fun getTranslationY() = (translation?.yShift ?: 0.0) + internalShiftY
+
+    private fun getTranslations() = Translation(getTranslationX(), getTranslationY())
+
+
+    override fun getVerticalOffset(): Double {
+        return noteGroup.notes.maxOfOrNull { note ->
+            calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
+        } ?: 0.0
+    }
+
+    fun getStemOffset(): Double {
+        return noteGroup.notes.maxOfOrNull { note ->
+            calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
+        } ?: 0.0
     }
 
 
