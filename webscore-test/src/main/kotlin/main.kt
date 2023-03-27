@@ -200,7 +200,7 @@ private fun showBeamIncludingChords() {
     val noteGroup1 = NoteGroup("notegroup1", listOf(note11, note12), stem = Stem.UP)
     val noteGroup2 = NoteGroup("notegroup2", listOf(note13, note14), stem = Stem.UP)
 
-    bar.scoreHandlerElements.addAll(setOf(noteGroup1, noteGroup2))
+    bar.scoreHandlerElements.addAll(setOf(noteGroup1, noteGroup2, rest1))
 
     val score = Score()
     score.bars.add(bar)

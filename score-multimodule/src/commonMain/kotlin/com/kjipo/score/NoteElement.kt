@@ -44,6 +44,10 @@ class NoteElement(
         )
 
         internalShiftX = (note.duration.ticks * pixelsPerTick - debugBox.width) / 2.0
+        internalShiftY = calculateVerticalOffset(
+            transformToNoteAndAccidental(note.noteType).first,
+            note.octave
+        )
 
         positionedRenderingElements.clear()
         highlightElements.clear()
@@ -222,22 +226,12 @@ class NoteElement(
         0.0
     }
 
-    override fun getVerticalOffset(): Double {
-        return calculateVerticalOffset(
-            transformToNoteAndAccidental(note.noteType).first,
-            note.octave
-        )
+    override fun getVerticalOffsetForStemStart(): Double {
+        return internalShiftY
     }
 
     override fun getGlyphs(): Map<String, GlyphData> {
         val glyphsUsed = mutableMapOf<String, GlyphData>()
-
-//        if (stem != Stem.NONE) {
-//             Use the bounding box for the note head of a half note to determine
-//             how far to move the stem so that it is on the right side of the note head
-//            val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
-//            glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
-//        }
 
         note.accidental?.let {
             glyphsUsed.put(it.name, getAccidentalGlyph(it))

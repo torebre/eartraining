@@ -227,16 +227,16 @@ class ScoreSetup(private val score: Score) {
                 // Element that is inside the beam, not one of the endpoints
                 element.getStem()?.let { stem ->
                     val elementTranslationX = element.translation?.xShift ?: 0.0
-                    val elementTranslationY = element.getVerticalOffset()
+                    val elementTranslationY = element.getVerticalOffsetForStemStart()
 
                     // Update the stem height of the element so that it touches the beam line
                     val updatedStemHeight = if (element.isStemUp()) {
                         ((elementTranslationX - beamCalculation.firstNoteXTranslation) * delta + elementTranslationY + firstNote.getStemHeight()).absoluteValue
                     } else {
                         val beamPoint =
-                            (elementTranslationX - beamCalculation.firstNoteXTranslation) * delta + firstNote.getVerticalOffset() + firstNote.getStemHeight()
+                            (elementTranslationX - beamCalculation.firstNoteXTranslation) * delta + firstNote.getVerticalOffsetForStemStart() + firstNote.getStemHeight()
 
-                        beamPoint - element.getVerticalOffset()
+                        beamPoint - element.getVerticalOffsetForStemStart()
                     }
 
                     element.updateStemHeight(updatedStemHeight)
@@ -273,8 +273,8 @@ class ScoreSetup(private val score: Score) {
             firstNoteXTranslation = (firstElement.translation?.xShift ?: 0.0).toDouble()
             lastNoteXTranslation = (lastElement.translation?.xShift ?: 0.0).toDouble()
 
-            firstNoteYTranslation = (firstElement.translation?.yShift ?: 0.0).toDouble()
-            lastNoteYTranslation = (lastElement.translation?.yShift ?: 0.0).toDouble()
+            firstNoteYTranslation = firstElement.getVerticalOffsetForStemStart()
+            lastNoteYTranslation = lastElement.getVerticalOffsetForStemStart()
 
             startCoordinates = firstElement.getAbsoluteCoordinatesForEndpointOfStem()?.let {
                 Pair(

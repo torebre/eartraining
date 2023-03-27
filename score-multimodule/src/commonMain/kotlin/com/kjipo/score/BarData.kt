@@ -59,27 +59,22 @@ class BarData(
                     val xPosition = barXoffset + ceil(
                         xOffset.plus(tickCounter.times(pixelsPerTick))
                     )
-                    var yPosition = barYoffset
 
                     when (scoreRenderingElement) {
                         is NoteElement -> {
-                            val localYOffset = scoreRenderingElement.getVerticalOffset()
-                            // This updating of the y-position is done because when references are used,
-                            // the y-position is not used, the translate is used instead
-                            yPosition += localYOffset
-                            scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                            scoreRenderingElement.translation = Translation(xPosition, barYoffset)
                             scoreRenderingElement.doLayout(pixelsPerTick)
                         }
 
                         is NoteGroupElement -> {
 //                            val localYOffset = scoreRenderingElement.getVerticalOffset()
 //                            yPosition += localYOffset
-                            scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                            scoreRenderingElement.translation = Translation(xPosition, barYoffset)
                             scoreRenderingElement.doLayout(pixelsPerTick)
                         }
 
                         else -> {
-                            scoreRenderingElement.translation = Translation(xPosition, yPosition)
+                            scoreRenderingElement.translation = Translation(xPosition, barYoffset)
                             scoreRenderingElement.doLayout(pixelsPerTick)
                         }
                     }

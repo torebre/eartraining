@@ -14,8 +14,6 @@ class NoteGroupElement(
 ) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeInBeamGroup,
     ElementWithProperties by properties {
     private val positionedRenderingElementParents = mutableListOf<PositionedRenderingElementParent>()
-//    private var yLowestPosition = Double.MAX_VALUE
-//    private var yHighestPosition = Double.MIN_VALUE
 
     private var stem: TranslatedRenderingElement? = null
     private var stemHeight = DEFAULT_STEM_HEIGHT
@@ -40,7 +38,8 @@ class NoteGroupElement(
 
     private fun addExtraBarLines(noteSymbol: NoteSymbol) =
         addExtraBarLinesForGClef(
-            getNoteWithoutAccidental(noteSymbol.noteType), noteSymbol.octave,
+            getNoteWithoutAccidental(noteSymbol.noteType),
+            noteSymbol.octave,
             translation?.xShift ?: 0.0,
             translation?.yShift ?: 0.0,
             -25,
@@ -235,7 +234,7 @@ class NoteGroupElement(
         // Not setting stemElement.typeId to avoid references being used, the stem is created specifically for this note group
         return getStem(
             xCoordinate,
-            getVerticalOffset(),
+            getVerticalOffsetForStemStart(),
             stemHeight,
             stemUp
         )
@@ -245,27 +244,28 @@ class NoteGroupElement(
         return if (isStemUp()) {
             getRightEdgeOfNoteHeadGlyph()
         } else {
-            getLeftEdgeOfNoteHeadGlpyh() + STEM_UP_STEM_X_OFFSET
+            getLeftEdgeOfNoteHeadGlyph() + STEM_UP_STEM_X_OFFSET
         }
     }
 
     private fun getRightEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMax
 
-    private fun getLeftEdgeOfNoteHeadGlpyh() = getNoteHeadGlyph(duration).boundingBox.xMin
+    private fun getLeftEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMin
 
     override fun getIdsOfHighlightElements(): Collection<String> {
         return highlightElements
     }
 
     override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
-        val yCoord = when (noteGroup.stem) {
+        val stemHeight = when (noteGroup.stem) {
             Stem.UP -> -stemHeight
             Stem.DOWN -> stemHeight
             Stem.NONE -> return null
         }
-        val xCoord = getXTranslateForStem()
+        val xCoord = (translation?.xShift ?: 0.0) + getXTranslateForStem()
+        val yCoord = (translation?.yShift ?: 0.0) + getVerticalOffsetForStemStart() + stemHeight
 
-        return getTranslations().let { Pair(it.xShift + xCoord, it.yShift + yCoord) }
+        return Pair(xCoord, yCoord)
     }
 
     private fun getTranslationX() = (translation?.xShift ?: 0.0) + internalShiftX
@@ -275,13 +275,7 @@ class NoteGroupElement(
     private fun getTranslations() = Translation(getTranslationX(), getTranslationY())
 
 
-    override fun getVerticalOffset(): Double {
-        return noteGroup.notes.maxOfOrNull { note ->
-            calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
-        } ?: 0.0
-    }
-
-    fun getStemOffset(): Double {
+    override fun getVerticalOffsetForStemStart(): Double {
         return noteGroup.notes.maxOfOrNull { note ->
             calculateVerticalOffset(getNoteWithoutAccidental(note.noteType), note.octave)
         } ?: 0.0
