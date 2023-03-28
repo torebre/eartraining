@@ -11,29 +11,14 @@ import mu.KotlinLogging
  */
 class NoteElement(
     val note: Note,
-    private val context: Context,
-    val properties: ElementWithProperties = Properties()
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeTied, ElementCanBeInBeamGroup,
-    ElementWithProperties by properties {
-
+    context: Context,
+) : AbstractNoteElement(context) {
     override var duration: Duration = note.duration
     override val id: String = note.id
 
-    private val positionedRenderingElements = mutableListOf<PositionedRenderingElementParent>()
-    private val highlightElements = mutableSetOf<String>()
     private var noteHead: TranslatedRenderingElementUsingReference? = null
 
-    private var stem: TranslatedRenderingElement? = null
-    private var stemHeight = DEFAULT_STEM_HEIGHT
-
-    private var internalShiftX = 0.0
-    private var internalShiftY = 0.0
-
     private val logger = KotlinLogging.logger {}
-
-    override fun toRenderingElement(): List<PositionedRenderingElementParent> {
-        return positionedRenderingElements + stem.let { if (it == null) emptyList() else listOf(it) }
-    }
 
     override fun doLayout(pixelsPerTick: Double) {
         layoutElements()
@@ -124,9 +109,7 @@ class NoteElement(
                 false
             )
 
-
         }
-
 
     }
 
@@ -169,11 +152,6 @@ class NoteElement(
         }
     }
 
-    override fun getStem() = stem
-
-    override fun getStemHeight(): Double {
-        return stemHeight
-    }
 
     override fun isStemUp(): Boolean {
         return note.stem == Stem.UP

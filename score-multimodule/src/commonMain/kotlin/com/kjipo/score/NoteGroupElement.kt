@@ -9,31 +9,14 @@ import mu.KotlinLogging
 
 class NoteGroupElement(
     val noteGroup: NoteGroup,
-    val context: Context,
-    val properties: ElementWithProperties = Properties()
-) : ScoreRenderingElement(), TemporalElement, HighlightableElement, ElementCanBeInBeamGroup,
-    ElementWithProperties by properties {
-    private val positionedRenderingElementParents = mutableListOf<PositionedRenderingElementParent>()
-
-    private var stem: TranslatedRenderingElement? = null
-    private var stemHeight = DEFAULT_STEM_HEIGHT
-
-    private var internalShiftX = 0.0
-    private var internalShiftY = 0.0
-
-    private val highlightElements = mutableSetOf<String>()
-
+    context: Context,
+) : AbstractNoteElement(context) {
     override val id: String = noteGroup.id
 
     // TODO Handle duration on note level
     override var duration: Duration = noteGroup.notes.first().duration
 
     private val logger = KotlinLogging.logger {}
-
-
-    override fun toRenderingElement(): List<PositionedRenderingElementParent> {
-        return positionedRenderingElementParents + stem.let { if (it == null) emptyList() else listOf(it) }
-    }
 
 
     private fun addExtraBarLines(noteSymbol: NoteSymbol) =
@@ -65,7 +48,7 @@ class NoteGroupElement(
                     Accidental.SHARP,
                     noteHeadTranslation
                 ).also { accidentals.add(it) }
-                    .also { positionedRenderingElementParents.add(it) }
+                    .also { positionedRenderingElements.add(it) }
             }
 
             val glyphData = getNoteHeadGlyph(duration)
@@ -76,17 +59,9 @@ class NoteGroupElement(
                 duration.name,
                 true
             ).also {
-                positionedRenderingElementParents.add(it)
+                positionedRenderingElements.add(it)
                 highlightElements.add(it.id)
             }
-
-//            if (yLowestPosition > yPositionForNoteHead) {
-//                yLowestPosition = yPositionForNoteHead
-//            }
-//
-//            if (yHighestPosition < yPositionForNoteHead) {
-//                yHighestPosition = yPositionForNoteHead
-//            }
         }
 
         handleOverlappingAccidentals(accidentals)
@@ -95,7 +70,7 @@ class NoteGroupElement(
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
             addExtraBarLines(noteSymbol)?.let {
-                positionedRenderingElementParents.addAll(it.toRenderingElement())
+                positionedRenderingElements.addAll(it.toRenderingElement())
             }
         }
 
@@ -103,7 +78,7 @@ class NoteGroupElement(
             getPitch(a.noteType, a.octave).compareTo(getPitch(b.noteType, b.octave))
         }?.let { noteSymbol ->
             addExtraBarLines(noteSymbol)?.let {
-                positionedRenderingElementParents.addAll(it.toRenderingElement())
+                positionedRenderingElements.addAll(it.toRenderingElement())
             }
         }
 
@@ -137,11 +112,11 @@ class NoteGroupElement(
                     // TODO Need to take x-coordinates into consideration too it is not necessary to move all sharps that overlap on the y-axis
                     if (positionedBoundingBox.yMin < positionedBoundingBoxNext.yMax) {
                         val accidental = positionedBoundingBoxAccidentalMap[positionedBoundingBoxNext]
+                        val indexAccidental = positionedRenderingElements.indexOf(accidental)
 
-                        val indexAccidental = positionedRenderingElementParents.indexOf(accidental)
-                        positionedRenderingElementParents.removeAt(indexAccidental)
+                        positionedRenderingElements.removeAt(indexAccidental)
                         with(accidental as TranslatedRenderingElementUsingReference) {
-                            positionedRenderingElementParents.add(
+                            positionedRenderingElements.add(
                                 indexAccidental,
                                 copy(
                                     translation = Translation(
@@ -177,14 +152,6 @@ class NoteGroupElement(
     override fun getGlyphs(): Map<String, GlyphData> {
         val glyphsUsed = mutableMapOf<String, GlyphData>()
 
-//        if (requiresStem()) {
-//            // Use the bounding box for the note head of a half note to determine
-//            // how far to move the stem so that it is on the right side of the note head
-//            val stem = addStem(getNoteHeadGlyph(Duration.HALF).boundingBox)
-//
-//            glyphsUsed[STEM_UP] = GlyphData(STEM_UP, stem.pathElements, findBoundingBox(stem.pathElements))
-//        }
-
         if (sharpInUse()) {
             glyphsUsed.put(Accidental.SHARP.name, getAccidentalGlyph(Accidental.SHARP))
         }
@@ -205,14 +172,6 @@ class NoteGroupElement(
         noteRequiresSharp(it.noteType)
     }.any { it }
 
-
-    override fun getStem(): TranslatedRenderingElement? {
-        return stem
-    }
-
-    override fun getStemHeight(): Double {
-        return stemHeight
-    }
 
     override fun updateStemHeight(stemHeight: Double) {
         this.stemHeight = stemHeight
@@ -256,6 +215,10 @@ class NoteGroupElement(
         return highlightElements
     }
 
+    override fun getTieCoordinates(top: Boolean): Pair<Double, Double> {
+        TODO("Not yet implemented")
+    }
+
     override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
         val stemHeight = when (noteGroup.stem) {
             Stem.UP -> -stemHeight
@@ -267,13 +230,6 @@ class NoteGroupElement(
 
         return Pair(xCoord, yCoord)
     }
-
-    private fun getTranslationX() = (translation?.xShift ?: 0.0) + internalShiftX
-
-    private fun getTranslationY() = (translation?.yShift ?: 0.0) + internalShiftY
-
-    private fun getTranslations() = Translation(getTranslationX(), getTranslationY())
-
 
     override fun getVerticalOffsetForStemStart(): Double {
         return noteGroup.notes.maxOfOrNull { note ->
