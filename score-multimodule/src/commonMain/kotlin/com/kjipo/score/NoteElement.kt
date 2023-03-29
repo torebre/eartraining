@@ -83,34 +83,17 @@ class NoteElement(
 
 
     private fun addEightNoteFlag(): TranslatedRenderingElementUsingReference {
-        return if (isStemUp()) {
-            val flagGlyph = getFlagGlyph(Duration.EIGHT, true)
+        val flagGlyph = getFlagGlyph(Duration.EIGHT, isStemUp())
+        val shiftX = getTranslationX() + getXTranslateForStem()
+        val shiftY = getTranslationY() + getStemHeight() * if(isStemUp()) -1 else 1
 
-            PositionedRenderingElement.create(
-                flagGlyph.boundingBox,
-                "$id-flag",
-                getTranslations().let {
-                    Translation(it.xShift - 30, it.yShift)
-                },
-                flagGlyph.name,
-                false
-            )
-
-        } else {
-            val flagGlyph = getFlagGlyph(Duration.EIGHT, false)
-
-            PositionedRenderingElement.create(
-                flagGlyph.boundingBox,
-                "$id-flag",
-                getTranslations().let {
-                    Translation(it.xShift - 30, it.yShift)
-                },
-                flagGlyph.name,
-                false
-            )
-
-        }
-
+        return PositionedRenderingElement.create(
+            flagGlyph.boundingBox,
+            "$id-flag",
+            Translation(shiftX, shiftY),
+            flagGlyph.name,
+            false
+        )
     }
 
     private fun setupNoteHeadAndExtraBarLines(noteHeadGlyph: GlyphData) {
@@ -226,7 +209,6 @@ class NoteElement(
         return glyphsUsed
     }
 
-    override fun getIdsOfHighlightElements() = highlightElements
     override fun getTieCoordinates(top: Boolean): Pair<Double, Double> {
         val tieCoordinates = getTieCoordinatesInternal(top)
         if (tieCoordinates == null) {

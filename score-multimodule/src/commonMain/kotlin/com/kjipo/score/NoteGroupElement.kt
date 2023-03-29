@@ -211,10 +211,6 @@ class NoteGroupElement(
 
     private fun getLeftEdgeOfNoteHeadGlyph() = getNoteHeadGlyph(duration).boundingBox.xMin
 
-    override fun getIdsOfHighlightElements(): Collection<String> {
-        return highlightElements
-    }
-
     override fun getTieCoordinates(top: Boolean): Pair<Double, Double> {
         TODO("Not yet implemented")
     }

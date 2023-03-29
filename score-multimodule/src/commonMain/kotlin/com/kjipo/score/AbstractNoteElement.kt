@@ -3,8 +3,10 @@ package com.kjipo.score
 /**
  * Collection of variables used by NoteElement and NoteGroupElement
  */
-abstract class AbstractNoteElement(protected val context: Context,
-                                   val properties: ElementWithProperties = Properties()):
+abstract class AbstractNoteElement(
+    protected val context: Context,
+    val properties: ElementWithProperties = Properties()
+) :
     ScoreRenderingElement(),
     TemporalElement,
     HighlightableElement,
@@ -25,10 +27,13 @@ abstract class AbstractNoteElement(protected val context: Context,
         return positionedRenderingElements + stem.let { if (it == null) emptyList() else listOf(it) }
     }
 
+    override fun getIdsOfHighlightElements() = highlightElements
+
     override fun getStem() = stem
 
     override fun getStemHeight(): Double {
         return stemHeight
     }
+
 
 }

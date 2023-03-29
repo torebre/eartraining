@@ -215,10 +215,10 @@ private fun showBeamIncludingChords() {
 
 fun main() {
 //showTie()
-//    showBeam()
+    showBeam()
 //showNoteGroupWithSharp()
 //    showNotes()
 //    showChordWithTwoSharps()
 //    showTieAcrossBars()
-    showBeamIncludingChords()
+//    showBeamIncludingChords()
 }
