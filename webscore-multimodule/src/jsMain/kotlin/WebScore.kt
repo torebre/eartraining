@@ -106,11 +106,10 @@ class WebScore(
 
     fun highlight(id: String, removeExistingHighlight: Boolean = true): Boolean {
         webscoreSvgProvider.getHighlightForId(id).let { elementsToHighlight ->
-
-
             if (elementsToHighlight.isEmpty()) {
                 return false
             }
+
             if (removeExistingHighlight) {
                 currentlyHighlightedElement?.let {
                     removeHighlight(it)

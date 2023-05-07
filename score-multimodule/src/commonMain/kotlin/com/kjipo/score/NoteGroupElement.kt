@@ -83,7 +83,7 @@ class NoteGroupElement(
         }
 
         if (noteGroup.stem != Stem.NONE) {
-            stem = addStem()
+            translatedStemElement = addStem()
         }
 
     }
@@ -174,8 +174,8 @@ class NoteGroupElement(
 
 
     override fun updateStemHeight(stemHeight: Double) {
-        this.stemHeight = stemHeight
-        stem = addStem()
+        this.stemHeightInternal = stemHeight
+        translatedStemElement = addStem()
     }
 
     override fun isStemUp(): Boolean {
@@ -194,7 +194,7 @@ class NoteGroupElement(
         return getStem(
             xCoordinate,
             getVerticalOffsetForStemStart(),
-            stemHeight,
+            stemHeightInternal,
             stemUp
         )
     }
@@ -217,8 +217,8 @@ class NoteGroupElement(
 
     override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
         val stemHeight = when (noteGroup.stem) {
-            Stem.UP -> -stemHeight
-            Stem.DOWN -> stemHeight
+            Stem.UP -> -stemHeightInternal
+            Stem.DOWN -> stemHeightInternal
             Stem.NONE -> return null
         }
         val xCoord = (translation?.xShift ?: 0.0) + getXTranslateForStem()

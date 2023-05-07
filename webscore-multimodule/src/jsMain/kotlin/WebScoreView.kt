@@ -7,8 +7,6 @@ class WebScoreView(
     private val webscoreSvgProvider: WebscoreSvgProvider,
     svgElementId: String = "score"
 ) {
-
-
     private var xStart = 0
     private var yStart = 0
 

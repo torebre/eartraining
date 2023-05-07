@@ -57,7 +57,7 @@ class NoteElement(
             positionedRenderingElements.add(setupAccidental(this))
         }
 
-        stem = calculateStem()
+        translatedStemElement = calculateStem()
         // TODO This is a bit brittle. Waiting to add the stem to the list of rendering elements until the list is requested. This is because the stem may change after the first layout calculations. Its height may change because of beams
 //        stem?.let { positionedRenderingElements.add(it) }
 
@@ -141,15 +141,15 @@ class NoteElement(
     }
 
     override fun updateStemHeight(stemHeight: Double) {
-        this.stemHeight = stemHeight
-        stem = calculateStem()
+        this.stemHeightInternal = stemHeight
+        translatedStemElement = calculateStem()
     }
 
     override fun getAbsoluteCoordinatesForEndpointOfStem(): Pair<Double, Double>? {
         val xCoord = getXTranslateForStem()
         val yCoord = when (note.stem) {
-            Stem.UP -> -stemHeight
-            Stem.DOWN -> stemHeight
+            Stem.UP -> -stemHeightInternal
+            Stem.DOWN -> stemHeightInternal
             Stem.NONE -> null
         }
 
@@ -167,13 +167,18 @@ class NoteElement(
         }
 
         val xTranslateForStem = getXTranslateForStem()
-        val stem = addStem(xTranslateForStem, 0.0, DEFAULT_STEM_WIDTH, stemHeight, note.stem != Stem.DOWN)
+        val stem = addStem(xTranslateForStem, 0.0, DEFAULT_STEM_WIDTH, stemHeightInternal, note.stem != Stem.DOWN)
 
         return TranslatedRenderingElement(
             listOf(stem),
             findBoundingBox(stem.pathElements), context.getAndIncrementStemCounter(),
             null, getTranslations()
-        )
+        ).also { stemElement ->
+            // Add element ID so that the stem is tied to the note element
+            properties.getProperty(ELEMENT_ID)?.let {
+                stemElement.properties[ELEMENT_ID] = it
+            }
+        }
     }
 
     /**

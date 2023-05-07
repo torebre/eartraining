@@ -50,13 +50,13 @@ object ScoreElementsTranslator {
             lastBarTrimmed = barsBeforeTrimming != score.bars.size
         }
 
-        logger.debug { "After trimming. Number of bars: ${score.bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
+//        logger.debug { "After trimming. Number of bars: ${score.bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
 
         if (!lastBarTrimmed) {
             fillInLastBar(score.bars, remainingTicksInBar, score)
         }
 
-        logger.debug { "After fill in. Number of bars: ${score.bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
+//        logger.debug { "After fill in. Number of bars: ${score.bars.size}. Remaining ticks in bar: $remainingTicksInBar" }
 
         return score
     }

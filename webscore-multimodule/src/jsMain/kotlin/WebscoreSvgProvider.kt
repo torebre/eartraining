@@ -40,7 +40,7 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
     ) {
         val elementToAddRenderingElementsTo = setupSvgGroupingElement(positionedRenderingElement, svgElement)
 
-//        logger.debug { "Rendering element with ID: ${positionedRenderingElement.id}" }
+//        logger.debug { "Rendering element with ID: ${positionedRenderingElement.id}. Element ID: ${positionedRenderingElement.properties[ELEMENT_ID]}" }
 
         positionedRenderingElement.properties[ELEMENT_ID]?.let { elementId ->
             if (elementIdGroupMap.contains(elementId)) {
@@ -77,7 +77,10 @@ class WebscoreSvgProvider(private val scoreHandler: ScoreProviderInterface) {
      * to be applied, instead of having to rerender the entire SVG.
      */
     fun updateSvg(renderingSequenceUpdate: RenderingSequenceUpdate, svgElement: Element) {
-        // TODO Need to look closer at the update logic. Right now it takes the ELEMENT_ID property, which links graphical elements to score elements, and removes the elements associated with it from the score, before adding the updated versions. It is not certain that this will work in all settings
+        // TODO Need to look closer at the update logic. Right now it takes the ELEMENT_ID property,
+        //  which links graphical elements to score elements, and removes the elements associated
+        //  with it from the score, before adding the updated versions. It is not certain that this
+        //  will work in all settings
         val scoreRenderingElementsAffected =
             renderingSequenceUpdate.renderGroupUpdates.map { it.value.properties[ELEMENT_ID] }.filterNotNull().toSet()
 
