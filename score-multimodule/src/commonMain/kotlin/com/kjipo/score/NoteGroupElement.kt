@@ -89,48 +89,68 @@ class NoteGroupElement(
     }
 
     private fun handleOverlappingAccidentals(accidentals: MutableList<TranslatedRenderingElementUsingReference>) {
-        if (accidentals.isNotEmpty()) {
-            val positionedBoundingBoxes = mutableListOf<BoundingBox>()
-            val positionedBoundingBoxAccidentalMap =
-                mutableMapOf<BoundingBox, PositionedRenderingElementParent>()
-            for (accidental in accidentals) {
-                val positionedBoundingBox = BoundingBox(
-                    accidental.translation.xShift + accidental.boundingBox.xMin,
-                    accidental.translation.yShift + accidental.boundingBox.yMin,
-                    accidental.translation.xShift + accidental.boundingBox.xMax,
-                    accidental.translation.yShift + accidental.boundingBox.yMax
-                )
-                positionedBoundingBoxes.add(positionedBoundingBox)
-                positionedBoundingBoxAccidentalMap[positionedBoundingBox] = accidental
-            }
+        if (accidentals.isEmpty()) {
+            return
+        }
 
-            positionedBoundingBoxes.sortBy { it.yMax }
-            for ((index, positionedBoundingBox) in positionedBoundingBoxes.withIndex()) {
-                if (index != positionedBoundingBoxes.size - 1) {
-                    val positionedBoundingBoxNext = positionedBoundingBoxes[index + 1]
+        for ((index, accidental) in accidentals.withIndex()) {
+            if (index != accidentals.size - 1) {
+                var tempAccidental = accidental
+                val positionedBoundingBoxNext = getPositionedBoundingBox(accidentals[index + 1])
+                var boxToMove = getPositionedBoundingBox(accidental)
 
-                    // TODO Need to take x-coordinates into consideration too it is not necessary to move all sharps that overlap on the y-axis
-                    if (positionedBoundingBox.yMin < positionedBoundingBoxNext.yMax) {
-                        val accidental = positionedBoundingBoxAccidentalMap[positionedBoundingBoxNext]
-                        val indexAccidental = positionedRenderingElements.indexOf(accidental)
-
-                        positionedRenderingElements.removeAt(indexAccidental)
-                        with(accidental as TranslatedRenderingElementUsingReference) {
-                            positionedRenderingElements.add(
-                                indexAccidental,
-                                copy(
-                                    translation = Translation(
-                                        accidental.translation.xShift - 50,
-                                        accidental.translation.yShift
-                                    )
-                                )
-                            )
-                        }
+                var counter = 0
+                // TODO Need a better way to place the accidentals
+                while (doBoundingBoxesOverlap(boxToMove, positionedBoundingBoxNext)) {
+                    counter += 1
+                    if (counter == 10) {
+                        // Give up on not having overlap
+                        break
                     }
+
+                    tempAccidental = replaceElementWithTranslatedCopy(index, tempAccidental, -5)
+                    boxToMove = getPositionedBoundingBox(tempAccidental)
                 }
+
             }
         }
     }
+
+    private fun replaceElementWithTranslatedCopy(
+        indexAccidental: Int,
+        accidental: PositionedRenderingElementParent,
+        xTranslation: Int = -50
+    ): TranslatedRenderingElementUsingReference {
+        positionedRenderingElements.removeAt(indexAccidental)
+
+        // TODO For some reason it did not work to return a value from inside a with-block. Got undefined in the Javascript then
+        val tempAccidental = accidental as TranslatedRenderingElementUsingReference
+        val movedElement = tempAccidental.copy(
+            translation = Translation(
+                accidental.translation.xShift + xTranslation,
+                accidental.translation.yShift
+            )
+        ).also {
+            positionedRenderingElements.add(indexAccidental, it)
+        }
+        return movedElement
+    }
+
+    private fun getPositionedBoundingBox(accidental: TranslatedRenderingElementUsingReference) = BoundingBox(
+        accidental.translation.xShift + accidental.boundingBox.xMin,
+        accidental.translation.yShift + accidental.boundingBox.yMin,
+        accidental.translation.xShift + accidental.boundingBox.xMax,
+        accidental.translation.yShift + accidental.boundingBox.yMax
+    )
+
+
+    private fun doBoundingBoxesOverlap(boundingBox: BoundingBox, boundingBox2: BoundingBox): Boolean {
+        return boundingBox2.isPointInsideBoundingBox(boundingBox.xMin, boundingBox.yMin) ||
+                boundingBox2.isPointInsideBoundingBox(boundingBox.xMin, boundingBox.yMax) ||
+                boundingBox2.isPointInsideBoundingBox(boundingBox.xMax, boundingBox.yMin) ||
+                boundingBox2.isPointInsideBoundingBox(boundingBox.xMax, boundingBox.yMax)
+    }
+
 
     private fun getStem(
         xCoordinate: Double,

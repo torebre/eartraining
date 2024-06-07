@@ -6,6 +6,7 @@ import kotlin.math.absoluteValue
 
 @Serializable
 data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val yMax: Double) {
+
     fun height(): Double {
         return yMax.minus(yMin).absoluteValue
     }
@@ -14,6 +15,9 @@ data class BoundingBox(val xMin: Double, val yMin: Double, val xMax: Double, val
         return xMax.minus(xMin).absoluteValue
     }
 
+    fun isPointInsideBoundingBox(xCoordinate: Double, yCoordinate: Double): Boolean {
+        return xCoordinate >= xMin && xCoordinate <= xMax && yCoordinate >= yMin && yCoordinate <= yMax
+    }
 
 }
 
