@@ -5,12 +5,10 @@ import com.kjipo.scoregenerator.ELEMENT_ID
 import com.kjipo.scoregenerator.ReducedScore
 import com.kjipo.scoregenerator.SimpleNoteSequence
 import kotlinx.browser.document
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
-import mu.KotlinLogging
+import org.w3c.dom.events.KeyboardEvent
 
 object WebScoreApp {
 
@@ -19,6 +17,10 @@ object WebScoreApp {
     private val webscoreListener: WebscoreListener = object : WebscoreListener {
 
         override fun noteInputMode(noteInputMode: Boolean) {
+            if(!noteInputMode) {
+                updateAllowedInputText(NoteInput.NoteInputStep.None)
+            }
+
             setTextForChildNode(
                 "#inputMode", if (noteInputMode) {
                     "Note input on"
@@ -38,18 +40,19 @@ object WebScoreApp {
             )
         }
 
-        override fun currentStep(currentStep: NoteInput.NoteInputStep?) {
+        override fun currentStep(currentStep: NoteInput.NoteInputStep) {
+            updateAllowedInputText(currentStep)
+        }
+
+
+        private fun updateAllowedInputText(currentStep: NoteInput.NoteInputStep) {
             setTextForChildNode(
-                "#currentStep", currentStep?.name ?: "None"
+                "#currentStep", currentStep.name
             )
             setAllowedInputText(currentStep)
         }
 
-        private fun setAllowedInputText(currentStep: NoteInput.NoteInputStep?) {
-            logger.debug {
-                "Current step: $currentStep"
-            }
-
+        private fun setAllowedInputText(currentStep: NoteInput.NoteInputStep) {
             val helperText = when (currentStep) {
                 NoteInput.NoteInputStep.Duration -> {
                     "1, 2, 3, 4"
@@ -63,8 +66,8 @@ object WebScoreApp {
                 NoteInput.NoteInputStep.Octave -> {
                     "1 to 12"
                 }
-                null -> {
-                    ""
+                NoteInput.NoteInputStep.None -> {
+                   "None"
                 }
             }
             setTextForChildNode("#allowedInput", helperText)
@@ -79,16 +82,22 @@ object WebScoreApp {
         webscoreShow.createInputScore()
         webscoreShow.inputScore?.addListener(webscoreListener)
 
-        document.querySelector("#playTarget")!!.addEventListener("click", {
-            GlobalScope.launch(Dispatchers.Default) {
-                webscoreShow.playSequence()
+        document.addEventListener("keydown", { event ->
+            val keyboardEvent = event as KeyboardEvent
+
+            when(keyboardEvent.code) {
+                "KeyP" -> webscoreShow.playInputSequence()
+                "KeyT" -> webscoreShow.playTargetSequence()
             }
+
+        })
+
+        document.querySelector("#playTarget")!!.addEventListener("click", {
+            webscoreShow.playTargetSequence()
         })
 
         document.querySelector("#playInput")!!.addEventListener("click", {
-            GlobalScope.launch(Dispatchers.Default) {
-                webscoreShow.playInputSequence()
-            }
+            webscoreShow.playInputSequence()
         })
 
         document.querySelector("btnSubmit")?.addEventListener("click", {
@@ -96,6 +105,7 @@ object WebScoreApp {
         })
 
     }
+
 
     private fun setTextForChildNode(idSelector: String, textContent: String) {
         document.querySelector(idSelector)?.let { element ->

@@ -175,7 +175,6 @@ class WebScore(
             logger.debug { "Note input mode: $noteInputMode" }
 
             handleKeyEvent(keyboardEvent)
-
         })
     }
 
@@ -456,7 +455,7 @@ class WebScore(
 
     }
 
-    override fun currentStep(currentStep: NoteInput.NoteInputStep?) {
+    override fun currentStep(currentStep: NoteInput.NoteInputStep) {
         webscoreListeners.forEach { it.currentStep(currentStep) }
     }
 

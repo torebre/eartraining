@@ -2,6 +2,9 @@ import com.kjipo.score.NoteSequenceElement
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.ReducedScore
 import com.kjipo.submithandling.SubmitHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
 /**
@@ -43,12 +46,24 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
         submitHandler.getCurrentExercise()?.submit(attempt)
     }
 
-    suspend fun playSequence() {
-        playSequenceInternal(targetSequenceGenerator.getActionSequenceScript(), webScore, midiInterface)
+    private suspend fun playTargetSequenceInternal() {
+        playTargetSequenceInternal(targetSequenceGenerator.getActionSequenceScript(), webScore, midiInterface)
     }
 
-    suspend fun playInputSequence() {
-        playSequenceInternal(inputSequenceGenerator.getActionSequenceScript(), inputScore, midiInterface)
+    private suspend fun playInputSequenceInternal() {
+        playTargetSequenceInternal(inputSequenceGenerator.getActionSequenceScript(), inputScore, midiInterface)
+    }
+
+    fun playInputSequence() {
+        GlobalScope.launch(Dispatchers.Default) {
+           playInputSequenceInternal()
+        }
+    }
+
+    fun playTargetSequence() {
+        GlobalScope.launch(Dispatchers.Default) {
+            playTargetSequenceInternal()
+        }
     }
 
 }

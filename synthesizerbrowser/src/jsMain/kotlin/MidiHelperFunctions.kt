@@ -4,7 +4,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 
 
-internal suspend fun playSequenceInternal(actionScript: ActionScript, webScore: WebScore?, midiInterface: MidiPlayerInterface) {
+internal suspend fun playTargetSequenceInternal(actionScript: ActionScript, webScore: WebScore?, midiInterface: MidiPlayerInterface) {
     val activePitches = mutableSetOf<Int>()
     actionScript.timeEventList.forEach {
         val sleepTime = it.first

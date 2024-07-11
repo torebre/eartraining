@@ -12,7 +12,8 @@ class NoteInput(private val scoreHandler: ScoreHandlerJavaScript) {
         Duration,
         Note,
         Modifier,
-        Octave
+        Octave,
+        None
     }
 
     private enum class Modifier {
@@ -98,6 +99,11 @@ class NoteInput(private val scoreHandler: ScoreHandlerJavaScript) {
                 keyboardEvent.key.toIntOrNull()?.let { octave ->
                     jumpToOctaveInput(octave)
                 }
+            }
+
+            NoteInputStep.None -> {
+                // Note input mode is off, no need to do anything
+
             }
         }
 
