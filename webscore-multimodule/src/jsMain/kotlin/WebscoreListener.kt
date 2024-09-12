@@ -1,12 +1,5 @@
-interface WebscoreListener: NoteInputListener {
+interface WebscoreListener : NoteInputListener {
 
-    fun noteInputMode(noteInputMode: Boolean) {
-        // Do nothing
-    }
-
-    fun noteInputNotRest(noteInput: Boolean) {
-        // Do nothing
-    }
-
+    fun noteInputMode(webscoreInputMode: WebscoreInputMode)
 
 }

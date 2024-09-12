@@ -23,7 +23,7 @@ class WebScore(
 
     private val webscoreListeners = mutableListOf<WebscoreListener>()
 
-    var activeElement: String? = null
+    private var activeElement: String? = null
 
     private var xStart = 0
     private var yStart = 0
@@ -34,10 +34,7 @@ class WebScore(
 
     private var currentlyHighlightedElement: String? = null
 
-    private var insertNoteNotRest = true
-        get() = field
-
-    private var noteInputMode = false
+    private var noteInputMode: WebscoreInputMode = WebscoreInputMode.MOVE
 
     private var mouseEventLastFired: Long = 0
 
@@ -93,8 +90,6 @@ class WebScore(
         if (activeElement == null) {
             activeElement = scoreHandler.getIdOfFirstSelectableElement()
         }
-
-        logger.debug { "Updating latest ID: $latestId" }
 
         latestId = scoreHandler.getLatestId()
         highlightElement(activeElement)
@@ -170,10 +165,6 @@ class WebScore(
 
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
-
-            logger.debug { "Key pressed: ${keyboardEvent.keyCode}. Code: ${keyboardEvent.code}. Key: ${keyboardEvent.key}" }
-            logger.debug { "Note input mode: $noteInputMode" }
-
             handleKeyEvent(keyboardEvent)
         })
     }
@@ -343,47 +334,80 @@ class WebScore(
 
         when (keyboardEvent.code) {
             "KeyM" -> {
-                insertNoteNotRest = !insertNoteNotRest
-                noteInput.insertNoteNotRest(insertNoteNotRest)
-                webscoreListeners.forEach { it.noteInputNotRest(insertNoteNotRest) }
+                noteInput.clear()
+                if (noteInputMode != WebscoreInputMode.MOVE) {
+                    noteInputMode = WebscoreInputMode.MOVE
+                    webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
+                }
             }
 
             "KeyN" -> {
-                if(noteInputMode) {
-                    noteInput.clear()
+                noteInput.clear()
+                noteInput.insertNoteNotRest(true)
+                if (noteInputMode != WebscoreInputMode.NOTE) {
+                    noteInputMode = WebscoreInputMode.NOTE
+                    webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
                 }
-                noteInputMode = !noteInputMode
-                webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
+            }
+
+            "KeyR" -> {
+                noteInput.clear()
+                noteInput.insertNoteNotRest(false)
+                if (noteInputMode != WebscoreInputMode.REST) {
+                    noteInputMode = WebscoreInputMode.REST
+                    webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
+                }
+            }
+
+            "KeyE" -> {
+                noteInput.clear()
+                if (noteInputMode != WebscoreInputMode.EDIT) {
+                    noteInputMode = WebscoreInputMode.EDIT
+                    webscoreListeners.forEach { it.noteInputMode(noteInputMode) }
+                }
+
             }
 
             else -> {
-                if (noteInputMode) {
-                    noteInput.processInput(keyboardEvent)
-                } else {
-                    processNotNoteInputModeKey(keyboardEvent.code)
+                when (noteInputMode) {
+                    WebscoreInputMode.NOTE, WebscoreInputMode.REST -> {
+                        noteInput.processInput(keyboardEvent)
+                    }
+
+                    WebscoreInputMode.MOVE -> {
+                        processMoveCommand(keyboardEvent.code)
+                    }
+
+                    WebscoreInputMode.EDIT -> {
+                        processEditModeCommand(keyboardEvent.code)
+                    }
                 }
             }
         }
     }
 
-    private fun processNotNoteInputModeKey(code: String) {
+    private fun processMoveCommand(code: String) {
         when (code) {
-            "ArrowUp" -> activeElement?.let {
-                scoreHandler.moveNoteOneStep(it, true)
-            }
-
-            "ArrowDown" -> activeElement?.let {
-                scoreHandler.moveNoteOneStep(it, false)
-            }
-
-            "ArrowLeft" -> {
+            "KeyH" -> {
                 activeElement = scoreHandler.getNeighbouringElement(activeElement, true)
                 highlightElement(activeElement)
             }
 
-            "ArrowRight" -> {
+            "KeyL" -> {
                 activeElement = scoreHandler.getNeighbouringElement(activeElement, false)
                 highlightElement(activeElement)
+            }
+        }
+    }
+
+    private fun processEditModeCommand(code: String) {
+        when (code) {
+            "KeyK" -> activeElement?.let {
+                scoreHandler.moveNoteOneStep(it, true)
+            }
+
+            "KeyJ" -> activeElement?.let {
+                scoreHandler.moveNoteOneStep(it, false)
             }
 
             "Delete" -> {

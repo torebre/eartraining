@@ -5,73 +5,114 @@ import com.kjipo.scoregenerator.ELEMENT_ID
 import com.kjipo.scoregenerator.ReducedScore
 import com.kjipo.scoregenerator.SimpleNoteSequence
 import kotlinx.browser.document
-import mu.KotlinLogging
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
+import mu.KotlinLogging
 import org.w3c.dom.events.KeyboardEvent
 
 object WebScoreApp {
 
     private val logger = KotlinLogging.logger {}
 
+    private var currentMode = WebscoreInputMode.MOVE
+
     private val webscoreListener: WebscoreListener = object : WebscoreListener {
 
-        override fun noteInputMode(noteInputMode: Boolean) {
-            if(!noteInputMode) {
-                updateAllowedInputText(NoteInput.NoteInputStep.None)
+        override fun noteInputMode(webscoreInputMode: WebscoreInputMode) {
+            if (currentMode != webscoreInputMode) {
+                var inputModeText = ""
+                when (webscoreInputMode) {
+                    WebscoreInputMode.NOTE -> {
+                        inputModeText = "Note input"
+                    }
+
+                    WebscoreInputMode.REST -> {
+                        inputModeText = "Rest input"
+                    }
+
+                    WebscoreInputMode.MOVE -> {
+                        inputModeText = "Move"
+                    }
+
+                    WebscoreInputMode.EDIT -> {
+                        inputModeText = "Edit element"
+                    }
+                }
+                setTextForChildNode("#inputMode", inputModeText)
+                setAllowedInputText(webscoreInputMode)
             }
-
-            setTextForChildNode(
-                "#inputMode", if (noteInputMode) {
-                    "Note input on"
-                } else {
-                    "Note input off"
-                }
-            )
+            currentMode = webscoreInputMode
         }
 
-        override fun noteInputNotRest(noteInput: Boolean) {
+        override fun currentStep(currentStep: NoteInput.NoteInputStep?) {
             setTextForChildNode(
-                "#noteOrRestInput", if (noteInput) {
-                    "Note input"
-                } else {
-                    "Rest input"
-                }
-            )
-        }
-
-        override fun currentStep(currentStep: NoteInput.NoteInputStep) {
-            updateAllowedInputText(currentStep)
-        }
-
-
-        private fun updateAllowedInputText(currentStep: NoteInput.NoteInputStep) {
-            setTextForChildNode(
-                "#currentStep", currentStep.name
+                "#currentStep", currentStep?.name ?: "None"
             )
             setAllowedInputText(currentStep)
         }
 
-        private fun setAllowedInputText(currentStep: NoteInput.NoteInputStep) {
-            val helperText = when (currentStep) {
+        private fun setAllowedInputText(webscoreInputMode: WebscoreInputMode) {
+            when (webscoreInputMode) {
+                WebscoreInputMode.MOVE -> {
+                    "H for left. L for right"
+                }
+
+                WebscoreInputMode.EDIT -> {
+                    "J for down. K for up"
+                }
+
+                WebscoreInputMode.NOTE, WebscoreInputMode.REST -> {
+                    null
+                }
+            }?.let { allowedInputText ->
+                setTextForAllowedInputNode(allowedInputText)
+            }
+        }
+
+        private fun setAllowedInputText(currentStep: NoteInput.NoteInputStep?) {
+            when (currentStep) {
                 NoteInput.NoteInputStep.Duration -> {
                     "1, 2, 3, 4"
                 }
+
                 NoteInput.NoteInputStep.Note -> {
                     "a, h, c, d, e, f, g"
                 }
+
                 NoteInput.NoteInputStep.Modifier -> {
                     "#"
                 }
+
                 NoteInput.NoteInputStep.Octave -> {
                     "1 to 12"
                 }
-                NoteInput.NoteInputStep.None -> {
-                   "None"
+
+                null -> {
+                    ""
                 }
+            }.let { helperText ->
+                setTextForAllowedInputNode(helperText)
             }
-            setTextForChildNode("#allowedInput", helperText)
         }
+    }
+
+    private fun setTextForAllowedInputNode(text: String) {
+        setTextForChildNode("#allowedInput", text)
+    }
+
+
+    private fun handleKeyEvent(event: KeyboardEvent) {
+        when (event.code) {
+            "KeyP" -> {
+                playInputSequence()
+            }
+
+            "KeyT" -> {
+                playTargetSequence()
+            }
+
+        }
+
     }
 
 
@@ -84,26 +125,28 @@ object WebScoreApp {
 
         document.addEventListener("keydown", { event ->
             val keyboardEvent = event as KeyboardEvent
-
-            when(keyboardEvent.code) {
-                "KeyP" -> webscoreShow.playInputSequence()
-                "KeyT" -> webscoreShow.playTargetSequence()
-            }
-
+            handleKeyEvent(keyboardEvent)
         })
 
         document.querySelector("#playTarget")!!.addEventListener("click", {
-            webscoreShow.playTargetSequence()
+            GlobalScope.launch(Dispatchers.Default) {
+                webscoreShow.playSequence()
+            }
         })
 
-        document.querySelector("#playInput")!!.addEventListener("click", {
-            webscoreShow.playInputSequence()
-        })
 
-        document.querySelector("btnSubmit")?.addEventListener("click", {
-            webscoreShow.submit()
-        })
 
+        private fun playTargetSequence() {
+            GlobalScope.launch(Dispatchers.Default) {
+                webscoreShow.playSequence()
+            }
+        }
+
+        private fun playInputSequence() {
+            GlobalScope.launch(Dispatchers.Default) {
+                webscoreShow.playInputSequence()
+            }
+        }
     }
 
 
@@ -117,41 +160,9 @@ object WebScoreApp {
 
 }
 
-//fun showScaleTest() {
-//    val synthesizer = SynthesizerScript()
-//    val noteSequence =
-//        SimpleNoteSequence(NoteType.values().leftShift(3).map { NoteSequenceElement.NoteElement(it, 5, Duration.QUARTER) }.toList())
-//    val sequenceGenerator = SequenceGenerator()
-//
-//    sequenceGenerator.loadSimpleNoteSequence(noteSequence)
-//    val webScore = WebScore(ScoreHandlerJavaScript(sequenceGenerator), "scaleTest", false)
-//
-//    document.querySelector("#playScaleTest")!!.addEventListener("click", {
-//        GlobalScope.launch(Dispatchers.Default) {
-//            playSequenceInternal(sequenceGenerator.getActionSequenceScript(), webScore, synthesizer)
-//        }
-//    })
-//
-//}
-
-fun showScaleTest() {
-    var idCounter = 0
-    val noteSequence: MutableList<NoteSequenceElement> =
-        NoteType.values().leftShift(3)
-            .map {
-                val elementId = (++idCounter).toString()
-                NoteSequenceElement.NoteElement(elementId, it, 5, Duration.QUARTER, mapOf(Pair(ELEMENT_ID, elementId)))
-            }
-            .toMutableList()
-
-    val splitScoreHandler = ReducedScore().also { it.loadSimpleNoteSequence(SimpleNoteSequence(noteSequence)) }
-    WebScore(ScoreHandlerJavaScript(splitScoreHandler), "scaleTest", false)
-}
-
 
 fun main() {
     KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
 
     WebScoreApp.showWebscore()
-//    showScaleTest()
 }
