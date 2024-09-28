@@ -17,25 +17,31 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     private var targetSequenceGenerator = ReducedScore()
     private var inputSequenceGenerator = ReducedScore()
     private var webScore: WebScore? = null
-    internal var inputScore: WebScore? = null
+    private var inputScore: WebScore? = null
 
     private val submitHandler = SubmitHandler()
 
     private val logger = KotlinLogging.logger {}
 
-    fun createSequence() {
+
+    fun createSequence(webscoreListener: WebscoreListener) {
         targetSequenceGenerator = ReducedScore()
         polyphonicNoteSequenceGenerator.createSequence().apply {
             targetSequenceGenerator.loadSimpleNoteSequence(this)
             submitHandler.setupExercise(elements)
         }
+        createInputScore().addListener(webscoreListener)
 
         webScore = WebScore(ScoreHandlerJavaScript(targetSequenceGenerator), "targetScore", false)
     }
 
-    fun createInputScore() {
+    private fun createInputScore(): WebScore {
         inputSequenceGenerator = ReducedScore()
-        inputScore = WebScore(ScoreHandlerJavaScript(inputSequenceGenerator), "inputScore", true)
+        return WebScore(
+            ScoreHandlerJavaScript(inputSequenceGenerator),
+            "inputScore",
+            true
+        ).also { webScore -> inputScore = webScore }
     }
 
     fun submit() {
@@ -56,7 +62,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
     fun playInputSequence() {
         GlobalScope.launch(Dispatchers.Default) {
-           playInputSequenceInternal()
+            playInputSequenceInternal()
         }
     }
 
