@@ -1,13 +1,15 @@
+package com.kjipo.midi
+
 import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.ActionScript
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 
 
-internal suspend fun playTargetSequenceInternal(
+suspend fun playTargetSequenceInternal(
     actionScript: ActionScript,
-    highlightCallback: (ids: Collection<String>, hightlightOn: Boolean) -> Unit,
-    midiInterface: MidiPlayerInterface
+    midiInterface: MidiPlayerInterface,
+    highlightCallback: ((ids: Collection<String>, hightlightOn: Boolean) -> Unit)? = null
 ) {
     val activePitches = mutableSetOf<Int>()
     actionScript.timeEventList.forEach {
@@ -34,7 +36,7 @@ internal suspend fun playTargetSequenceInternal(
                     }
 
                     is Action.HighlightEvent -> {
-                        highlightCallback(action.ids, action.highlightOn)
+                        highlightCallback?.let { it(action.ids, action.highlightOn) }
 //                        webScore?.apply {
 //                            if (action.highlightOn) {
 //                                highlight(action.ids)

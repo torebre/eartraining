@@ -1,4 +1,4 @@
-
+package com.kjipo.midi
 
 
 class SoundFontSynthesizer: MidiPlayerInterface {

@@ -1,3 +1,5 @@
+package com.kjipo.midi
+
 import com.kjipo.scoregenerator.Pitch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay

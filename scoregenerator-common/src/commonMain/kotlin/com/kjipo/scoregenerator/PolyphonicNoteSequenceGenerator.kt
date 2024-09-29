@@ -10,13 +10,14 @@ import com.kjipo.score.NoteType
 import com.kjipo.score.TICKS_PER_QUARTER_NOTE
 import kotlin.random.Random
 
-class PolyphonicNoteSequenceGenerator {
-    private val startingOctave = 5
-    private val probabilityOfAddingInterval = 0.4
-    private val probabilityOfAddingThird = 0.6
 
+class PolyphonicNoteSequenceGenerator(
+    private val startingOctave: Int = 5,
+    private val probabilityOfAddingInterval: Double = 0.4,
+    private val probabilityOfAddingThird: Double = 0.6
+) {
 
-    fun createSequence(): SimpleNoteSequence {
+    fun createSequence(allowMultipleNotesAtSameTime: Boolean = true): SimpleNoteSequence {
         var timeRemaining = 4 * TICKS_PER_QUARTER_NOTE
 
         var currentNote = NoteType.values()[Random.nextInt(NoteType.values().size)]
@@ -54,7 +55,8 @@ class PolyphonicNoteSequenceGenerator {
                 timeRemaining -= duration.ticks
             }
 
-            if (Random.nextDouble() < probabilityOfAddingInterval) {
+
+            if (allowMultipleNotesAtSameTime && Random.nextDouble() < probabilityOfAddingInterval) {
                 val currentPitch = getPitch(currentNote, currentOctave)
                 val intervalNote = addInterval(currentPitch)
                 val multipleNotesElementId = (++idCounter).toString()
@@ -168,6 +170,7 @@ class PolyphonicNoteSequenceGenerator {
                         }
                         idAsInteger++
                     }
+
                     is NoteSequenceElement.MultipleNotesElement -> {
                         val duration = noteEvent.elements.first().duration
                         val noteOn = timeCounter
@@ -214,6 +217,7 @@ class PolyphonicNoteSequenceGenerator {
                         }
 
                     }
+
                     is NoteSequenceElement.RestElement -> {
                         timeCounter += getDurationInMilliseconds(noteEvent.duration)
                     }

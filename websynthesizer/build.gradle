@@ -10,11 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
-//    implementation(npm("@types/webaudioapi", "0.0.27"))
-    implementation project(":websynthesizer")
     implementation project(":scoregenerator-common")
-    implementation(npm("essentia.js", "0.1.3"))
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.2'
     implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
     testImplementation "org.jetbrains.kotlin:kotlin-test-js"

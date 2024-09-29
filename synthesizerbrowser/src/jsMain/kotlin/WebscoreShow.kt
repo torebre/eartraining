@@ -53,11 +53,23 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     }
 
     private suspend fun playTargetSequenceInternal() {
-        playTargetSequenceInternal(targetSequenceGenerator.getActionSequenceScript(), webScore, midiInterface)
+        playTargetSequenceInternal(targetSequenceGenerator.getActionSequenceScript(), { ids, highlightOn ->
+            if (highlightOn) {
+                webScore?.highlight(ids)
+            } else {
+                webScore?.removeHighlight(ids)
+            }
+        }, midiInterface)
     }
 
     private suspend fun playInputSequenceInternal() {
-        playTargetSequenceInternal(inputSequenceGenerator.getActionSequenceScript(), inputScore, midiInterface)
+        playTargetSequenceInternal(inputSequenceGenerator.getActionSequenceScript(), { ids, highlightOn ->
+            if (highlightOn) {
+                inputScore?.highlight(ids)
+            } else {
+                inputScore?.removeHighlight(ids)
+            }
+        }, midiInterface)
     }
 
     fun playInputSequence() {
