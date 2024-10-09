@@ -55,7 +55,6 @@ class PolyphonicNoteSequenceGenerator(
                 timeRemaining -= duration.ticks
             }
 
-
             if (allowMultipleNotesAtSameTime && Random.nextDouble() < probabilityOfAddingInterval) {
                 val currentPitch = getPitch(currentNote, currentOctave)
                 val intervalNote = addInterval(currentPitch)

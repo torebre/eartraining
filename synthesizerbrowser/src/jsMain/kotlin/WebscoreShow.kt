@@ -26,7 +26,7 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
 
     fun createSequence(webscoreListener: WebscoreListener) {
         targetSequenceGenerator = ReducedScore()
-        polyphonicNoteSequenceGenerator.createSequence().apply {
+        polyphonicNoteSequenceGenerator.createSequence(false).apply {
             targetSequenceGenerator.loadSimpleNoteSequence(this)
             submitHandler.setupExercise(elements)
         }

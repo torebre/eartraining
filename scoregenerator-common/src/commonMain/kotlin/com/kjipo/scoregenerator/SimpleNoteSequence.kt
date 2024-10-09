@@ -35,6 +35,10 @@ class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
         return pitchSequence
     }
 
+    override fun toString(): String {
+        return "SimpleNoteSequence(elements=$elements)"
+    }
+
 
     companion object {
 

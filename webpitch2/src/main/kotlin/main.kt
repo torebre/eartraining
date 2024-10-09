@@ -1,5 +1,6 @@
 import com.kjipo.midi.SynthesizerScript
 import com.kjipo.midi.playTargetSequenceInternal
+import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.actionScript
 import com.kjipo.scoregenerator.computePitchSequence
@@ -18,6 +19,15 @@ object WebPitchApp {
 
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
 
+    private val synthesizer = SynthesizerScript()
+    private var currentSequence = polyphonicNoteSequenceGenerator.createSequence(false)
+    private var actionSequence: MutableList<Action>
+
+    init {
+        val (_, actionSequence) = computePitchSequence(currentSequence.elements)
+        this.actionSequence = actionSequence
+    }
+
     private var isRecording = false
 
     private val logger = KotlinLogging.logger {}
@@ -25,7 +35,7 @@ object WebPitchApp {
 
     fun start() {
         setupPlayButton()
-
+        setupGenerateSequenceButton()
 
         // TODO Why does it not work when PitchDetection is a class?
         var pitchDetection: PitchDetection? = null
@@ -77,13 +87,14 @@ object WebPitchApp {
 
 
     private fun setupPlayButton() {
-        val synthesizer = SynthesizerScript()
-        val simpleNoteSequence = polyphonicNoteSequenceGenerator.createSequence(false)
-        val (_, actionSequence) = computePitchSequence(simpleNoteSequence.elements)
         val playButton = document.querySelector("#btnPlay")
 
         if (playButton != null) {
             playButton.addEventListener("click", {
+
+//                logger.info { "Current sequence: $currentSequence" }
+//                logger.info { "Pitch sequence: $actionSequence" }
+
                 GlobalScope.launch(Dispatchers.Default) {
                     playTargetSequenceInternal(actionScript(actionSequence), synthesizer)
                 }
@@ -91,6 +102,18 @@ object WebPitchApp {
         } else {
             logger.error { "Play button is null" }
         }
+    }
+
+
+    private fun setupGenerateSequenceButton() {
+        document.querySelector("#btnGenerateSequence")?.let { generateSequenceButton ->
+            generateSequenceButton.addEventListener("click", {
+                currentSequence = polyphonicNoteSequenceGenerator.createSequence(false)
+                val (_, actionSequence) = computePitchSequence(currentSequence.elements)
+                this.actionSequence = actionSequence
+            })
+        }
+
     }
 
     private fun setTextForChildNode(idSelector: String, textContent: String) {
@@ -102,8 +125,6 @@ object WebPitchApp {
     }
 
 }
-
-
 
 
 fun main() {

@@ -4,6 +4,11 @@ import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.ActionScript
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import mu.KotlinLogging
+import kotlin.js.Date
+
+
+private val logger = KotlinLogging.logger {}
 
 
 suspend fun playTargetSequenceInternal(
@@ -23,14 +28,17 @@ suspend fun playTargetSequenceInternal(
                 when (action) {
                     is Action.PitchEvent -> {
                         if (action.noteOn) {
-                            action.pitches.forEach {
-                                activePitches.add(it)
-                                midiInterface.noteOn(it)
+
+//                            logger.info { "Pitch on: ${action.pitches}. Time: ${Date.now()}" }
+
+                            action.pitches.forEach { pitch ->
+                                activePitches.add(pitch)
+                                midiInterface.noteOn(pitch)
                             }
                         } else {
-                            action.pitches.forEach {
-                                activePitches.remove(it)
-                                midiInterface.noteOff(it)
+                            action.pitches.forEach { pitch ->
+                                activePitches.remove(pitch)
+                                midiInterface.noteOff(pitch)
                             }
                         }
                     }
