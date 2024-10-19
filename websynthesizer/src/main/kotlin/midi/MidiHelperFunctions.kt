@@ -5,13 +5,12 @@ import com.kjipo.scoregenerator.ActionScript
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
-import kotlin.js.Date
 
 
 private val logger = KotlinLogging.logger {}
 
 
-suspend fun playTargetSequenceInternal(
+suspend fun playTargetSequenceInternal2(
     actionScript: ActionScript,
     midiInterface: MidiPlayerInterface,
     highlightCallback: ((ids: Collection<String>, hightlightOn: Boolean) -> Unit)? = null

@@ -1,3 +1,5 @@
+import com.kjipo.midi.MidiPlayerInterface
+import com.kjipo.midi.playTargetSequenceInternal2
 import com.kjipo.score.NoteSequenceElement
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.ReducedScore
@@ -53,23 +55,27 @@ class WebscoreShow(private val midiInterface: MidiPlayerInterface) {
     }
 
     private suspend fun playTargetSequenceInternal() {
-        playTargetSequenceInternal(targetSequenceGenerator.getActionSequenceScript(), { ids, highlightOn ->
+        playTargetSequenceInternal2(targetSequenceGenerator.getActionSequenceScript(),
+            midiInterface,
+            { ids, highlightOn ->
             if (highlightOn) {
                 webScore?.highlight(ids)
             } else {
                 webScore?.removeHighlight(ids)
             }
-        }, midiInterface)
+        })
     }
 
     private suspend fun playInputSequenceInternal() {
-        playTargetSequenceInternal(inputSequenceGenerator.getActionSequenceScript(), { ids, highlightOn ->
+        playTargetSequenceInternal2(inputSequenceGenerator.getActionSequenceScript(),
+            midiInterface,
+            { ids, highlightOn ->
             if (highlightOn) {
                 inputScore?.highlight(ids)
             } else {
                 inputScore?.removeHighlight(ids)
             }
-        }, midiInterface)
+        })
     }
 
     fun playInputSequence() {

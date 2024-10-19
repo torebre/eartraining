@@ -1,3 +1,4 @@
+import com.kjipo.midi.SynthesizerScript
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

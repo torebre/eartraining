@@ -1,5 +1,5 @@
 import com.kjipo.midi.SynthesizerScript
-import com.kjipo.midi.playTargetSequenceInternal
+import com.kjipo.midi.playTargetSequenceInternal2
 import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.actionScript
@@ -96,7 +96,7 @@ object WebPitchApp {
 //                logger.info { "Pitch sequence: $actionSequence" }
 
                 GlobalScope.launch(Dispatchers.Default) {
-                    playTargetSequenceInternal(actionScript(actionSequence), synthesizer)
+                    playTargetSequenceInternal2(actionScript(actionSequence), synthesizer)
                 }
             })
         } else {
