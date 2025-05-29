@@ -1,13 +1,11 @@
 package graph
 
+import graph.PitchDataWithTime
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import mu.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.svg.SVGElement
+import kotlin.Int
 import kotlin.math.log2
 
 class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphModel) : PitchGraphModelListener {
@@ -39,16 +37,17 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
 
     private var windowStartAbsolute = 0L
-    private var windowsEndAbsolute = 0L
+    private var windowsEndAbsolute = 10000L
 
     private var idPointMap = mutableMapOf<Int, Element>()
-
     private var idsPointMap = mutableMapOf<Pair<Int, Int>, Element>()
 
+    private var idTargetPointMap = mutableMapOf<Int, Element>()
+    private var idsTargetPointMap = mutableMapOf<Pair<Int, Int>, Element>()
 
     private var axisRightXStart = xMaxCoordinate - 100
 
-    private val logger = KotlinLogging.logger {}
+//    private val logger = KotlinLogging.logger {}
 
 
     init {
@@ -72,9 +71,13 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         return turnYAxis(yCoord.toInt())
     }
 
-    private fun clearAndDrawLine(idPointsToConnect: List<Int>) {
-        idsPointMap.values.forEach { it.remove() }
-        idsPointMap.clear()
+    private fun clearAndDrawLine(
+        idPointsToConnect: List<Int>,
+        idPointMap2: MutableMap<Int, Element>,
+        idsPointMap2: MutableMap<Pair<Int, Int>, Element>
+    ) {
+        idsPointMap2.values.forEach { it.remove() }
+        idsPointMap2.clear()
 
         if (idPointsToConnect.size < 2) {
             return
@@ -82,15 +85,15 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
         var previousId = idPointsToConnect.first()
         for (id in idPointsToConnect.subList(1, idPointsToConnect.size)) {
-            val previousPoint = idPointMap[previousId]
-            val currentPoint = idPointMap[id]
+            val previousPoint = idPointMap2[previousId]
+            val currentPoint = idPointMap2[id]
 
             if (previousPoint == null || currentPoint == null) {
                 previousId = id
                 continue
             }
 
-            idsPointMap[Pair(previousId, id)] = connectPointsWithLine(
+            idsPointMap2[Pair(previousId, id)] = connectPointsWithLine(
                 previousPoint.getAttribute("cx")!!.toInt(),
                 previousPoint.getAttribute("cy")!!.toInt(),
                 currentPoint.getAttribute("cx")!!.toInt(),
@@ -121,27 +124,38 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private fun updateGraphBasedOnCurrentWindow() {
         pitchGraphModel.getPointsInRange(windowStartAbsolute, windowsEndAbsolute).let { dataPointsToShow ->
-            val idsOfPointsToShow = dataPointsToShow.map { it.id }
-            idPointMap.keys.filter { !idsOfPointsToShow.contains(it) }.forEach {
-                // These are points that are no longer showing
-                idPointMap[it]?.remove()
-                idPointMap.remove(it)
-            }
-
-            dataPointsToShow.forEach { dataPoint ->
-                if (idPointMap.containsKey(dataPoint.id)) {
-                    // This is a data point that should still be showing
-                    val existingPoint = idPointMap[dataPoint.id]
-                    existingPoint?.setAttribute("cx", transformToX(dataPoint.timeStamp).toString())
-                } else {
-                    // This is a new point
-                    idPointMap[dataPoint.id] =
-                        addPointToGraph(transformToX(dataPoint.timeStamp), transformToY(dataPoint.pitch))
-                }
-            }
-
-            clearAndDrawLine(idsOfPointsToShow)
+            showDataPoints(dataPointsToShow, idPointMap, idsPointMap, "red")
         }
+    }
+
+    private fun showDataPoints(
+        dataPointsToShow: List<PitchDataWithTime>,
+        idPointMap2: MutableMap<Int, Element>,
+        idsPointMap2: MutableMap<Pair<Int, Int>, Element>,
+        colour: String
+    ) {
+        val idsOfPointsToShow = dataPointsToShow.map { it.id }
+        idPointMap2.keys.filter { !idsOfPointsToShow.contains(it) }.forEach {
+            // These are points that are no longer showing
+            idPointMap2[it]?.remove()
+            idPointMap2.remove(it)
+        }
+
+        dataPointsToShow.forEach { dataPoint ->
+            if (idPointMap2.containsKey(dataPoint.id)) {
+                // This is a data point that should still be showing
+                val existingPoint = idPointMap2[dataPoint.id]
+                existingPoint?.setAttribute("cx", transformToX(dataPoint.timeStamp).toString())
+            } else {
+                // This is a new point
+                idPointMap2[dataPoint.id] =
+                    addPointToGraph(transformToX(dataPoint.timeStamp),
+                        transformToY(dataPoint.pitch),
+                        colour)
+            }
+        }
+
+        clearAndDrawLine(idsOfPointsToShow, idPointMap2, idsPointMap2)
     }
 
     private fun shiftWindowToRight() {
@@ -150,7 +164,6 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
     override fun newPitchDataReceived(pitchData: PitchDataWithTime) {
-
         if (startTime == 0L) {
             startTime = pitchData.timeStamp
             windowStartAbsolute = pitchData.timeStamp
@@ -165,10 +178,14 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         val xCoord = transformToX(pitchData.timeStamp)
         val yCoord = transformToY(pitchData.pitch)
 
-        idPointMap[pitchData.id] = addPointToGraph(xCoord, yCoord)
+        idPointMap[pitchData.id] = addPointToGraph(xCoord, yCoord, "red")
         if (!movePointsIfNeeded()) {
             // TODO This can be done more efficiently since the IDs of the points to connect have already been sent to the graph
-            clearAndDrawLine(pitchGraphModel.getPointsInRange(windowStartAbsolute, windowsEndAbsolute).map { it.id })
+            clearAndDrawLine(
+                pitchGraphModel.getPointsInRange(windowStartAbsolute, windowsEndAbsolute).map { it.id },
+                idPointMap,
+                idsPointMap
+            )
         }
     }
 
@@ -181,13 +198,39 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
 
-    private fun addPointToGraph(xCoord: Int, yCoord: Int): Element {
+    override fun targetSequenceShowing(isShowing: Boolean) {
+        if (isShowing) {
+//            val dataPointsToShow =
+//                pitchGraphModel.getTargetSequencePointsInRange(windowStartAbsolute, windowsEndAbsolute)
+            val dataPointsToShow = pitchGraphModel.getTargetSequence()
+
+            console.log("Test28: " +dataPointsToShow)
+
+            pitchGraphModel.getTargetSequence().forEach { pitchData ->
+               console.log("Test25: " + pitchData.timeStamp)
+            }
+            console.log("Test24: $windowStartAbsolute, $windowsEndAbsolute. Number of target sequence points: ${dataPointsToShow.size}")
+
+            showDataPoints(
+                dataPointsToShow,
+                idTargetPointMap,
+                idsTargetPointMap,
+                "green"
+            )
+
+            console.log("Test26: " +idTargetPointMap)
+            console.log("Test27: " +idsTargetPointMap)
+        }
+    }
+
+
+    private fun addPointToGraph(xCoord: Int, yCoord: Int, colour: String): Element {
         return document.createElementNS(SVG_NAMESPACE_URI, "circle").also {
             with(it) {
                 setAttribute("cx", "$xCoord")
                 setAttribute("cy", "$yCoord")
                 setAttribute("r", "2")
-                setAttribute("fill", "red")
+                setAttribute("fill", colour)
             }
         }.also {
             svgElement.appendChild(it)
@@ -212,13 +255,13 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private fun drawPitchAxis() {
         for (pitchClassFrequency in PITCH_CLASS_FREQUENCIES) {
-            logger.debug {
-                "Pitch class frequency: $pitchClassFrequency. Y-coordinate: ${
-                    transformToY(
-                        pitchClassFrequency
-                    )
-                }"
-            }
+//            logger.debug {
+//                "Pitch class frequency: $pitchClassFrequency. Y-coordinate: ${
+//                    transformToY(
+//                        pitchClassFrequency
+//                    )
+//                }"
+//            }
 
             val textElement = document.createElementNS(SVG_NAMESPACE_URI, "text").also {
                 with(it) {

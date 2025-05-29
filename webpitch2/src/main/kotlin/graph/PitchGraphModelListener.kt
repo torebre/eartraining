@@ -7,5 +7,6 @@ interface PitchGraphModelListener {
 
     fun uncertainPitchReceived(timestamp: Long)
 
+    fun targetSequenceShowing(isShowing: Boolean)
 
 }

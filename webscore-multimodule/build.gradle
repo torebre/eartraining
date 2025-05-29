@@ -44,22 +44,22 @@ kotlin {
                 implementation kotlin('test-annotations-common')
             }
         }
-        jvmMain {
-            dependencies {
-//                implementation project(":score-jvm")
-                implementation project(":score-multimodule")
-                implementation kotlin('stdlib-jdk8')
-            }
-        }
-        jvmTest {
-            dependencies {
-                implementation kotlin('test')
-                implementation kotlin('test-junit')
-
-                implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-                implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
-            }
-        }
+//        jvmMain {
+//            dependencies {
+////                implementation project(":score-jvm")
+//                implementation project(":score-multimodule")
+//                implementation kotlin('stdlib-jdk8')
+//            }
+//        }
+//        jvmTest {
+//            dependencies {
+//                implementation kotlin('test')
+//                implementation kotlin('test-junit')
+//
+//                implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+//                implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+//            }
+//        }
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')

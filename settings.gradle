@@ -14,4 +14,5 @@ include 'webpitch2'
 include 'pitchDetection'
 include 'essentia_module2'
 include 'websynthesizer'
+include 'attempt-processor'
 

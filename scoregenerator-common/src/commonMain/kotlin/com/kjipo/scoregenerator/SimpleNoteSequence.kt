@@ -29,6 +29,10 @@ class SimpleNoteSequence(val elements: List<NoteSequenceElement>) {
                     )
                 )
             }
+            else if(element is NoteSequenceElement.MultipleNotesElement) {
+                throw UnsupportedOperationException("Handling multiple note elements is not implemented")
+            }
+
             timeCounter += durationInMilliseconds
         }
 
