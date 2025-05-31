@@ -135,10 +135,11 @@ object WebPitchApp {
     private fun simpleNoteSequenceToPitchSequence(simpleNoteSequence: SimpleNoteSequence): List<PitchDataWithTime> {
         var idCounter = 0
 
+        // How to go from a MIDI note number to the pitch: https://newt.phys.unsw.edu.au/jw/notes.html
         return simpleNoteSequence.transformToPitchSequence().map { pitchData ->
 
             PitchDataWithTime(
-                (440 * ((pitchData.pitch - 69) / 12.0).pow(2)).toFloat(),
+                (440 * 2.0.pow((pitchData.pitch - 69) / 12.0)).toFloat(),
                 1.0f,
                 pitchData.timeOn.toLong(),
                 idCounter++
