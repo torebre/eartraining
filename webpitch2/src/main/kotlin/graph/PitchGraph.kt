@@ -1,6 +1,5 @@
 package graph
 
-import graph.PitchDataWithTime
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.Element
@@ -16,8 +15,8 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private val width = 500
 
-    private val yMinValue = log2(PITCH_CLASS_FREQUENCIES.first())
-    private val yMaxValue = log2(PITCH_CLASS_FREQUENCIES.last())
+    private val yMinValue = log2(PITCH_CLASS_FREQUENCIES.first().pitch)
+    private val yMaxValue = log2(PITCH_CLASS_FREQUENCIES.last().pitch)
 
     private val svgElement: SVGElement
 
@@ -149,9 +148,11 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
             } else {
                 // This is a new point
                 idPointMap2[dataPoint.id] =
-                    addPointToGraph(transformToX(dataPoint.timeStamp),
+                    addPointToGraph(
+                        transformToX(dataPoint.timeStamp),
                         transformToY(dataPoint.pitch),
-                        colour)
+                        colour
+                    )
             }
         }
 
@@ -204,10 +205,10 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 //                pitchGraphModel.getTargetSequencePointsInRange(windowStartAbsolute, windowsEndAbsolute)
             val dataPointsToShow = pitchGraphModel.getTargetSequence()
 
-            console.log("Test28: " +dataPointsToShow)
+            console.log("Test28: " + dataPointsToShow)
 
             pitchGraphModel.getTargetSequence().forEach { pitchData ->
-               console.log("Test25: " + pitchData.timeStamp)
+                console.log("Test25: " + pitchData.timeStamp)
             }
             console.log("Test24: $windowStartAbsolute, $windowsEndAbsolute. Number of target sequence points: ${dataPointsToShow.size}")
 
@@ -218,8 +219,8 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                 "green"
             )
 
-            console.log("Test26: " +idTargetPointMap)
-            console.log("Test27: " +idsTargetPointMap)
+            console.log("Test26: " + idTargetPointMap)
+            console.log("Test27: " + idsTargetPointMap)
         }
     }
 
@@ -253,26 +254,68 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
 
-    private fun drawPitchAxis() {
-        for (pitchClassFrequency in PITCH_CLASS_FREQUENCIES) {
-//            logger.debug {
-//                "Pitch class frequency: $pitchClassFrequency. Y-coordinate: ${
-//                    transformToY(
-//                        pitchClassFrequency
-//                    )
-//                }"
-//            }
+    class PitchCoordinateData(val pitch: Float, val noteName: String, val frequency: Float, val yCoordinate: Int)
 
+
+    private fun drawPitchAxis() {
+        val pitchCoordinateData = PITCH_CLASS_FREQUENCIES.map { pitchClassFrequency ->
+            PitchCoordinateData(
+                pitchClassFrequency.pitch,
+                pitchClassFrequency.note,
+                pitchClassFrequency.pitch,
+                transformToY(pitchClassFrequency.pitch)
+            )
+        }.toList()
+
+        pitchCoordinateData.forEachIndexed { index, pitchData ->
+            val border = when (index) {
+                0 -> {
+                    Pair(yMaxCoordinate, (pitchData.yCoordinate + pitchCoordinateData[index + 1].yCoordinate) / 2)
+                }
+
+                pitchCoordinateData.size - 1 -> {
+                    Pair((pitchData.yCoordinate + pitchCoordinateData[index - 1].yCoordinate) / 2, yMinCoordinate)
+                }
+
+                else -> {
+                    Pair(
+                        (pitchData.yCoordinate + pitchCoordinateData[index - 1].yCoordinate) / 2,
+                        (pitchData.yCoordinate + pitchCoordinateData[index + 1].yCoordinate) / 2
+                    )
+                }
+            }
+
+            //console.log("Test30: " + border)
+
+            drawBackgroundLines(border, if (index % 2 == 0) "green" else "blue")
+        }
+
+        pitchCoordinateData.forEach { pitchData ->
             val textElement = document.createElementNS(SVG_NAMESPACE_URI, "text").also {
                 with(it) {
                     setAttribute("x", "$axisRightXStart")
-                    setAttribute("y", "${transformToY(pitchClassFrequency)}")
+                    setAttribute("y", "${pitchData.yCoordinate}")
                     setAttribute("class", "pitchAxis")
-                    textContent = "${getPitchClosestToFrequency(pitchClassFrequency)} (${pitchClassFrequency})"
+//                    textContent = "${getPitchClosestToFrequency(pitchClassFrequency)} (${pitchClassFrequency})"
+                    textContent = "${pitchData.noteName} (${pitchData.frequency})"
                 }
             }
             svgElement.appendChild(textElement)
         }
+    }
+
+
+    private fun drawBackgroundLines(border: Pair<Int, Int>, colour: String) {
+        val backgroundElement = document.createElementNS(SVG_NAMESPACE_URI, "rect").also {
+            with(it) {
+                setAttribute("x", "$xMinCoordinate")
+                setAttribute("y", "${border.first}")
+                setAttribute("width", "${xMaxCoordinate - xMinCoordinate}")
+                setAttribute("height", "${border.first - border.second}")
+                setAttribute("fill", colour)
+            }
+        }
+        svgElement.appendChild(backgroundElement)
     }
 
 
