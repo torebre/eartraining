@@ -131,19 +131,28 @@ object WebPitchApp {
         }
     }
 
-
     private fun simpleNoteSequenceToPitchSequence(simpleNoteSequence: SimpleNoteSequence): List<PitchDataWithTime> {
         var idCounter = 0
 
         // How to go from a MIDI note number to the pitch: https://newt.phys.unsw.edu.au/jw/notes.html
-        return simpleNoteSequence.transformToPitchSequence().map { pitchData ->
+        return simpleNoteSequence.transformToPitchSequence().flatMap { pitchData ->
+            val pitch = (440 * 2.0.pow((pitchData.pitch - 69) / 12.0)).toFloat()
 
-            PitchDataWithTime(
-                (440 * 2.0.pow((pitchData.pitch - 69) / 12.0)).toFloat(),
-                1.0f,
-                pitchData.timeOn.toLong(),
-                idCounter++
+            listOf(
+                PitchDataWithTime(
+                    pitch,
+                    1.0f,
+                    pitchData.timeOn.toLong(),
+                    idCounter++
+                ),
+                PitchDataWithTime(
+                    pitch,
+                    1.0f,
+                    pitchData.timeOff.toLong(),
+                    idCounter++
+                )
             )
+
         }
     }
 
