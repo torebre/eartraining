@@ -48,6 +48,9 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
 //    private val logger = KotlinLogging.logger {}
 
+    class PitchCoordinateData(val pitch: Float, val noteName: String, val frequency: Float, val yCoordinate: Int)
+
+
 
     init {
         svgElement = document.getElementById(svgElementId) as SVGElement
@@ -254,9 +257,6 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
 
-    class PitchCoordinateData(val pitch: Float, val noteName: String, val frequency: Float, val yCoordinate: Int)
-
-
     private fun drawPitchAxis() {
         val pitchCoordinateData = PITCH_CLASS_FREQUENCIES.map { pitchClassFrequency ->
             PitchCoordinateData(
@@ -296,12 +296,12 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                     setAttribute("x", "$axisRightXStart")
                     setAttribute("y", "${pitchData.yCoordinate}")
                     setAttribute("class", "pitchAxis")
-//                    textContent = "${getPitchClosestToFrequency(pitchClassFrequency)} (${pitchClassFrequency})"
-                    textContent = "${pitchData.noteName} (${pitchData.frequency})"
+                    textContent = "${pitchData.noteName} (${formatPitchFrequence(pitchData.frequency)})"
                 }
             }
             svgElement.appendChild(textElement)
         }
+
     }
 
 
@@ -321,6 +321,10 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     companion object {
         internal const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
+
+        private fun formatPitchFrequence(pitch: Float): String {
+            return pitch.asDynamic().toFixed(2) as String
+        }
 
     }
 
