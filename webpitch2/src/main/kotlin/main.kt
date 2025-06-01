@@ -2,6 +2,7 @@ import com.kjipo.attemptprocessor.PitchData
 import com.kjipo.midi.SynthesizerScript
 import com.kjipo.midi.playTargetSequenceInternal2
 import com.kjipo.scoregenerator.Action
+import com.kjipo.scoregenerator.PitchRange
 import com.kjipo.scoregenerator.PolyphonicNoteSequenceGenerator
 import com.kjipo.scoregenerator.SimpleNoteSequence
 import com.kjipo.scoregenerator.actionScript
@@ -24,7 +25,10 @@ object WebPitchApp {
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
 
     private val synthesizer = SynthesizerScript()
-    private var currentSequence = polyphonicNoteSequenceGenerator.createSequence(false)
+
+    // TODO What is a suitable pitch range to use?
+    private val pitchRange = PitchRange(45, 70)
+    private var currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
     private var actionSequence: MutableList<Action>
     private var isRecording = false
 
@@ -122,7 +126,7 @@ object WebPitchApp {
     private fun setupGenerateSequenceButton() {
         document.querySelector("#btnGenerateSequence")?.let { generateSequenceButton ->
             generateSequenceButton.addEventListener("click", {
-                currentSequence = polyphonicNoteSequenceGenerator.createSequence(false)
+                currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
                 val (pitches, actionSequence) = computePitchSequence(currentSequence.elements)
                 this.actionSequence = actionSequence
                 this.rateInput.setCurrentTarget(pitches)
