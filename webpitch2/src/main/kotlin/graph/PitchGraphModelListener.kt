@@ -9,4 +9,6 @@ interface PitchGraphModelListener {
 
     fun targetSequenceShowing(isShowing: Boolean)
 
+    fun reset()
+
 }

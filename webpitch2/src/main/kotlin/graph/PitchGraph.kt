@@ -22,34 +22,24 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private var startTime: Long = 0
     private var lastTimePoint: Long = 0
-
-//    private var previousXCoord: Int = -1
-//    private var previousYCoord: Int = -1
-
-    private var zoomLevel = 100000
-    private var stepSize = zoomLevel / xMaxCoordinate
     private var pixelStepSize = 1
-
-    private var outsideRangeShiftInMilliseconds = 1000
-
-    private var rangeInMilliseconds = 10000
-
-
     private var windowStartAbsolute = 0L
     private var windowsEndAbsolute = 10000L
 
-    private var idPointMap = mutableMapOf<Int, Element>()
-    private var idsPointMap = mutableMapOf<Pair<Int, Int>, Element>()
+    private val outsideRangeShiftInMilliseconds = 1000
+    private val rangeInMilliseconds = 10000
 
-    private var idTargetPointMap = mutableMapOf<Int, Element>()
-    private var idsTargetPointMap = mutableMapOf<Pair<Int, Int>, Element>()
+    private val idPointMap = mutableMapOf<Int, Element>()
+    private val idsPointMap = mutableMapOf<Pair<Int, Int>, Element>()
 
-    private var axisRightXStart = xMaxCoordinate - 100
+    private val idTargetPointMap = mutableMapOf<Int, Element>()
+    private val idsTargetPointMap = mutableMapOf<Pair<Int, Int>, Element>()
+
+    private val axisRightXStart = xMaxCoordinate - 100
 
 //    private val logger = KotlinLogging.logger {}
 
     class PitchCoordinateData(val pitch: Float, val noteName: String, val frequency: Float, val yCoordinate: Int)
-
 
 
     init {
@@ -204,16 +194,12 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     override fun targetSequenceShowing(isShowing: Boolean) {
         if (isShowing) {
-//            val dataPointsToShow =
-//                pitchGraphModel.getTargetSequencePointsInRange(windowStartAbsolute, windowsEndAbsolute)
             val dataPointsToShow = pitchGraphModel.getTargetSequence()
 
-            console.log("Test28: " + dataPointsToShow)
-
-            pitchGraphModel.getTargetSequence().forEach { pitchData ->
-                console.log("Test25: " + pitchData.timeStamp)
-            }
-            console.log("Test24: $windowStartAbsolute, $windowsEndAbsolute. Number of target sequence points: ${dataPointsToShow.size}")
+//            pitchGraphModel.getTargetSequence().forEach { pitchData ->
+//                console.log("Test25: " + pitchData.timeStamp)
+//            }
+//            console.log("Test24: $windowStartAbsolute, $windowsEndAbsolute. Number of target sequence points: ${dataPointsToShow.size}")
 
             showDataPoints(
                 dataPointsToShow,
@@ -222,9 +208,26 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                 "green"
             )
 
-            console.log("Test26: " + idTargetPointMap)
-            console.log("Test27: " + idsTargetPointMap)
+//            console.log("Test26: " + idTargetPointMap)
+//            console.log("Test27: " + idsTargetPointMap)
         }
+    }
+
+    override fun reset() {
+        startTime = 0
+        lastTimePoint = 0
+        pixelStepSize = 1
+        windowStartAbsolute = 0L
+        windowsEndAbsolute = 10000L
+
+        idPointMap.values.forEach { it.remove() }
+        idPointMap.clear()
+        idsPointMap.values.forEach { it.remove() }
+        idsPointMap.clear()
+        idTargetPointMap.values.forEach { it.remove() }
+        idTargetPointMap.clear()
+        idsTargetPointMap.values.forEach { it.remove() }
+        idsTargetPointMap.clear()
     }
 
 

@@ -27,7 +27,7 @@ object WebPitchApp {
     private val synthesizer = SynthesizerScript()
 
     // TODO What is a suitable pitch range to use?
-    private val pitchRange = PitchRange(45, 70)
+    private val pitchRange = PitchRange(40, 60)
     private var currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
     private var actionSequence: MutableList<Action>
     private var isRecording = false
@@ -126,13 +126,18 @@ object WebPitchApp {
     private fun setupGenerateSequenceButton() {
         document.querySelector("#btnGenerateSequence")?.let { generateSequenceButton ->
             generateSequenceButton.addEventListener("click", {
-                currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
-                val (pitches, actionSequence) = computePitchSequence(currentSequence.elements)
-                this.actionSequence = actionSequence
-                this.rateInput.setCurrentTarget(pitches)
-                pitchGraphModel.targetSequence = simpleNoteSequenceToPitchSequence(currentSequence)
+                reset()
             })
         }
+    }
+
+
+    private fun reset() {
+        currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
+        val (pitches, actionSequence) = computePitchSequence(currentSequence.elements)
+        this.actionSequence = actionSequence
+        this.rateInput.setCurrentTarget(pitches)
+        pitchGraphModel.reset(simpleNoteSequenceToPitchSequence(currentSequence))
     }
 
     private fun simpleNoteSequenceToPitchSequence(simpleNoteSequence: SimpleNoteSequence): List<PitchDataWithTime> {
@@ -163,7 +168,6 @@ object WebPitchApp {
     private fun setupShowTargetSequenceButton() {
         document.querySelector("#btnShowTargetSequence")?.let { generateSequenceButton ->
             generateSequenceButton.addEventListener("click", {
-                console.log("Test23")
                 pitchGraphModel.toggleTargetSequenceShowing()
             })
         }

@@ -15,7 +15,7 @@ open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {
     private val receivedPitchData = mutableListOf<PitchDataWithTime>()
     private val pitchDataListeners = mutableListOf<PitchGraphModelListener>()
 
-    var targetSequence = listOf<PitchDataWithTime>()
+    private var targetSequence = listOf<PitchDataWithTime>()
 
     private var startTime: Long? = null
 
@@ -34,6 +34,16 @@ open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {
                 timeNow - it,
                 idCounter++))
         }
+    }
+
+    fun reset(targetSequence: List<PitchDataWithTime>) {
+        receivedPitchData.clear()
+        targetSequenceShowing = false
+        this.targetSequence = targetSequence
+        startTime = null
+        idCounter = 0
+
+        pitchDataListeners.forEach { it.reset() }
     }
 
     protected fun addPitchDataWithTime(pitchDataWithTime: PitchDataWithTime) {
