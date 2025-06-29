@@ -1,5 +1,7 @@
 package com.kjipo.midi
 
+import midi.MidiPlayerInterface
+
 
 class SoundFontSynthesizer: MidiPlayerInterface {
     override fun noteOn(pitch: Int) {
