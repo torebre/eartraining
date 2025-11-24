@@ -29,7 +29,7 @@ object WebPitchApp {
 
     private var pitchRange = PitchRange(40, 60)
     private var currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
-    private var actionSequence: MutableList<Action>
+    private var actionSequence: List<Action> = emptyList()
     private var isRecording = false
 
     private val rateInput: RateInput = RateInput()
@@ -38,17 +38,11 @@ object WebPitchApp {
 
     private val logger = KotlinLogging.logger {}
 
-    init {
-        val (pitches, actionSequence) = computePitchSequence(currentSequence.elements)
-        this.actionSequence = actionSequence
-        this.rateInput.setCurrentTarget(pitches)
-    }
-
-
     fun start() {
         setupPlayButton()
         setupGenerateSequenceButton()
         setupShowTargetSequenceButton()
+        reset()
 
         // TODO Why does it not work when PitchDetection is a class?
         var pitchDetection: PitchDetection? = null

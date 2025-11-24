@@ -39,7 +39,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
 //    private val logger = KotlinLogging.logger {}
 
-    class PitchCoordinateData(val pitch: Float, val noteName: String, val frequency: Float, val yCoordinate: Int)
+    class PitchCoordinateData(val midiNote: Int, val noteName: String, val frequency: Float, val yCoordinate: Int)
 
 
     init {
@@ -263,7 +263,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     private fun drawPitchAxis() {
         val pitchCoordinateData = PITCH_CLASS_FREQUENCIES.map { pitchClassFrequency ->
             PitchCoordinateData(
-                pitchClassFrequency.pitch,
+                pitchClassFrequency.midiNote,
                 pitchClassFrequency.note,
                 pitchClassFrequency.pitch,
                 transformToY(pitchClassFrequency.pitch)
@@ -299,7 +299,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                     setAttribute("x", "$axisRightXStart")
                     setAttribute("y", "${pitchData.yCoordinate}")
                     setAttribute("class", "pitchAxis")
-                    textContent = "${pitchData.noteName} (${formatPitchFrequence(pitchData.frequency)})"
+                    textContent = "${pitchData.noteName} ${pitchData.midiNote} ${formatPitchFrequence(pitchData.frequency)}"
                 }
             }
             svgElement.appendChild(textElement)
