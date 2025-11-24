@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import mu.KotlinLoggingConfiguration
 import mu.KotlinLoggingLevel
+import org.w3c.dom.HTMLInputElement
 import kotlin.math.pow
 
 
@@ -26,8 +27,7 @@ object WebPitchApp {
 
     private val synthesizer = SynthesizerScript()
 
-    // TODO What is a suitable pitch range to use?
-    private val pitchRange = PitchRange(40, 60)
+    private var pitchRange = PitchRange(40, 60)
     private var currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
     private var actionSequence: MutableList<Action>
     private var isRecording = false
@@ -121,6 +121,8 @@ object WebPitchApp {
             logger.error { "Play button is null" }
         }
     }
+    
+    
 
 
     private fun setupGenerateSequenceButton() {
@@ -133,6 +135,10 @@ object WebPitchApp {
 
 
     private fun reset() {
+        val lowestNote = (document.getElementById("lowestNote") as? HTMLInputElement)?.value?.toIntOrNull() ?: 40
+        val highestNote = (document.getElementById("highestNote") as? HTMLInputElement)?.value?.toIntOrNull() ?: 60
+        pitchRange = PitchRange(lowestNote, highestNote)
+
         currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
         val (pitches, actionSequence) = computePitchSequence(currentSequence.elements)
         this.actionSequence = actionSequence
