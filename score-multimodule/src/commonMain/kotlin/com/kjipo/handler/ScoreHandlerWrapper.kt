@@ -1,7 +1,7 @@
 package com.kjipo.handler
 
 import com.kjipo.score.Duration
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 class ScoreHandlerWrapper(var scoreHandler: ScoreHandlerInterface) : ScoreHandlerInterface {
     private val logger = KotlinLogging.logger {}

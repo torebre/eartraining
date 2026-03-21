@@ -5,6 +5,11 @@ repositories {
     mavenCentral()
 }
 
+// Fixes webpack-cli incompatibility by pinning a compatible version.
+rootProject.kotlinNodeJs {
+    versions.webpackCli.version = "4.10.0"
+}
+
 kotlin {
     js {
         browser {
@@ -35,7 +40,7 @@ kotlin {
                 implementation project(":score-multimodule")
                 implementation kotlin('stdlib-common')
 
-                implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
+                implementation "io.github.oshai:kotlin-logging:$kotlinLogging"
             }
         }
         commonTest {
@@ -56,8 +61,8 @@ kotlin {
 //                implementation kotlin('test')
 //                implementation kotlin('test-junit')
 //
-//                implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-//                implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+//                implementation 'org.slf4j:slf4j-api:1.7.25'
+//                implementation 'org.slf4j:slf4j-simple:1.7.25'
 //            }
 //        }
         jsMain {
@@ -71,7 +76,7 @@ kotlin {
 
                 implementation(npm("rfc6902", "4.0.0"))
 
-                implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
+                implementation "io.github.oshai:kotlin-logging:$kotlinLogging"
             }
         }
         jsTest {

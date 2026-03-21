@@ -2,7 +2,7 @@ package graph
 
 import com.kjipo.attemptprocessor.PitchData
 import PitchDetectionListener
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.js.Date
 
 open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {

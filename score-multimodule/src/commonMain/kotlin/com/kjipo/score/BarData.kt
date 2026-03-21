@@ -3,7 +3,7 @@ package com.kjipo.score
 import com.kjipo.handler.Bar
 import com.kjipo.handler.ScoreHelperFunctions.createTemporalElement
 import com.kjipo.svg.GlyphData
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.ceil
 
 /**

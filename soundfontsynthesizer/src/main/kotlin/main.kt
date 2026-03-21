@@ -2,7 +2,7 @@
 private val logger = KotlinLogging.logger {}
 
 fun main() {
-//    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+//    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     // TODO
     println("Test")

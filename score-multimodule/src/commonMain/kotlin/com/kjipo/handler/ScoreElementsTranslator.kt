@@ -1,7 +1,7 @@
 package com.kjipo.handler
 
 import com.kjipo.score.*
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 object ScoreElementsTranslator {
 

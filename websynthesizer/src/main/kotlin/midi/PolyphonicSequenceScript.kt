@@ -3,7 +3,7 @@ package com.kjipo.midi
 import com.kjipo.midi.SimplePitchEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 class PolyphonicSequenceScript(
     private val pitchEvents: List<Pair<Collection<SimplePitchEvent>, Int>>,

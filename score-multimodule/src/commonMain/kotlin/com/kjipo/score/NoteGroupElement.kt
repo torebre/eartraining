@@ -4,7 +4,6 @@ import com.kjipo.handler.NoteGroup
 import com.kjipo.handler.NoteSymbol
 import com.kjipo.handler.ScoreHandlerUtilities.getPitch
 import com.kjipo.svg.*
-import mu.KotlinLogging
 
 
 class NoteGroupElement(
@@ -16,7 +15,6 @@ class NoteGroupElement(
     // TODO Handle duration on note level
     override var duration: Duration = noteGroup.notes.first().duration
 
-    private val logger = KotlinLogging.logger {}
 
 
     private fun addExtraBarLines(noteSymbol: NoteSymbol) =

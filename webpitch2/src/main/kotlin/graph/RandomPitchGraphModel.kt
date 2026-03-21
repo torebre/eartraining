@@ -1,7 +1,7 @@
 package graph
 
 import kotlinx.coroutines.delay
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.random.Random
 
 class RandomPitchGraphModel : PitchGraphModel() {

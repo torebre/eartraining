@@ -14,10 +14,11 @@ import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import mu.KotlinLogging
-import mu.KotlinLoggingConfiguration
-import mu.KotlinLoggingLevel
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.github.oshai.kotlinlogging.Level
 import org.w3c.dom.HTMLInputElement
+import kotlin.also
 import kotlin.math.pow
 
 
@@ -45,7 +46,18 @@ object WebPitchApp {
         reset()
 
         // TODO Why does it not work when PitchDetection is a class?
-        var pitchDetection: PitchDetection? = null
+        val pitchDetection = PitchDetection()
+        pitchDetection.also {
+            it.addPitchDetectionListener(object : PitchDetectionListener {
+                override fun pitchData(pitchData: PitchData) {
+                    logger.info { "Pitch: ${pitchData.pitch}. Certainty: ${pitchData.certainty}" }
+                    setTextForChildNode("#pitchLabel", pitchData.pitch.toString())
+                    setTextForChildNode("#certaintyLabel", pitchData.certainty.toString())
+
+                    rateInput.addPitchData(pitchData)
+                }
+            })
+        }
 
 //    val pitchGraphModel = RandomPitchGraphModel()
         val pitchGraph = PitchGraph("pitchGraph", pitchGraphModel)
@@ -55,22 +67,22 @@ object WebPitchApp {
 
             recordingButton.addEventListener("click", {
                 if (!isRecording) {
-                    if (pitchDetection == null) {
-                        pitchDetection = PitchDetection.also {
-                            it.addPitchDetectionListener(object : PitchDetectionListener {
-                                override fun pitchData(pitchData: PitchData) {
-                                    logger.info { "Pitch: ${pitchData.pitch}. Certainty: ${pitchData.certainty}" }
-                                    setTextForChildNode("#pitchLabel", pitchData.pitch.toString())
-                                    setTextForChildNode("#certaintyLabel", pitchData.certainty.toString())
+//                    if (pitchDetection == null) {
+//                        pitchDetection = PitchDetection.also {
+//                            it.addPitchDetectionListener(object : PitchDetectionListener {
+//                                override fun pitchData(pitchData: PitchData) {
+//                                    logger.info { "Pitch: ${pitchData.pitch}. Certainty: ${pitchData.certainty}" }
+//                                    setTextForChildNode("#pitchLabel", pitchData.pitch.toString())
+//                                    setTextForChildNode("#certaintyLabel", pitchData.certainty.toString())
+//
+//                                    rateInput.addPitchData(pitchData)
+//                                }
+//                            })
+//                        }
+//                        pitchDetection = PitchDetection
+//                    }
 
-                                    rateInput.addPitchData(pitchData)
-                                }
-                            })
-                        }
-                        pitchDetection = PitchDetection
-                    }
-
-                    pitchDetection?.let {
+                    pitchDetection.let {
                         rateInput.startNewInput()
                         it.startRecording()
                         it.addPitchDetectionListener(pitchGraphModel)
@@ -84,7 +96,7 @@ object WebPitchApp {
                     recordingButton.textContent = "Stop recording"
                     isRecording = true
                 } else {
-                    pitchDetection?.stopRecording()
+                    pitchDetection.stopRecording()
                     rateInput.stopInput()
 
 
@@ -185,11 +197,9 @@ object WebPitchApp {
 
 
 fun main() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     WebPitchApp.start()
-
-
 }
 
 

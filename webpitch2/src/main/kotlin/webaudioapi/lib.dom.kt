@@ -749,7 +749,7 @@ external interface Keyframe {
         get() = definedExternally
         set(value) = definedExternally
     @nativeGetter
-    operator fun get(property: String): dynamic /* String? | Number? */
+    operator fun get(property: String): Any? /* String? | Number? */
     @nativeSetter
     operator fun set(property: String, value: String?)
     @nativeSetter
@@ -1346,7 +1346,7 @@ external interface PropertyIndexedKeyframes {
         get() = definedExternally
         set(value) = definedExternally
     @nativeGetter
-    operator fun get(property: String): dynamic /* String? | Array<String>? | Number? | Array<Number?>? */
+    operator fun get(property: String): Any? /* String? | Array<String>? | Number? | Array<Number?>? */
     @nativeSetter
     operator fun set(property: String, value: String?)
     @nativeSetter

@@ -4,7 +4,7 @@ import com.kjipo.svg.transformToPathString
 import com.kjipo.svg.translateGlyph
 import kotlinx.dom.clear
 import kotlinx.serialization.json.Json
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 

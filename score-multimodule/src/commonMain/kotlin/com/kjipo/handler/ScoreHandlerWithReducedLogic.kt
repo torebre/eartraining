@@ -2,7 +2,7 @@ package com.kjipo.handler
 
 import com.kjipo.score.*
 import kotlinx.serialization.json.Json
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
  * Stores a sequence of temporal elements, and can produce a score based on them.

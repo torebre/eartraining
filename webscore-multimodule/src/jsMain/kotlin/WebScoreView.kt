@@ -1,5 +1,5 @@
 import kotlinx.browser.document
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.Element
 
 

@@ -13,7 +13,7 @@ class ExtraBarLinesElement(
 ) : ScoreRenderingElement() {
 
     override fun toRenderingElement(): List<PositionedRenderingElement> {
-        val xStart = xPosition.minus(leftStart).toDouble()
+        val xStart = xPosition.minus(leftStart)
         val xStop = xStart + rightEnd.toDouble()
 
         val pathElements = yPositions.map {

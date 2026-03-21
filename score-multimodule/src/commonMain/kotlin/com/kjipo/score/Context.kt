@@ -3,7 +3,7 @@ package com.kjipo.score
 import com.kjipo.handler.Note
 import com.kjipo.handler.NoteSymbol
 import com.kjipo.handler.Score
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 class Context(private val score: Score) {
 

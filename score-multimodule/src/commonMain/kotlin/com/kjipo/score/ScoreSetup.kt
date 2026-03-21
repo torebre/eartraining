@@ -4,7 +4,7 @@ import com.kjipo.handler.BeamGroup
 import com.kjipo.handler.BeamLine
 import com.kjipo.handler.Score
 import com.kjipo.svg.GlyphData
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.absoluteValue
 
 /**
@@ -270,8 +270,8 @@ class ScoreSetup(private val score: Score) {
         val stopCoordinates: Pair<Double, Double>?
 
         init {
-            firstNoteXTranslation = (firstElement.translation?.xShift ?: 0.0).toDouble()
-            lastNoteXTranslation = (lastElement.translation?.xShift ?: 0.0).toDouble()
+            firstNoteXTranslation = (firstElement.translation?.xShift ?: 0.0)
+            lastNoteXTranslation = (lastElement.translation?.xShift ?: 0.0)
 
             firstNoteYTranslation = firstElement.getVerticalOffsetForStemStart()
             lastNoteYTranslation = lastElement.getVerticalOffsetForStemStart()

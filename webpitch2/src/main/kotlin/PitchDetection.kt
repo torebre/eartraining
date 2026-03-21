@@ -3,7 +3,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.khronos.webgl.Float32Array
 import org.w3c.dom.mediacapture.MediaStream
 import org.w3c.dom.url.URL
@@ -16,22 +16,36 @@ import webaudioapi.MediaStreamAudioSourceNode
 import kotlin.js.Promise
 
 
-object PitchDetection {
+@OptIn(kotlin.js.ExperimentalJsExport::class)
+@JsExport
+class PitchDetection {
     @JsName("audioContext")
     var audioContext: AudioContext = js("new AudioContext();")
 
+    @JsExport.Ignore
     private var processData = false
+    @JsExport.Ignore
     private var mediaStream: MediaStream? = null
+    @JsExport.Ignore
     private var microphoneNode: MediaStreamAudioSourceNode? = null
+    @JsExport.Ignore
     private var gainNode: GainNode? = null
 
 
     // TODO It is an AudioWorkletNode, but where is the code for the interface?
-    private var testAudioProcessorNode: dynamic = Any()
+    @JsExport.Ignore
+    private var testAudioProcessorNode: dynamic = null
 
+    @JsExport.Ignore
     private val pitchDetectionListeners = mutableListOf<PitchDetectionListener>()
 
+    @JsExport.Ignore
     private val logger = KotlinLogging.logger {}
+
+    @JsName("PitchDetection")
+    constructor() {
+        logger.info { "Initializing PitchDetection" }
+    }
 
 
     fun startRecording() {
@@ -54,6 +68,7 @@ object PitchDetection {
             }
     }
 
+    @JsExport.Ignore
     suspend fun urlFromFiles(files: List<String>): String {
         val promises = files
             .map { file ->
@@ -74,6 +89,7 @@ object PitchDetection {
             }.await()
     }
 
+    @JsExport.Ignore
     suspend fun processAudio(stream: MediaStream) {
         logger.info { "Setting up audio processing: $stream" }
         logger.info { "Audio context: $audioContext" }
@@ -92,10 +108,13 @@ object PitchDetection {
         logger.info { "Setting up audio stream from microphone" }
         microphoneNode = audioContext.createMediaStreamSource(stream as webaudioapi.MediaStream)
 
+        logger.info { "Set up microphone node" }
+
         setupPitchDetectionTest()
     }
 
 
+    @JsExport.Ignore
     private suspend fun setupPitchDetectionTest() {
         // The variable is used in the JavaScript-code
         val bytes = 8 + 4 * Float32Array.BYTES_PER_ELEMENT
@@ -107,13 +126,15 @@ object PitchDetection {
         val audioBuffer = js("new InternalAudioBuffer(sharedArrayBuffer);")
 
         val addModulePromise: Promise<Any> =
-            js("webpitch2.PitchDetection.audioContext.audioWorklet.addModule(fileContents);")
+            (audioContext.asDynamic()).audioWorklet.addModule(fileContents) as Promise<Any>
 
         logger.info { "Sample rate: ${audioContext.sampleRate}" }
 
+        val currentAudioContext = audioContext
         addModulePromise.then {
+            val sampleRate = currentAudioContext.sampleRate
             testAudioProcessorNode =
-                js("new AudioWorkletNode(webpitch2.PitchDetection.audioContext, 'test-audio-processor', { processorOptions: { bufferSize: 8192, sampleRate: webpitch2.PitchDetection.audioContext.sampleRate}});")
+                js("new AudioWorkletNode(currentAudioContext, 'test-audio-processor', { processorOptions: { bufferSize: 8192, sampleRate: sampleRate}});")
 
             logger.info { "AudioWorkletNode: ${testAudioProcessorNode}" }
 
@@ -122,14 +143,14 @@ object PitchDetection {
 
             // Set up the audio network
             testAudioProcessorNode.port.postMessage(input)
-            gainNode = audioContext.createGain()
+            gainNode = currentAudioContext.createGain()
 
             gainNode?.let { gain ->
-                gain.gain.setValueAtTime(0, audioContext.currentTime)
+                gain.gain.setValueAtTime(0, currentAudioContext.currentTime)
 
                 microphoneNode?.connect(testAudioProcessorNode as AudioNode)
                 testAudioProcessorNode?.connect(gainNode)
-                gain.connect(audioContext.destination)
+                gain.connect(currentAudioContext.destination)
             }
         }
             .catch({ throwable -> logger.info(throwable, { "Exception when setting up audio graph" }) })
@@ -177,7 +198,7 @@ object PitchDetection {
 
         audioContext.close().then {
             microphoneNode?.disconnect()
-            testAudioProcessorNode.disconnect()
+            testAudioProcessorNode?.disconnect()
             gainNode?.disconnect()
 
             microphoneNode = null

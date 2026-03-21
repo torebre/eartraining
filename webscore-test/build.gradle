@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.kotlin.js'
+    id 'org.jetbrains.kotlin.multiplatform'
 }
 
-group 'com.kjipo'
-version '0.4-SNAPSHOT'
+group = 'com.kjipo'
+version = '0.4-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -14,38 +14,53 @@ rootProject.kotlinNodeJs {
     versions.webpackCli.version = "4.10.0"
 }
 
-dependencies {
-    implementation project(':webscore-multimodule')
-    implementation project(':scoregenerator-common')
-    implementation project(':score-multimodule')
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
-
-//                implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
-
-    implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
-
-    testImplementation "org.jetbrains.kotlin:kotlin-test-js"
-}
-
 kotlin {
     js {
         browser {
             webpackTask {
-                cssSupport.enabled = true
+                cssSupport {
+                    enabled.set(true)
+                }
             }
 
             runTask {
-                cssSupport.enabled = true
+                cssSupport {
+                    enabled.set(true)
+                }
             }
 
             testTask {
                 useKarma {
                     useChromeHeadless()
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
         binaries.executable()
+    }
+
+    sourceSets {
+        jsMain {
+            kotlin.srcDir('src/main/kotlin')
+            resources.srcDir('src/main/resources')
+
+            dependencies {
+                implementation project(':webscore-multimodule')
+                implementation project(':scoregenerator-common')
+                implementation project(':score-multimodule')
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
+
+//                implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.10"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
+
+                implementation "io.github.oshai:kotlin-logging:$kotlinLogging"
+            }
+        }
+        jsTest {
+            kotlin.srcDir('src/test/kotlin')
+
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test-js"
+            }
+        }
     }
 }

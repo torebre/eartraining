@@ -4,7 +4,7 @@ import com.kjipo.svg.PathCommand
 import com.kjipo.svg.PathElement
 import com.kjipo.svg.PathInterfaceImpl
 import com.kjipo.svg.findBoundingBox
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 class BarLines(
     val xPosition: Double,
@@ -19,7 +19,7 @@ class BarLines(
         val spaceBetweenLines = 2 * DEFAULT_VERTICAL_NOTE_SPACING
         var y = yPosition - 3 * spaceBetweenLines
         val pathElements = mutableListOf(
-            PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), y.toDouble())),
+            PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition, y)),
             PathElement(PathCommand.VERTICAL_LINE_TO_RELATIVE, listOf(4.times(spaceBetweenLines).toDouble())),
             PathElement(
                 PathCommand.MOVE_TO_ABSOLUTE,
@@ -29,11 +29,11 @@ class BarLines(
         )
 
         for (i in 0..4) {
-            pathElements.add(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition.toDouble(), y.toDouble())))
+            pathElements.add(PathElement(PathCommand.MOVE_TO_ABSOLUTE, listOf(xPosition, y)))
             pathElements.add(
                 PathElement(
                     PathCommand.HORIZONAL_LINE_TO_RELATIVE,
-                    listOf(xPosition.plus(DEFAULT_BAR_WIDTH).toDouble())
+                    listOf(xPosition.plus(DEFAULT_BAR_WIDTH))
                 )
             )
             y += spaceBetweenLines

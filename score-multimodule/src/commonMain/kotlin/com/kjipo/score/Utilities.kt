@@ -1,7 +1,7 @@
 package com.kjipo.score
 
 import com.kjipo.svg.BoundingBox
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.abs
 import kotlin.math.roundToInt
 

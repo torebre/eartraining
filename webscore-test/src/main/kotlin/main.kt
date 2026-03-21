@@ -4,9 +4,9 @@ import com.kjipo.score.*
 import com.kjipo.scoregenerator.ELEMENT_ID
 import com.kjipo.scoregenerator.ReducedScore
 import com.kjipo.scoregenerator.SimpleNoteSequence
-import mu.KotlinLogging
-import mu.KotlinLoggingConfiguration
-import mu.KotlinLoggingLevel
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.github.oshai.kotlinlogging.Level
 
 // Uncommenting the following will set up an empty webscore automatically when the Javascript in the built module is run
 //val scoreHandler = ScoreHandlerJavaScript(ScoreHandler())
@@ -17,7 +17,7 @@ private val logger = KotlinLogging.logger {}
 
 
 private fun showTie() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val bar = Bar().also {
         it.clef = Clef.G
@@ -42,7 +42,7 @@ private fun showTie() {
 }
 
 private fun showBeam() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val bar = Bar(clef = Clef.G, timeSignature = TimeSignature(4, 4))
 
@@ -92,7 +92,7 @@ private fun showBeam() {
 }
 
 private fun showNoteGroupWithSharp() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val bar = Bar().also {
         it.clef = Clef.G
@@ -116,7 +116,7 @@ private fun showNoteGroupWithSharp() {
 }
 
 private fun showNotes() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val simpleNoteSequence = NoteType.values().mapIndexed { index, noteType ->
         val id = "test$index"
@@ -132,7 +132,7 @@ private fun showNotes() {
 
 
 private fun showChordWithTwoSharps() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val bar = Bar().also {
         it.clef = Clef.G
@@ -163,7 +163,7 @@ private fun showChordWithTwoSharps() {
 private fun showTieAcrossBars() {
     val score = Score()
 
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val bar = Bar().apply {
         clef = Clef.G
@@ -187,7 +187,7 @@ private fun showTieAcrossBars() {
 }
 
 private fun showBeamIncludingChords() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     val bar = Bar(clef = Clef.G, timeSignature = TimeSignature(4, 4))
 

@@ -3,9 +3,9 @@ import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import mu.KotlinLoggingConfiguration
-import mu.KotlinLoggingLevel
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.github.oshai.kotlinlogging.Level
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.events.KeyboardEvent
 
 object WebScoreApp {
@@ -178,7 +178,7 @@ object WebScoreApp {
 
 
 fun main() {
-    KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+    KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
     WebScoreApp.showWebscore()
 }

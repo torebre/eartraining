@@ -2,7 +2,7 @@ package com.kjipo.scoregenerator
 
 import com.kjipo.handler.*
 import com.kjipo.score.*
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 
 /**

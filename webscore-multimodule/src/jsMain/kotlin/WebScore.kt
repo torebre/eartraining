@@ -1,7 +1,7 @@
 import com.kjipo.handler.MoveElement
 import kotlinx.browser.document
 import kotlinx.html.currentTimeMillis
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.Element
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.KeyboardEvent

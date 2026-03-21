@@ -4,7 +4,7 @@ import com.kjipo.scoregenerator.Action
 import com.kjipo.scoregenerator.ActionScript
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 
 private val logger = KotlinLogging.logger {}

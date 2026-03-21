@@ -3,7 +3,7 @@ package com.kjipo.handler
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import com.kjipo.score.TICKS_PER_QUARTER_NOTE
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.absoluteValue
 
 object ScoreHandlerUtilities {

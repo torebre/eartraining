@@ -3,7 +3,7 @@ package com.kjipo.score
 import com.kjipo.handler.Note
 import com.kjipo.handler.ScoreHelperFunctions.transformToNoteAndAccidental
 import com.kjipo.svg.*
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 
 /**

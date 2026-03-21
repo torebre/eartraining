@@ -3,15 +3,15 @@ import com.kjipo.score.Clef
 import com.kjipo.score.Duration
 import com.kjipo.score.NoteType
 import com.kjipo.score.TimeSignature
-import mu.KotlinLoggingConfiguration
-import mu.KotlinLoggingLevel
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.github.oshai.kotlinlogging.Level
 import kotlin.test.Test
 
 class NoteGroupRenderTest {
 
     @Test
     fun showChordWithTwoSharps() {
-        KotlinLoggingConfiguration.LOG_LEVEL = KotlinLoggingLevel.DEBUG
+        KotlinLoggingConfiguration.logLevel = Level.DEBUG
 
         val bar = Bar().also {
             it.clef = Clef.G

@@ -7,7 +7,7 @@ import com.kjipo.submithandling.SubmitHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 /**
  * Shows two scores. One with the target sequence and one with the

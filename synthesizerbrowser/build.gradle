@@ -6,6 +6,11 @@ repositories {
     mavenCentral()
 }
 
+// Fixes webpack-cli incompatibility by pinning a compatible version.
+rootProject.kotlinNodeJs {
+    versions.webpackCli.version = "4.10.0"
+}
+
 kotlin {
     js {
         browser {
@@ -38,13 +43,13 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:$kotlinxHtmlVersion"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
 
-                implementation "io.github.microutils:kotlin-logging:$kotlinLogging"
+                implementation "io.github.oshai:kotlin-logging:$kotlinLogging"
             }
         }
         jsTest {
             dependencies {
                 implementation kotlin('test-js')
-                implementation group: 'junit', name: 'junit', version: '4.12'
+                implementation 'junit:junit:4.12'
             }
         }
     }

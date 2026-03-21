@@ -3,7 +3,7 @@ package com.kjipo.midi
 import com.kjipo.scoregenerator.Pitch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 class MidiScript(pitchSequence: List<Pitch>, private val midiPlayer: MidiPlayerInterface) {
     private val pitchEvents = mutableListOf<PitchEvent>()

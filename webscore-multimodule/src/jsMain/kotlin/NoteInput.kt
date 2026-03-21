@@ -2,7 +2,7 @@ import com.kjipo.handler.InsertNoteWithType
 import com.kjipo.score.Duration
 import com.kjipo.score.GClefNoteLine
 import com.kjipo.score.NoteType
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.events.KeyboardEvent
 
 
