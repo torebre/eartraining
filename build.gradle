@@ -5,6 +5,7 @@ allprojects {
 
 buildscript {
     ext.kotlinVersion = '2.1.0'
+    ext.composeVersion = '1.7.3'
 
     repositories {
         mavenCentral()
@@ -12,6 +13,8 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.compose:compose-gradle-plugin:$composeVersion"
+        classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:$kotlinVersion"
     }
 }
 
