@@ -1,0 +1,61 @@
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+}
+
+group = 'com.kjipo'
+version = '0.4-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+// Fixes webpack-cli incompatibility by pinning a compatible version.
+rootProject.kotlinNodeJs {
+    versions.webpackCli.version = "4.10.0"
+    versions.webpackDevServer.version = "4.11.1"
+}
+
+kotlin {
+    jvm()
+    js {
+        browser {
+            webpackTask {
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
+
+            runTask {
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
+
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
+        binaries.executable()
+    }
+
+    sourceSets {
+        jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+            }
+
+        }
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+            }
+        }
+        jsTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test-js"
+            }
+        }
+    }
+}
