@@ -45,6 +45,7 @@ kotlin {
 
             dependencies {
                 implementation project(":scoregenerator-common")
+                implementation project(":soundfont-core")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
                 implementation "io.github.oshai:kotlin-logging:$kotlinLogging"
