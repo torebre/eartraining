@@ -1,0 +1,54 @@
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.compose'
+    id 'org.jetbrains.kotlin.plugin.compose'
+}
+
+kotlin {
+    jvm("jvm")
+
+    js {
+        browser()
+        binaries.executable()
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation project(":soundfont-core")
+                implementation compose.runtime
+                implementation compose.foundation
+                implementation compose.material3
+                implementation compose.ui
+                implementation compose.components.resources
+                implementation compose.components.uiToolingPreview
+                implementation "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.4"
+                implementation "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.8.4"
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation compose.desktop.currentOs
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+            }
+        }
+
+        jsTest {
+            dependencies {
+                implementation kotlin("test")
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0"
+            }
+        }
+    }
+}
