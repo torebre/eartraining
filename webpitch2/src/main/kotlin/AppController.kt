@@ -1,4 +1,5 @@
 import com.kjipo.attemptprocessor.PitchData
+import com.kjipo.midi.MidiPlayerInterface
 import com.kjipo.midi.playTargetSequenceInternal2
 import com.kjipo.scoregenerator.*
 import graph.PitchDataWithTime
@@ -13,7 +14,8 @@ import kotlin.math.pow
 
 class AppController(val state: AppState) {
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
-    private val synthesizer = com.kjipo.midi.SynthesizerScript()
+//    private val synthesizer = com.kjipo.midi.SynthesizerScript()
+    private val synthesizer: MidiPlayerInterface = com.kjipo.soundfontsyntheizer.SoundfontSynthesizer()
     private val rateInput = RateInput()
     private val pitchGraphModel = PitchGraphModel()
     private val pitchDetection = PitchDetection()

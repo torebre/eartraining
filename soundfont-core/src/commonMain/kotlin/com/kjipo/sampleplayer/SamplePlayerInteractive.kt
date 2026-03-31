@@ -73,5 +73,8 @@ class SamplePlayerInteractive {
         activePitches.remove(pitch)?.pitchOff()
     }
 
+    fun allPitchesOff() {
+        activePitches.values.forEach { it.pitchOff() }
+    }
 
 }
