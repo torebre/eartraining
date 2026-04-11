@@ -319,50 +319,31 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
             )
         }.toList()
 
-        pitchCoordinateData.forEachIndexed { index, pitchData ->
-            val border = when (index) {
-                0 -> {
-                    Pair(height, (pitchData.yCoordinate + pitchCoordinateData[index + 1].yCoordinate) / 2)
-                }
-
-                pitchCoordinateData.size - 1 -> {
-                    Pair((pitchData.yCoordinate + pitchCoordinateData[index - 1].yCoordinate) / 2, 0)
-                }
-
-                else -> {
-                    Pair(
-                        (pitchData.yCoordinate + pitchCoordinateData[index - 1].yCoordinate) / 2,
-                        (pitchData.yCoordinate + pitchCoordinateData[index + 1].yCoordinate) / 2
-                    )
-                }
-            }
-
-            drawBackgroundLines(border, if (index % 2 == 0) "green" else "blue")
-        }
-
         pitchCoordinateData.forEach { pitchData ->
+            drawBackgroundLine(pitchData.yCoordinate, "lightgrey")
+
             val textElement = document.createElementNS(SVG_NAMESPACE_URI, "text").also {
                 with(it) {
                     setAttribute("x", "$axisRightXStart")
                     setAttribute("y", "${pitchData.yCoordinate}")
+                    setAttribute("dominant-baseline", "middle")
                     setAttribute("class", "pitchAxis")
                     textContent = "${pitchData.noteName} ${pitchData.midiNote} ${formatPitchFrequence(pitchData.frequency)}"
                 }
             }
             svgElement.appendChild(textElement)
         }
-
     }
 
 
-    private fun drawBackgroundLines(border: Pair<Int, Int>, colour: String) {
-        val backgroundElement = document.createElementNS(SVG_NAMESPACE_URI, "rect").also {
+    private fun drawBackgroundLine(yCoord: Int, colour: String) {
+        val backgroundElement = document.createElementNS(SVG_NAMESPACE_URI, "line").also {
             with(it) {
-                setAttribute("x", "0")
-                setAttribute("y", "${border.second}")
-                setAttribute("width", "$width")
-                setAttribute("height", "${border.first - border.second}")
-                setAttribute("fill", colour)
+                setAttribute("x1", "0")
+                setAttribute("y1", "$yCoord")
+                setAttribute("x2", "${width - marginRight}")
+                setAttribute("y2", "$yCoord")
+                setAttribute("stroke", colour)
             }
         }
         svgElement.appendChild(backgroundElement)
