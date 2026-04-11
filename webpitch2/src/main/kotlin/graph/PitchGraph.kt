@@ -4,16 +4,29 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.Element
 import org.w3c.dom.svg.SVGElement
+import org.w3c.dom.DOMRectReadOnly
 import kotlin.Int
 import kotlin.math.log2
 
-class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphModel) : PitchGraphModelListener {
-    private val xMinCoordinate = 0
-    private val yMinCoordinate = 0
-    private val xMaxCoordinate = 500
-    private val yMaxCoordinate = 500
+external class ResizeObserver(callback: (Array<ResizeObserverEntry>, ResizeObserver) -> Unit) {
+    fun observe(target: Element)
+    fun unobserve(target: Element)
+    fun disconnect()
+}
 
-    private val width = 500
+abstract external class ResizeObserverEntry {
+    val contentRect: DOMRectReadOnly
+    val target: Element
+}
+
+class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphModel) : PitchGraphModelListener {
+    private var width = 500
+    private var height = 500
+
+    private val marginTop = 20
+    private val marginBottom = 20
+    private val marginLeft = 20
+    private val marginRight = 120
 
     private val yMinValue = log2(PITCH_CLASS_FREQUENCIES.first().pitch)
     private val yMaxValue = log2(PITCH_CLASS_FREQUENCIES.last().pitch)
@@ -35,32 +48,72 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     private val idTargetPointMap = mutableMapOf<Int, Element>()
     private val idsTargetPointMap = mutableMapOf<Pair<Int, Int>, Element>()
 
-    private val axisRightXStart = xMaxCoordinate - 100
+    private var axisRightXStart = width - marginRight
 
-//    private val logger = KotlinLogging.logger {}
+    private var isTargetShowing = false
 
     class PitchCoordinateData(val midiNote: Int, val noteName: String, val frequency: Float, val yCoordinate: Int)
 
-
     init {
         svgElement = document.getElementById(svgElementId) as SVGElement
-        svgElement.setAttribute("viewBox", "$xMinCoordinate $yMinCoordinate $xMaxCoordinate $yMaxCoordinate")
-        drawPitchAxis()
+        
+        val resizeObserver = ResizeObserver { entries, _ ->
+            for (entry in entries) {
+                onResize(entry.contentRect.width, entry.contentRect.height)
+            }
+        }
+        resizeObserver.observe(svgElement)
+
+        val rect = svgElement.getBoundingClientRect()
+        if (rect.width > 0 && rect.height > 0) {
+            width = rect.width.toInt()
+            height = rect.height.toInt()
+        }
+
+        updateLayoutState()
+        redraw()
 
         pitchGraphModel.addPitchDataListener(this)
     }
 
-
-    private fun transformToX(timestamp: Long): Int {
-        return ((timestamp - windowStartAbsolute).toDouble() / (windowsEndAbsolute - windowStartAbsolute) * width * pixelStepSize).toInt()
+    private fun onResize(newWidth: Double, newHeight: Double) {
+        width = newWidth.toInt()
+        height = newHeight.toInt()
+        updateLayoutState()
+        redraw()
     }
 
+    private fun updateLayoutState() {
+        axisRightXStart = width - marginRight
+        svgElement.setAttribute("viewBox", "0 0 $width $height")
+    }
+
+    private fun redraw() {
+        // Clear all SVG elements
+        while (svgElement.firstChild != null) {
+            svgElement.removeChild(svgElement.firstChild!!)
+        }
+        idPointMap.clear()
+        idsPointMap.clear()
+        idTargetPointMap.clear()
+        idsTargetPointMap.clear()
+
+        drawPitchAxis()
+        updateGraphBasedOnCurrentWindow()
+        targetSequenceShowing(isTargetShowing)
+    }
+
+    private fun transformToX(timestamp: Long): Int {
+        val drawableWidth = width - marginLeft - marginRight
+        val x = ((timestamp - windowStartAbsolute).toDouble() / (windowsEndAbsolute - windowStartAbsolute) * drawableWidth * pixelStepSize).toInt()
+        return x + marginLeft
+    }
 
     private fun transformToY(pitch: Float): Int {
+        val drawableHeight = height - marginTop - marginBottom
         val pitchOnLogScale = log2(pitch)
-        val yCoord =
-            yMaxCoordinate - ((yMaxValue - pitchOnLogScale) / (yMaxValue - yMinValue)) * (yMaxCoordinate - yMinCoordinate)
-        return turnYAxis(yCoord.toInt())
+        val relativeY = ((yMaxValue - pitchOnLogScale) / (yMaxValue - yMinValue)) * drawableHeight
+        return (relativeY + marginTop).toInt()
     }
 
     private fun clearAndDrawLine(
@@ -184,22 +237,16 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
 
-    private fun turnYAxis(yCoord: Int) = yMaxCoordinate - yCoord
+    private fun turnYAxis(yCoord: Int) = height - yCoord
 
     override fun uncertainPitchReceived(timestamp: Long) {
         // TODO Mark in graph
-
     }
 
-
     override fun targetSequenceShowing(isShowing: Boolean) {
+        isTargetShowing = isShowing
         if (isShowing) {
             val dataPointsToShow = pitchGraphModel.getTargetSequence()
-
-//            pitchGraphModel.getTargetSequence().forEach { pitchData ->
-//                console.log("Test25: " + pitchData.timeStamp)
-//            }
-//            console.log("Test24: $windowStartAbsolute, $windowsEndAbsolute. Number of target sequence points: ${dataPointsToShow.size}")
 
             showDataPoints(
                 dataPointsToShow,
@@ -207,9 +254,11 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                 idsTargetPointMap,
                 "green"
             )
-
-//            console.log("Test26: " + idTargetPointMap)
-//            console.log("Test27: " + idsTargetPointMap)
+        } else {
+            idTargetPointMap.values.forEach { it.remove() }
+            idTargetPointMap.clear()
+            idsTargetPointMap.values.forEach { it.remove() }
+            idsTargetPointMap.clear()
         }
     }
 
@@ -261,7 +310,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
 
     private fun drawPitchAxis() {
-        val pitchCoordinateData = PITCH_CLASS_FREQUENCIES.map { pitchClassFrequency ->
+        val pitchCoordinateData: List<PitchCoordinateData> = PITCH_CLASS_FREQUENCIES.map { pitchClassFrequency ->
             PitchCoordinateData(
                 pitchClassFrequency.midiNote,
                 pitchClassFrequency.note,
@@ -273,11 +322,11 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         pitchCoordinateData.forEachIndexed { index, pitchData ->
             val border = when (index) {
                 0 -> {
-                    Pair(yMaxCoordinate, (pitchData.yCoordinate + pitchCoordinateData[index + 1].yCoordinate) / 2)
+                    Pair(height, (pitchData.yCoordinate + pitchCoordinateData[index + 1].yCoordinate) / 2)
                 }
 
                 pitchCoordinateData.size - 1 -> {
-                    Pair((pitchData.yCoordinate + pitchCoordinateData[index - 1].yCoordinate) / 2, yMinCoordinate)
+                    Pair((pitchData.yCoordinate + pitchCoordinateData[index - 1].yCoordinate) / 2, 0)
                 }
 
                 else -> {
@@ -287,8 +336,6 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                     )
                 }
             }
-
-            //console.log("Test30: " + border)
 
             drawBackgroundLines(border, if (index % 2 == 0) "green" else "blue")
         }
@@ -311,9 +358,9 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     private fun drawBackgroundLines(border: Pair<Int, Int>, colour: String) {
         val backgroundElement = document.createElementNS(SVG_NAMESPACE_URI, "rect").also {
             with(it) {
-                setAttribute("x", "$xMinCoordinate")
-                setAttribute("y", "${border.first}")
-                setAttribute("width", "${xMaxCoordinate - xMinCoordinate}")
+                setAttribute("x", "0")
+                setAttribute("y", "${border.second}")
+                setAttribute("width", "$width")
                 setAttribute("height", "${border.first - border.second}")
                 setAttribute("fill", colour)
             }

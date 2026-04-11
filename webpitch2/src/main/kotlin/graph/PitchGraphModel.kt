@@ -81,6 +81,10 @@ open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {
         pitchDataListeners.forEach { it.targetSequenceShowing(targetSequenceShowing) }
     }
 
+    fun isTargetSequenceShowing(): Boolean {
+        return targetSequenceShowing
+    }
+
     fun addPitchDataListener(pitchGraphModelListener: PitchGraphModelListener) =
         pitchDataListeners.add(pitchGraphModelListener)
 
