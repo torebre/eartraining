@@ -17,5 +17,3 @@ fun main() {
     controller.setPitchGraphElement("pitchGraph")
     controller.generateSequence()
 }
-
-
