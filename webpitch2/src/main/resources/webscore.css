@@ -10,3 +10,16 @@
 .pitchAxis {
     font-size: 50%;
 }
+
+.pitch-C { stroke: #ff0000; }
+.pitch-C\# { stroke: #ff8000; }
+.pitch-D { stroke: #ffff00; }
+.pitch-D\# { stroke: #80ff00; }
+.pitch-E { stroke: #00ff00; }
+.pitch-F { stroke: #00ff80; }
+.pitch-F\# { stroke: #00ffff; }
+.pitch-G { stroke: #0080ff; }
+.pitch-G\# { stroke: #0000ff; }
+.pitch-A { stroke: #8000ff; }
+.pitch-A\# { stroke: #ff00ff; }
+.pitch-B { stroke: #ff0080; }

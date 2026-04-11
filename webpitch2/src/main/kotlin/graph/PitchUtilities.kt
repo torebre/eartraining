@@ -10,7 +10,7 @@ internal val PITCH_CLASSES = listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "
 
 private val C2 = 440.0 * SEMITONE_RATIO.pow(-33)
 
-class PitchData(val pitch: Float, val note: String, val octave: Int, val midiNote: Int)
+class PitchData(val pitch: Float, val note: String, val octave: Int, val midiNote: Int, val pitchClass: String)
 
 internal val PITCH_CLASS_FREQUENCIES = generateSequence(C2) {
     it * SEMITONE_RATIO
@@ -21,11 +21,13 @@ internal val PITCH_CLASS_FREQUENCIES = generateSequence(C2) {
         // Starting on MIDI note 36 (C2)
         val midiNote = index + 36
         val octave = midiNote / 12 - 1
+        val pitchClassName = PITCH_CLASSES[midiNote % 12]
         PitchData(
             frequency,
-            PITCH_CLASSES[midiNote % 12] + "$octave",
+            pitchClassName + "$octave",
             octave,
-            midiNote
+            midiNote,
+            pitchClassName
         )
     }
 

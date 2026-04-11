@@ -52,7 +52,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private var isTargetShowing = false
 
-    class PitchCoordinateData(val midiNote: Int, val noteName: String, val frequency: Float, val yCoordinate: Int)
+    class PitchCoordinateData(val midiNote: Int, val noteName: String, val frequency: Float, val yCoordinate: Int, val pitchClass: String)
 
     init {
         svgElement = document.getElementById(svgElementId) as SVGElement
@@ -315,12 +315,13 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                 pitchClassFrequency.midiNote,
                 pitchClassFrequency.note,
                 pitchClassFrequency.pitch,
-                transformToY(pitchClassFrequency.pitch)
+                transformToY(pitchClassFrequency.pitch),
+                pitchClassFrequency.pitchClass
             )
         }.toList()
 
         pitchCoordinateData.forEach { pitchData ->
-            drawBackgroundLine(pitchData.yCoordinate, "lightgrey")
+            drawBackgroundLine(pitchData.yCoordinate, pitchData.pitchClass)
 
             val textElement = document.createElementNS(SVG_NAMESPACE_URI, "text").also {
                 with(it) {
@@ -336,14 +337,14 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
 
-    private fun drawBackgroundLine(yCoord: Int, colour: String) {
+    private fun drawBackgroundLine(yCoord: Int, pitchClass: String) {
         val backgroundElement = document.createElementNS(SVG_NAMESPACE_URI, "line").also {
             with(it) {
                 setAttribute("x1", "0")
                 setAttribute("y1", "$yCoord")
                 setAttribute("x2", "${width - marginRight}")
                 setAttribute("y2", "$yCoord")
-                setAttribute("stroke", colour)
+                setAttribute("class", "pitch-$pitchClass")
             }
         }
         svgElement.appendChild(backgroundElement)
