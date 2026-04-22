@@ -323,16 +323,35 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         pitchCoordinateData.forEach { pitchData ->
             drawBackgroundLine(pitchData.yCoordinate, pitchData.pitchClass)
 
-            val textElement = document.createElementNS(SVG_NAMESPACE_URI, "text").also {
-                with(it) {
-                    setAttribute("x", "$axisRightXStart")
-                    setAttribute("y", "${pitchData.yCoordinate}")
-                    setAttribute("dominant-baseline", "middle")
-                    setAttribute("class", "pitchAxis")
-                    textContent = "${pitchData.noteName} ${pitchData.midiNote} ${formatPitchFrequence(pitchData.frequency)}"
-                }
+            // Note Name column
+            document.createElementNS(SVG_NAMESPACE_URI, "text").also {
+                it.setAttribute("x", "${axisRightXStart + 5}")
+                it.setAttribute("y", "${pitchData.yCoordinate}")
+                it.setAttribute("dominant-baseline", "middle")
+                it.setAttribute("class", "pitchAxis")
+                it.textContent = pitchData.noteName
+                svgElement.appendChild(it)
             }
-            svgElement.appendChild(textElement)
+
+            // MIDI Note column
+            document.createElementNS(SVG_NAMESPACE_URI, "text").also {
+                it.setAttribute("x", "${axisRightXStart + 40}")
+                it.setAttribute("y", "${pitchData.yCoordinate}")
+                it.setAttribute("dominant-baseline", "middle")
+                it.setAttribute("class", "pitchAxis")
+                it.textContent = "${pitchData.midiNote}"
+                svgElement.appendChild(it)
+            }
+
+            // Frequency column
+            document.createElementNS(SVG_NAMESPACE_URI, "text").also {
+                it.setAttribute("x", "${axisRightXStart + 75}")
+                it.setAttribute("y", "${pitchData.yCoordinate}")
+                it.setAttribute("dominant-baseline", "middle")
+                it.setAttribute("class", "pitchAxis")
+                it.textContent = formatPitchFrequency(pitchData.frequency)
+                svgElement.appendChild(it)
+            }
         }
     }
 
@@ -354,7 +373,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     companion object {
         internal const val SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
-        private fun formatPitchFrequence(pitch: Float): String {
+        private fun formatPitchFrequency(pitch: Float): String {
             return pitch.asDynamic().toFixed(2) as String
         }
 
