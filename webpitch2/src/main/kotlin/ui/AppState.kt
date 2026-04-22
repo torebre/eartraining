@@ -1,6 +1,7 @@
 package ui
 
 import androidx.compose.runtime.*
+import kotlinx.browser.localStorage
 
 enum class ConfigMode {
     NORMAL,
@@ -9,8 +10,22 @@ enum class ConfigMode {
 }
 
 class AppState {
-    var lowestNote by mutableStateOf(60)
-    var highestNote by mutableStateOf(90)
+    private var _lowestNote by mutableStateOf(localStorage.getItem("lowestNote")?.toIntOrNull() ?: 60)
+    var lowestNote: Int
+        get() = _lowestNote
+        set(value) {
+            _lowestNote = value
+            localStorage.setItem("lowestNote", value.toString())
+        }
+
+    private var _highestNote by mutableStateOf(localStorage.getItem("highestNote")?.toIntOrNull() ?: 90)
+    var highestNote: Int
+        get() = _highestNote
+        set(value) {
+            _highestNote = value
+            localStorage.setItem("highestNote", value.toString())
+        }
+
     var isRecording by mutableStateOf(false)
     var currentPitch by mutableStateOf(0.0f)
     var currentCertainty by mutableStateOf(0.0f)
