@@ -40,3 +40,7 @@ internal fun getPitchClosestToFrequency(frequency: Float): String? {
 
     return PITCH_CLASSES[pitchClass]
 }
+
+internal fun getMidiNoteClosestToFrequency(frequency: Float): Int {
+    return (12 * log2(frequency / 440.0) + 69).roundToInt()
+}

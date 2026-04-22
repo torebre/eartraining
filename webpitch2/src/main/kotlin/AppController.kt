@@ -5,11 +5,13 @@ import com.kjipo.scoregenerator.*
 import graph.PitchDataWithTime
 import graph.PitchGraph
 import graph.PitchGraphModel
+import graph.getMidiNoteClosestToFrequency
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ui.AppState
+import ui.ConfigMode
 import kotlin.math.pow
 
 class AppController(val state: AppState) {
@@ -30,6 +32,14 @@ class AppController(val state: AppState) {
                 state.currentPitch = pitchData.pitch
                 state.currentCertainty = pitchData.certainty
                 rateInput.addPitchData(pitchData)
+
+                if (state.configMode != ConfigMode.NORMAL) {
+                    if (pitchData.pitch > 0) {
+                        state.closestMidiNote = getMidiNoteClosestToFrequency(pitchData.pitch)
+                    } else {
+                        state.closestMidiNote = null
+                    }
+                }
             }
         })
     }
@@ -69,6 +79,35 @@ class AppController(val state: AppState) {
 
     fun toggleShowTarget() {
         pitchGraphModel.toggleTargetSequenceShowing()
+    }
+
+    fun startConfigureLowerLimit() {
+        state.configMode = ConfigMode.CONFIGURING_LOWER
+        if (!state.isRecording) {
+            toggleRecording()
+        }
+    }
+
+    fun startConfigureUpperLimit() {
+        state.configMode = ConfigMode.CONFIGURING_UPPER
+        if (!state.isRecording) {
+            toggleRecording()
+        }
+    }
+
+    fun setLimit() {
+        state.closestMidiNote?.let {
+            if (state.configMode == ConfigMode.CONFIGURING_LOWER) {
+                state.lowestNote = it
+            } else if (state.configMode == ConfigMode.CONFIGURING_UPPER) {
+                state.highestNote = it
+            }
+        }
+        state.configMode = ConfigMode.NORMAL
+        state.closestMidiNote = null
+        if (state.isRecording) {
+            toggleRecording()
+        }
     }
 
     private fun simpleNoteSequenceToPitchSequence(simpleNoteSequence: SimpleNoteSequence): List<PitchDataWithTime> {
