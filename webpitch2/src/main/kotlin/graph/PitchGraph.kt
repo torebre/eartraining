@@ -45,6 +45,8 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     private val idPointMap = mutableMapOf<Int, Element>()
     private val idsPointMap = mutableMapOf<Pair<Int, Int>, Element>()
 
+    private val timeAxisElements = mutableListOf<Element>()
+
     private val idTargetPointMap = mutableMapOf<Int, Element>()
     private val idsTargetPointMap = mutableMapOf<Pair<Int, Int>, Element>()
 
@@ -95,10 +97,12 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         }
         idPointMap.clear()
         idsPointMap.clear()
+        timeAxisElements.clear()
         idTargetPointMap.clear()
         idsTargetPointMap.clear()
 
         drawPitchAxis()
+        drawTimeAxis()
         updateGraphBasedOnCurrentWindow()
         targetSequenceShowing(isTargetShowing)
     }
@@ -168,6 +172,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
     private fun updateGraphBasedOnCurrentWindow() {
+        drawTimeAxis()
         pitchGraphModel.getPointsInRange(windowStartAbsolute, windowsEndAbsolute).let { dataPointsToShow ->
             showDataPoints(dataPointsToShow, idPointMap, idsPointMap, "red")
         }
@@ -273,10 +278,15 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         idPointMap.clear()
         idsPointMap.values.forEach { it.remove() }
         idsPointMap.clear()
+        timeAxisElements.forEach { it.remove() }
+        timeAxisElements.clear()
         idTargetPointMap.values.forEach { it.remove() }
         idTargetPointMap.clear()
         idsTargetPointMap.values.forEach { it.remove() }
         idsTargetPointMap.clear()
+
+        drawTimeAxis()
+        drawPitchAxis()
     }
 
 
@@ -305,6 +315,49 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
             }
         }.also {
             svgElement.appendChild(it)
+        }
+    }
+
+
+    private fun drawTimeAxis() {
+        timeAxisElements.forEach { it.remove() }
+        timeAxisElements.clear()
+
+        val startSecond = (windowStartAbsolute / 1000).toInt()
+        val endSecond = (windowsEndAbsolute / 1000).toInt()
+
+        for (second in startSecond..endSecond) {
+            val timestamp = second * 1000L
+            val x = transformToX(timestamp)
+
+            if (x < marginLeft || x > width - marginRight) {
+                continue
+            }
+
+            val isMajorTick = second % 5 == 0
+            val tickHeight = if (isMajorTick) 10 else 5
+
+            document.createElementNS(SVG_NAMESPACE_URI, "line").also {
+                it.setAttribute("x1", "$x")
+                it.setAttribute("y1", "${height - marginBottom}")
+                it.setAttribute("x2", "$x")
+                it.setAttribute("y2", "${height - marginBottom + tickHeight}")
+                it.setAttribute("stroke", "black")
+                svgElement.appendChild(it)
+                timeAxisElements.add(it)
+            }
+
+            if (isMajorTick) {
+                document.createElementNS(SVG_NAMESPACE_URI, "text").also {
+                    it.setAttribute("x", "$x")
+                    it.setAttribute("y", "${height - marginBottom + 20}")
+                    it.setAttribute("text-anchor", "middle")
+                    it.setAttribute("class", "timeAxis")
+                    it.textContent = "$second"
+                    svgElement.appendChild(it)
+                    timeAxisElements.add(it)
+                }
+            }
         }
     }
 
