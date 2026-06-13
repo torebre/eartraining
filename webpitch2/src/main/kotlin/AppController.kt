@@ -55,6 +55,7 @@ class AppController(val state: AppState) {
         actionSequence = actions
         rateInput.setCurrentTarget(pitches)
         rateInput.startNewInput()
+        state.reset()
         pitchGraphModel.reset(simpleNoteSequenceToPitchSequence(currentSequence))
     }
 

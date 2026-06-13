@@ -31,4 +31,15 @@ class AppState {
     var currentCertainty by mutableStateOf(0.0f)
     var configMode by mutableStateOf(ConfigMode.NORMAL)
     var closestMidiNote by mutableStateOf<Int?>(null)
+
+
+    fun reset() {
+        isRecording = false
+        currentPitch = 0.0f
+        currentCertainty = 0.0f
+        configMode = ConfigMode.NORMAL
+        closestMidiNote = null
+    }
+
 }
+
