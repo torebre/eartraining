@@ -26,6 +26,14 @@ class AppState {
             localStorage.setItem("highestNote", value.toString())
         }
 
+    private var _isDarkMode by mutableStateOf(localStorage.getItem("isDarkMode")?.toBoolean() ?: false)
+    var isDarkMode: Boolean
+        get() = _isDarkMode
+        set(value) {
+            _isDarkMode = value
+            localStorage.setItem("isDarkMode", value.toString())
+        }
+
     var isRecording by mutableStateOf(false)
     var currentPitch by mutableStateOf(0.0f)
     var currentCertainty by mutableStateOf(0.0f)

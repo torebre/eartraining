@@ -54,6 +54,8 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private var isTargetShowing = false
 
+    private var isDarkMode = false
+
     class PitchCoordinateData(val midiNote: Int, val noteName: String, val frequency: Float, val yCoordinate: Int, val pitchClass: String)
 
     init {
@@ -102,9 +104,16 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         idsTargetPointMap.clear()
 
         drawPitchAxis()
-        drawTimeAxis()
         updateGraphBasedOnCurrentWindow()
-        targetSequenceShowing(isTargetShowing)
+        
+        if (isTargetShowing) {
+            showDataPoints(
+                pitchGraphModel.getTargetSequence(),
+                idTargetPointMap,
+                idsTargetPointMap,
+                "green"
+            )
+        }
     }
 
     private fun transformToX(timestamp: Long): Int {
@@ -249,22 +258,15 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
     }
 
     override fun targetSequenceShowing(isShowing: Boolean) {
+        if (isTargetShowing == isShowing) return
         isTargetShowing = isShowing
-        if (isShowing) {
-            val dataPointsToShow = pitchGraphModel.getTargetSequence()
+        redraw()
+    }
 
-            showDataPoints(
-                dataPointsToShow,
-                idTargetPointMap,
-                idsTargetPointMap,
-                "green"
-            )
-        } else {
-            idTargetPointMap.values.forEach { it.remove() }
-            idTargetPointMap.clear()
-            idsTargetPointMap.values.forEach { it.remove() }
-            idsTargetPointMap.clear()
-        }
+    override fun darkModeChanged(isDarkMode: Boolean) {
+        if (this.isDarkMode == isDarkMode) return
+        this.isDarkMode = isDarkMode
+        redraw()
     }
 
     override fun reset() {
@@ -311,7 +313,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                 setAttribute("y1", "$previousYCoord")
                 setAttribute("x2", "$xCoord")
                 setAttribute("y2", "$yCoord")
-                setAttribute("stroke", "black")
+                setAttribute("stroke", if (isDarkMode) "white" else "black")
             }
         }.also {
             svgElement.appendChild(it)
@@ -342,7 +344,7 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
                 it.setAttribute("y1", "${height - marginBottom}")
                 it.setAttribute("x2", "$x")
                 it.setAttribute("y2", "${height - marginBottom + tickHeight}")
-                it.setAttribute("stroke", "black")
+                it.setAttribute("stroke", if (isDarkMode) "white" else "black")
                 svgElement.appendChild(it)
                 timeAxisElements.add(it)
             }

@@ -85,6 +85,10 @@ open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {
         return targetSequenceShowing
     }
 
+    fun darkModeChanged(isDarkMode: Boolean) {
+        pitchDataListeners.forEach { it.darkModeChanged(isDarkMode) }
+    }
+
     fun addPitchDataListener(pitchGraphModelListener: PitchGraphModelListener) =
         pitchDataListeners.add(pitchGraphModelListener)
 

@@ -111,6 +111,10 @@ class AppController(val state: AppState) {
         }
     }
 
+    fun darkModeChanged(isDarkMode: Boolean) {
+        pitchGraphModel.darkModeChanged(isDarkMode)
+    }
+
     private fun simpleNoteSequenceToPitchSequence(simpleNoteSequence: SimpleNoteSequence): List<PitchDataWithTime> {
         var idCounter = 0
         return simpleNoteSequence.transformToPitchSequence().flatMap { pitchData ->

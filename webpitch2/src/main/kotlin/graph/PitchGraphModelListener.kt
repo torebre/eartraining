@@ -11,4 +11,6 @@ interface PitchGraphModelListener {
 
     fun reset()
 
+    fun darkModeChanged(isDarkMode: Boolean)
+
 }

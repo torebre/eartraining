@@ -11,7 +11,37 @@ fun AppControls(controller: AppController) {
     val state = controller.state
     val isNormalMode = state.configMode == ConfigMode.NORMAL
 
-    Div {
+    Div(attrs = {
+        style {
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            if (state.isDarkMode) {
+                backgroundColor(Color("black"))
+                color(Color("white"))
+            } else {
+                backgroundColor(Color("white"))
+                color(Color("black"))
+            }
+            minHeight(100.vh)
+            padding(10.px)
+            boxSizing("border-box")
+        }
+    }) {
+        // Dark mode toggle button in top right
+        Div(attrs = {
+            style {
+                position(Position.Absolute)
+                top(10.px)
+                right(10.px)
+            }
+        }) {
+            Button(attrs = {
+                onClick { state.isDarkMode = !state.isDarkMode }
+            }) {
+                Text(if (state.isDarkMode) "Light Mode" else "Dark Mode")
+            }
+        }
+
         // Row 1: Action buttons
         Div(attrs = { style { marginBottom(10.px) } }) {
             val buttonStyle: AttrBuilderContext<*> = {

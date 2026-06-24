@@ -1,5 +1,6 @@
 import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
 import io.github.oshai.kotlinlogging.Level
+import kotlinx.browser.document
 import org.jetbrains.compose.web.renderComposable
 import ui.AppControls
 import ui.AppState
@@ -12,6 +13,16 @@ fun main() {
 
     renderComposable(rootElementId = "content") {
         AppControls(controller)
+        
+        val isDarkMode = state.isDarkMode
+        androidx.compose.runtime.SideEffect {
+            if (isDarkMode) {
+                document.body?.classList?.add("dark-mode")
+            } else {
+                document.body?.classList?.remove("dark-mode")
+            }
+            controller.darkModeChanged(isDarkMode)
+        }
     }
 
     controller.setPitchGraphElement("pitchGraph")
