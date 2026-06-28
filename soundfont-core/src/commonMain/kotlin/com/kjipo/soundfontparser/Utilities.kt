@@ -1,9 +1,15 @@
 package com.kjipo.soundfontparser
 
 
-internal fun transformToString(inputData: ByteArray): String {
-    return CharArray(inputData.size, {
-        Char(inputData[it].toInt())
+internal fun transformToString(inputData: ByteArray, skipInvalidChars: Boolean = false): String {
+    return CharArray(inputData.size, { index ->
+        val charCode = inputData[index].toInt()
+        if (skipInvalidChars && (charCode < Char.MIN_VALUE.code || charCode > Char.MAX_VALUE.code)) {
+            '\uFFFD'
+        }
+        else {
+            Char(charCode)
+        }
     }).concatToString()
 }
 

@@ -154,7 +154,7 @@ object SetupData {
 
     private fun parseInstRecord(recordData: ByteArray): SfInstRecord {
         return SfInstRecord(
-            transformToString(recordData.copyOfRange(0, 20)).trimEnd('\u0000'),
+            transformToString(recordData.copyOfRange(0, 20), true).trimEnd('\u0000'),
             extractWord(recordData, 20)
         )
     }
@@ -177,7 +177,7 @@ object SetupData {
 
     private fun parsePhdrRecord(recordData: ByteArray): PhdrRecord {
         return PhdrRecord(
-            achPresetName = transformToString(recordData.copyOfRange(0, 20)).trimEnd('\u0000'),
+            achPresetName = transformToString(recordData.copyOfRange(0, 20), true).trimEnd('\u0000'),
             wPreset = extractWord(recordData, 20),
             wBank = extractWord(recordData, 22),
             wPresetBagNdx = extractWord(recordData, 24),
@@ -212,7 +212,7 @@ object SetupData {
 
     private fun parseShrdRecord(shdrRecord: ByteArray): ShdrRecord {
         return ShdrRecord(
-            achSampleName = transformToString(shdrRecord.copyOfRange(0, 20)).trimEnd('\u0000'),
+            achSampleName = transformToString(shdrRecord.copyOfRange(0, 20), true).trimEnd('\u0000'),
             dwStart = extractDword(shdrRecord, 20),
             dwEnd = extractDword(shdrRecord, 24),
             dwStartloop = extractDword(shdrRecord, 28),
