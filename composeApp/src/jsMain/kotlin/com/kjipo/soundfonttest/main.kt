@@ -34,12 +34,16 @@ private fun setupUi() {
 
         // Create buttons for each sample
         val body = document.body
+        val container = document.createElement("div")
+        container.asDynamic().style.height = "100vh"
+        container.asDynamic().style.overflowY = "auto"
+        body?.appendChild(container)
 
         // Add "Play pitch" input and button
         val pitchInput = document.createElement("input")
         pitchInput.setAttribute("type", "number")
         pitchInput.setAttribute("value", "60")
-        body?.appendChild(pitchInput)
+        container.appendChild(pitchInput)
 
         val playPitchButton = document.createElement("button")
         playPitchButton.textContent = "Play pitch"
@@ -52,7 +56,7 @@ private fun setupUi() {
                 console.log("Invalid pitch value")
             }
         })
-        body?.appendChild(playPitchButton)
+        container.appendChild(playPitchButton)
 
         // Add "Play scale" button
         val playScaleButton = document.createElement("button")
@@ -61,7 +65,7 @@ private fun setupUi() {
             console.log("Playing scale")
             com.kjipo.sampleplayer.playScale(samplePlayer, 0)
         })
-        body?.appendChild(playScaleButton)
+        container.appendChild(playScaleButton)
 
         sampleNames.forEachIndexed { index, sampleName ->
             val button = document.createElement("button")
@@ -70,7 +74,7 @@ private fun setupUi() {
                 console.log("Playing sample: $sampleName")
                 samplePlayer.playSample(index)
             })
-            body?.appendChild(button)
+            container.appendChild(button)
         }
 
         val activePitches = mutableSetOf<Int>()
@@ -89,7 +93,7 @@ private fun setupUi() {
                     button.style.backgroundColor = "green"
                 }
             })
-            body?.appendChild(button)
+            container.appendChild(button)
         }
     }
 }
