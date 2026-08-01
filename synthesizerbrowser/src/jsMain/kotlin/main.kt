@@ -1,15 +1,15 @@
-import com.kjipo.midi.SynthesizerScript
+import com.kjipo.midi.MidiPlayerInterface
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.github.oshai.kotlinlogging.Level
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
-import io.github.oshai.kotlinlogging.Level
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.w3c.dom.events.KeyboardEvent
 
 object WebScoreApp {
-    private val synthesizer = SynthesizerScript()
+    private val synthesizer: MidiPlayerInterface = com.kjipo.soundfontsyntheizer.SoundfontSynthesizer()
     private val webscoreShow = WebscoreShow(synthesizer)
 
     private val logger = KotlinLogging.logger {}
