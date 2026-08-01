@@ -22,7 +22,6 @@ fun AppControls(controller: AppController) {
                 backgroundColor(Color("white"))
                 color(Color("black"))
             }
-            minHeight(100.vh)
             padding(10.px)
             boxSizing("border-box")
         }
