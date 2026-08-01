@@ -6,6 +6,7 @@ import com.kjipo.soundfontparser.Parser
 import com.kjipo.soundfontparser.SetupData
 import com.kjipo.soundfontparser.loadFile
 import com.kjipo.soundfontparser.printChunks
+import com.kjipo.soundfontparser.serialization.SoundFontDataJsonSerializer
 import kotlinx.browser.document
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,12 +21,8 @@ private fun setupUi() {
 
     // Load soundfont data at startup
     GlobalScope.launch {
-//        val soundfontData = loadFile("florestan-subset.sf2")
-//        val soundfontData = loadFile("soundfonts/r-piano/R-piano.sf2")
-        val soundfontData = loadFile("soundfonts/grandpno/Grandpno.sf2")
-        val chunks = Parser.parse(soundfontData)
-        printChunks(chunks)
-        val soundFontData = SetupData.setupData(chunks, soundfontData)
+        val json = loadFile("soundfonts/filtered_soundfont.json").decodeToString()
+        val soundFontData = SoundFontDataJsonSerializer.deserialize(json)
 
         val samplePlayer = SamplePlayer(soundFontData)
         val sampleNames = samplePlayer.getSampleNames()
