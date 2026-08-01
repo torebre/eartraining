@@ -48,7 +48,6 @@ kotlin {
 
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
-//                implementation(npm("@types/webaudioapi", "0.0.27"))
                 implementation project(":websynthesizer")
                 implementation project(":scoregenerator-common")
                 implementation project(":score-multimodule")
