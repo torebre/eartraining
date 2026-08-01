@@ -10,27 +10,27 @@ enum class ConfigMode {
 }
 
 class AppState {
-    private var _lowestNote by mutableStateOf(localStorage.getItem("lowestNote")?.toIntOrNull() ?: 60)
+    private var lowestNoteInternal by mutableStateOf(localStorage.getItem("lowestNote")?.toIntOrNull() ?: 60)
     var lowestNote: Int
-        get() = _lowestNote
+        get() = lowestNoteInternal
         set(value) {
-            _lowestNote = value
+            lowestNoteInternal = value
             localStorage.setItem("lowestNote", value.toString())
         }
 
-    private var _highestNote by mutableStateOf(localStorage.getItem("highestNote")?.toIntOrNull() ?: 90)
+    private var highestNoteInternal by mutableStateOf(localStorage.getItem("highestNote")?.toIntOrNull() ?: 90)
     var highestNote: Int
-        get() = _highestNote
+        get() = highestNoteInternal
         set(value) {
-            _highestNote = value
+            highestNoteInternal = value
             localStorage.setItem("highestNote", value.toString())
         }
 
-    private var _isDarkMode by mutableStateOf(localStorage.getItem("isDarkMode")?.toBoolean() ?: false)
+    private var isDarkModeInternal by mutableStateOf(localStorage.getItem("isDarkMode")?.toBoolean() ?: false)
     var isDarkMode: Boolean
-        get() = _isDarkMode
+        get() = isDarkModeInternal
         set(value) {
-            _isDarkMode = value
+            isDarkModeInternal = value
             localStorage.setItem("isDarkMode", value.toString())
         }
 
@@ -50,4 +50,3 @@ class AppState {
     }
 
 }
-
