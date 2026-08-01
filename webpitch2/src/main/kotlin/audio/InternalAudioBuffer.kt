@@ -12,7 +12,7 @@ import kotlin.math.min
  * [4..7]: readPointer (Uint32, 1 element)
  * [8..]: storage (Float32, capacityVariable elements)
  */
-class InternalAudioBuffer(private val sharedArrayBuffer: ArrayBuffer) {
+class InternalAudioBuffer(sharedArrayBuffer: ArrayBuffer) {
     private val capacityVariable: Int = (sharedArrayBuffer.byteLength - 8) / Float32Array.BYTES_PER_ELEMENT
     private val writePointer = Uint32Array(sharedArrayBuffer.asDynamic(), 0, 1)
     private val readPointer = Uint32Array(sharedArrayBuffer.asDynamic(), 4, 1)
