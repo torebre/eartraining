@@ -28,6 +28,7 @@ kotlin {
                 }
             }
         }
+        binaries.executable()
     }
 
     sourceSets {
@@ -37,7 +38,7 @@ kotlin {
                 implementation project(':scoregenerator-common')
                 implementation project(':score-multimodule')
                 implementation project(":websynthesizer")
-                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.2'
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntime"
 
                 implementation "org.jetbrains.kotlinx:kotlinx-html-js:$kotlinxHtmlVersion"
