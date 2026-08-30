@@ -8,3 +8,9 @@ webscore/web/
 **/node_modules
 synthesizer/web
 **/yarn.lock
+/testServe/
+/old_samples/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+tsconfig.tsbuildinfo
