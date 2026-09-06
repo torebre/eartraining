@@ -14,3 +14,6 @@ synthesizer/web
 # TypeScript incremental build cache
 *.tsbuildinfo
 tsconfig.tsbuildinfo
+
+.kotlin
+data/
