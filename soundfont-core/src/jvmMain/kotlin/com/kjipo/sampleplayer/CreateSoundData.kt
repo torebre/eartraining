@@ -122,19 +122,4 @@ private fun parseSampleName(sampleName: String): Byte {
 fun main() {
     filterSoundFont()
 
-//    val soundFontData = runBlocking {
-////        val soundfontData = loadFile("florestan-subset.sf2")
-////        val soundfontData = loadFile("merlin_gold.sf2")
-//        val soundfontData = loadFile("FluidR3Mono_GM2-315.SF2")
-//        val chunks = Parser.parse(soundfontData)
-//        printChunks(chunks)
-//        SetupData.setupData(chunks, soundfontData)
-//    }
-//
-//    val samplePlayer = SamplePlayer(soundFontData)
-//    samplePlayer.playSample(1)
-
 }
-
-
-
