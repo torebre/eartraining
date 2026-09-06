@@ -2,9 +2,8 @@ package com.kjipo.soundfontsyntheizer
 
 import com.kjipo.midi.MidiPlayerInterface
 import com.kjipo.sampleplayer.SamplePlayerInteractive
-import com.kjipo.soundfontparser.Parser
-import com.kjipo.soundfontparser.SetupData
 import com.kjipo.soundfontparser.loadFile
+import com.kjipo.soundfontparser.serialization.SoundFontDataJsonSerializer
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,10 +16,8 @@ class SoundfontSynthesizer: MidiPlayerInterface {
 
     init {
         GlobalScope.launch {
-            val soundfontData = loadFile("grandpno/Grandpno.sf2")
-//            val soundfontData = loadFile("German8.sf2")
-            val chunks = Parser.parse(soundfontData)
-            val soundFontData = SetupData.setupData(chunks, soundfontData)
+            val json = loadFile("soundfonts/filtered_soundfont.json").decodeToString()
+            val soundFontData = SoundFontDataJsonSerializer.deserialize(json)
 
             samplePlayerInteractive = SamplePlayerInteractive(soundFontData)
         }
