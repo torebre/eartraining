@@ -10,15 +10,23 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import storage.APPLICATION_VERSION
+import storage.AttemptStorage
+import storage.ExportedAttempts
+import storage.LocalStorageAttemptStorage
+import storage.downloadJsonFile
 import ui.AppState
 import ui.ConfigMode
 import kotlin.math.pow
 
-class AppController(val state: AppState) {
+class AppController(
+    val state: AppState,
+    val attemptStorage: AttemptStorage = LocalStorageAttemptStorage()
+) {
     private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
 //    private val synthesizer = com.kjipo.midi.SynthesizerScript()
     private val synthesizer: MidiPlayerInterface = com.kjipo.soundfontsyntheizer.SoundfontSynthesizer()
-    private val rateInput = RateInput()
+    val rateInput = RateInput()
     private val pitchGraphModel = PitchGraphModel()
     private val pitchDetection = PitchDetection()
     private val logger = KotlinLogging.logger {}
@@ -67,6 +75,7 @@ class AppController(val state: AppState) {
 
     fun toggleRecording() {
         if (!state.isRecording) {
+            state.canSaveAttempt = false
             rateInput.startNewInput()
             pitchDetection.startRecording()
             pitchDetection.addPitchDetectionListener(pitchGraphModel)
@@ -75,7 +84,27 @@ class AppController(val state: AppState) {
             pitchDetection.stopRecording()
             rateInput.stopInput()
             state.isRecording = false
+            if (state.configMode == ConfigMode.NORMAL) {
+                state.canSaveAttempt = true
+            }
         }
+    }
+
+    fun saveAttempt() {
+        if (state.canSaveAttempt) {
+            rateInput.save(attemptStorage)
+            state.canSaveAttempt = false
+        }
+    }
+
+    fun exportAttempts() {
+        val attempts = attemptStorage.getAttempts()
+        val attemptsArray = attempts.map { LocalStorageAttemptStorage.attemptToJson(it) }.toTypedArray()
+        val exportObj = js("{}")
+        exportObj["version"] = APPLICATION_VERSION
+        exportObj["attempts"] = attemptsArray
+        val jsonString = JSON.stringify(exportObj, replacer = null, space = 2)
+        downloadJsonFile("attempts.json", jsonString)
     }
 
     fun toggleShowTarget() {

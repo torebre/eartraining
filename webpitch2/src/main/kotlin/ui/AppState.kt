@@ -39,6 +39,7 @@ class AppState {
     var currentCertainty by mutableStateOf(0.0f)
     var configMode by mutableStateOf(ConfigMode.NORMAL)
     var closestMidiNote by mutableStateOf<Int?>(null)
+    var canSaveAttempt by mutableStateOf(false)
 
 
     fun reset() {
@@ -47,6 +48,7 @@ class AppState {
         currentCertainty = 0.0f
         configMode = ConfigMode.NORMAL
         closestMidiNote = null
+        canSaveAttempt = false
     }
 
 }

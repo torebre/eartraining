@@ -88,6 +88,26 @@ fun AppControls(controller: AppController) {
             }) {
                 Text("Show target")
             }
+
+            Button(attrs = {
+                buttonStyle()
+                onClick { controller.saveAttempt() }
+                if (!isNormalMode || !state.canSaveAttempt) {
+                    attr("disabled", "true")
+                }
+            }) {
+                Text("Save attempt")
+            }
+
+            Button(attrs = {
+                buttonStyle()
+                onClick { controller.exportAttempts() }
+                if (!isNormalMode) {
+                    attr("disabled", "true")
+                }
+            }) {
+                Text("Export attempts")
+            }
         }
 
         // Row 2: Pitch and certainty

@@ -44,3 +44,13 @@ internal fun getPitchClosestToFrequency(frequency: Float): String? {
 internal fun getMidiNoteClosestToFrequency(frequency: Float): Int {
     return (12 * log2(frequency / 440.0) + 69).roundToInt()
 }
+
+fun getPitchFromNoteNameAndOctave(noteName: String, octave: Int): Int {
+    val pitchClassIndex = PITCH_CLASSES.indexOf(noteName)
+
+    if(pitchClassIndex == -1) {
+        throw IllegalArgumentException("Invalid note name given as input: $noteName")
+    }
+
+    return pitchClassIndex + octave * 12
+}

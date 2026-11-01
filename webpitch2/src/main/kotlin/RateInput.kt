@@ -2,6 +2,7 @@ import com.kjipo.attemptprocessor.InputAttempt
 import com.kjipo.attemptprocessor.PitchData
 import com.kjipo.scoregenerator.Pitch
 import io.github.oshai.kotlinlogging.KotlinLogging
+import storage.AttemptStorage
 
 
 class RateInput {
@@ -20,25 +21,22 @@ class RateInput {
     }
 
     fun stopInput() {
-        // TODO Need to do something here?
-
-        save()
+        logger.info { "Stopped input with ${currentInput.size} pitch data points" }
     }
 
-    fun setCurrentTarget(pitches: MutableList<Pitch>) {
+    fun setCurrentTarget(pitches: List<Pitch>) {
+        currentTarget.clear()
         currentTarget.addAll(pitches)
     }
 
-    fun save() {
-        val inputAttempt = InputAttempt(currentTarget.toList(), currentInput.toList())
-        val outputJson = JSON.stringify(inputAttempt)
-
-        logger.info { "Input data: $outputJson" }
-
-        // TODO Save input attempt
-
-
+    fun getCurrentAttempt(): InputAttempt {
+        return InputAttempt(currentTarget.toList(), currentInput.toList())
     }
 
+    fun save(attemptStorage: AttemptStorage) {
+        val inputAttempt = getCurrentAttempt()
+        attemptStorage.saveAttempt(inputAttempt)
+        logger.info { "Saved input attempt to storage" }
+    }
 
 }
