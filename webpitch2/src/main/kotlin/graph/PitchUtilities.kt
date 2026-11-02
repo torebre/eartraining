@@ -41,6 +41,10 @@ internal fun getPitchClosestToFrequency(frequency: Float): String? {
     return PITCH_CLASSES[pitchClass]
 }
 
+fun midiNoteToFrequency(midiNote: Int): Float {
+    return (440 * 2.0.pow((midiNote - 69) / 12.0)).toFloat()
+}
+
 internal fun getMidiNoteClosestToFrequency(frequency: Float): Int {
     return (12 * log2(frequency / 440.0) + 69).roundToInt()
 }

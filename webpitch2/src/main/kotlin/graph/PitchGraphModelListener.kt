@@ -11,6 +11,10 @@ interface PitchGraphModelListener {
 
     fun reset()
 
+    fun pitchDataCleared()
+
+    fun referencePitchChanged(referencePitch: Float?)
+
     fun darkModeChanged(isDarkMode: Boolean)
 
 }

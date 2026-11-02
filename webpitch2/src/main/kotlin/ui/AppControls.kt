@@ -10,6 +10,7 @@ import org.jetbrains.compose.web.dom.*
 fun AppControls(controller: AppController) {
     val state = controller.state
     val isNormalMode = state.configMode == ConfigMode.NORMAL
+    val canConfigure = isNormalMode && !state.isPlayingFirstNote
 
     Div(attrs = {
         style {
@@ -71,8 +72,22 @@ fun AppControls(controller: AppController) {
 
             Button(attrs = {
                 buttonStyle()
+                onClick { controller.toggleFirstNote() }
+                attr("aria-pressed", state.isPlayingFirstNote.toString())
+                if (state.isPlayingFirstNote) {
+                    classes("toggleActive")
+                }
+                if (!isNormalMode || state.isRecording) {
+                    attr("disabled", "true")
+                }
+            }) {
+                Text("Play first note")
+            }
+
+            Button(attrs = {
+                buttonStyle()
                 onClick { controller.toggleRecording() }
-                if (!isNormalMode) {
+                if (!isNormalMode || state.isPlayingFirstNote) {
                     attr("disabled", "true")
                 }
             }) {
@@ -82,7 +97,7 @@ fun AppControls(controller: AppController) {
             Button(attrs = {
                 buttonStyle()
                 onClick { controller.toggleShowTarget() }
-                if (!isNormalMode) {
+                if (!isNormalMode || state.isPlayingFirstNote) {
                     attr("disabled", "true")
                 }
             }) {
@@ -148,7 +163,7 @@ fun AppControls(controller: AppController) {
                         controller.startConfigureLowerLimit()
                     }
                 }
-                if (!isNormalMode && state.configMode != ConfigMode.CONFIGURING_LOWER) {
+                if (!canConfigure && state.configMode != ConfigMode.CONFIGURING_LOWER) {
                     attr("disabled", "true")
                 }
             }) {
@@ -189,7 +204,7 @@ fun AppControls(controller: AppController) {
                         controller.startConfigureUpperLimit()
                     }
                 }
-                if (!isNormalMode && state.configMode != ConfigMode.CONFIGURING_UPPER) {
+                if (!canConfigure && state.configMode != ConfigMode.CONFIGURING_UPPER) {
                     attr("disabled", "true")
                 }
             }) {

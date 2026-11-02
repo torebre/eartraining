@@ -17,6 +17,8 @@ open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {
 
     private var targetSequence = listOf<PitchDataWithTime>()
 
+    private var referencePitch: Float? = null
+
     private var startTime: Long? = null
 
     private val logger = KotlinLogging.logger {}
@@ -40,10 +42,32 @@ open class PitchGraphModel : PitchGraphModelInterface, PitchDetectionListener {
         receivedPitchData.clear()
         targetSequenceShowing = false
         this.targetSequence = targetSequence
+        referencePitch = null
         startTime = null
         idCounter = 0
 
         pitchDataListeners.forEach { it.reset() }
+    }
+
+    /**
+     * Removes the received pitch data and the reference pitch, but keeps the target sequence.
+     */
+    fun clearPitchData() {
+        receivedPitchData.clear()
+        referencePitch = null
+        startTime = null
+        idCounter = 0
+
+        pitchDataListeners.forEach { it.pitchDataCleared() }
+    }
+
+    fun setReferencePitch(referencePitch: Float?) {
+        this.referencePitch = referencePitch
+        pitchDataListeners.forEach { it.referencePitchChanged(referencePitch) }
+    }
+
+    fun getReferencePitch(): Float? {
+        return referencePitch
     }
 
     protected fun addPitchDataWithTime(pitchDataWithTime: PitchDataWithTime) {

@@ -56,6 +56,8 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
 
     private var isDarkMode = false
 
+    private var referencePitchElement: Element? = null
+
     class PitchCoordinateData(val midiNote: Int, val noteName: String, val frequency: Float, val yCoordinate: Int, val pitchClass: String)
 
     init {
@@ -102,10 +104,12 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         timeAxisElements.clear()
         idTargetPointMap.clear()
         idsTargetPointMap.clear()
+        referencePitchElement = null
 
         drawPitchAxis()
+        drawReferencePitchLine()
         updateGraphBasedOnCurrentWindow()
-        
+
         if (isTargetShowing) {
             showDataPoints(
                 pitchGraphModel.getTargetSequence(),
@@ -269,12 +273,27 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         redraw()
     }
 
-    override fun reset() {
+    override fun pitchDataCleared() {
+        resetTimeWindow()
+        redraw()
+    }
+
+    override fun referencePitchChanged(referencePitch: Float?) {
+        drawReferencePitchLine()
+    }
+
+    private fun resetTimeWindow() {
         startTime = 0
         lastTimePoint = 0
         pixelStepSize = 1
         windowStartAbsolute = 0L
         windowsEndAbsolute = 10000L
+    }
+
+    override fun reset() {
+        resetTimeWindow()
+        // The model hides the target sequence when it is reset
+        isTargetShowing = false
 
         idPointMap.values.forEach { it.remove() }
         idPointMap.clear()
@@ -286,9 +305,28 @@ class PitchGraph(svgElementId: String, private val pitchGraphModel: PitchGraphMo
         idTargetPointMap.clear()
         idsTargetPointMap.values.forEach { it.remove() }
         idsTargetPointMap.clear()
+        referencePitchElement?.remove()
+        referencePitchElement = null
 
         drawTimeAxis()
         drawPitchAxis()
+    }
+
+    private fun drawReferencePitchLine() {
+        referencePitchElement?.remove()
+        referencePitchElement = pitchGraphModel.getReferencePitch()?.let { referencePitch ->
+            val yCoord = transformToY(referencePitch)
+            document.createElementNS(SVG_NAMESPACE_URI, "line").also {
+                with(it) {
+                    setAttribute("x1", "$marginLeft")
+                    setAttribute("y1", "$yCoord")
+                    setAttribute("x2", "${width - marginRight}")
+                    setAttribute("y2", "$yCoord")
+                    setAttribute("class", "referencePitch")
+                }
+                svgElement.appendChild(it)
+            }
+        }
     }
 
 

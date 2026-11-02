@@ -6,6 +6,7 @@ import graph.PitchDataWithTime
 import graph.PitchGraph
 import graph.PitchGraphModel
 import graph.getMidiNoteClosestToFrequency
+import graph.midiNoteToFrequency
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -17,21 +18,21 @@ import storage.LocalStorageAttemptStorage
 import storage.downloadJsonFile
 import ui.AppState
 import ui.ConfigMode
-import kotlin.math.pow
 
 class AppController(
     val state: AppState,
-    val attemptStorage: AttemptStorage = LocalStorageAttemptStorage()
-) {
-    private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
+    val attemptStorage: AttemptStorage = LocalStorageAttemptStorage(),
 //    private val synthesizer = com.kjipo.midi.SynthesizerScript()
     private val synthesizer: MidiPlayerInterface = com.kjipo.soundfontsyntheizer.SoundfontSynthesizer()
+) {
+    private val polyphonicNoteSequenceGenerator = PolyphonicNoteSequenceGenerator()
     val rateInput = RateInput()
     private val pitchGraphModel = PitchGraphModel()
     private val pitchDetection = PitchDetection()
     private val logger = KotlinLogging.logger {}
 
     private var actionSequence: List<Action> = emptyList()
+    private var firstNote: Int? = null
     var pitchGraph: PitchGraph? = null
 
     init {
@@ -39,7 +40,9 @@ class AppController(
             override fun pitchData(pitchData: PitchData) {
                 state.currentPitch = pitchData.pitch
                 state.currentCertainty = pitchData.certainty
-                rateInput.addPitchData(pitchData)
+                if (state.isRecording) {
+                    rateInput.addPitchData(pitchData)
+                }
 
                 if (state.configMode != ConfigMode.NORMAL) {
                     if (pitchData.pitch > 0) {
@@ -57,10 +60,14 @@ class AppController(
     }
 
     fun generateSequence() {
+        if (state.isPlayingFirstNote) {
+            toggleFirstNote()
+        }
         val pitchRange = PitchRange(state.lowestNote, state.highestNote)
         val currentSequence = polyphonicNoteSequenceGenerator.createSequence(false, pitchRange)
         val (pitches, actions) = computePitchSequence(currentSequence.elements)
         actionSequence = actions
+        firstNote = pitches.minByOrNull { it.timeOn }?.pitch
         rateInput.setCurrentTarget(pitches)
         rateInput.startNewInput()
         state.reset()
@@ -73,21 +80,56 @@ class AppController(
         }
     }
 
+    fun toggleFirstNote() {
+        if (state.isRecording) {
+            return
+        }
+        if (!state.isPlayingFirstNote) {
+            val note = firstNote ?: return
+            // Only the first note should be shown, not the whole target sequence
+            if (pitchGraphModel.isTargetSequenceShowing()) {
+                pitchGraphModel.toggleTargetSequenceShowing()
+            }
+            pitchGraphModel.clearPitchData()
+            pitchGraphModel.setReferencePitch(midiNoteToFrequency(note))
+            synthesizer.noteOn(note)
+            startPitchDetection()
+            state.isPlayingFirstNote = true
+        } else {
+            firstNote?.let { synthesizer.noteOff(it) }
+            stopPitchDetection()
+            state.isPlayingFirstNote = false
+        }
+    }
+
     fun toggleRecording() {
+        if (state.isPlayingFirstNote) {
+            return
+        }
         if (!state.isRecording) {
             state.canSaveAttempt = false
             rateInput.startNewInput()
-            pitchDetection.startRecording()
-            pitchDetection.addPitchDetectionListener(pitchGraphModel)
+            pitchGraphModel.clearPitchData()
+            startPitchDetection()
             state.isRecording = true
         } else {
-            pitchDetection.stopRecording()
+            stopPitchDetection()
             rateInput.stopInput()
             state.isRecording = false
             if (state.configMode == ConfigMode.NORMAL) {
                 state.canSaveAttempt = true
             }
         }
+    }
+
+    private fun startPitchDetection() {
+        pitchDetection.startRecording()
+        pitchDetection.addPitchDetectionListener(pitchGraphModel)
+    }
+
+    private fun stopPitchDetection() {
+        pitchDetection.stopRecording()
+        pitchDetection.removePitchDetectionListener(pitchGraphModel)
     }
 
     fun saveAttempt() {
@@ -108,6 +150,9 @@ class AppController(
     }
 
     fun toggleShowTarget() {
+        if (state.isPlayingFirstNote) {
+            return
+        }
         pitchGraphModel.toggleTargetSequenceShowing()
     }
 
@@ -147,7 +192,7 @@ class AppController(
     private fun simpleNoteSequenceToPitchSequence(simpleNoteSequence: SimpleNoteSequence): List<PitchDataWithTime> {
         var idCounter = 0
         return simpleNoteSequence.transformToPitchSequence().flatMap { pitchData ->
-            val pitch = (440 * 2.0.pow((pitchData.pitch - 69) / 12.0)).toFloat()
+            val pitch = midiNoteToFrequency(pitchData.pitch)
             listOf(
                 PitchDataWithTime(pitch, 1.0f, pitchData.timeOn.toLong(), idCounter++),
                 PitchDataWithTime(pitch, 1.0f, pitchData.timeOff.toLong(), idCounter++)

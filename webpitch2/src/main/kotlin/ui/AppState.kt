@@ -35,6 +35,7 @@ class AppState {
         }
 
     var isRecording by mutableStateOf(false)
+    var isPlayingFirstNote by mutableStateOf(false)
     var currentPitch by mutableStateOf(0.0f)
     var currentCertainty by mutableStateOf(0.0f)
     var configMode by mutableStateOf(ConfigMode.NORMAL)
@@ -44,6 +45,7 @@ class AppState {
 
     fun reset() {
         isRecording = false
+        isPlayingFirstNote = false
         currentPitch = 0.0f
         currentCertainty = 0.0f
         configMode = ConfigMode.NORMAL
